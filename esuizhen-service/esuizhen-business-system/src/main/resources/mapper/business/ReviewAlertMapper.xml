@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.business.dao.business.ReviewAlertDao">
+	<!-- 存储过程调用 -->
+	<select id="callProReviewAlert" statementType="CALLABLE">
+		{call hds_db.pro_init_review_alert_batch()}
+	</select>
+	<!-- 需要推送消息的医生 -->
+	<select id="queryNotSendReviewAlert" resultType="java.util.LinkedHashMap">
+		SELECT 
+		CONCAT("近14天<!-- （",DATE_FORMAT(startDate,"%c.%e"),"~",DATE_FORMAT(endDate,"%c.%e"),"） -->您有"
+		,t1.patientCount,"名患者需到院复查，希望您进一步关注。") content,
+		<!-- CONCAT("复查提醒（",DATE_FORMAT(startDate,"%c.%e"),"~",DATE_FORMAT(endDate,"%c.%e"),"）") -->"未来14天" titleName,
+		t1.reviewBatchId,t1.doctorId,t2.userId,t2.trueName
+		FROM hds_db.s_review_alert_batch t1
+		JOIN user_db.u_doctor t2 ON t1.doctorId=t2.doctorId
+		WHERE t1.sendFlag=0
+	</select>
+	
+	
+	<!-- 获取批次 -->
+	<select id="queryreviewBatch" resultType="java.util.LinkedHashMap">
+		SELECT reviewBatchId,doctorId,patientCount,startDate,endDate,sendFlag,endDate,sendFlag,sendTime,createTime,updateTime,handleFlag
+		FROM hds_db.s_review_alert_batch
+		<where>
+			reviewBatchId=#{reviewBatchId}
+		</where>
+	</select>
+	<!-- 获取批次详情 -->
+	<select id="queryreviewDetail" resultType="java.util.LinkedHashMap">
+		SELECT
+		reviewDetailId,reviewBatchId,alertTime,alertContent,affirmTime,doctorId,patientId,itemId,productApplyId,updateFlag,confirmFlag,state,cause,sendTime,handleFlag
+		FROM hds_db.s_review_alert_detail 
+		<where>
+			reviewBatchId=#{reviewBatchId}
+		</where>
+		LIMIT 1
+	</select>
+	
+	<!-- 获取发送给医生的信息 -->
+	<select id="querySendInfoByReviewDetailId" resultType="java.util.LinkedHashMap">
+		SELECT 
+		<!-- CONCAT("复查提醒（",DATE_FORMAT(startDate,"%c.%e"),"~",DATE_FORMAT(endDate,"%c.%e"),"）") --> 
+		"未来14天" titleName,
+		CONCAT("患者【",t4.trueName,"】确认",t1.affirmTime,"来院复查。") content,
+		t1.reviewBatchId,t1.doctorId,t3.userId,t4.trueName
+		FROM hds_db.s_review_alert_detail t1
+		JOIN user_db.u_doctor t3 ON t1.doctorId=t3.doctorId
+		JOIN user_db.u_patient t4 ON t1.patientId=t4.patientId
+		WHERE t1.reviewDetailId=#{reviewDetailId}
+	</select>
+	<!-- 修改推送状态 -->
+	<update id="updateReviewAlertSend">
+		UPDATE hds_db.s_review_alert_batch
+		SET sendFlag=1,sendTime=NOW(),updateTime=NOW()
+		WHERE reviewBatchId=#{reviewBatchId}
+	</update>
+	
+	<!-- 修改详情为发送状态 -->
+	<update id="updateReviewAlertDetailSend">
+		UPDATE hds_db.s_review_alert_detail t1
+		JOIN followup_db.followup_plan_detail t2 ON t1.itemId=t2.followupItemId
+		<set>
+			t1.updateTime=NOW(),
+			t1.sendTime=NOW(),
+			t2.isAlertSent=1
+		</set>
+		WHERE t1.reviewDetailId=#{reviewDetailId}
+	</update>
+	
+	<!-- 修改详情 -->
+	<update id="updateReviewAlertDetail">
+		UPDATE hds_db.s_review_alert_detail
+		<set>
+			<if test="confirmFlag!=null">
+				confirmFlag=#{confirmFlag},
+			</if>
+			<if test="state!=null">
+				state=#{state},
+			</if>
+			<if test="cause!=null">
+				cause=#{cause},
+			</if>
+			<if test="sendTime!=null">
+				sendTime=#{sendTime},
+			</if>
+			<if test="updateFlag!=null">
+				updateFlag=#{updateFlag},
+			</if>
+			<if test="alertContent!=null">
+				alertContent=#{alertContent},
+			</if>
+			<if test="alertTime!=null">
+				alertTime=#{alertTime},
+			</if>
+			<if test="affirmTime!=null">
+				affirmTime=#{affirmTime},
+			</if>
+			<if test="productApplyId!=null">
+				productApplyId=#{productApplyId},
+			</if>
+			updateTime=NOW()
+		</set>
+		WHERE reviewDetailId=#{reviewDetailId}
+		<if test="patientId!=null">
+			AND patientId=#{patientId}
+		</if>
+	</update>
+	
+	<!-- 获取提醒患者列表 -->
+	<select id="queryReviewAlertPatientListByBatchId" resultType="com.esuizhen.cloudservice.business.model.business.TReviewAlertDetailInfo">
+		SELECT t2.trueName,
+		IFNULL(t2.userPictureUrl,IF(t2.sex=2,#{wonmanUrl},#{manUrl})) pictureUrl,
+		t1.updateFlag,
+		IF(
+			t1.confirmFlag!=1,
+			t1.state,
+			(CASE WHEN t4.state IN (0,1) THEN 2 WHEN t4.state=2 THEN 3 WHEN t4.state=3 THEN 4 ELSE 5 END)
+		) state,
+		t1.affirmTime,
+		t1.alertTime,
+		<if test="defaultContent!=null">
+			IFNULL(t1.alertContent,#{defaultContent}) alertContent,
+		</if>
+		t1.patientId,
+		t1.reviewDetailId
+		FROM
+		hds_db.s_review_alert_detail t1
+		JOIN user_db.u_patient t2 ON t1.patientId = t2.patientId
+		<!-- JOIN user_db.u_user t3 ON t2.userId = t3.userId -->
+		LEFT JOIN hds_db.s_product_service_apply t4 ON t4.productApplyId=t1.productApplyId
+		<where>
+			t1.reviewBatchId=#{reviewBatchId}
+			<if test="confirmFlag!=null">
+				AND confirmFlag=#{confirmFlag}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 获取提醒批次详情  -->
+	<select id="queryReviewBatchDetailInfo" resultType="com.esuizhen.cloudservice.business.model.business.TReviewAlertDetailInfo">
+		SELECT 
+		t1.state,
+		t1.affirmTime,
+		t1.alertTime,
+		t1.productApplyId,
+		t1.patientId,
+		t1.reviewDetailId,
+		t1.doctorId,
+		t1.cause,
+		t1.confirmFlag,
+		t2.trueName doctorName,
+		t2.userId doctorUserId,
+		t4.deptName,
+		t4.deptId
+		FROM
+		hds_db.s_review_alert_detail t1
+		JOIN user_db.u_doctor t2 ON t1.doctorId=t2.doctorId
+		LEFT JOIN user_db.r_hospital_doctor t3 ON t3.doctorId=t2.doctorId
+		LEFT JOIN user_db.u_department t4 ON t3.deptId=t4.deptId
+		<where>
+			<if test="reviewDetailId!=null">
+				AND t1.reviewDetailId=#{reviewDetailId}
+			</if>
+			<if test="reviewBatchId!=null">
+				AND t1.reviewBatchId = #{reviewBatchId}
+			</if>
+			<if test="patientId!=null">
+				AND t1.patientId=#{patientId}
+			</if>
+		</where> 
+		LIMIT 1
+	</select>
+	
+	<!-- 获取患者发送列表  -->
+	<select id="queryReviewAlertSendPatientList" resultType="java.util.LinkedHashMap">
+		SELECT 
+		t2.trueName,
+		t1.state,
+		t1.alertTime,
+		IFNULL(t1.alertContent,#{defaultContent}) alertContent,
+		"门诊挂号" alertItem,
+		t1.patientId,
+		t1.reviewDetailId,
+		t2.userId patientUserId,
+		t3.productId,
+		t3.openId,
+		t2.mobile
+		FROM
+		hds_db.s_review_alert_detail t1
+		JOIN user_db.u_patient t2 ON t1.patientId = t2.patientId
+		JOIN user_db.u_thirdparty t3 ON t3.userId = t2.userId
+		<where>
+			<if test="reviewBatchId!=null">
+				t1.reviewBatchId= #{reviewBatchId}
+			</if>
+			<if test="reviewDetailId!=null">
+				t1.reviewDetailId= #{reviewDetailId}
+			</if>
+			<if test="reviewDetailList!=null">
+			<foreach collection="reviewDetailList" open="AND t1.reviewDetailId IN (" close=")" separator="," item="item">
+				#{item}
+			</foreach>
+			</if>
+			<if test="confirmFlag!=null">
+				AND t1.confirmFlag=#{confirmFlag}
+			</if>
+		</where>
+	</select>
+	
+	
+	<!-- 扫描未发送的随访计划  -->
+	<select id="queryFollowupPlanNotSend" resultType="java.util.LinkedHashMap">
+		SELECT 
+			t1.followupItemId,t1.actionType,t1.followupDate,t2.followupSource,
+			t3.userId,t3.trueName,
+			t4.productId,t4.openId,
+			MAX(t6.hospitalId) hospitalId,
+			IF(MAX(t6.hospitalId) IS NOT NULL,(SELECT userId FROM user_db.u_hospital WHERE hospitalId = MAX(t6.hospitalId)),NULL) hospitalUserId,
+			IFNULL(t7.checkItems,'') checkItems
+			FROM (SELECT * FROM followup_db.followup_plan_detail t1 WHERE t1.isAlertSent=0 AND t1.isSurveryFeedback=0 AND t1.followupDate=CURDATE())t1
+			JOIN followup_db.followup_plan t2 ON t1.followupId=t2.followupId AND t2.state=1
+			JOIN user_db.u_patient t3 ON t2.patientId = t3.patientId
+			JOIN user_db.u_thirdparty t4 ON t4.userId = t3.userId
+			LEFT JOIN user_db.r_hospital_patient t5 ON t5.patientId=t3.patientId
+			LEFT JOIN (SELECT t2.hospitalId,t2.userId FROM com_trade_db.product t1
+			JOIN user_db.u_hospital t2 ON t1.vendor=t2.userId 
+			WHERE productType=12) t6 ON t6.hospitalId=t5.hospitalId
+			JOIN followup_db.followup_plan_template t7 ON t7.planTemplateId=t2.planTemplateId
+			GROUP BY followupItemId
+	</select>
+	<!-- 存储过程调用 -->
+	<select id="callProFollowupPlanUpdate" statementType="CALLABLE">
+		{call followup_db.pro_update_followup_plan_state()}
+	</select>
+	<!-- 更新随访计划发送时间 -->
+	<update id="updateFollowupItemSend">
+		UPDATE followup_db.followup_plan_detail
+		SET isAlertSent=1
+		WHERE followupItemId=#{followupItemId}
+	</update>
+	
+	<!-- 统计查询 -->
+	<select id="statisAlertNum" resultType="com.esuizhen.cloudservice.business.model.business.TReviewAlertStatisInfo">
+		SELECT * FROM 
+		(
+		SELECT 
+		COUNT(
+		CASE WHEN t.lastAttendingDate IS NOT NULL AND DATE_ADD(t.lastAttendingDate,INTERVAL 14 DAY)>=t3.followupDate
+		THEN NULL
+		WHEN t4.reviewDetailId IS NOT NULL THEN
+		NULL
+		ELSE 0 END
+		)waitAlert
+		FROM
+		(SELECT patientId,doctorId FROM user_db.r_doctor_patient WHERE doctorId=#{doctorId}) t1
+		JOIN user_db.u_patient t ON t1.patientId = t.patientId
+		JOIN followup_db.followup_plan t2 ON t1.patientId=t2.patientId AND t2.state=1
+		JOIN followup_db.followup_plan_detail t3 ON t2.followupId=t3.followupId  AND actionType=2 
+		<![CDATA[ 
+		AND followupDate>=CURDATE() AND followupDate<=DATE_ADD(CURDATE(),INTERVAL 14 day)
+		]]>
+		LEFT JOIN hds_db.s_review_alert_detail t4 ON (t4.itemId=t3.followupItemId AND confirmFlag=1) OR 
+		(t4.patientId = t1.patientId AND t4.confirmFlag=1 AND affirmTime IS NOT NULL AND REPLACE(REPLACE(t4.affirmTime,"上午",""),"下午","") BETWEEN DATE_SUB(t3.followupDate,INTERVAL 14 DAY) AND DATE_ADD(t3.followupDate,INTERVAL 14 DAY))
+		)t1,
+		(
+		SELECT 
+		COUNT(IF(t2.state=1,1,NULL)) appointing,
+		COUNT(IF(t2.state=2,1,NULL)) appointment
+		FROM
+		(SELECT productApplyId FROM hds_db.s_review_alert_detail t1 
+		WHERE doctorId=#{doctorId} AND confirmFlag=1 AND productApplyId IS NOT NULL 
+		)t1
+		JOIN hds_db.s_product_service_apply t2 ON t1.productApplyId = t2.productApplyId AND state IN(1,2) 
+			<!-- <![CDATA[ 
+				AND consultOrderTime>=CURDATE() AND consultOrderTime<DATE_ADD(CURDATE(),INTERVAL 14 DAY)
+			]]> -->
+		)t2,
+		(
+		SELECT COUNT(
+		CASE 
+		WHEN lastAttendingDate IS NOT NULL AND DATE_ADD(lastAttendingDate,INTERVAL 14 DAY)>=followupDate
+		THEN NULL 
+		WHEN
+		affirmTime IS NOT NULL AND DATE_ADD(REPLACE(REPLACE(affirmTime,"上午",""),"下午",""),INTERVAL 14 DAY)>=followupDate
+		THEN NULL
+		WHEN followupDate>=CURDATE()
+		THEN NULL
+		ELSE 0 END 
+		) expire
+		FROM
+		(
+		SELECT 
+				t1.patientId,t.lastAttendingDate,t2.followupId,MAX(t3.followupDate) followupDate,
+				(SELECT MAX(affirmTime) FROM hds_db.s_review_alert_detail h WHERE h.patientId=t1.patientId) affirmTime
+				FROM
+				(SELECT patientId FROM user_db.r_doctor_patient WHERE doctorId=#{doctorId}) t1
+				JOIN user_db.u_patient t ON t.patientId = t1.patientId
+				JOIN followup_db.followup_plan t2 ON t1.patientId=t2.patientId AND t2.state=1
+				<![CDATA[ 
+				JOIN followup_db.followup_plan_detail t3 ON t2.followupId=t3.followupId  AND actionType=2 AND t3.followupDate<DATE_ADD(CURDATE(),INTERVAL 14 DAY)
+				]]>
+		GROUP BY patientId
+		)t
+		)t3
+	</select>
+	
+	<!-- 获取未来14天患者信息 -->
+	<select id="queryWaitPatientList" resultType="com.esuizhen.cloudservice.business.model.business.TReviewAlertDetailInfo">
+		SELECT 
+			t1.patientId,
+			IFNULL(t5.state,0) state,
+			IFNULL(t5.alertTime,t3.followupDate) alertTime,
+			IFNULL(t5.updateFlag,0) updateFlag,
+			<if test="defaultContent!=null">
+				IFNULL(t5.alertContent,#{defaultContent}) alertContent,
+			</if>
+			IFNULL(t5.reviewDetailId,t3.followupItemId) reviewDetailId,
+			t.trueName,
+			IFNULL(t.userPictureUrl,IF(t.sex=2,#{wonmanUrl},#{manUrl})) pictureUrl
+			FROM
+			(SELECT patientId,doctorId FROM user_db.r_doctor_patient WHERE doctorId=#{doctorId}) t1
+			JOIN user_db.u_patient t ON t.patientId=t1.patientId
+			JOIN followup_db.followup_plan t2 ON t1.patientId=t2.patientId AND t2.state=1
+			<![CDATA[ 
+			JOIN followup_db.followup_plan_detail t3 ON t2.followupId=t3.followupId  AND actionType=2
+			AND followupDate>=CURDATE() AND followupDate<=DATE_ADD(CURDATE(),INTERVAL 14 day)
+			LEFT JOIN hds_db.s_review_alert_detail t4 ON 
+			(t4.itemId=t3.followupItemId AND t4.confirmFlag=1) OR 
+			(t4.patientId = t1.patientId AND t4.confirmFlag=1 AND affirmTime IS NOT NULL AND REPLACE(REPLACE(t4.affirmTime,"上午",""),"下午","") BETWEEN DATE_SUB(t3.followupDate,INTERVAL 14 DAY) AND DATE_ADD(t3.followupDate,INTERVAL 14 DAY))
+			LEFT JOIN hds_db.s_review_alert_detail t5 
+			ON t5.itemId = t3.followupItemId AND t5.confirmFlag = 0 AND t5.doctorId=t1.doctorId
+			WHERE (t.lastAttendingDate IS NULL OR DATE_ADD(t.lastAttendingDate,INTERVAL 14 DAY)<t3.followupDate) AND t4.reviewDetailId IS NULL
+			]]>
+	</select>
+	
+	<!-- 已过期 -->
+	<select id="queryExpirPatientList" resultType="com.esuizhen.cloudservice.business.model.business.TReviewAlertDetailInfo">
+		SELECT 
+			t.patientId,
+			IFNULL(t2.state,0) state,
+			IFNULL(t2.alertTime,t.followupDate) alertTime,
+			IFNULL(t2.updateFlag,0) updateFlag,
+			<if test="defaultContent!=null">
+				IFNULL(t2.alertContent,#{defaultContent}) alertContent,
+			</if>
+			IFNULL(t2.reviewDetailId,t1.followupItemId) reviewDetailId,
+			t.trueName,
+			IFNULL(t.userPictureUrl,IF(t.sex=2,#{wonmanUrl},#{manUrl})) pictureUrl
+			<![CDATA[ 
+			FROM
+			(
+				SELECT * FROM(
+					SELECT 
+						t1.patientId,t.lastAttendingDate,t2.followupId,MAX(t3.followupDate) followupDate,t.trueName,t.userPictureUrl,t.sex,
+						(SELECT MAX(affirmTime) FROM hds_db.s_review_alert_detail h WHERE h.patientId=t1.patientId) affirmTime
+						FROM
+						(SELECT patientId FROM user_db.r_doctor_patient WHERE doctorId=#{doctorId}) t1
+						JOIN user_db.u_patient t ON t.patientId = t1.patientId
+						JOIN followup_db.followup_plan t2 ON t1.patientId=t2.patientId AND t2.state=1
+						JOIN followup_db.followup_plan_detail t3 ON t2.followupId=t3.followupId  AND actionType=2 AND followupDate<DATE_ADD(CURDATE(),INTERVAL 14 DAY)
+					GROUP BY patientId
+				)t
+				WHERE (lastAttendingDate IS NULL OR DATE_ADD(lastAttendingDate,INTERVAL 14 DAY)<t.followupDate)
+				AND
+				(t.affirmTime IS NULL OR DATE_ADD(REPLACE(REPLACE(t.affirmTime,"上午",""),"下午",""),INTERVAL 14 DAY)<t.followupDate)
+				AND followupDate<CURDATE()
+			)t
+			JOIN followup_db.followup_plan_detail t1 ON t.followupId=t1.followupId AND t.followupDate=t1.followupDate
+			LEFT JOIN hds_db.s_review_alert_detail t2 ON t1.followupItemId = t2.itemId
+			]]>
+	</select>
+	
+	
+	
+	<!-- 已预约 和 赴约中  -->
+	<select id="queryProductApplyReviewAlert" resultType="com.esuizhen.cloudservice.business.model.business.TReviewAlertDetailInfo">
+		SELECT  
+		t1.patientId,t1.state,t1.alertTime,t1.updateFlag,t1.affirmTime,t1.reviewDetailId,
+		<if test="defaultContent!=null">
+				IFNULL(t1.alertContent,#{defaultContent}) alertContent,
+		</if>
+		t3.trueName,
+		IFNULL(t3.userPictureUrl,IF(t3.sex=2,#{wonmanUrl},#{manUrl})) pictureUrl
+		FROM (
+		SELECT * FROM hds_db.s_review_alert_detail t1 
+		WHERE doctorId=#{doctorId} AND confirmFlag=1 AND productApplyId IS NOT NULL 
+		)t1
+		JOIN hds_db.s_product_service_apply t2 ON t1.productApplyId=t2.productApplyId
+		<if test="reqFlag==1"><!-- 已预约 -->
+			AND t2.state=1
+		</if>
+		<if test="reqFlag==2"><!-- 赴约中 -->
+			AND t2.state=2
+		</if>
+		JOIN user_db.u_patient t3 ON t1.patientId = t3.patientId
+	</select>
+	
+	<!-- 初始化复查提醒数据 -->
+	<insert id="initNotInReviewAlert">
+		INSERT INTO hds_db.s_review_alert_detail(reviewDetailId,reviewBatchId,doctorId,patientId,itemId,alertTime,handleFlag,createTime)
+		SELECT CONCAT("RALD",UNIX_TIMESTAMP(),ROUND(RAND()*POW(10,10))) reviewDetailId,#{reviewBatchId},#{doctorId},t2.patientId,t1.followupItemId itemId,t1.followupDate,1,NOW() createTime
+		FROM
+		(
+		SELECT followupItemId,followupDate,followupId FROM followup_db.followup_plan_detail
+		<where>
+			<if test="reviewDetailList!=null">
+				<foreach collection="reviewDetailList" open="AND followupItemId IN(" close=")" item="fItem" separator=",">
+					#{fItem}
+				</foreach>
+			</if>
+			<if test="followupItemId!=null">
+				AND followupItemId = #{followupItemId}
+			</if>
+		</where>
+		) t1
+		JOIN followup_db.followup_plan t2 ON t1.followupId=t2.followupId
+	</insert>
+	<!-- 创建预约复查详情 -->
+	<insert id="createReviewAlertDetail">
+		INSERT INTO hds_db.s_review_alert_detail(reviewDetailId,reviewBatchId,doctorId,patientId,itemId,alertTime,handleFlag,createTime)
+		VALUES(
+			#{reviewDetailId},#{reviewBatchId},#{doctorId},#{patientId},#{itemId},#{alertTime},1,now()
+		)
+	</insert>
+</mapper>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.exporttemplate.PatientExportTemplateDao">
+	<sql id="column_list">
+		exportTemplateId,templateType,heads,fields,exportSort,title,sqlContent
+	</sql>
+	<select id="queryById" resultType="com.esuizhen.cloudservice.followup.bean.PatientExportTemplate">
+		SELECT <include refid="column_list"/> FROM user_db.u_patient_export_template WHERE exportTemplateId=#{exportTemplateId}
+	</select>
+	<select id="queryExprotData" resultType="java.util.LinkedHashMap">
+		${sql}
+	</select>
+</mapper>
+

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.esuizhen.cloudservice.followup.dao.meta.PhoneHomeMetaInfoDao">
+
+	<!-- 从任务分配表查询随访人员 -->
+	<select id="queryPhoneHome" resultType="java.util.Map">
+		SELECT
+		*
+		FROM
+		user_db.meta_phone_home
+		<where>
+			<if test="phone !=null">
+				phone=#{phone}
+			</if>
+			<if test="code !=null">
+				and code=#{code}
+			</if>
+		</where>
+	limit 1
+	</select>
+</mapper>
+

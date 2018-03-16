@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.westangel.timertask.dao.OpPushRuleConfDao">
+
+    <select id="queryArticleTitle" resultType="java.lang.String">
+		SELECT
+			articleTitle
+		FROM
+			com_sys_db.sys_knowledge_article
+		WHERE
+			articleId = #{articleId}
+	</select>
+	
+	<select id="queryOpPushRuleConfList" resultType="com.westangel.timertask.model.OpPushRuleConf">
+		SELECT 
+        	pushRuleId,
+        	pushCycle,
+        	pushTime,
+        	isLoop,
+        	pushArticleMaxNum,
+        	state,
+        	(CASE WHEN lastTime IS NULL THEN createTime ELSE lastTime END ) lastTime ,
+        	bak,
+        	title,
+        	content,
+        	isUseTitle,
+        	createTime,
+        	updateTime
+		FROM operation_db.op_push_rule_conf 
+	    WHERE 
+	        state = 1
+	</select>
+	
+	<update id="updateOpPushRuleConf" parameterType="com.westangel.timertask.model.OpPushRuleConf">
+        UPDATE operation_db.op_push_rule_conf 
+        <set>
+            <if test="pushCycle != null">
+                pushCycle = #{pushCycle} ,
+            </if>
+            <if test="pushTime != null">
+                pushTime = #{pushTime} ,
+            </if>
+	        <if test="isLoop != null">
+                isLoop = #{isLoop} ,
+            </if>
+	        <if test="pushArticleMaxNum != null">
+                pushArticleMaxNum = #{pushArticleMaxNum} ,
+            </if>
+	        <if test="state != null">
+                state = #{state} ,
+            </if>
+	        <if test="lastTime != null">
+                lastTime = #{lastTime} ,
+            </if>
+	        <if test="updateTime != null">
+                updateTime = NOW() ,
+            </if>
+        </set>
+        WHERE 
+	        pushRuleId = #{pushRuleId} 
+	</update>
+	
+	<select id="queryPushList" resultType="com.westangel.timertask.model.OpPushQueryResult">
+		SELECT  t20.* FROM (
+		SELECT
+	      t3.patientId,
+				t8.articleTitle ,
+				t6.userId,
+	      t4.articleId,
+	      t2.pushRuleId,
+	      t1.title,
+				(CASE WHEN t1.isUseTitle=1 THEN t8.articleTitle ELSE t1.content END) content,
+	      t1.bak,
+	      	(SELECT
+					it1.pushResultId
+				FROM
+					operation_db.op_push_result it1
+				WHERE
+					it1.pushRuleId = t1.pushRuleId
+				AND it1.patientId = t3.patientId
+				AND articleId = t4.articleId limit 1) pushResultId
+			FROM
+	      operation_db.op_push_rule_conf t1,
+				operation_db.r_push_rule_tag t2,
+				operation_db.r_patient_tag t3,
+				operation_db.r_article_tag t4,
+				user_db.u_patient t6,
+				user_db.u_user t7 , 
+				com_sys_db.sys_knowledge_article t8
+			WHERE t1.pushRuleId=t2.pushRuleId
+			AND	t2.patientTagId = t3.tagId
+			AND t2.articleTagId = t4.tagId
+			AND t6.patientId = t3.patientId
+			AND t7.userId = t6.userId
+			AND t4.articleId=t8.articleId
+            AND t8.articleType=1
+			AND t2.pushRuleId = #{pushRuleId}
+			AND t7.weixinFlag = 1
+			AND t7.state = 1
+		    AND t8.state=1
+		    ORDER BY t8.sortIndex ASC ,t8.articleId ASC
+		    ) t20 GROUP BY t20.patientId,t20.articleId
+	</select>
+	
+	<select id="queryTestPushList" resultType="com.westangel.timertask.model.OpPushQueryResult">
+		SELECT
+		    DISTINCT
+			t2.userId,
+			t3.articleId,
+			(SELECT  articleTitle FROM com_sys_db.sys_knowledge_article WHERE articleId = t3.articleId) articleTitle ,
+			t1.pushRuleId,
+			(
+				SELECT
+					title
+				FROM
+					operation_db.op_push_rule_conf it1
+				WHERE
+					it1.pushRuleId = t1.pushRuleId
+			) title,
+			(
+				SELECT
+					(CASE WHEN isUseTitle=1 THEN (SELECT  articleTitle FROM com_sys_db.sys_knowledge_article WHERE articleId = t3.articleId) ELSE content END)
+				FROM
+					operation_db.op_push_rule_conf it1
+				WHERE
+					it1.pushRuleId = t1.pushRuleId
+			) content,
+			(
+				SELECT
+					bak
+				FROM
+					operation_db.op_push_rule_conf it1
+				WHERE
+					it1.pushRuleId = t1.pushRuleId
+			) bak
+		FROM
+			operation_db.r_push_rule_tag t1,
+			operation_db.op_test_account t2,
+			operation_db.r_article_tag t3 , 
+			com_sys_db.sys_knowledge_article t8
+		WHERE
+		    t1.articleTagId = t3.tagId
+		AND t3.articleId=t8.articleId
+        AND t8.articleType=1
+		AND t1.pushRuleId=#{pushRuleId}
+		AND t8.state=1
+		AND EXISTS (SELECT 1 from operation_db.op_push_rule_conf t9 WHERE t9.pushRuleId=t1.pushRuleId and t9.state=1)
+	</select>
+	
+	<select id="queryPushCircleList" resultType="com.westangel.timertask.model.OpPushQueryResult">
+		SELECT
+			t2.pushRuleId,
+			t3.patientId,
+			t6.userId,
+			GROUP_CONCAT(
+				DISTINCT t8.articleId
+    			ORDER BY t8.sortIndex ASC,t8.articleId ASC
+			) newPushArticleId,
+			(
+				SELECT
+					allPushArticleIdJson
+				FROM
+					operation_db.op_push_result_queue it1
+				WHERE
+					it1.patientId = t3.patientId
+				AND it1.pushRuleId = t2.pushRuleId
+			) allPushArticleIdJson,
+			(
+				SELECT
+					pushAtricleIdJson
+				FROM
+					operation_db.op_push_result_queue it1
+				WHERE
+					it1.patientId = t3.patientId
+				AND it1.pushRuleId = t2.pushRuleId
+			) pushAtricleIdJson,
+			(
+				SELECT
+					pushResultQueueId
+				FROM
+					operation_db.op_push_result_queue it1
+				WHERE
+					it1.patientId = t3.patientId
+				AND it1.pushRuleId = t2.pushRuleId
+			) pushResultQueueId
+		FROM
+			operation_db.r_push_rule_tag t2,
+			operation_db.r_patient_tag t3,
+			operation_db.r_article_tag t4,
+			user_db.u_patient t6,
+			user_db.u_user t7 , 
+			com_sys_db.sys_knowledge_article t8
+		WHERE
+			t2.patientTagId = t3.tagId
+		AND t2.articleTagId = t4.tagId
+		AND t6.patientId = t3.patientId
+		AND t7.userId = t6.userId
+		AND t4.articleId=t8.articleId
+        AND t8.articleType=1
+		AND t2.pushRuleId = #{pushRuleId}
+		AND t7.weixinFlag = 1
+		AND t7.state = 1
+		AND t8.state=1
+		GROUP BY
+			patientId
+		
+	</select>
+
+	<select id="queryPushArticleList" resultType="com.westangel.timertask.model.OpPushQueryResult">
+		SELECT
+	      t3.patientId,
+		  t8.articleTitle ,
+		  t6.userId,
+	      t4.articleId,
+	      t2.pushRuleId,
+	      t1.title,
+		  (CASE WHEN t1.isUseTitle=1 THEN t8.articleTitle ELSE t1.content END) content,
+	      t1.bak,
+		  (select pushTimes from operation_db.op_push_result where patientId=t6.patientId AND pushRuleId=t1.pushRuleId AND articleId=t8.articleId limit 1) pushTimes,
+		  (SELECT pushResultQueueId from operation_db.op_push_result_queue where patientId=t6.patientId AND pushRuleId=t1.pushRuleId limit 1) pushResultQueueId
+		FROM
+	      operation_db.op_push_rule_conf t1,
+				operation_db.r_push_rule_tag t2,
+				operation_db.r_patient_tag t3,
+				operation_db.r_article_tag t4,
+				user_db.u_patient t6,
+				user_db.u_user t7 ,
+				com_sys_db.sys_knowledge_article t8
+			WHERE t1.pushRuleId=t2.pushRuleId
+			AND	t2.patientTagId = t3.tagId
+			AND t2.articleTagId = t4.tagId
+			AND t6.patientId = t3.patientId
+			AND t7.userId = t6.userId
+			AND t4.articleId=t8.articleId
+            AND t8.articleType=1
+			AND t2.pushRuleId = #{pushRuleId}
+			AND t7.weixinFlag = 1
+			AND t7.state = 1
+		    AND t8.state=1
+		    AND t6.patientId=#{patientId}
+		    <if test="pushArticle!=null">
+				AND t8.articleId IN
+				<foreach collection="pushArticle" item="pushArticleId" open="(" close=")" separator=",">
+					#{pushArticleId}
+				</foreach>
+			</if>
+			GROUP BY articleId,patientId
+	</select>
+</mapper>
+

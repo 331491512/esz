@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.business.dao.business.DoctorDao">
+	<!-- 医生公告信息 -->
+	<resultMap id="doctorAnnouncementInfoResultMap"
+		type="com.esuizhen.cloudservice.business.model.business.TDoctorAnnouncementInfo">
+		<result property="announcementId" column="id" />
+		<result property="announcementContent" column="announcement" />
+		<result property="createTime" column="createTime" />
+	</resultMap>
+
+	<!-- 医生出诊时间信息 -->
+	<resultMap id="doctorClinicInfoResultMap"
+		type="com.esuizhen.cloudservice.business.bean.TDoctorClinicInfo">
+		<result property="introduction" column="clinicIntroduction" />
+		<result property="updateTime" column="updateTime" />
+		<collection property="dataList" ofType="com.esuizhen.cloudservice.business.bean.TDoctorClinicScheduleInfo">
+			<result property="clinicDay" column="clinicDay" />
+			<result property="moningSchedule" column="moningSchedule" />
+			<result property="moningLimit" column="moningLimit" />
+			<result property="afternoonSchedule" column="afternoonSchedule" />
+			<result property="afternoonLimit" column="afternoonLimit" />
+			<result property="eveningSchedule" column="eveningSchedule" />
+			<result property="eveningLimit" column="eveningLimit" />
+		</collection>
+	</resultMap>
+	<!-- 医生出诊项 -->
+	<resultMap id="doctorClinicScheduleInfoResultMap"
+		type="com.esuizhen.cloudservice.business.bean.TDoctorClinicScheduleInfo">
+		<result property="clinicDay" column="clinicDay" />
+		<result property="moningSchedule" column="moningSchedule" />
+		<result property="moningLimit" column="moningLimit" />
+		<result property="moningSet" column="moningSet" />
+		<result property="moningUsage" column="moningUsage" />
+		<result property="afternoonSchedule" column="afternoonSchedule" />
+		<result property="afternoonLimit" column="afternoonLimit" />
+		<result property="afternoonSet" column="afternoonSet" />
+		<result property="afternoonUsage" column="afternoonUsage" />
+		<result property="eveningSchedule" column="eveningSchedule" />
+		<result property="eveningLimit" column="eveningLimit" />
+		<result property="eveningSet" column="eveningSet" />
+		<result property="eveningUsage" column="eveningUsage" />
+		<result property="clinicItemId" column="clinicItemId" />
+		<result property="week" column="week" />
+	</resultMap>
+	<!-- 获取医院编号 by 医生 -->
+	<select id="getHospitalIdByDoctorId" resultType="java.lang.Long">
+		SELECT
+		hospitalId FROM user_db.r_hospital_doctor WHERE doctorId = #{doctorId}
+	</select>
+
+	<!-- 查看医生当前公告 -->
+	<select id="queryDoctorAnnouncementInfoByDoctorId"
+		parameterType="java.lang.Long" resultMap="doctorAnnouncementInfoResultMap">
+		SELECT id ,
+		announcement ,
+		createTime
+		FROM s_doctor_announcement
+		WHERE
+		doctorId=#{doctorId} ORDER BY
+		createTime desc limit 1
+	</select>
+
+	<!-- 查看医生公告历史 -->
+	<select id="queryDoctorAnnouncementInfoListByDoctorId"
+		parameterType="java.lang.Long" resultMap="doctorAnnouncementInfoResultMap">
+		SELECT id,
+		announcement,
+		createTime
+		FROM s_doctor_announcement
+		WHERE
+		doctorId=#{doctorId}
+		ORDER BY createTime DESC
+	</select>
+
+	<!-- 添加医生公告 -->
+	<insert id="createDoctorAnnouncement"
+		parameterType="com.esuizhen.cloudservice.business.model.business.DoctorAnnouncement">
+		INSERT INTO
+		s_doctor_announcement(doctorId,hospitalId,announcement,createTime)
+		VALUES(#{doctorId},#{hospitalId},#{announcement},NOW())
+	</insert>
+	<!-- 根据医生查找患者用户  -->
+	<select id="queryPatientUserByDoctorId" resultType="java.lang.Long">
+		SELECT
+			upa.userId
+		FROM
+			user_db.u_patient upa
+		LEFT JOIN user_db.r_doctor_patient rdp ON upa.patientId = rdp.patientId
+		LEFT JOIN user_db.u_user uu ON upa.userId = uu.userId
+		WHERE
+			rdp.doctorId = #{doctorId}
+		AND accountType > 0
+	</select>
+	<!-- 查找患者电话 -->
+	<select id="queryPatientPhoneByPatientId" resultType="java.lang.String">
+		SELECT
+			mobile
+		FROM
+			user_db.u_patient
+		WHERE
+			mobile IS NOT NULL 
+		<if test="pats != null">
+			AND patientId IN
+			<foreach collection="pats" open="(" separator=","
+				close=")" index="index" item="item">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+	
+	<select id="queryPatientUserByPatientIds" resultType="com.westangel.common.bean.push.PushUser">
+		SELECT
+			t1.userId,t2.openId,t2.productId
+		FROM
+			user_db.u_patient t1
+		JOIN
+			user_db.u_thirdparty t2 ON t1.userId = t2.userId 
+		WHERE
+			1=1 
+		<if test="pats != null">
+			AND t1.patientId IN
+			<foreach collection="pats" open="(" separator=","
+				close=")" index="index" item="item">
+				#{item}
+			</foreach>
+		</if>
+		GROUP BY t1.userId
+	</select>
+	<!-- 根据删除医生公告 -->
+	<delete id="deleteDoctorAnnouncement" parameterType="java.lang.String">
+		DELETE FROM s_doctor_announcement WHERE doctorId = #{doctorId}
+		<if test="announcements != null">
+			AND id IN
+			<foreach collection="announcements" open="(" separator=","
+				close=")" index="index" item="item">
+				#{item}
+			</foreach>
+		</if>
+	</delete>
+
+	<!-- 医生userId获取 -->
+	<select id="queryDoctorUserIdByDoctorId" resultType="java.lang.Long">
+		SELECT
+			userId
+		FROM
+			user_db.u_doctor
+		WHERE
+			doctorId = #{doctorId}
+			LIMIT 1
+	</select>
+	<!-- 医生Id获取 -->
+	<select id="queryDoctorIdByDoctorUserId" resultType="java.lang.Long">
+		SELECT
+			doctorId
+		FROM
+			user_db.u_doctor
+		WHERE
+			userId = #{doctorUserId}
+			LIMIT 1
+	</select>
+	
+	<!-- 根据医生的userId查询医生基本信息 -->
+	<select id="findByUserId" resultType="com.westangel.common.bean.Doctor">
+		SELECT
+			t1.userId,
+			t1.doctorId,
+			t1.trueName,
+			t1.mobile
+		FROM user_db.u_doctor t1
+		WHERE t1.userId = #{userId}
+	</select>
+	
+	<!-- 修改医生出诊时间 -->
+	<update id="updateDoctorClinicSchedule">
+		UPDATE s_doctor_clinic_schedule
+		<set>
+			moningSchedule = #{moningSchedule} ,
+			moningLimit = #{moningLimit},
+			moningSet = #{moningSet},
+			afternoonSchedule =#{afternoonSchedule} ,
+			afternoonLimit = #{afternoonLimit},
+			afternoonSet = #{afternoonSet},
+			eveningSchedule = #{eveningSchedule},
+			eveningLimit = #{eveningLimit},
+			eveningSet = #{eveningSet},
+			updateTime = NOW()
+		</set>
+		WHERE doctorId = #{doctorId} and clinicDay = #{clinicDay}
+	</update>
+	
+	<!-- 医生基本信息 -->
+	<select id="queryDoctorSimpleInfo" resultType="com.westangel.common.bean.DoctorSimpleInfo">
+		SELECT
+			d1.trueName,d1.userId,d1.doctorId,d1.mobile,
+			d3.professionalRankName professionalRank,
+			CASE WHEN d5.deptName IS NULL THEN d7.deptName ELSE d5.deptName  END AS deptName,
+			d6.hospitalName,d6.hospitalId
+		FROM
+			user_db.u_doctor d1
+		LEFT JOIN user_db.meta_professional_rank d3 ON d1.professionalRank = d3.professionalRankId
+		LEFT JOIN user_db.r_hospital_doctor d4 ON d1.doctorId = d4.doctorId
+		LEFT JOIN user_db.u_department d5 ON d4.deptId = d5.deptId
+		LEFT JOIN user_db.u_hospital d6 ON d4.hospitalId = d6.hospitalId
+		LEFT JOIN user_db.u_department d7 ON d7.deptId = d5.parentId
+		<if test="doctorId!=null">
+			WHERE
+			d1.doctorId=#{doctorId}
+		</if>
+		<if test="doctorUserId!=null">
+			WHERE
+			d1.userId=#{doctorUserId}
+		</if>
+	</select>
+
+	<!-- 查询病历医生 -->	
+	<select id="findPathologyDoctors" resultType="com.westangel.common.bean.Doctor">
+		SELECT
+			t1.userId,
+			t1.doctorId,
+			t1.trueName
+		FROM user_db.u_doctor t1
+			INNER JOIN user_db.r_user_role t2 ON t2.userId = t1.userId
+			INNER JOIN user_db.r_hospital_doctor t3 ON t3.doctorId = t1.doctorId
+		WHERE t3.hospitalId = #{hospitalId} AND t2.userRole = 51
+	</select>
+	
+	<select id="findProductGroupDoctor" resultType="com.westangel.common.bean.Doctor">
+		SELECT
+			t1.userId,
+			t1.doctorId,
+			t1.trueName
+		FROM user_db.u_doctor t1
+			INNER JOIN user_db.r_user_role t2 ON t2.userId = t1.userId
+			INNER JOIN com_trade_db.product_group t3 ON t3.memberVendor = t1.userId
+			INNER JOIN hds_db.s_product_service_apply t4 ON t4.productId = t3.productId
+			<if test="groupType != null and groupType == 3">
+				INNER JOIN hds_db.s_mdt_apply t5 ON t5.radiateUserId = t1.userId
+			</if>
+		WHERE t3.groupType = #{groupType} AND t4.productApplyId = #{productApplyId}
+		ORDER BY userId DESC
+		LIMIT 1
+	</select>
+	
+	<select id="findPathologyDoctor" resultType="com.westangel.common.bean.Doctor">
+		SELECT
+			t1.userId,
+			t1.doctorId,
+			t1.trueName
+		FROM user_db.u_doctor t1
+			INNER JOIN hds_db.s_mdt_apply t2 ON t2.basicPathologyUserId = t1.userId
+		WHERE t2.productApplyId = #{productApplyId}
+	</select>
+</mapper>

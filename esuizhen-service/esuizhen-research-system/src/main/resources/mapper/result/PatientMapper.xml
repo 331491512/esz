@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.PatientDao">
+
+	<select id="selectUnselectedPatients" resultType="com.westangel.common.bean.PatientSimpleInfo">
+		SELECT
+			t1.patientId,
+			t1.trueName,
+			t1.sex,
+			t1.confirmedDate,
+			t3.diseaseTypeId sourceDiseaseTypeId,
+			t3.diseaseTypeName sourceDiseaseTypeName,
+			t1.sourceDiagnosis 
+		FROM user_db.u_patient t1
+			INNER JOIN user_db.r_doctor_patient t2 ON t2.patientId = t1.patientId
+			LEFT JOIN ehr_db.meta_c_disease_type t3 ON t3.diseaseTypeId = t1.sourceDiseaseTypeId
+		WHERE t2.doctorId=#{req.doctorId}
+		    AND t1.patientId IN (${sqlStr})
+		    AND t1.patientId NOT IN(
+		    	SELECT
+					i1.invitee
+				FROM pro_db.project_invitation_patient i1
+				WHERE i1.projectId = #{req.projectId}
+		    )
+		    <if test="req.followupStartMark == 0">
+		    	AND t1.patientId IN(
+			    	SELECT
+						n1.patientId
+					FROM(
+						SELECT
+							i1.patientId
+						FROM
+							ehr_db.e_diagnosis_info i1
+						WHERE
+							i1.visitTime IS NOT NULL
+						ORDER BY i1.visitTime ASC
+					) n1
+					GROUP BY n1.patientId
+				)
+		    </if>
+		    <if test="req.effectiveContactMethodFlag == 1">
+		    	AND t1.patientId IN(
+		    		SELECT
+						i1.patientId
+					FROM user_db.u_patient_family i1
+					WHERE i1.isValid = 1
+					GROUP BY i1.patientId
+				)
+		    </if>
+		    order by t1.confirmedDate desc
+	</select>
+
+	<select id="findUnselectedPatients" resultType="com.westangel.common.bean.PatientSimpleInfo" parameterType="com.esuizhen.cloudservice.research.bean.UnselectedPatientsSearchReq">
+		SELECT
+			*
+		FROM(
+			SELECT
+				t1.patientId,
+				t1.trueName,
+				t1.sex,
+				t8.diseaseTypeId sourceDiseaseTypeId,
+				t8.diseaseCode sourceDiseaseCode,
+				t8.diagnosis sourceDiagnosis,
+				t8.visitTime confirmedDate,
+				t11.diseaseTypeName sourceDiseaseTypeName
+			FROM user_db.u_patient t1
+				INNER JOIN user_db.r_hospital_patient t2 ON t1.patientId = t2.patientId
+				INNER JOIN user_db.r_hospital_doctor t3 ON t2.hospitalId = t3.hospitalId
+				INNER JOIN user_db.u_doctor t4 ON t3.doctorId = t4.doctorId
+				<if test="marriageStatus != null or cityId != null or professionId != null">
+					INNER JOIN user_db.u_user t5 ON t1.userId = t5.userId
+				</if>
+				<if test="inhospitalIdentity != null or inhospitalStartDate != null or inhospitalEndDate != null or inhospitalDeptId != null">
+					LEFT JOIN ehr_db.ei_inhospital_note t6 ON t1.patientId = t6.patientId
+				</if>
+				<if test="outHospitalIdentity != null or outHospitalStartDate != null or outHospitalEndDate != null or outhospitalDeptId != null">
+					LEFT JOIN ehr_db.ei_inhospital_note t7 ON t1.patientId = t7.patientId
+				</if>
+				INNER JOIN ehr_db.e_diagnosis_info t8 ON t1.patientId = t8.patientId AND t8.diagnosisTypeId = 1
+				<if test="treatmentWayId != null or treatmentContent != null">
+					LEFT JOIN ehr_db.eci_treatment_note t9 ON t1.patientId = t9.patientId
+				</if>
+				<if test="followupResultId != null or followupStartDate != null or followupEndDate != null">
+					LEFT JOIN followup_db.followup_result t10 ON t1.patientId = t10.patientId
+				</if>
+				LEFT JOIN ehr_db.meta_c_disease_type t11 ON t8.diseaseTypeId = t11.diseaseTypeId
+				INNER JOIN user_db.r_doctor_patient t12 ON t1.patientId = t12.patientId AND t3.doctorId = t12.doctorId
+			WHERE t1.patientId NOT IN(SELECT r1.invitee FROM pro_db.project_invitation_patient r1 WHERE r1.projectId = #{projectId})
+			<if test="sex != null">
+				<choose>
+					<when test="sex == 0">
+						AND (t1.sex IS NULL OR t1.sex = 0)
+					</when>
+					<otherwise>
+						AND t1.sex = #{sex}
+					</otherwise>
+				</choose>
+			</if>
+			<if test="minAge > 0">
+				AND TIMESTAMPDIFF(YEAR,	t1.birthDate, NOW()) >= #{minAge}
+			</if>
+			<if test="maxAge > 0">
+				<![CDATA[
+					AND TIMESTAMPDIFF(YEAR,	t1.birthDate, NOW()) <= #{maxAge}
+				]]>
+			</if>
+			<if test="marriageStatus != null">
+				AND t5.marriageStatus = #{marriageStatus}
+			</if>
+			<if test="cityId != null">
+				AND t5.cityId = #{cityId}
+			</if>
+			<if test="professionId != null">
+				AND t5.professionId = #{professionId}
+			</if>
+			AND t4.doctorId = #{doctorId}
+			<if test="inhospitalIdentity == 1">
+				AND (t6.inhospitalTimes IS NULL OR t6.inhospitalTimes = 1)
+			</if>
+			<if test="inhospitalIdentity == 2">
+				AND t6.inhospitalTimes IN (
+					SELECT
+						MAX(p1.inhospitalTimes)
+					FROM ehr_db.ei_inhospital_note p1
+					WHERE p1.patientId = t1.patientId
+				)
+			</if>
+			<if test="inhospitalStartDate != null">
+				AND t6.inhospitalDate >= DATE_FORMAT(#{inhospitalStartDate}, '%Y-%c-%D')
+			</if>
+			<if test="inhospitalEndDate != null">
+				<![CDATA[
+					AND t6.inhospitalDate <= DATE_ADD(DATE_FORMAT(#{inhospitalEndDate}, '%Y-%c-%D'), INTERVAL 1 DAY)
+				]]>
+			</if>
+			<if test="inhospitalDeptId != null">
+				AND t6.inhospitalDeptId = #{inhospitalDeptId}
+			</if>
+			<if test="outHospitalIdentity == 1">
+				AND (t7.inhospitalTimes IS NULL OR t7.inhospitalTimes = 1)
+			</if>
+			<if test="outHospitalIdentity == 2">
+				AND t7.inhospitalTimes IN (
+					SELECT
+						MAX(p1.inhospitalTimes)
+					FROM ehr_db.ei_inhospital_note p1
+					WHERE p1.patientId = t1.patientId
+				)
+			</if>
+			<if test="outHospitalStartDate != null">
+				AND t7.outhospitalDate >= DATE_FORMAT(#{outHospitalStartDate}, '%Y-%c-%D')
+			</if>
+			<if test="outHospitalEndDate != null">
+			<![CDATA[
+				AND t7.outhospitalDate <= DATE_ADD(DATE_FORMAT(#{outHospitalEndDate}, '%Y-%c-%D'), INTERVAL 1 DAY)
+			]]>
+			</if>
+			<if test="outhospitalDeptId != null">
+				AND t7.outhospitalDeptId = #{outhospitalDeptId}
+			</if>
+			<if test="conditionMinAge != null">
+				AND TIMESTAMPDIFF(YEAR,	t1.birthDate, t1.confirmedDate) >= #{conditionMinAge}
+			</if>
+			<if test="conditionMaxAge != null">
+				<![CDATA[
+					AND TIMESTAMPDIFF(YEAR,	t1.birthDate, t1.confirmedDate) <= #{conditionMaxAge}
+				]]>
+			</if>
+			<if test="diseaseTypeId != null">
+				AND t8.diseaseTypeId = #{diseaseTypeId}
+			</if>
+			<if test="conditionStartDate != null">
+				AND t8.visitTime >= DATE_FORMAT(#{conditionStartDate}, '%Y-%c-%D')
+			</if>
+			<if test="conditionEndDate != null">
+				<![CDATA[
+					AND t8.visitTime <= DATE_ADD(DATE_FORMAT(#{conditionEndDate}, '%Y-%c-%D'), INTERVAL 1 DAY)
+				]]>
+			</if>
+			<if test="pathologyDiagnosis != null">
+				<bind name="patternPathologyDiagnosis" value="'%' + pathologyDiagnosis + '%'" />
+				AND t8.pathologyDiagnosis LIKE #{patternPathologyDiagnosis}
+			</if>
+			<if test="diagnosisType != null">
+				AND t8.diagnosisTypeId = #{diagnosisType}
+			</if>
+			<if test="diagnosisName != null">
+				<bind name="patternDiagnosisName" value="'%' + diagnosisName + '%'" />
+				AND t8.diagnosis LIKE #{patternDiagnosisName}
+			</if>
+			<if test="diagnosisStages != null">
+				AND t8.disagnosisPeriodizationId = #{diagnosisStages}
+			</if>
+			<if test="treatmentWayId != null">
+				AND t9.treatmentTypeId = #{treatmentWayId}
+			</if>
+			<if test="treatmentContent != null">
+				<bind name="patternTreatmentContent" value="'%' + treatmentContent + '%'" />
+				AND t9.treatmentName LIKE #{patternTreatmentContent}
+			</if>
+			<if test="followupResultId != null">
+				AND t10.followupResultValue = #{followupResultId}
+			</if>
+			<if test="followupStartDate != null">
+				AND t10.followupTime >= DATE_FORMAT(#{followupStartDate}, '%Y-%c-%D')
+			</if>
+			<if test="followupEndDate != null">
+				<![CDATA[
+					AND t10.followupTime <= DATE_ADD(DATE_FORMAT(#{followupEndDate}, '%Y-%c-%D'), INTERVAL 1 DAY)
+				]]>
+			</if>
+			ORDER BY t8.visitTime ASC
+		) f1
+		GROUP BY f1.patientId
+		ORDER BY f1.confirmedDate DESC
+	</select>
+	 
+	<select id="findBaseDate" resultType="java.util.Date">
+		SELECT
+			CASE WHEN t3.followupStartMark = 1 THEN
+				t2.createTime
+			ELSE
+				(
+					SELECT
+						v1.diagnosisDate
+					FROM pro_db.crf_result_diagnosis_info v1
+					INNER JOIN pro_db.crf_result_main v2 ON v1.crfResultId = v2.crfResultId
+					WHERE v1.diagnosisType = 1 AND v2.projectId = t1.projectId AND v2.patientId = t2.patientId
+				)
+			END baseDate
+		FROM pro_db.r_crftemplate_project t1
+		INNER JOIN pro_db.r_subcenter_patient t2 ON t1.projectId = t2.projectId
+		INNER JOIN pro_db.project_crf_template t3 ON t1.crfTemplateId = t3.crfTemplateId
+		WHERE t1.projectId = #{projectId} AND t2.patientId = #{patientId}
+	</select>
+	
+	<select id="findDemography" resultType="com.esuizhen.cloudservice.research.model.result.TCrfResultBasicDemography">
+		SELECT
+			t1.userId,
+			t1.patientId,
+			t1.mobile, 
+			t1.trueName, 
+			t1.birthDate, 
+			t1.sex, 
+			t2.nativePlace, 
+			t2.country, 
+			t2.nation,
+			t2.profession, 
+			t1.bloodType, 
+			t2.idType, 
+			t2.identification, 
+			t2.marriageStatus,
+			t2.address, 
+			t1.confirmedDate,
+			(SELECT IF(COUNT(1) > 0, 1, 0) FROM user_db.u_thirdparty i1 WHERE i1.state = 1 AND i1.userId = t1.userId) weixinFlag
+		FROM user_db.u_patient t1
+			INNER JOIN user_db.u_user t2 ON t1.userId = t2.userId
+		WHERE t1.patientId = #{patientId}
+	</select>
+	
+	<select id="findPatientInfo" resultType="com.westangel.common.bean.PatientSimpleInfo">
+		SELECT
+			t1.patientId,
+			t1.trueName,
+			t1.sex,
+			t1.birthDate,
+			TIMESTAMPDIFF(YEAR,	t1.birthDate, NOW()) age,
+			t1.mobile,
+			t1.sourceDiagnosis,
+			t1.confirmedDate
+		FROM user_db.u_patient t1
+		WHERE t1.patientId = #{patientId}
+		<!-- 
+		SELECT
+			t1.patientId,
+			t1.trueName,
+			t1.sex,
+			t1.birthDate,
+			TIMESTAMPDIFF(YEAR,	t1.birthDate, NOW()) age,
+			t1.mobile,
+			t4.diagnosisName sourceDiagnosis,
+			t4.diagnosisDate confirmedDate
+		FROM pro_db.crf_result_basic_demography t1
+			INNER JOIN pro_db.crf_result_main t2 ON t1.crfResultId = t2.crfResultId
+			LEFT JOIN pro_db.crf_result_main t3 ON t2.projectId = t3.projectId AND t2.patientId = t3.patientId
+			LEFT JOIN pro_db.crf_result_diagnosis_info t4 ON t3.crfResultId = t4.crfResultId AND t4.diagnosisType = 1
+		WHERE t2.projectId = #{projectId} AND t2.patientId = #{patientId}
+		GROUP BY t1.patientId
+		 -->
+	</select>
+	
+	<select id="findDiagosisInfo" resultType="com.esuizhen.cloudservice.research.model.result.TCrfResultDiagnosisInfo">
+		SELECT
+			t1.diagnosisId,
+			t1.emrId,
+			t1.patientId,
+			t1.patientNo,
+			t1.diseaseTypeId,
+			t1.diagnosis diagnosisName,
+			t1.diagnosisExplain,
+			t1.inHospitalCondition,
+			t1.diagnosisTypeId diagnosisType,
+			t1.diseaseBodyPartId diagnosisBodyPart,
+			t1.diseaseCode diagnosisCode,
+			t1.organCode,
+			t1.diseaseBasis diagnosisBasic,
+			t1.treatmentHistory,
+			t1.isFollowup,
+			t1.sourceCancerCount,
+			t1.pathologyDiagnosis,
+			t1.pathologyDiagnosisCode,
+			t1.isSourceDiagnosis,
+			t1.disagnosisPeriodizationId diagnosisStages,
+			t1.remark,
+			t1.visitTime diagnosisDate,
+			t1.creator,
+			t1.operatorId,
+			t1.createTime,
+			t1.updateTime,
+			t3.hospitalName diagnosisHospital
+		FROM
+			ehr_db.e_diagnosis_info t1
+			INNER JOIN ehr_db.e_medical_record t2 ON t1.emrId = t2.emrId
+			LEFT JOIN user_db.u_hospital t3 ON t2.hospitalId = t3.hospitalId
+		WHERE
+			t1.diagnosisTypeId = 1
+		AND t1.patientId = #{patientId}
+		<if test="diseaseTypeId != null">
+			AND t1.diseaseTypeId = #{diseaseTypeId}
+		</if>
+		ORDER BY t1.visitTime ASC
+	</select>
+	
+	<select id="findStayPatientList" resultType="com.westangel.common.bean.PatientSimpleInfo">
+		SELECT
+			t1.id,
+			t2.patientId,
+			t2.trueName,
+			t2.sex,
+			t2.confirmedDate,
+			t3.diseaseTypeId sourceDiseaseTypeId,
+			t3.diseaseTypeName sourceDiseaseTypeName,
+			t2.sourceDiagnosis,
+			t1.projectId,
+			t1.groupId,
+			t1.state,
+			t1.inviter
+		FROM pro_db.project_invitation_patient t1
+			INNER JOIN user_db.u_patient t2 ON t2.patientId = t1.invitee
+			LEFT JOIN ehr_db.meta_c_disease_type t3 ON t3.diseaseTypeId = t2.sourceDiseaseTypeId
+		WHERE t1.projectId = #{projectId}
+			AND t1.state != 2
+			<if test="state != null">
+				AND state = #{state}
+			</if>
+			<if test="subcenterId != null">
+				AND t1.subcenterId = #{subcenterId}
+			</if>
+			<if test="doctorId != null">
+				AND t1.inviter = #{doctorId}
+			</if>
+	</select>
+	
+	<select id="findDiseaseType" resultType="com.westangel.common.bean.PatientSimpleInfo">
+		SELECT
+			t1.patientId,
+			t1.diseaseTypeId sourceDiseaseTypeId,
+			t2.diseaseTypeName sourceDiseaseTypeName
+		FROM ehr_db.e_diagnosis_info t1
+			LEFT JOIN ehr_db.meta_c_disease_type t2 ON t2.diseaseTypeId = t1.diseaseTypeId
+		WHERE 
+			t1.diseaseTypeId IS NOT NULL
+			AND t1.patientId = #{patientId}
+		ORDER BY t1.visitTime ASC
+		LIMIT 1
+	</select>
+	
+	<update id="update">
+		UPDATE user_db.u_patient
+		<set>
+			<if test="isTumourDeath != null">
+				isTumourDeath = #{isTumourDeath},
+			</if>
+			<if test="deathDate != null">
+				deathDate = #{deathDate},
+			</if>
+			updateTime = NOW()
+		</set>
+		WHERE patientId = #{patientId}
+	</update>
+</mapper>

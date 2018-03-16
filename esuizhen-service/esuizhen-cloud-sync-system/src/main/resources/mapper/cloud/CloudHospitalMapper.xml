@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.CloudHospitalDao" >
+	<resultMap type="com.esuizhen.cloudservice.sync.model.Hospital" id="baseResultMap">
+		<id column="hospitalId" property="hospitalId" jdbcType="BIGINT" />
+		<result column="hospitalName" property="hospitalName" jdbcType="VARCHAR" />
+		<result column="nickName" property="nickName" jdbcType="VARCHAR" />
+		<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+		<result column="tagIds" property="tagIds" jdbcType="VARCHAR" />
+		<result column="tags" property="tags" jdbcType="VARCHAR" />
+		<result column="gradeId" property="gradeId" jdbcType="INTEGER" />
+		<result column="specialClinics" property="specialClinics" jdbcType="VARCHAR" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="busLines" property="busLines" jdbcType="VARCHAR" />
+		<result column="cityCode" property="cityCode" jdbcType="VARCHAR" />
+		<result column="tel" property="tel" jdbcType="VARCHAR" />
+		<result column="introduction" property="introduction" jdbcType="VARCHAR" />
+		<result column="latitude" property="latitude" jdbcType="VARCHAR" />
+		<result column="longitude" property="longitude" jdbcType="VARCHAR" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<sql id="base_column_list">
+		t1.hospitalId, t1.hospitalName, t1.nickName, t1.uuid, t1.tagIds, t1.tags, t1.gradeId, t1.specialClinics, t1.address,
+		t1.busLines, t1.cityCode, t1.tel, t1.introduction, t1.latitude, t1.longitude, t1.createTime, t1.updateTime
+	</sql>
+	
+	<select id="existHospital" resultType="java.lang.Integer">
+		SELECT
+			COUNT(0)
+		FROM user_db.u_hospital t1
+		WHERE t1.hospitalId=#{hospitalId}
+	</select>
+	
+	<select id="findById" resultMap="baseResultMap">
+		SELECT
+			<include refid="base_column_list" />
+		FROM user_db.u_hospital t1
+		WHERE t1.hospitalId=#{hospitalId}
+	</select>
+	
+	<select id="findByUuid" resultMap="baseResultMap">
+		SELECT
+			<include refid="base_column_list" />
+		FROM user_db.u_hospital t1
+		WHERE t1.uuid=#{uuid}
+	</select>
+	
+	<select id="findByDoctorId" resultMap="baseResultMap">
+		SELECT
+			<include refid="base_column_list" />
+		FROM user_db.u_hospital t1
+			INNER JOIN user_db.r_hospital_doctor t2 ON t1.hospitalId=t2.hospitalId
+			INNER JOIN user_db.u_doctor t3 ON t2.doctorId=t3.doctorId
+		WHERE t3.userId=#{doctorId,jdbcType=BIGINT}
+	</select>
+</mapper>

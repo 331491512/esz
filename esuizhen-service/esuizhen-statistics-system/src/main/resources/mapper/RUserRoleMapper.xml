@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.statistics.dao.RUserRoleDao">
+	<select id="existUserRoleRelationship" resultType="int">
+		SELECT
+			COUNT(1)
+		FROM user_db.r_user_role t1
+		JOIN user_db.u_doctor t2 ON t1.userId=t2.userId
+		WHERE t2.doctorId = #{doctorId}
+		<if test="userRole != null">
+			AND t1.userRole = #{userRole}
+		</if>
+	</select>
+</mapper>

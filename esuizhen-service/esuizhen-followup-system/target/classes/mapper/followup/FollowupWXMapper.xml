@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followup.FollowupWXDao">
+	
+	<!-- 更新医院随访消息模版 -->
+	<insert id="updateFollowupWXTemplate">
+		INSERT INTO followup_wx_template (
+			templateId,
+			hospitalId,
+			siganature,
+			content,
+			replyContent,
+			createTime
+		)
+		VALUES
+		(
+			#{templateId},
+			#{hospitalId},
+			#{siganature},
+			#{content},
+			#{replyContent},
+			NOW()
+		)
+		ON DUPLICATE KEY UPDATE
+		siganature=VALUES(siganature),content=VALUES(content),replyContent=VALUES(replyContent),updateTime=NOW()
+	</insert>
+    
+    <!-- 新增下发请求 -->
+    <insert id="createFollowupWXReq">
+    	INSERT INTO followup_wx_req (
+			templateId,
+			hospitalId,
+			openId,
+			messageId,
+			sendTime,
+			trueName,
+			state,
+			signature,
+			content,
+			replyContent,
+			createTime
+		)
+		VALUES
+			(#{templateId}, #{hospitalId}, #{openId}, #{messageId}, #{followupDate}, #{trueName},#{state},#{signature},#{content},#{replyContent},NOW())
+    </insert>
+    
+    <!-- 随访内容查看 -->
+    <select id="queryFollowupMessage" resultType="com.esuizhen.cloudservice.followup.bean.TWXFollowupMessageInfo">
+    	SELECT
+			if(t1.templateId is null,t1.content,t2.content) content,
+			if(t1.templateId is null,t1.replyContent,t2.replyContent) replyContent,
+			t1.replyState
+		FROM
+			followup_wx_req t1
+		LEFT JOIN followup_wx_template t2 ON t1.templateId = t2.templateId AND t1.hospitalId = t2.hospitalId
+		WHERE
+			t1.hospitalId=#{hospitalId} AND t1.messageId=#{messageId}
+    </select>
+    
+    
+    <!-- 随访模版查看 -->
+    <select id="queryFollowupTemplate" resultType="java.util.LinkedHashMap">
+    	SELECT
+			t1.content,t1.replyContent,t1.siganature
+		FROM
+			followup_wx_template t1
+		WHERE
+			t1.hospitalId=#{hospitalId} AND t1.templateId=#{templateId}
+    </select>
+    
+    <!-- 更改随访消息状态 -->
+    <update id="updateFollowupWXReq">
+    	UPDATE followup_wx_req
+    	<set>
+    		<if test="state!=null">
+    			state=#{state},
+    		</if>
+    		<if test="replyState!=null">
+    			replyState=#{replyState},
+    		</if>
+    		<if test="followupResultBuffId!=null">
+				followupResultBuffId =#{followupResultBuffId},    			
+    		</if>
+    		updateTime = NOW()
+    	</set>
+    	WHERE 
+    	hospitalId=#{hospitalId} 
+    	AND messageId=#{messageId}
+    </update>
+</mapper>

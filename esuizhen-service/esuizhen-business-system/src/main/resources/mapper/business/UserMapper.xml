@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.business.dao.business.UserDao">
+	
+	<!-- 获取用户姓名 -->
+	<select id="getUserTrueName" resultType="java.lang.String">
+		SELECT
+		   trueName 
+		FROM 
+		<if test="role==1">
+		   user_db.u_patient 
+		</if>
+		<if test="role==2">
+		   user_db.u_user 
+		</if>
+		WHERE 
+		   userId = #{userId}
+	</select>
+	
+	<!-- 获取用户OpenId -->
+	<select id="getOpenIdByUserId" resultType="java.lang.String">
+		SELECT
+			openId
+		FROM
+			user_db.u_thirdparty
+		WHERE
+			userId = #{userId}
+			<if test="productId!=null">
+				AND productId = #{productId}
+			</if> 
+		ORDER BY productId desc limit 1
+	</select>
+	
+	<!-- 获取用户userId OpenId -->
+	<select id="getPushOpenIdByUserId" resultType="com.westangel.common.bean.push.PushUser">
+		SELECT
+			openId,userId,productId
+		FROM
+			user_db.u_thirdparty
+		WHERE
+			userId = #{userId} AND state=1
+		ORDER BY productId desc limit 1
+	</select>
+
+	<!-- 获取用户姓手机号-->
+	<select id="getUserMobile" resultType="java.lang.String">
+		SELECT
+		   mobile
+		FROM 
+		   user_db.u_user 
+		WHERE 
+		   userId = #{userId}
+	</select>
+	
+	<!-- 获取医生doctorId-->
+	<select id="getDoctorId" resultType="java.lang.Long">
+		SELECT
+		   doctorId
+		FROM 
+		   user_db.u_doctor
+		WHERE 
+		   userId = #{vendor}
+	</select>
+	
+	<!-- 获取患者patientId-->
+	<select id="getPatientId" resultType="java.lang.Long">
+		SELECT
+		   patientId
+		FROM 
+		   user_db.u_patient
+		WHERE 
+		   userId = #{buyer}
+	</select>
+	
+	<!-- 获取患者信息 -->
+	<select id="getPatientInfo" resultType="com.westangel.common.bean.PatientSimpleInfo">
+		SELECT
+		t1.trueName,
+		t1.userId,
+		t1.mobile,
+		CASE WHEN t2.weixinFlag=1 AND MAX(t3.productId) IS NOT NULL THEN MAX(t3.productId) ELSE 0 END weixinFlag
+		FROM
+		user_db.u_patient t1
+		INNER JOIN
+		user_db.u_user t2 ON t1.userId=t2.userId
+		LEFT JOIN
+		user_db.u_thirdparty t3 ON t3.userId = t1.userId AND t3.state = 1
+		WHERE
+			t2.state = 1
+			AND (t1.mobile IS NOT NULL OR t3.openId IS NOT NULL)
+			<if test="users!=null">
+				AND t1.userId IN
+				<foreach collection="users" open="(" separator=","
+					close=")" index="index" item="item">
+					#{item}
+				</foreach>
+			</if>
+		GROUP BY userId
+	</select>
+	
+	<!-- 获取患者病重分组userId -->
+	<select id="queryDieaseGroupPatientUserId" resultType="java.lang.Long">
+		select t2.userId from user_db.r_doctor_patient t1
+		INNER JOIN user_db.u_patient t2 ON t1.patientId=t2.patientId
+		INNER JOIN user_db.u_doctor t3 ON t3.userId=#{doctorUserId} and t3.doctorId = t1.doctorId
+		WHERE t2.sourceDiseaseTypeId in
+		<foreach collection="groups" open="(" close=")" separator="," item="item">
+			#{item}
+		</foreach>
+	</select>
+	
+	<!-- 获取自定义分组userId -->
+	<select id="queryCustomGroupPatientUserId" resultType="java.lang.Long">
+		select t4.userId from user_db.u_doctor t1
+		INNER JOIN user_db.u_patient_group t2 ON t2.creator = t1.doctorId AND t2.groupNo in 
+		<foreach collection="groups" open="(" close=")" separator="," item="item">
+			#{item}
+		</foreach>
+		INNER JOIN user_db.u_patient_group_members t3 ON t3.groupNo = t2.groupNo 
+		INNER JOIN user_db.u_patient t4 ON t4.patientId = t3.patientId
+		WHERE t1.userId = #{doctorUserId}
+	</select>
+	
+	<!-- 获取MDT组userId -->
+	<select id="queryMdtGroupPatientUserId" resultType="java.lang.Long">
+		select t3.userId from user_db.u_doctor t1
+		LEFT JOIN user_db.r_doctor_patient t2 ON t1.doctorId = t2.doctorId
+		LEFT JOIN user_db.u_patient t3 ON t3.patientId = t2.patientId
+		LEFT JOIN hds_db.s_product_service_apply t4 ON t3.userId= t4.buyer AND productType=4
+		where
+		t1.userId = #{doctorUserId}
+		AND (t2.sourceFlag=7 OR t4.agentApplicant=t1.userId)
+		GROUP BY t3.userId
+		UNION
+		SELECT t2.buyer FROM com_trade_db.product_group t1
+			JOIN 
+			user_db.u_doctor t ON t.userId = t1.memberVendor
+			JOIN
+			hds_db.s_product_service_apply t2 ON t2.productId=t1.productId AND t2.orderId=t1.orderId
+			JOIN
+			user_db.u_patient t3 ON t3.userId = t2.buyer
+			JOIN
+			user_db.r_doctor_patient t4 ON t4.doctorId=t.doctorId AND t4.patientId=t3.patientId
+			WHERE
+			t1.memberVendor = #{doctorUserId}
+	</select>
+	
+	<!-- 获取患者的UserId -->
+	<select id="querUserIdByPatientUuid" resultType="java.lang.Long">
+		SELECT userId FROM user_db.u_patient t1 WHERE t1.uuid=#{patientUuid}
+	</select>
+	<!-- 获取医生的UserId -->
+	<select id="queryUserIdByHospitalId" resultType="java.lang.Long">
+		SELECT userId FROM user_db.u_hospital t1 WHERE t1.hospitalId=#{hospitalId}
+	</select>
+	
+	<!-- 获取用户最新版本号  -->
+	<select id="compareAppVersion" resultType="java.lang.Integer">
+		SELECT STRCMP(MAX(appVersion),#{appVersion}) from user_db.u_user_ping where userId = #{userId}
+	</select>
+</mapper>

@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.HospitalPatientDao">
+
+	<select id="findPatientNo" resultType="java.lang.String">
+		SELECT
+			(CASE WHEN tab.patientNo1 IS NOT NULL THEN tab.patientNo1
+					WHEN tab.patientNo2 IS NOT NULL THEN tab.patientNo2
+					ELSE tab.patientNo3 END) patientNo
+		FROM (SELECT (SELECT t1.patientNo FROM ehr_db.ei_inhospital_note t1 WHERE t1.patientNo IS NOT NULL AND t1.patientId=#{patientId} AND t1.hospitalId=#{hospitalId} LIMIT 1) patientNo1,
+		(SELECT t2.patientNo FROM ehr_db.eci_surgery_note t2 WHERE t2.patientNo IS NOT NULL AND t2.patientId=#{patientId} AND t2.hospitalId=#{hospitalId} LIMIT 1) patientNo2,
+		(SELECT t3.patientNo FROM ehr_db.e_diagnosis_info t3
+			INNER JOIN ehr_db.e_medical_record t4 ON t3.emrId=t4.emrId
+		WHERE t3.patientNo IS NOT NULL AND t3.patientId=#{patientId} AND t4.hospitalId=#{hospitalId} LIMIT 1) patientNo3) tab
+	</select>
+
+	<sql id="base_column_list">
+		t1.id, t1.hospitalId, t1.patientId, t1.patientNo, t1.sourceFlag, t1.syncFlag, t1.lastestFollowupResultSyncTime, t1.createTime
+	</sql>
+	
+	<select id="findFirstHasPatientNo" parameterType="java.lang.Long" resultType="com.westangel.common.bean.user.HospitalPatientBriefInfo">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM r_hospital_patient t1
+		WHERE t1.patientId=#{patientId} AND t1.patientNo IS NOT NULL LIMIT 1
+	</select>
+	
+	<select id="findNoPatientNoes" parameterType="java.lang.Long" resultType="com.westangel.common.bean.user.HospitalPatientBriefInfo">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM r_hospital_patient t1
+		WHERE (t1.patientNo IS NULL OR TRIM(t1.patientNo)='') AND t1.patientId=#{patientId}
+	</select>
+
+	<select id="screening" resultType="com.westangel.common.bean.user.HospitalPatientBriefInfo">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM r_hospital_patient t1
+		WHERE t1.patientId=#{cloudPatientId} AND
+			t1.hospitalId IN(SELECT t2.hospitalId FROM user_db.r_hospital_patient t2 WHERE t2.patientId=#{tobPatientId})
+	</select>
+
+	<select id="findANotNullPatientNo" resultType="com.westangel.common.bean.user.HospitalPatientBriefInfo">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM r_hospital_patient t1
+		WHERE t1.patientNo IS NOT NULL AND t1.patientId = #{patientId}
+		<if test="hospitalId!=null">
+			AND t1.hospitalId = #{hospitalId}
+		</if> 
+		LIMIT 0, 1
+	</select>
+	
+	<select id="find" resultType="com.westangel.common.bean.user.HospitalPatientBriefInfo">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM r_hospital_patient t1
+		WHERE 1=1 
+		<if test="hospitalId != null">
+			AND t1.hospitalId=#{hospitalId}
+		</if>
+		<if test="patientId != null">
+			AND t1.patientId=#{patientId}
+		</if>
+	</select>
+	
+	<select id="findByPatientId" resultType="com.westangel.common.bean.user.HospitalPatientBriefInfo" parameterType="java.lang.Long">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM r_hospital_patient t1
+		WHERE t1.patientId=#{patientId}
+	</select>
+
+	<select id="hasRelationOfHospitalPatient" parameterType="com.westangel.common.bean.user.HospitalPatientBriefInfo" resultType="java.lang.Integer">
+		SELECT
+			count(1) 
+		FROM
+			r_hospital_patient 
+		WHERE
+		(
+			patientId=#{patientId} 
+			AND hospitalId=#{hospitalId}
+			AND patientNo=#{patientNo}
+		)	
+	</select>
+	
+	<insert id="insertRelationOfHospitalPatient" parameterType="com.westangel.common.bean.user.HospitalPatientBriefInfo">
+		<selectKey resultType="long" keyProperty="id" order="AFTER">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO r_hospital_patient
+		(
+			hospitalId,
+			patientId,
+			patientNo,
+			syncFlag,
+			sourceFlag,
+			lastestFollowupResultSyncTime,
+			createTime
+		)
+		VALUES
+		(
+			#{hospitalId},
+			#{patientId},
+			#{patientNo},
+			#{syncFlag},
+			#{sourceFlag},
+			#{lastestFollowupResultSyncTime},
+			NOW()
+		)
+	</insert>
+	
+	<update id="updateToBHospitalPatientToCloudRelation">
+		UPDATE user_db.r_hospital_patient
+		<set>
+			patientId=#{cloudPatientId}
+		</set> 
+		WHERE patientId=#{tobPatientId}
+		<if test="hospitalPatientBriefInfos != null">
+			AND hospitalId NOT IN
+			<foreach collection="hospitalPatientBriefInfos" item="hospitalPatient" index="index" open="(" separator="," close=")">
+				#{hospitalPatient.hospitalId}
+			</foreach>
+		</if>
+	</update>
+	
+	<update id="mergerInfo">
+		UPDATE user_db.r_hospital_patient tob
+		JOIN user_db.r_hospital_patient toc ON tob.hospitalId=toc.hospitalId
+		SET tob.hospitalCertificateState=IF(toc.hospitalCertificateState>tob.hospitalCertificateState,toc.hospitalCertificateState,tob.hospitalCertificateState),
+		tob.lastestFollowupResultSyncTime=IFNULL(tob.lastestFollowupResultSyncTime,toc.lastestFollowupResultSyncTime)
+		WHERE tob.patientId =#{tobPatientId}  AND toc.patientId=#{tocPatientId}
+	</update>
+	
+	<update id="update">
+		UPDATE user_db.r_hospital_patient
+		<set>
+			<if test="patientNo!=null">
+				patientNo=#{patientNo}
+			</if>
+			<if test="sourceFlag!=null">
+				sourceFlag=#{sourceFlag}
+			</if>
+		</set>
+		WHERE id=#{id}
+	</update>
+	
+	<delete id="deleteByPatientId">
+		DELETE FROM user_db.r_hospital_patient WHERE patientId=#{patientId}
+	</delete>
+	
+	<delete id="delete">
+		DELETE FROM user_db.r_hospital_patient WHERE id=#{id}
+	</delete>
+	
+	<!-- 患者医院认证 -->
+	<!-- 查询医患关系表 -->
+	<select id="checkPatientNo"  resultType="java.lang.Integer">
+		SELECT
+			id 
+		FROM
+			r_hospital_patient 
+		WHERE
+		(
+			patientId=#{patientId} 
+			AND hospitalId=#{hospitalId}
+			AND patientNo=#{patientNo}
+		)	
+	</select>
+	
+	<!-- 查询老病案号 表 -->
+	<select id="checkPatientNoInRelation" resultType="com.esuizhen.cloudservice.user.model.PatientHospitalCertificateInfo">
+		SELECT t1.patientId,t1.id,t2.id rid,t3.trueName
+		<if test="mobile!=null"><!-- 手机号认证 -->
+			,(SELECT COUNT(0) FROM user_db.u_patient_family t4 WHERE t4.patientId=t1.patientId AND t4.familyPhone=#{mobile} AND t4.sourceFlag in(3,4)) mobileFlag
+		</if>
+		,(SELECT IF(f1.accountType>0,1,0) FROM user_db.u_patient f JOIN user_db.u_user f1 ON f.userId=f1.userId WHERE f.patientId=t1.patientId) weixinFlag
+		, (SELECT tobFlag FROM user_db.u_patient f JOIN user_db.u_user f1 ON f.userId=f1.userId WHERE f.patientId=#{patientId}) tobFlag
+		FROM user_db.r_hospital_patient t1
+		LEFT JOIN (SELECT * FROM user_db.r_uuid_patientno WHERE hospitalId=#{hospitalId} AND patientId IS NOT NULL AND patientNo=#{patientNo})  t2 ON t1.hospitalId = t2.hospitalId AND t1.patientId = t2.patientId
+		LEFT JOIN user_db.u_patient t3 ON t3.patientId = t1.patientId AND t3.trueName=#{trueName}
+		WHERE t1.hospitalId=#{hospitalId} AND (t1.patientNo=#{patientNo} OR t2.patientNo=#{patientNo}) LIMIT 1
+	</select>
+	
+	<!-- 查询匹配库病案号 -->
+	<select id="checkPatientNoInMatchRelation" resultType="com.esuizhen.cloudservice.user.model.PatientHospitalCertificateInfo">
+		SELECT 
+			t1.patientUuid,t3.trueName
+			<if test="mobile!=null"><!-- 手机号认证 -->
+			,(SELECT COUNT(0) FROM cloud_sync_match_db.u_patient_family t4 WHERE t4.patientUuid=t1.patientUuid AND t4.sourceFlag in(3,4)) mobileFlag
+			</if>
+		FROM cloud_sync_match_db.r_hospital_patient t1
+		LEFT JOIN cloud_sync_match_db.r_uuid_patientno t2 ON t1.hospitalId = t2.hospitalId AND t1.patientUuid = t2.uuid
+		LEFT JOIN cloud_sync_match_db.u_patient t3 ON t3.uuid=t1.patientUuid AND t3.trueName=#{trueName}
+		WHERE t1.hospitalId=#{hospitalId} AND (t1.patientNo=#{patientNo} OR t2.patientNo=#{patientNo}) LIMIT 1;
+	</select>
+	
+	<update id="updateHospitalCertificateState">
+		UPDATE user_db.r_hospital_patient
+		<set>
+			hospitalCertificateState=#{hospitalCertificateState},
+			certificateTime=now()
+		</set>
+		WHERE id=#{id}
+	</update>
+	
+	<update id="updateRelationHospitalCertificateState">
+		UPDATE user_db.r_hospital_patient t1,user_db.r_uuid_patientno t2
+		<set>
+			t1.hospitalCertificateState=#{hospitalCertificateState},
+			t2.certificateFlag=#{hospitalCertificateState},
+			t1.certificateTime=now()
+		</set> 
+		WHERE t2.id=#{id} AND t1.hospitalId=t2.hospitalId AND t1.patientId=t2.patientId
+	</update>
+	
+	
+	<!--  查找此患者关注的一个医院. 优先查找有patientNo的 -->
+	<select id="findHospitalOfPatient" resultType="java.lang.Integer">
+		SELECT
+			 t1.hospitalId
+		FROM r_hospital_patient t1
+	    WHERE t1.patientId=#{patientId}
+		ORDER BY patientNo DESC, createTime DESC
+		LIMIT 0,1
+	</select>
+	
+	<!-- 查找此患者正在进行院级服务的医院 -->
+	<select id="findHospitalInServiceOfPatient" resultType="java.lang.Integer">
+		SELECT
+			 t2.hospitalId
+		FROM hds_db.s_product_service_apply t1,
+		     u_hospital t2,
+		     u_patient t3
+		      
+	    WHERE 
+	        (t1.state = 2 OR t1.state=4)
+	        AND t1.vendor=t2.userId
+	        AND t3.userId=t1.buyer
+	        AND t3.patientId=#{patientId}
+		ORDER BY  t1.createTime DESC
+		LIMIT 0,1
+	</select>
+	
+	
+ </mapper>

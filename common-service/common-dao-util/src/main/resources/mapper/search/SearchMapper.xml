@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.westangel.common.dao.search.SearchDao">
+	<!-- 获取插入表 -->
+	<select id="queryVarFollowupPatientTableName" resultType="java.lang.String">
+		SELECT tableName FROM ods_db.conf_search_patient WHERE state =1 ORDER BY clearTime DESC LIMIT 1
+	</select>
+	<!-- 插入查询 -->
+	<insert id="insert" parameterType="com.westangel.common.bean.search.SearchInfo">
+		<selectKey resultType="int" keyProperty="searchId" order="AFTER">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		insert into ods_db.var_search(totalNum,interfaceName,req,operator,searchTableName,createTime) VALUES (#{totalNum},#{interfaceName},#{req},#{operator},#{searchTableName},NOW())
+	</insert>
+	<!-- 修改人数 -->
+	<update id="update" parameterType="com.westangel.common.bean.search.SearchInfo">
+		update ods_db.var_search
+		<set>
+			totalNum = #{totalNum},
+			sqlContent=#{sqlContent},
+			updateTime = now()
+		</set>
+		where searchId = #{searchId}
+	</update>
+	<!-- 查询中间表名称根据查询编号 -->
+	<select id="queryTableNameBySearchId" resultType="java.lang.String">
+		SELECT searchTableName FROM ods_db.var_search where searchId =#{searchId}
+	</select>
+	<!-- 根据查询编号获取查询条件 -->
+	<select id="querySearchById" resultType="com.westangel.common.bean.search.SearchInfo">
+		SELECT * FROM ods_db.var_search where searchId =#{searchId}
+	</select>
+	
+	<!-- 创建searchInfo -->
+	<select id="createSearchInfo" parameterType="com.westangel.common.bean.search.SearchInfo" resultType="java.lang.Integer">
+		 SELECT ods_db.create_search_info(#{interfaceName},#{req},#{operator}) searchId;
+	</select>
+	
+	<!-- 初始化宽表指定列为NULL -->
+	<update id="initNullSearchWidePatientColumn">
+		update ${searchTableName} 
+		<set>
+			${searchColumn} = null
+		</set>
+		where ${searchColumn} is not null
+	</update>
+</mapper>
+

@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.esuizhen.cloudservice.statistics.dao.FollowupProgressDao">
+	<select id="findFollowupProgressList" resultType="com.esuizhen.cloudservice.statistics.bean.TFollowupProgressInfo">
+		SELECT
+			f1.*,
+			CONVERT(f1.finishedQuantity/f1.totalQuantity, DECIMAL(5, 4)) finishedRate,
+			(f1.totalQuantity - f1.finishedQuantity) noFinishedQuantity,
+			CONVERT((f1.totalQuantity - f1.finishedQuantity)/f1.totalQuantity, DECIMAL(5, 4)) noFinishedRate,
+			CONVERT(f1.effectivedQuantity/f1.totalQuantity, DECIMAL(5, 4)) effectivedRate
+		FROM(
+			SELECT
+				t1.followupTaskId,
+				t1.followupTaskName followupName,
+				t1.planFinishTime planFinishTime,
+				t1.totalPatientNum totalQuantity,
+				(
+					SELECT
+						COUNT(DISTINCT r1.patientId)
+					FROM followup_db.followup_result r1
+					WHERE t1.followupTaskId = r1.followupTaskId
+					and r1.state=2 and r1.mergeFlag!=2
+				) finishedQuantity,
+				(
+					SELECT
+						COUNT(0)
+					FROM followup_db.followup_result r1
+						INNER JOIN followup_db.meta_followup_result_value r2 ON r1.followupResultValue = r2.followupResultValueId AND r2.type = 1
+					WHERE t1.followupTaskId = r1.followupTaskId
+					and r1.state=2 and r1.mergeFlag!=2
+				) effectivedQuantity,
+				(
+					SELECT
+						COUNT(0)
+					FROM followup_db.followup_result r1
+						INNER JOIN followup_db.meta_followup_result_value r2 ON r1.followupResultValue = r2.followupResultValueId AND r2.type = 2
+					WHERE t1.followupTaskId = r1.followupTaskId
+					and r1.state=2 and r1.mergeFlag!=2
+				) invalidQuantity,
+				(
+					SELECT
+						COUNT(0)
+					FROM followup_db.r_followup_task_patient r1
+					WHERE r1.state = 1
+						AND t1.followupTaskId = r1.followupTaskId and r1.mergeFlag!=2
+				) temporaryQuantity,
+				(
+					SELECT
+						COUNT(0)
+					FROM followup_db.r_followup_task_patient r1
+					WHERE r1.state = 0
+						AND t1.followupTaskId = r1.followupTaskId and r1.mergeFlag!=2
+				) notResultQuantity
+			FROM followup_db.followup_task t1
+			WHERE t1.state IN(0, 1)
+			ORDER BY t1.createTime ASC
+		) f1
+		<if test="limit != null">
+			LIMIT ${limit}
+		</if>
+	</select>
+
+	<!-- 随访人员进展统计 -->
+	<select id="findPersonalFollowupProgress" resultType="com.esuizhen.cloudservice.statistics.bean.TFollowupProgressInfo">
+		SELECT
+			f1.*,
+			CONVERT(f1.finishedQuantity/f1.totalQuantity, DECIMAL(5, 4)) finishedRate,
+			(f1.totalQuantity - f1.finishedQuantity) noFinishedQuantity,
+			CONVERT((f1.totalQuantity - f1.finishedQuantity)/f1.totalQuantity, DECIMAL(5, 4)) noFinishedRate,
+			CONVERT(f1.effectivedQuantity/f1.finishedQuantity, DECIMAL(5, 4)) effectivedRate
+		FROM(
+			SELECT
+				t1.followupTaskName followupName,
+				t1.planFinishTime planFinishTime,
+				t2.totalPatientNum totalQuantity,
+				t3.trueName,
+				(
+					SELECT
+						COUNT(DISTINCT r1.patientId)
+					FROM followup_db.followup_result r1
+					WHERE t1.followupTaskId = r1.followupTaskId
+						AND t2.followupAssignId = r1.followupAssignId
+						and r1.state=2 and r1.mergeFlag!=2
+				) finishedQuantity,
+				(
+					SELECT
+						COUNT(0)
+					FROM followup_db.followup_result r1
+						INNER JOIN followup_db.meta_followup_result_value r2 ON r1.followupResultValue = r2.followupResultValueId AND r2.type = 1
+					WHERE t1.followupTaskId = r1.followupTaskId
+						AND t2.followupAssignId = r1.followupAssignId
+						AND r1.state = 2 and r1.mergeFlag!=2
+				) effectivedQuantity,
+				(
+					SELECT
+						COUNT(DISTINCT r1.patientId)
+					FROM followup_db.followup_result r1
+						INNER JOIN followup_db.meta_followup_result_value r2 ON r1.followupResultValue = r2.followupResultValueId AND r2.type = 2
+					WHERE t1.followupTaskId = r1.followupTaskId
+						AND t2.followupAssignId = r1.followupAssignId
+						AND r1.state = 2 and r1.mergeFlag!=2
+				) invalidQuantity,
+				(
+					SELECT
+						COUNT(1)
+					FROM followup_db.r_followup_task_patient r1
+					WHERE r1.followupTaskId = t1.followupTaskId
+						AND r1.followupAssignId = t2.followupAssignId
+						AND r1.state = 1 and r1.mergeFlag!=2
+				)temporaryQuantity,
+				(
+					SELECT
+						COUNT(1)
+					FROM followup_db.r_followup_task_patient r1
+					WHERE r1.followupTaskId = t1.followupTaskId
+						AND r1.followupAssignId = t2.followupAssignId
+						AND r1.state = 0 and r1.mergeFlag!=2
+				)notResultQuantity
+			FROM followup_db.followup_task t1
+				INNER JOIN followup_db.r_followup_task_assign t2 ON t1.followupTaskId = t2.followupTaskId
+				INNER JOIN user_db.u_doctor t3 ON t2.operator = t3.doctorId
+			WHERE 1 = 1
+			<if test="followupTaskId != null">
+				AND t1.followupTaskId = #{followupTaskId}
+			</if>
+			<if test="followupAssignId != null">
+				AND t2.followupAssignId = #{followupAssignId}
+			</if>
+			<if test="userId != null">
+				AND t3.userId = #{userId}
+			</if>
+			GROUP BY t3.doctorId
+		) f1
+	</select>
+	
+	<!-- 所有患者随访进展 -->
+	<select id="findAllFollowupProgress" parameterType="java.util.HashMap" resultType="com.esuizhen.cloudservice.statistics.bean.TFollowupProgressInfo">
+		SELECT
+			f1.*,f1.followupTaskTotal followupingCount,
+			(f1.totalQuantity - f1.finishedQuantity) noFinishedQuantity,
+			CONVERT(f1.finishedQuantity/f1.totalQuantity, DECIMAL(5, 4)) finishedRate,
+			CONVERT((f1.totalQuantity - f1.finishedQuantity)/f1.totalQuantity, DECIMAL(5, 4)) noFinishedRate
+			<!-- (f1.followupFlagTotal - f1.followupTaskTotal) notassignedQuantity -->
+		FROM(
+			SELECT
+				COUNT(1) totalQuantity,
+				(
+					SELECT
+						COUNT(DISTINCT r1.patientId)
+					FROM user_db.u_patient r1
+					<choose>
+						<when test="cancerFilterFlag!=null and cancerFilterFlag==1">
+							WHERE r1.liveStatus=1 AND r1.sourceDiseaseTypeId IS NOT NULL AND r1.followupFlag=1 AND r1.sourceTumorFlag=1 AND r1.outPatientFlag=2 AND r1.patientType=1 AND r1.mergeFlag!=2
+						</when>
+						<otherwise>
+							INNER JOIN ehr_db.meta_c_disease_type_icd v2 ON r1.icdDiseaseTypeId=v2.icdDiseaseTypeId
+							WHERE r1.liveStatus=1 AND r1.followupFlag=1 AND r1.outPatientFlag=2 AND r1.patientType=1 AND r1.mergeFlag!=2
+						</otherwise>
+					</choose>
+				) hasFollowupCount,
+				(
+					SELECT COUNT(DISTINCT v2.patientId) 
+					FROM followup_db.followup_task v1
+					INNER JOIN followup_db.r_followup_task_patient v2 ON v1.followupTaskId=v2.followupTaskId
+					<if test="cancerFilterFlag!=null and cancerFilterFlag != 1">
+						INNER JOIN user_db.u_patient v3 ON v2.patientId = v3.patientId AND v3.outPatientFlag=2 AND v3.patientType=1 AND v3.mergeFlag!=2
+						INNER JOIN ehr_db.meta_c_disease_type_icd v4 ON v3.icdDiseaseTypeId=v4.icdDiseaseTypeId
+					</if>
+					WHERE v1.finishTime <![CDATA[>=]]> DATE_ADD(NOW(),INTERVAL -#{followupCycle} DAY)
+					AND v2.patientId NOT IN(
+						SELECT v5.patientId FROM followup_db.var_patient_followup v5, user_db.u_patient v6 WHERE v5.patientId=v6.patientId AND v5.latestFollowupTime <![CDATA[<]]> DATE_ADD(NOW(), INTERVAL -#{followupCycle} DAY) AND v6.followupFlag=1 AND v6.liveStatus=1
+					) and v2.mergeFlag!=2
+				) hasCycleFinishTaskCount,
+				(
+					SELECT
+						COUNT(DISTINCT r1.patientId)
+					FROM followup_db.followup_result r1
+					where r1.state=2 and r1.mergeFlag!=2
+				) finishedQuantity,
+				(
+					SELECT COUNT(DISTINCT r3.patientId) 
+					FROM followup_db.followup_task r1,followup_db.r_followup_task_patient r2,user_db.u_patient r3 
+					WHERE r1.followupTaskId=r2.followupTaskId AND r2.patientId=r3.patientId AND r3.followupFlag = 2 AND r3.liveStatus=1 and r2.mergeFlag!=2 AND r3.outPatientFlag=2 AND r3.patientType=1 AND r3.mergeFlag!=2
+				)lossQuantity,
+				(
+					SELECT COUNT(DISTINCT r3.patientId) 
+					FROM followup_db.followup_task r1,followup_db.r_followup_task_patient r2,user_db.u_patient r3 
+					WHERE r1.followupTaskId=r2.followupTaskId AND r2.patientId=r3.patientId AND r3.followupFlag=3 and r2.mergeFlag!=2 AND r3.outPatientFlag=2 AND r3.patientType=1 AND r3.mergeFlag!=2
+				)unnecessaryFollowupQuantity,
+				(
+					SELECT COUNT(DISTINCT r3.patientId) 
+					FROM followup_db.followup_task r1,followup_db.r_followup_task_patient r2,user_db.u_patient r3 
+					WHERE r1.followupTaskId=r2.followupTaskId AND r2.patientId=r3.patientId AND r3.liveStatus=0 and r2.mergeFlag!=2 AND r3.outPatientFlag=2 AND r3.patientType=1 AND r3.mergeFlag!=2
+				)followupAfterDeathCount,
+				(
+					SELECT COUNT(DISTINCT v1.patientId) FROM user_db.u_patient v1
+					<choose>
+						<when test="cancerFilterFlag!=null and cancerFilterFlag==1">
+							WHERE v1.liveStatus=1 AND v1.sourceDiseaseTypeId IS NOT NULL AND v1.followupFlag=1 AND v1.sourceTumorFlag=1 AND v1.outPatientFlag=2 AND v1.patientType=1 AND v1.mergeFlag!=2
+							AND v1.patientId NOT IN(SELECT v4.patientId FROM followup_db.followup_task v3,followup_db.r_followup_task_patient v4 WHERE v3.followupTaskId=v4.followupTaskId AND v3.state IN(0,1) and v4.mergeFlag!=2)
+							AND v1.patientId NOT IN(SELECT DISTINCT v3.patientId FROM followup_db.var_patient_followup v3,followup_db.r_followup_task_patient v4 WHERE v3.patientId=v4.patientId AND v3.latestFollowupTime <![CDATA[>=]]> DATE_ADD(NOW(), INTERVAL -#{followupCycle} DAY) and v4.mergeFlag!=2)
+						</when>
+						<otherwise>
+							INNER JOIN ehr_db.meta_c_disease_type_icd v2 ON v1.icdDiseaseTypeId=v2.icdDiseaseTypeId
+							WHERE v1.liveStatus=1 AND v1.followupFlag=1 AND v1.outPatientFlag=2 AND v1.patientType=1 AND v1.mergeFlag!=2
+							AND v1.patientId NOT IN(SELECT v4.patientId FROM followup_db.followup_task v3,followup_db.r_followup_task_patient v4 WHERE v3.followupTaskId=v4.followupTaskId AND v3.state IN(0,1) and v4.mergeFlag!=2)
+							AND v1.patientId NOT IN(SELECT DISTINCT v3.patientId FROM followup_db.var_patient_followup v3,followup_db.r_followup_task_patient v4 WHERE v3.patientId=v4.patientId AND v3.latestFollowupTime <![CDATA[>=]]> DATE_ADD(NOW(), INTERVAL -#{followupCycle} DAY) and v4.mergeFlag!=2)
+						</otherwise>
+					</choose>
+				) notassignedQuantity,
+				(
+					SELECT
+						COUNT(DISTINCT ftp.patientId)
+					FROM followup_db.followup_task r1 INNER JOIN followup_db.r_followup_task_patient ftp
+					WHERE ftp.followupTaskId = r1.followupTaskId AND r1.state IN (0,1) and ftp.mergeFlag!=2
+				) followupTaskTotal
+			FROM(
+				SELECT 
+					c1.patientId
+				FROM(
+					SELECT
+						r1.patientId
+					FROM user_db.u_patient r1
+					WHERE r1.followupFlag = 1 AND r1.outPatientFlag = 2 AND r1.patientType=1 AND r1.mergeFlag!=2
+					UNION ALL
+					SELECT
+						r1.patientId
+					FROM followup_db.followup_result r1
+					where r1.state=2 and r1.mergeFlag!=2
+					GROUP BY r1.patientId
+					UNION ALL
+					SELECT
+						r1.patientId
+					FROM followup_db.r_followup_task_patient r1
+					where r1.mergeFlag!=2
+					GROUP BY r1.patientId
+				) c1
+				GROUP BY c1.patientId
+			) t1
+		) f1
+	</select>
+	
+	<!-- 随访任务总进展 -->
+	<select id="findFollowupProgress" resultType="com.esuizhen.cloudservice.statistics.bean.TFollowupProgressInfo">
+		SELECT
+			f1.*,
+			CONVERT (f1.finishedQuantity / f1.totalQuantity, DECIMAL (5, 4)) finishedRate,
+			CONVERT ((f1.totalQuantity - f1.finishedQuantity) / f1.totalQuantity, DECIMAL (5, 4)) noFinishedRate,
+			(f1.finishedQuantity - f1.effectivedQuantity) invalidQuantity,
+			(f1.totalQuantity - f1.finishedQuantity) noFinishedQuantity
+		FROM(
+			SELECT
+				t1.followupTaskName followupName,
+				t1.totalPatientNum totalQuantity,
+				t1.planFinishTime planFinishTime,
+				(
+					SELECT
+						COUNT(DISTINCT r1.patientId)
+					FROM
+						followup_db.followup_result r1
+					WHERE t1.followupTaskId = r1.followupTaskId
+					and r1.state=2 and r1.mergeFlag!=2
+				) finishedQuantity,
+				(
+					SELECT
+						COUNT(DISTINCT r1.patientId)
+					FROM followup_db.followup_result r1
+						INNER JOIN followup_db.meta_followup_result_value r2 ON r1.followupResultValue = r2.followupResultValueId
+					WHERE r2.type = 1 AND r1.followupTaskId = t1.followupTaskId
+					and r1.state=2 and r1.mergeFlag!=2
+				) effectivedQuantity,
+				(
+					SELECT
+						COUNT(1)
+					FROM followup_db.r_followup_task_patient r1
+					WHERE r1.state = 1 AND t1.followupTaskId = r1.followupTaskId and r1.mergeFlag!=2
+				) temporaryQuantity,
+				(
+					SELECT
+						COUNT(1)
+					FROM followup_db.r_followup_task_patient r1
+					WHERE r1.state = 0 AND t1.followupTaskId = r1.followupTaskId and r1.mergeFlag!=2
+				) notResultQuantity
+			FROM
+				followup_db.followup_task t1
+			WHERE
+				t1.followupTaskId = #{followupTaskId}
+		) f1
+	</select>
+	
+	<!-- 未完成和未结束的随访任务 -->
+	<select id="findNotFinished" resultType="com.esuizhen.cloudservice.statistics.bean.TFollowupProgressInfo">
+		SELECT
+			f1.*,
+			(f1.finishedQuantity - f1.effectivedQuantity) invalidQuantity,
+			(f1.totalQuantity - f1.finishedQuantity) noFinishedQuantity,
+			(f1.totalQuantity - f1.finishedQuantity - f1.temporaryQuantity) notResultQuantity
+		FROM(
+			SELECT
+				t1.followupTaskName followupName,
+				t1.totalPatientNum totalQuantity,
+				t1.planFinishTime planFinishTime,
+				(
+					SELECT COUNT(0) FROM followup_db.r_followup_task_patient r1 WHERE t1.followupTaskId = r1.followupTaskId AND r1.state = 2 and r1.mergeFlag!=2
+				) finishedQuantity,
+				(
+					SELECT
+						COUNT(0)
+					FROM followup_db.r_followup_task_patient r1
+						INNER JOIN followup_db.followup_result r2 ON r1.followupTaskId = r2.followupTaskId
+						INNER JOIN followup_db.meta_followup_result_value r3 ON r2.followupResultValue = r3.followupResultValueId AND r3.type = 1
+					WHERE t1.followupTaskId = r1.followupTaskId AND r1.state = 2 and r1.mergeFlag!=2
+				) effectivedQuantity,
+				(
+					SELECT
+						COUNT(0)
+					FROM followup_db.r_followup_task_patient r1
+					WHERE t1.followupTaskId = r1.followupTaskId AND r1.state = 1 and r1.mergeFlag!=2
+				) temporaryQuantity
+			FROM followup_db.followup_task t1
+			WHERE t1.state NOT IN(2, 3)
+			ORDER BY t1.createTime ASC
+		) f1
+	</select>
+	
+	<!-- 患者总数统计 -->
+	<select id="countPatientNum" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT COUNT(0) FROM user_db.u_patient WHERE outPatientFlag=2 AND patientType=1 AND mergeFlag!=2
+	</select>
+</mapper>

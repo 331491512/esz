@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.treatment.TreatmentChemotherapyMedicationDetailInfoDao" >
+  <resultMap id="BaseResultMap" type="com.esuizhen.cloudservice.ehr.model.treatment.TreatmentChemotherapyMedicationDetailInfo" >
+    <id column="chemotherapyMedicationDetailId" property="chemotherapyMedicationDetailId" jdbcType="VARCHAR" />
+    <result column="treatmentId" property="treatmentId" jdbcType="VARCHAR" />
+    <result column="chemotherapyMedicationRecordId" property="chemotherapyMedicationRecordId" jdbcType="VARCHAR" />
+    <result column="inhospitalId" property="inhospitalId" jdbcType="VARCHAR" />
+    <result column="clinicMedicalId" property="clinicMedicalId" jdbcType="VARCHAR" />
+    <result column="patientId" property="patientId" jdbcType="BIGINT" />
+    <result column="patientNo" property="patientNo" jdbcType="VARCHAR" />
+    <result column="hospitalId" property="hospitalId" jdbcType="INTEGER" />
+    <result column="medicationType" property="medicationType" jdbcType="INTEGER" />
+    <result column="medicationId" property="medicationId" jdbcType="INTEGER" />
+    <result column="medicationName" property="medicationName" jdbcType="VARCHAR" />
+    <result column="commodityName" property="commodityName" jdbcType="VARCHAR" />
+    <result column="computingMethod" property="computingMethod" jdbcType="VARCHAR" />
+    <result column="theoreticalDose" property="theoreticalDose" jdbcType="VARCHAR" />
+    <result column="actualDose" property="actualDose" jdbcType="REAL" />
+    <result column="measurementUnit" property="measurementUnit" jdbcType="VARCHAR" />
+    <result column="drugUsage" property="drugUsage" jdbcType="VARCHAR" />
+    <result column="treatmentPeriod" property="treatmentPeriod" jdbcType="VARCHAR" />
+    <result column="totalCourse" property="totalCourse" jdbcType="VARCHAR" />
+    <result column="delay" property="delay" jdbcType="INTEGER" />
+    <result column="metaDataType" property="metaDataType" jdbcType="INTEGER" />
+    <result column="decrement" property="decrement" jdbcType="INTEGER" />
+    <result column="route" property="route" jdbcType="INTEGER" />
+    <result column="frequency" property="frequency" jdbcType="INTEGER" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="beginTime" property="beginTime" jdbcType="TIMESTAMP" />
+    <result column="endTime" property="endTime" jdbcType="TIMESTAMP" />
+    <result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="routeName" property="routeName" jdbcType="VARCHAR" />
+    <result column="frequencyName" property="frequencyName" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    md.chemotherapyMedicationDetailId, md.treatmentId, md.chemotherapyMedicationRecordId, md.inhospitalId, md.clinicMedicalId,
+    md.patientId, md.patientNo, md.hospitalId, md.medicationType, md.medicationId, md.medicationName, md.commodityName, 
+    md.computingMethod, md.theoreticalDose, md.actualDose, md.measurementUnit, md.drugUsage, md.treatmentPeriod, 
+    md.totalCourse, md.delay, md.decrement, md.route, md.frequency, md.remark, md.beginTime, md.endTime, md.createTime, 
+    md.updateTime,
+    (select routeName from meta_info_route v1 where v1.routeId=route) routeName,
+    (select frequencyName from meta_info_frequency v1 where v1.frequencyId=frequency) frequencyName
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from eci_treatment_chemotherapy_medication_detail
+    where chemotherapyMedicationDetailId = #{chemotherapyMedicationDetailId,jdbcType=VARCHAR}
+  </select>
+  <select id="queryList" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />, mu.name as measurementUnitName,msim.metaDataType as medicationMetaDataType
+    from eci_treatment_chemotherapy_medication_detail md left join meta_info_dosage_unit mu on mu.id = CONVERT(md.measurementUnit,SIGNED) 
+    left join meta_e_medication msim on md.medicationId = msim.medicationId
+    where chemotherapyMedicationRecordId = #{chemotherapyMedicationRecordId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from eci_treatment_chemotherapy_medication_detail
+    where chemotherapyMedicationDetailId = #{chemotherapyMedicationDetailId,jdbcType=VARCHAR}
+  </delete>
+  
+  <delete id="deleteTreatmentChemotherapyMedicationDetailInfo">
+    delete from eci_treatment_chemotherapy_medication_detail
+    where treatmentId = #{treatmentId}
+    <if test="clinicMedicalId != null">
+   		and clinicMedicalId=#{clinicMedicalId}
+   	</if>
+   	<if test="inhospitalId != null">
+   		and inhospitalId=#{inhospitalId}
+   	</if>
+    <if test="chemotherapyMedicationRecordId != null">
+    	AND chemotherapyMedicationRecordId = #{chemotherapyMedicationRecordId}
+    </if>
+  </delete>
+  
+  <insert id="insert" parameterType="com.esuizhen.cloudservice.ehr.model.treatment.TreatmentChemotherapyMedicationDetailInfo" >
+    insert into eci_treatment_chemotherapy_medication_detail (chemotherapyMedicationDetailId, treatmentId, 
+      chemotherapyMedicationRecordId, inhospitalId, clinicMedicalId,
+      patientId, patientNo, hospitalId, 
+      medicationType, medicationId, medicationName, 
+      commodityName, computingMethod, theoreticalDose, 
+      actualDose, measurementUnit, drugUsage, 
+      treatmentPeriod, totalCourse, delay, 
+      decrement, route, frequency, 
+      remark, beginTime, endTime, 
+      createTime, updateTime)
+    values (#{chemotherapyMedicationDetailId,jdbcType=VARCHAR}, #{treatmentId,jdbcType=VARCHAR}, 
+      #{chemotherapyMedicationRecordId,jdbcType=VARCHAR}, #{inhospitalId,jdbcType=VARCHAR}, #{clinicMedicalId,jdbcType=VARCHAR},
+      #{patientId,jdbcType=BIGINT}, #{patientNo,jdbcType=VARCHAR}, #{hospitalId,jdbcType=INTEGER}, 
+      #{medicationType,jdbcType=INTEGER}, #{medicationId,jdbcType=INTEGER}, #{medicationName,jdbcType=VARCHAR}, 
+      #{commodityName,jdbcType=VARCHAR}, #{computingMethod,jdbcType=VARCHAR}, #{theoreticalDose,jdbcType=VARCHAR}, 
+      #{actualDose,jdbcType=REAL}, #{measurementUnit,jdbcType=VARCHAR}, #{drugUsage,jdbcType=VARCHAR}, 
+      #{treatmentPeriod,jdbcType=VARCHAR}, #{totalCourse,jdbcType=VARCHAR}, #{delay,jdbcType=INTEGER}, 
+      #{decrement,jdbcType=INTEGER}, #{route,jdbcType=INTEGER}, #{frequency,jdbcType=INTEGER}, 
+      #{remark,jdbcType=VARCHAR}, #{beginTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, 
+      NOW(), NOW())
+  </insert>
+  <insert id="insertSelective" parameterType="com.esuizhen.cloudservice.ehr.model.treatment.TreatmentChemotherapyMedicationDetailInfo" >
+    insert into eci_treatment_chemotherapy_medication_detail
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="chemotherapyMedicationDetailId != null" >
+        chemotherapyMedicationDetailId,
+      </if>
+      <if test="treatmentId != null" >
+        treatmentId,
+      </if>
+      <if test="chemotherapyMedicationRecordId != null" >
+        chemotherapyMedicationRecordId,
+      </if>
+      <if test="inhospitalId != null" >
+        inhospitalId,
+      </if>
+      <if test="clinicMedicalId != null" >
+        clinicMedicalId,
+      </if>
+      <if test="patientId != null" >
+        patientId,
+      </if>
+      <if test="patientNo != null" >
+        patientNo,
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId,
+      </if>
+      <if test="medicationType != null" >
+        medicationType,
+      </if>
+      <if test="medicationId != null" >
+        medicationId,
+      </if>
+      <if test="medicationName != null" >
+        medicationName,
+      </if>
+      <if test="commodityName != null" >
+        commodityName,
+      </if>
+      <if test="computingMethod != null" >
+        computingMethod,
+      </if>
+      <if test="theoreticalDose != null" >
+        theoreticalDose,
+      </if>
+      <if test="actualDose != null" >
+        actualDose,
+      </if>
+      <if test="measurementUnit != null" >
+        measurementUnit,
+      </if>
+      <if test="drugUsage != null" >
+        drugUsage,
+      </if>
+      <if test="treatmentPeriod != null" >
+        treatmentPeriod,
+      </if>
+      <if test="totalCourse != null" >
+        totalCourse,
+      </if>
+      <if test="delay != null" >
+        delay,
+      </if>
+      <if test="decrement != null" >
+        decrement,
+      </if>
+      <if test="route != null" >
+        route,
+      </if>
+      <if test="frequency != null" >
+        frequency,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="beginTime != null" >
+        beginTime,
+      </if>
+      <if test="endTime != null" >
+        endTime,
+      </if>
+      createTime,
+      updateTime
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="chemotherapyMedicationDetailId != null" >
+        #{chemotherapyMedicationDetailId,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentId != null" >
+        #{treatmentId,jdbcType=VARCHAR},
+      </if>
+      <if test="chemotherapyMedicationRecordId != null" >
+        #{chemotherapyMedicationRecordId,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalId != null" >
+        #{inhospitalId,jdbcType=VARCHAR},
+      </if>
+      <if test="clinicMedicalId != null" >
+        #{clinicMedicalId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="medicationType != null" >
+        #{medicationType,jdbcType=INTEGER},
+      </if>
+      <if test="medicationId != null" >
+        #{medicationId,jdbcType=INTEGER},
+      </if>
+      <if test="medicationName != null" >
+        #{medicationName,jdbcType=VARCHAR},
+      </if>
+      <if test="commodityName != null" >
+        #{commodityName,jdbcType=VARCHAR},
+      </if>
+      <if test="computingMethod != null" >
+        #{computingMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="theoreticalDose != null" >
+        #{theoreticalDose,jdbcType=VARCHAR},
+      </if>
+      <if test="actualDose != null" >
+        #{actualDose,jdbcType=REAL},
+      </if>
+      <if test="measurementUnit != null" >
+        #{measurementUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="drugUsage != null" >
+        #{drugUsage,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentPeriod != null" >
+        #{treatmentPeriod,jdbcType=VARCHAR},
+      </if>
+      <if test="totalCourse != null" >
+        #{totalCourse,jdbcType=VARCHAR},
+      </if>
+      <if test="delay != null" >
+        #{delay,jdbcType=INTEGER},
+      </if>
+      <if test="decrement != null" >
+        #{decrement,jdbcType=INTEGER},
+      </if>
+      <if test="route != null" >
+        #{route,jdbcType=INTEGER},
+      </if>
+      <if test="frequency != null" >
+        #{frequency,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="beginTime != null" >
+        #{beginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null" >
+        #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      NOW(),
+      NOW()
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.cloudservice.ehr.model.treatment.TreatmentChemotherapyMedicationDetailInfo" >
+    update eci_treatment_chemotherapy_medication_detail
+    <set >
+      <if test="treatmentId != null" >
+        treatmentId = #{treatmentId,jdbcType=VARCHAR},
+      </if>
+      <if test="chemotherapyMedicationRecordId != null" >
+        chemotherapyMedicationRecordId = #{chemotherapyMedicationRecordId,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalId != null" >
+        inhospitalId = #{inhospitalId,jdbcType=VARCHAR},
+      </if>
+      <if test="clinicMedicalId != null" >
+        clinicMedicalId = #{clinicMedicalId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        patientId = #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        patientNo = #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="medicationType != null" >
+        medicationType = #{medicationType,jdbcType=INTEGER},
+      </if>
+      <if test="medicationId != null" >
+        medicationId = #{medicationId,jdbcType=INTEGER},
+      </if>
+      <if test="medicationName != null" >
+        medicationName = #{medicationName,jdbcType=VARCHAR},
+      </if>
+      <if test="commodityName != null" >
+        commodityName = #{commodityName,jdbcType=VARCHAR},
+      </if>
+      <if test="computingMethod != null" >
+        computingMethod = #{computingMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="theoreticalDose != null" >
+        theoreticalDose = #{theoreticalDose,jdbcType=VARCHAR},
+      </if>
+      <if test="actualDose != null" >
+        actualDose = #{actualDose,jdbcType=REAL},
+      </if>
+      <if test="measurementUnit != null" >
+        measurementUnit = #{measurementUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="drugUsage != null" >
+        drugUsage = #{drugUsage,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentPeriod != null" >
+        treatmentPeriod = #{treatmentPeriod,jdbcType=VARCHAR},
+      </if>
+      <if test="totalCourse != null" >
+        totalCourse = #{totalCourse,jdbcType=VARCHAR},
+      </if>
+      <if test="delay != null" >
+        delay = #{delay,jdbcType=INTEGER},
+      </if>
+      <if test="decrement != null" >
+        decrement = #{decrement,jdbcType=INTEGER},
+      </if>
+      <if test="route != null" >
+        route = #{route,jdbcType=INTEGER},
+      </if>
+      <if test="frequency != null" >
+        frequency = #{frequency,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="beginTime != null" >
+        beginTime = #{beginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null" >
+        endTime = #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      updateTime = NOW()
+    </set>
+    where chemotherapyMedicationDetailId = #{chemotherapyMedicationDetailId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.esuizhen.cloudservice.ehr.model.treatment.TreatmentChemotherapyMedicationDetailInfo" >
+    update eci_treatment_chemotherapy_medication_detail
+    set treatmentId = #{treatmentId,jdbcType=VARCHAR},
+      chemotherapyMedicationRecordId = #{chemotherapyMedicationRecordId,jdbcType=VARCHAR},
+      inhospitalId = #{inhospitalId,jdbcType=VARCHAR},
+      clinicMedicalId = #{clinicMedicalId,jdbcType=VARCHAR},
+      patientId = #{patientId,jdbcType=BIGINT},
+      patientNo = #{patientNo,jdbcType=VARCHAR},
+      hospitalId = #{hospitalId,jdbcType=INTEGER},
+      medicationType = #{medicationType,jdbcType=INTEGER},
+      medicationId = #{medicationId,jdbcType=INTEGER},
+      medicationName = #{medicationName,jdbcType=VARCHAR},
+      commodityName = #{commodityName,jdbcType=VARCHAR},
+      computingMethod = #{computingMethod,jdbcType=VARCHAR},
+      theoreticalDose = #{theoreticalDose,jdbcType=VARCHAR},
+      actualDose = #{actualDose,jdbcType=REAL},
+      measurementUnit = #{measurementUnit,jdbcType=VARCHAR},
+      drugUsage = #{drugUsage,jdbcType=VARCHAR},
+      treatmentPeriod = #{treatmentPeriod,jdbcType=VARCHAR},
+      totalCourse = #{totalCourse,jdbcType=VARCHAR},
+      delay = #{delay,jdbcType=INTEGER},
+      decrement = #{decrement,jdbcType=INTEGER},
+      route = #{route,jdbcType=INTEGER},
+      frequency = #{frequency,jdbcType=INTEGER},
+      remark = #{remark,jdbcType=VARCHAR},
+      beginTime = #{beginTime,jdbcType=TIMESTAMP},
+      endTime = #{endTime,jdbcType=TIMESTAMP},
+      updateTime = NOW()
+    where chemotherapyMedicationDetailId = #{chemotherapyMedicationDetailId,jdbcType=VARCHAR}
+  </update>
+</mapper>

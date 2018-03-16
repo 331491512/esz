@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.business.dao.business.HospitalDao">
+	
+	<!-- 服务期内的未读报告 -->
+	<select id="queryNoReadReportList" resultType="java.util.LinkedHashMap">
+		<![CDATA[
+		SELECT * from 
+		(
+		SELECT
+			detectionReportId reportId,detectionTypeName typeName,applyTime,2 reportType
+		FROM
+			lis_db.eci_detection_report
+		WHERE
+		patientId=#{patientId}
+		AND
+		hospitalId=#{hospitalId}
+		AND
+		readFlag=0
+		AND applyTime>=DATE_ADD(#{serverApplyDate},INTERVAL -15 DAY)
+		AND applyTime<=DATE_ADD(#{serverApplyDate},INTERVAL 15 DAY)
+		UNION
+			SELECT
+				examReportId reporId,examTypeName typeName,applyTime,1 reportType
+			FROM
+				lis_db.eci_exam_report
+		WHERE
+		patientId=#{patientId}
+		AND
+		hospitalId=#{hospitalId}
+		AND
+		readFlag=0
+		AND applyTime>=DATE_ADD(#{serverApplyDate},INTERVAL -15 DAY)
+		AND applyTime<=DATE_ADD(#{serverApplyDate},INTERVAL 15 DAY)
+		)t
+		]]>
+	</select>
+	
+	
+	<!-- 查询患者随访计划详情 -->
+	<select id="queryProductApplySimpleInfo" resultType="java.util.LinkedHashMap">
+		SELECT
+		  t1.buyer patientUserId,t1.vendor hospitalUserId,t1.createTime,t1.wxProductId
+			,t2.trueName patientName,t2.patientId
+			,t3.hospitalName,t3.hospitalId
+		FROM hds_db.s_product_service_apply t1
+		LEFT JOIN
+		user_db.u_patient t2 ON t2.userId=t1.buyer
+		LEFT JOIN
+		user_db.u_hospital t3 ON t3.userId = t1.vendor
+		WHERE productApplyId = #{productApplyId}
+	</select>
+	
+	<!-- 修改报告状态 -->
+	<update id="updateReportReadFlag">
+		<if test="reportType==2">
+		update lis_db.eci_detection_report
+		<set>
+			readFlag = 1
+		</set>
+		where
+		detectionReportId=#{reportId}
+		</if>
+		<if test="reportType==1">
+		update lis_db.eci_exam_report
+		<set>
+			readFlag = 1
+		</set>
+		where
+		examReportId=#{reportId}
+		</if>	
+	</update>
+</mapper>

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followupTableDao.FollowupTableDao">
+	<!-- 判断患者是否开启随访表 -->
+	<select id="isOpenedFollowupTable" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		SELECT COUNT(1) FROM user_db.u_patient p
+		INNER JOIN ehr_db.e_diagnosis_info d ON d.diagnosisId=p.diagnosisId AND ((d.diseasecode>'C00' AND d.diseasecode &lt;'C98') OR (d.diseasecode>'D32' AND d.diseasecode&lt;'D34'))
+		WHERE p.patientId=#{patientId}
+	</select>
+	<!-- 获取随访表基本信息 add by fanpanwei -->
+	<select id="getFollowupTable" parameterType="java.lang.Integer" resultType="com.esuizhen.cloudservice.followup.bean.FollowupTableReq">
+		SELECT
+			p.patientCode serialNo,d.diseaseCode ICD10,d.organCode ICDO,
+			(SELECT
+			CASE WHEN (SELECT COUNT(DISTINCT(ed.diseaseTypeId)) from ehr_db.e_diagnosis_info ed WHERE ed.patientId=p.patientId AND ed.isSourceDiagnosis=1 AND ((ed.diseasecode>'C00' AND ed.diseasecode &lt;'C98') OR (ed.diseasecode>'D32' AND ed.diseasecode&lt;'D34')))&gt;1 THEN CONCAT(GROUP_CONCAT(mdt.diseaseTypeName),';多发癌') ELSE GROUP_CONCAT(mdt.diseaseTypeName) END
+			FROM ehr_db.meta_c_disease_type mdt
+			WHERE mdt.diseaseTypeId IN (SELECT DISTINCT(ed.diseaseTypeId) from ehr_db.e_diagnosis_info ed WHERE ed.patientId=p.patientId AND ((ed.diseasecode>'C00' AND ed.diseasecode &lt;'C98') OR (ed.diseasecode>'D32' AND ed.diseasecode&lt;'D34'))))diseaseTypes,
+			1 isKnown,(SELECT mn.clinicNo from ehr_db.ec_clinic_medical_note mn WHERE mn.patientId=p.patientId ORDER BY visitTime DESC LIMIT 1) clinicNo,p.patientNo inpatientNo,u.trueName,u.sex,u.birthDate,u.nation,
+			IF(u.birthDate is null,null,(year(now())-year(u.birthDate)-1)+(DATE_FORMAT(u.birthDate,'%m%d')&lt;=DATE_FORMAT(NOW(),'%m%d'))) age,
+			CASE WHEN u.idType=1 THEN u.identification ELSE NULL END identification,u.education,u.profession,
+			h.householdAddress,h.liveAddress,IFNULL(p.familyPhone,u.mobile) mobile,h.companyAddress,h.companyTel,d.diagnosis organName,p.sourcePathologyDiseaseCode sourcePathologyDiagnosis,
+			p.confirmedDate,d.diagnosisBasisId diagnosisBasisId,d.diseaseBasis diagnosisBasis,dh.tumourPeriodizationTId,dh.tumourPeriodizationNId,dh.tumourPeriodizationM1Id,
+			dh.tumourPeriodizationT,dh.tumourPeriodizationN,dh.tumourPeriodizationM1,
+			dh.tumourPeriodizationClinicId,dh.tumourPeriodizationClinic,
+			(SELECT deptName from user_db.u_department WHERE deptId=dh.outhospitalDeptId) outhospitalWard,
+			dh.inhospitalDate reportDate,dh.inhospitalDoctorName reportDoctor,vm.isHaveTherapy,
+			vm.operationFlag,vm.radiotherapyFlag,vm.chemotherapyFlag,vm.endocrineTherapyFlag,vm.targetedTherapyFlag,vm.unknownFlag,
+			p.otherHospital,
+			IFNULL(ft.lastCondition,'不明') lastCondition,ft.latestFollowupTime,p.underlyCausesOfDeath causeOfDeath,ft.isTumourDeath,ft.isInHospitalDeath,ft.cancleFollowupDate,
+			ft.lostFollowupReason,ft.remark,
+			(SELECT trueName FROM user_db.u_doctor WHERE doctorId=ft.followuopDoctor) followuopDoctor
+		FROM user_db.u_patient p
+		INNER JOIN user_db.u_user u ON p.patientId=#{patientId} AND u.userId=p.userId
+		LEFT JOIN ehr_db.var_patient_medical vm ON vm.patientId=p.patientId
+		LEFT JOIN ehr_db.e_diagnosis_info d ON d.diagnosisId=p.diagnosisId
+		LEFT JOIN ehr_db.ei_inhospital_note dh ON dh.inhospitalId=d.inhospitalId
+		LEFT JOIN ehr_db.ei_inhospital_note h ON h.patientId=p.patientId AND h.inhospitalDate=vm.latestInHospitalDate
+		LEFT JOIN (SELECT * FROM (SELECT f.patientId,
+								CASE WHEN f.followupResultValue=4 THEN '死亡' WHEN f.lostFollowupFlag=1 THEN '失访' WHEN f.followupResultValue IN (1,2,3,15,16,17) THEN '存活' ELSE '不明' END lastCondition,
+								CASE WHEN mf.followupResultValueId=10 THEN '拒访' WHEN mf.followupResultValueId IN (8,9,12,13) THEN '失联' ELSE '其他' END lostFollowupReason,
+								CASE mf.followupResultValueId WHEN 5 THEN f.remark ELSE mf.followupResultValueName END remark,
+								vf.latestFollowupTime, f.isTumourDeath,f.isInHospitalDeath,
+								CASE WHEN f.followupResultValue=4 THEN f.deathDate WHEN f.lostFollowupFlag=1 THEN f.followupTime ELSE NULL END cancleFollowupDate,
+								CASE WHEN f.followupResultValue=15 THEN (SELECT attendingDoctorId from ehr_db.ec_clinic_medical_note ec WHERE ec.patientId=f.patientId ORDER BY ec.visitTime DESC LIMIT 1)
+								WHEN f.followupResultValue=16 THEN (SELECT inhospitalDoctor from ehr_db.ei_inhospital_note ei WHERE ei.patientId=f.patientId ORDER BY ei.inhospitalDate DESC LIMIT 1)
+								WHEN f.isInHospitalDeath=1 THEN (SELECT inhospitalDoctor from ehr_db.ei_inhospital_note ei WHERE ei.patientId=f.patientId ORDER BY ei.inhospitalDate DESC LIMIT 1)
+								ELSE f.operator END followuopDoctor
+								FROM followup_db.followup_result f
+								LEFT JOIN followup_db.var_patient_followup vf ON vf.patientId=f.patientId
+								LEFT JOIN followup_db.meta_followup_result_value mf ON mf.followupResultValueId=f.lostFollowupCauseResultValue
+								WHERE f.state=2 AND f.patientId=#{patientId2}
+								ORDER BY f.followupTime DESC) aa GROUP BY aa.patientId) ft ON ft.patientId=p.patientId
+	</select>
+	
+	
+	<update id="updateDiagnosis" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupTableReq">
+		UPDATE ehr_db.e_diagnosis_info d SET
+			<if test="ICDO!=null and ICDO!=''">
+			d.organCode=#{ICDO},
+			</if>
+			d.updateTime=now()
+		WHERE d.diagnosisId IN (select p.diagnosisId from user_db.u_patient p where p.patientId=#{patientId})
+	</update>
+	<update id="updateInhospitalNote" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupTableReq">
+		UPDATE ehr_db.ei_inhospital_note h SET
+			<if test="tumourPeriodizationTId!=null and tumourPeriodizationTId!=''">
+			h.tumourPeriodizationTId=#{tumourPeriodizationTId},
+			</if>
+			<if test="tumourPeriodizationT!=null and tumourPeriodizationT!=''">
+			h.tumourPeriodizationT=#{tumourPeriodizationT},
+			</if>
+			<if test="tumourPeriodizationNId!=null and tumourPeriodizationNId!=''">
+			h.tumourPeriodizationNId=#{tumourPeriodizationNId},
+			</if>
+			<if test="tumourPeriodizationN!=null and tumourPeriodizationN!=''">
+			h.tumourPeriodizationN=#{tumourPeriodizationN},
+			</if>
+			<if test="tumourPeriodizationM1Id!=null and tumourPeriodizationM1Id!=''">
+			h.tumourPeriodizationM1Id=#{tumourPeriodizationM1Id},
+			</if>
+			<if test="tumourPeriodizationM1!=null and tumourPeriodizationM1!=''">
+			h.tumourPeriodizationM1=#{tumourPeriodizationM1},
+			</if>
+			<if test="tumourPeriodizationClinicId!=null and tumourPeriodizationClinicId!=''">
+			h.tumourPeriodizationClinicId=#{tumourPeriodizationClinicId},
+			</if>
+			<if test="tumourPeriodizationClinic!=null and tumourPeriodizationClinic!=''">
+			h.tumourPeriodizationClinic=#{tumourPeriodizationClinic},
+			</if>
+			<if test="tumourPeriodization!=null and tumourPeriodization!=''">
+			h.tumourPeriodization=#{tumourPeriodization},
+			</if>
+			h.updateTime=now()
+		WHERE h.inhospitalId IN (
+			SELECT d.inhospitalId FROM ehr_db.e_diagnosis_info d
+			INNER JOIN user_db.u_patient p ON p.diagnosisId=d.diagnosisId AND p.patientId=#{patientId}
+			)
+	</update>
+	<update id="updateUser" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupTableReq">
+		UPDATE user_db.u_user u SET 
+		<if test="education!=null and education!=''">
+			u.education=#{education},
+		</if>
+			u.updateTime=now()
+		WHERE u.userId IN (select p.userId from user_db.u_patient p where p.patientId=#{patientId})
+	</update>
+	<update id="updateVarPatientMedical" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupTableReq">
+		UPDATE ehr_db.var_patient_medical vm SET
+		<if test="isHaveTherapy!=null and isHaveTherapy!=''">
+			vm.isHaveTherapy=#{isHaveTherapy},
+		</if>
+		<if test="operationFlag!=null and operationFlag!=''">
+			vm.operationFlag=#{operationFlag},
+		</if>
+		<if test="radiotherapyFlag!=null and radiotherapyFlag!=''">
+			vm.radiotherapyFlag=#{radiotherapyFlag},
+		</if>
+		<if test="chemotherapyFlag!=null and chemotherapyFlag!=''">
+			vm.chemotherapyFlag=#{chemotherapyFlag},
+		</if>	
+		<if test="endocrineTherapyFlag!=null and endocrineTherapyFlag!=''">
+			vm.endocrineTherapyFlag=#{endocrineTherapyFlag},
+		</if>	
+		<if test="targetedTherapyFlag!=null and targetedTherapyFlag!=''">
+			vm.targetedTherapyFlag=#{targetedTherapyFlag},
+		</if>
+		<if test="unknownFlag!=null and unknownFlag!=''">
+			vm.unknownFlag=#{unknownFlag},
+		</if>	
+			vm.updateTime=now()
+		WHERE vm.patientId=#{patientId}
+	</update>
+	<update id="updatePatient" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupTableReq">
+		UPDATE user_db.u_patient p SET
+		<if test="causeOfDeath!=null and causeOfDeath!=''">
+			p.underlyCausesOfDeath=#{causeOfDeath},
+		</if>
+		<if test="otherHospital!=null and otherHospital!=''">
+			p.otherHospital=#{otherHospital},
+		</if>
+		<if test="sourcePathologyDiagnosis!=null and sourcePathologyDiagnosis!=''">
+			p.sourcePathologyDiseaseCode=#{sourcePathologyDiagnosis},
+		</if>
+			p.updateTime=Now()
+		WHERE p.patientId=#{patientId}
+	</update>
+	
+</mapper>

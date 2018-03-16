@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.CloudSubDeptDoctorDao" >
+
+	<resultMap id="baseResultMap" type="com.esuizhen.cloudservice.sync.model.SubDeptDoctor" >
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="doctorId" property="doctorId" jdbcType="BIGINT" />
+		<result column="doctorUuid" property="doctorUuid" jdbcType="VARCHAR" />
+		<result column="deptId" property="deptId" jdbcType="INTEGER" />
+		<result column="deptUuid" property="deptUuid" jdbcType="VARCHAR" />
+		<result column="subDeptId" property="subDeptId" jdbcType="INTEGER" />
+		<result column="subDeptUuid" property="subDeptUuid" jdbcType="VARCHAR" />
+		<result column="positionTitle" property="positionTitle" jdbcType="INTEGER" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<sql id="base_column_list">
+		t1.id, t1.deptId, t1.subDeptId, t1.doctorId, t1.positionTitle, t1.createTime
+	</sql>
+	
+	<select id="find" resultMap="baseResultMap" parameterType="com.esuizhen.cloudservice.sync.model.SubDeptDoctor">
+		SELECT <include refid="base_column_list"></include>
+			FROM user_db.r_subdept_doctor t1
+		WHERE t1.doctorId=#{doctorId,jdbcType=BIGINT} AND t1.subDeptId=#{subDeptId,jdbcType=BIGINT}
+	</select>
+	
+	<select id="findByDoctorId" resultMap="baseResultMap" parameterType="java.lang.Long">
+		SELECT
+			<include refid="base_column_list"></include>, t2.uuid deptUuid, t3.uuid subDeptUuid, t5.uuid doctorUuid
+		FROM user_db.r_subdept_doctor t1
+			INNER JOIN user_db.u_department t2 ON t1.deptId=t2.deptId
+			INNER JOIN user_db.u_sub_dept t3 ON t1.subDeptId=t3.subDeptId
+			INNER JOIN user_db.u_doctor t4 ON t1.doctorId=t4.doctorId
+			INNER JOIN user_db.u_user t5 ON t4.userId=t5.userId
+		WHERE t1.doctorId=#{doctorId,jdbcType=BIGINT}
+	</select>
+	
+	<select id="findBySubdeptUuidAndDoctorUuid" resultMap="baseResultMap">
+		SELECT
+			<include refid="base_column_list"></include>,t5.uuid deptUuid, t6.uuid subDeptUuid, t4.uuid doctorUuid
+		FROM user_db.r_subdept_doctor t1
+			INNER JOIN user_db.u_sub_dept t2 ON t1.subDeptId=t2.subDeptId
+			INNER JOIN user_db.u_doctor t3 ON t1.doctorId=t3.doctorId
+			INNER JOIN user_db.u_user t4 ON t3.userId=t4.userId
+			INNER JOIN user_db.u_department t5 ON t1.deptId=t5.deptId
+			INNER JOIN user_db.u_sub_dept t6 ON t1.subDeptId=t6.subDeptId
+		WHERE 1=1
+			<if test="hospitalUuid != null">
+				AND t2.uuid=#{subdeptUuid,jdbcType=VARCHAR}
+			</if>
+			<if test="hospitalUuid != null">
+				AND t4.uuid=#{doctorUuid,jdbcType=VARCHAR}
+			</if>
+	</select>
+	
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.sync.model.SubDeptDoctor">
+		<selectKey resultType="long" keyProperty="id" order="AFTER" >
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO user_db.r_subdept_doctor(deptId, subDeptId, doctorId, positionTitle, createTime)
+		VALUES(
+			#{deptId,jdbcType=BIGINT},
+			#{subDeptId,jdbcType=BIGINT},
+			#{doctorId,jdbcType=BIGINT},
+			#{positionTitle,jdbcType=INTEGER},
+			NOW())
+	</insert>
+	
+	<update id="update">
+		UPDATE user_db.r_subdept_doctor
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="deptId != null">
+				deptId=#{deptId,jdbcType=BIGINT},
+			</if>
+			<if test="subDeptId != null">
+				subDeptId=#{subDeptId,jdbcType=BIGINT},
+			</if>
+			<if test="doctorId != null">
+				doctorId=#{doctorId,jdbcType=BIGINT},
+			</if>
+			<if test="positionTitle != null">
+				positionTitle=#{positionTitle,jdbcType=INTEGER}
+			</if>
+		</trim>
+		WHERE id=#{id,jdbcType=BIGINT}
+	</update>
+</mapper>

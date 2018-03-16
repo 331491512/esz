@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.temp.TempRHospitalDoctorDao" >
+    <!-- 向temp表推送数据 -->
+    <insert id="insert">
+		INSERT INTO server_sync_temp_db.r_hospital_doctor (
+			id,doctorId,doctorUuid,hospitalId,hospitalName,deptId,deptUuid,
+			positionTitle,staffNo,createTime,batchId
+		)
+		VALUES(
+			#{id},#{doctorId},#{doctorUuid},#{hospitalId},#{hospitalName},#{deptId},#{deptUuid},
+			#{positionTitle},#{staffNo},#{createTime},#{batchId}
+		)
+	</insert>
+
+	<select id="getSyncHospitalDoctor" resultType="com.esuizhen.server.sync.bean.server.HospitalDoctorRes" parameterType="com.esuizhen.server.sync.bean.TBatchDetailInfo">
+		SELECT
+		t1.id,
+		IFNULL(t2.doctorId,t21.doctorId) doctorId,
+		t1.doctorUuid,
+		t1.hospitalId,
+		t1.hospitalName,
+		t3.deptId,
+		t1.deptUuid,
+		t1.positionTitle,
+		t1.staffNo,
+		t1.createTime,
+		IF(t4.id is null,1,2) opFlag
+		FROM server_sync_temp_db.r_hospital_doctor t1
+		LEFT JOIN user_db.u_doctor t2 ON t2.uuid=t1.doctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t21 ON t1.doctorUuid=t21.uuid
+		LEFT JOIN user_db.u_department t3 ON t1.deptUuid=t3.uuid
+		LEFT JOIN user_db.r_hospital_doctor t4 ON t1.hospitalId=t4.hospitalId AND t4.doctorId=IFNULL(t2.doctorId,t21.doctorId)
+		WHERE t1.batchId=#{batchId}
+	</select>
+</mapper>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TRSubcenterPatientDao">
+
+	<select id="findGroupCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(1)
+		FROM pro_db.r_subcenter_patient t1
+		WHERE
+			t1.projectId = #{projectId}
+			<if test="groupId != null">
+				AND t1.groupId = #{groupId}
+			</if>
+	</select>
+
+	<select id="findInvitationCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(0)
+		FROM pro_db.r_subcenter_patient t1
+		INNER JOIN pro_db.project_invitation_patient t2 ON t1.patientId = t2.invitee AND t1.projectId = t2.projectId
+		WHERE t1.projectId = #{projectId} AND t2.inviter = #{doctorId}
+	</select>
+	
+	<select id="findPatientCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(0)
+		FROM pro_db.r_subcenter_patient t1
+		WHERE t1.projectId = #{projectId}
+		AND t1.patientId = #{patientId}
+	</select>
+
+	<insert id="insertByBatch">
+		INSERT INTO pro_db.r_subcenter_patient(
+			subcenterId, 
+			projectId, 
+			groupId,
+			patientId, 
+			createTime
+		)VALUES
+		<foreach collection="patientSimpleInfos" item="patientSimpleInfo" index="index" separator=",">
+			(
+				#{rSubcenterPatient.subcenterId}, 
+				#{rSubcenterPatient.projectId}, 
+				#{rSubcenterPatient.groupId}, 
+				#{patientSimpleInfo.patientId}, 
+				NOW()
+			)
+		</foreach>
+	</insert>
+	
+	<insert id="insert">
+		INSERT INTO pro_db.r_subcenter_patient(
+			subcenterId, 
+			projectId, 
+			groupId,
+			patientId, 
+			createTime
+		)VALUES(
+			#{subcenterId}, 
+			#{projectId}, 
+			#{groupId}, 
+			#{patientId}, 
+			NOW()
+		)
+	</insert>
+	
+	<insert id="superinduceByInvitation">
+		INSERT INTO pro_db.r_subcenter_patient (
+			subcenterId,
+			projectId,
+			groupId,
+			patientId,
+			createTime
+		) SELECT
+			t1.subcenterId,
+			t1.projectId,
+			t1.groupId,
+			t1.invitee patientId,
+			NOW() createTime
+		FROM
+			pro_db.project_invitation_patient t1
+		WHERE
+			t1.projectId = #{projectId}
+		AND t1.invitee IN (
+			<foreach collection="crfResult" item="patientSimpleInfo" index="index" separator=",">
+				#{patientSimpleInfo.patientId}
+			</foreach>
+		)
+		GROUP BY t1.invitee
+	</insert>
+	
+	<update id="updatePatientIntoGroup">
+		UPDATE pro_db.r_subcenter_patient
+		<set>
+			groupId = #{groupId}
+		</set>
+		WHERE projectId = #{projectId}
+	</update>
+	
+	<delete id="deleteProjectPatients">
+		DELETE FROM pro_db.r_subcenter_patient
+		WHERE patientId IN
+		<foreach collection="patientSimpleInfos" item="item" index="index" open="(" separator="," close=")">
+			#{item.patientId}
+		</foreach>
+		AND projectId = #{projectId}
+	</delete>
+	
+	<delete id="deleteByDoctorId">
+		DELETE
+			t1.*
+		FROM pro_db.r_subcenter_patient t1,
+			pro_db.project_invitation_patient t2
+		WHERE t1.patientId = t2.invitee
+			AND t2.state = 2
+			AND t2.projectId = #{projectId}
+			AND t2.inviter = #{doctorId}
+	</delete>
+	
+	<delete id="deleteBySubcenterId">
+		DELETE
+			t1.*
+		FROM pro_db.r_subcenter_patient t1,
+			pro_db.project_invitation_patient t2,
+			pro_db.project_subcenter t3
+		WHERE t1.patientId = t2.invitee
+			AND t2.state = 2
+			AND t2.inviter = t3.subcenterDirector
+			AND t3.subcenterId = #{subcenterId}
+	</delete>
+	
+	<delete id="deleteByGroupId">
+		DELETE FROM pro_db.r_subcenter_patient
+		WHERE groupId = #{groupId}
+	</delete>
+	
+	<delete id="deleteByProjectId">
+		DELETE FROM pro_db.r_subcenter_patient WHERE projectId = #{projectId}
+	</delete>
+</mapper>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TProjectThresholdPatientDao">
+	<select id="findCrfProfilePhysicalExamThreshold" resultType="com.esuizhen.cloudservice.research.model.result.TProjectThresholdPatient">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM pro_db.project_threshold_patient t1
+		WHERE
+		<if test="projectId == null">
+			t1.projectId IS NULL
+		</if>
+		<if test="projectId != null">
+			t1.projectId = #{projectId}
+		</if>
+		<if test="patientId != null">
+			AND t1.patientId = #{patientId}
+		</if>
+	</select>
+	
+	<sql id="base_column_list">
+		t1.id, t1.projectId, t1.patientId, t1.thresholdCode, t1.thresholdMax, t1.thresholdMin, t1.creatorId, t1.createTime, t1.updateTime
+	</sql>
+	
+	<insert id="insertByBatch">
+		INSERT INTO pro_db.project_threshold_patient(
+			projectId,
+			patientId,
+			thresholdCode,
+			thresholdMax,
+			thresholdMin,
+			creatorId,
+			createTime,
+			updateTime
+		)VALUES
+		<foreach collection="projectThresholdPatients" item="projectThresholdPatient" index="index" separator=",">
+			(
+				#{projectThresholdPatient.projectId},
+				#{projectThresholdPatient.patientId},
+				#{projectThresholdPatient.thresholdCode},
+				#{projectThresholdPatient.thresholdMax},
+				#{projectThresholdPatient.thresholdMin},
+				#{projectThresholdPatient.creatorId},
+				NOW(),
+				NOW()
+			)
+		</foreach>
+	</insert>
+	
+	<delete id="deleteByProjectIdAndPatientId">
+		DELETE FROM pro_db.project_threshold_patient WHERE projectId = #{projectId} AND patientId = #{patientId}
+	</delete>
+	
+	<delete id="deleteByProjectId">
+		DELETE FROM pro_db.project_threshold_patient WHERE projectId = #{projectId}
+	</delete>
+</mapper>

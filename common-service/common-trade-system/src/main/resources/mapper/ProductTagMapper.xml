@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.westangel.commonservice.trade.dao.ProductTagDao">
+	<!-- 插入标签与商品对应关系 -->
+	<insert id="createtProductTagList">
+		INSERT INTO com_trade_db.r_product_tag(productId,tagId,createTime)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+			(
+        		#{productId},
+        		#{item.tagId},
+        		NOW()
+        	)
+		</foreach>
+	</insert>
+	<!-- 删除表情与商品对应关系 -->
+	<delete id="deleteProductTag">
+		DELETE FROM com_trade_db.r_product_tag WHERE productId=#{productId}
+	</delete>
+	
+	<!-- 获取商品标签 -->
+	<select id="getProductTags" resultType="com.westangel.common.bean.sys.TagInfo">
+		SELECT t1.tagId,t1.tagName 
+		FROM com_trade_db.r_product_tag t
+		JOIN com_sys_db.sys_tag t1 ON t.tagId=t1.tagId
+		WHERE t.productId=#{productId}
+	</select>
+	
+	
+	<!-- 获取患者用户标签 -->
+	<select id="getPatientTags" resultType="com.westangel.common.bean.sys.TagInfo">
+		SELECT t2.tagId FROM user_db.u_patient t1
+		JOIN operation_db.r_patient_tag t2 ON t1.patientId = t2.patientId
+		JOIN com_sys_db.sys_tag t3 ON  t3.tagId=t2.tagId
+		JOIN com_sys_db.sys_tag_type t4 ON  t3.tagTypeId=t4.tagTypeId AND t4.isPublish = 1
+		WHERE t1.userId = #{userId}
+		UNION
+		SELECT t2.tagId FROM user_db.u_patient t1
+		JOIN com_sys_db.r_knowledge_tag_disease_type t2 ON t1.sourceDiseaseTypeId=t2.diseaseTypeId WHERE t1.userId = #{userId}
+	</select>
+	
+	
+	<!-- 获取规则标签 -->
+	<select id="getRuleTags" resultType="com.westangel.common.bean.sys.TagInfo">
+		SELECT tagId FROM com_trade_db.r_product_show_rule_tag WHERE ruleId=#{ruleId}
+	</select>
+
+	<select id="findContentTagsByRule" resultType="com.westangel.common.bean.sys.TagInfo">
+		SELECT
+		t3.tagId,t3.tagName
+		FROM
+		com_trade_db.conf_product_show_rule t1
+		JOIN com_trade_db.r_product_show_rule_tag t2 ON t1.ruleId=t2.ruleId
+		JOIN com_sys_db.sys_tag t3 ON  t3.tagId=t2.tagId
+		JOIN com_sys_db.sys_tag_type t4 ON  t3.tagTypeId=t4.tagTypeId AND t4.isPublish = 1
+		WHERE t1.ruleId=#{ruleId}
+	</select>
+	
+</mapper>

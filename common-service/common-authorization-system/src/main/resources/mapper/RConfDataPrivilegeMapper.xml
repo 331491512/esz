@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.westangel.commonservice.authorization.dao.RConfDataPrivilegeDao">
+	<sql id="base_column_list">
+		t1.userRole,
+		t1.dataId,
+		t1.privilege
+	</sql>
+	
+	<select id="findByOperator" resultType="com.westangel.common.bean.user.RConfDataPrivilege">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM user_db.r_conf_data_privilege t1 
+		JOIN user_db.r_user_role t2 ON t1.userRole=t2.userRole AND t2.userId=#{operator}
+	</select>
+	
+	
+</mapper>

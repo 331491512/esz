@@ -1,0 +1,464 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.inhospitalcost.TInhospitalCostInfoDao">
+    <resultMap type="com.esuizhen.cloudservice.ehr.model.inhospitalcost.TInhospitalCostInfo" id="BaseResultMap">
+    	<id column="costId" property="costId"/>
+    	<result column="patientid" property="patientid"/>
+    	<result column="inhospitalId" property="inhospitalId"/>
+    	<result column="totalCost" property="totalCost"/>
+    	<result column="selfCost" property="selfCost"/>
+    	<result column="generalMedicalServices" property="generalMedicalServices"/>
+    	<result column="commonMedicalProceduresCost" property="commonMedicalProceduresCost"/>
+    	<result column="nursingFees" property="nursingFees"/>
+    	<result column="generalMedicalOther" property="generalMedicalOther"/>
+    	<result column="pathologicalDiagnosis" property="pathologicalDiagnosis"/>
+    	<result column="laboratoryDiagnosis" property="laboratoryDiagnosis"/>
+    	<result column="imagingDiagnosis" property="imagingDiagnosis"/>
+    	<result column="clinicalDiagnosis" property="clinicalDiagnosis"/>
+    	<result column="nonSurgicalTreatmentProgram" property="nonSurgicalTreatmentProgram"/>
+    	<result column="clinicalPhysicalTherapyFee" property="clinicalPhysicalTherapyFee"/>
+    	<result column="surgicalTreatmentCosts" property="surgicalTreatmentCosts"/>
+    	<result column="anesthesiaFees" property="anesthesiaFees"/>
+    	<result column="surgeryFees" property="surgeryFees"/>
+    	<result column="rehabilitationCosts" property="rehabilitationCosts"/>
+    	<result column="tcmTreatmentCosts" property="tcmTreatmentCosts"/>
+    	<result column="medicineCosts" property="medicineCosts"/>
+    	<result column="antimicrobialDrugCosts" property="antimicrobialDrugCosts"/>
+    	<result column="medicineCosts2" property="medicineCosts2"/>
+    	<result column="herbalFee" property="herbalFee"/>
+    	<result column="bloodFee" property="bloodFee"/>
+    	<result column="albuminFee" property="albuminFee"/>
+    	<result column="globulinFee" property="globulinFee"/>
+    	<result column="coagulationFactorfee" property="coagulationFactorfee"/>
+    	<result column="cytokinesFee" property="cytokinesFee"/>
+    	<result column="checkDisposableMedicalMaterialCosts" property="checkDisposableMedicalMaterialCosts"/>
+    	<result column="therapeuticDisposableMedicalCosts" property="therapeuticDisposableMedicalCosts"/>
+    	<result column="surgicalDisposableMedicalCosts" property="surgicalDisposableMedicalCosts"/>
+    	<result column="otherCosts" property="otherCosts"/>
+    	<result column="bedCharges" property="bedCharges"/>
+    	<result column="registrationFee" property="registrationFee"/>
+    	<result column="examinationFee" property="examinationFee"/>
+    	<result column="birthRate" property="birthRate"/>
+    	<result column="careAssistedRespirationRate" property="careAssistedRespirationRate"/>
+    	<result column="routineInspectionFees" property="routineInspectionFees"/>
+    	<result column="radionuclideExaminationFee" property="radionuclideExaminationFee"/>
+    	<result column="ultrasoundFee" property="ultrasoundFee"/>
+    	<result column="psychiatricTreatmentCosts" property="psychiatricTreatmentCosts"/>
+    	<result column="interventionalTreatmentCosts" property="interventionalTreatmentCosts"/>
+    	<result column="specialTreatmentCosts" property="specialTreatmentCosts"/>
+    	<result column="radionuclideTherapyCosts" property="radionuclideTherapyCosts"/>
+    	<result column="radiationFee" property="radiationFee"/>
+    	<result column="interventionalDisposableFee" property="interventionalDisposableFee"/>
+    	<result column="operator" property="operator"/>
+    	<result column="createTime" property="createTime"/>
+    	<result column="updateTime" property="updateTime"/>
+    </resultMap>
+    
+    <!-- <resultMap type="com.esuizhen.cloudservice.ehr.model.inhospitalcost.TInhospitalCostInfoAdd" id="InhospitalCostAddMap" extends="BaseResultMap">
+    	<result column="reInhospitalPlan31Days" property="reInhospitalPlan31Days"/>
+    	<result column="reInhospitalTarget31Days" property="reInhospitalTarget31Days"/>
+    	<result column="preComaHour" property="preComaHour"/>
+    	<result column="preComaMinute" property="preComaMinute"/>
+    	<result column="inComaHour" property="inComaHour"/>
+    	<result column="inComaMinute" property="inComaMinute"/>
+    	<result column="inviabilityScore" property="inviabilityScore"/>
+    	<result column="outviabilityScore" property="outviabilityScore"/>
+    	<result column="babyAge" property="babyAge"/>
+    	<result column="babyBornWeight" property="babyBornWeight"/>
+    	<result column="babyWeightInHospital" property="babyWeightInHospital"/>
+    </resultMap> -->
+    <sql id="base_column_list">
+       	costId,
+       	patientid,
+       	inhospitalId,
+       	ROUND(totalCost/100,2) totalCost,
+       	ROUND(selfCost/100,2) selfCost,
+       	ROUND(generalMedicalServices/100,2) generalMedicalServices,
+       	ROUND(commonMedicalProceduresCost/100,2) commonMedicalProceduresCost,
+       	ROUND(nursingFees/100,2) nursingFees,
+       	ROUND(generalMedicalOther/100,2) generalMedicalOther,
+       	ROUND(pathologicalDiagnosis/100,2) pathologicalDiagnosis,
+       	ROUND(laboratoryDiagnosis/100,2) laboratoryDiagnosis,
+       	ROUND(imagingDiagnosis/100,2) imagingDiagnosis,
+       	ROUND(clinicalDiagnosis/100,2) clinicalDiagnosis,
+       	ROUND(nonSurgicalTreatmentProgram/100,2) nonSurgicalTreatmentProgram,
+       	ROUND(clinicalPhysicalTherapyFee/100,2) clinicalPhysicalTherapyFee,
+       	ROUND(surgicalTreatmentCosts/100,2) surgicalTreatmentCosts,
+       	ROUND(anesthesiaFees/100,2) anesthesiaFees,
+       	ROUND(surgeryFees/100,2) surgeryFees,
+       	ROUND(rehabilitationCosts/100,2) rehabilitationCosts,
+       	ROUND(tcmTreatmentCosts/100,2) tcmTreatmentCosts,
+       	ROUND(medicineCosts/100,2) medicineCosts,
+       	ROUND(antimicrobialDrugCosts/100,2) antimicrobialDrugCosts,
+       	ROUND(medicineCosts2/100,2) medicineCosts2,
+       	ROUND(herbalFee/100,2) herbalFee,
+       	ROUND(bloodFee/100,2) bloodFee,
+       	ROUND(albuminFee/100,2) albuminFee,
+       	ROUND(globulinFee/100,2) globulinFee,
+       	ROUND(coagulationFactorfee/100,2) coagulationFactorfee,
+       	ROUND(cytokinesFee/100,2) cytokinesFee,
+       	ROUND(checkDisposableMedicalMaterialCosts/100,2) checkDisposableMedicalMaterialCosts,
+       	ROUND(therapeuticDisposableMedicalCosts/100,2) therapeuticDisposableMedicalCosts,
+       	ROUND(surgicalDisposableMedicalCosts/100,2) surgicalDisposableMedicalCosts,
+       	ROUND(otherCosts/100,2) otherCosts,
+       	ROUND(bedCharges/100,2) bedCharges,
+       	ROUND(registrationFee/100,2) registrationFee,
+       	ROUND(examinationFee/100,2) examinationFee,
+       	ROUND(birthRate/100,2) birthRate,
+       	ROUND(careAssistedRespirationRate/100,2) careAssistedRespirationRate,
+       	ROUND(routineInspectionFees/100,2) routineInspectionFees,
+       	ROUND(radionuclideExaminationFee/100,2) radionuclideExaminationFee,
+       	ROUND(ultrasoundFee/100,2) ultrasoundFee,
+       	ROUND(psychiatricTreatmentCosts/100,2) psychiatricTreatmentCosts,
+       	ROUND(interventionalTreatmentCosts/100,2) interventionalTreatmentCosts,
+       	ROUND(specialTreatmentCosts/100,2) specialTreatmentCosts,
+       	ROUND(radionuclideTherapyCosts/100,2) radionuclideTherapyCosts,
+       	ROUND(radiationFee/100,2) radiationFee,
+       	ROUND(interventionalDisposableFee/100,2) interventionalDisposableFee,
+       	operator,
+       	createTime,
+       	updateTime
+    </sql>
+    <sql id="other_column_list">
+    	note.reInhospitalPlan31Days,
+    	note.reInhospitalTarget31Days,
+    	note.preComaHour,
+    	note.preComaMinute,
+    	note.inComaHour,
+    	note.inComaMinute,
+    	note.inviabilityScore,
+    	note.outviabilityScore,
+    	note.babyAge,
+    	note.babyBornWeight,
+    	note.babyWeightInHospital
+    </sql>
+    
+    <insert id="insertEiInhospitalCost" parameterType="com.esuizhen.cloudservice.ehr.model.inhospitalcost.TInhospitalCostInfo">
+    	INSERT INTO ei_inhospital_cost(
+    	costId,
+    		patientid ,
+            inhospitalId ,
+            totalCost ,
+            selfCost ,
+            generalMedicalServices ,
+            commonMedicalProceduresCost ,
+            nursingFees ,
+            generalMedicalOther ,
+            pathologicalDiagnosis ,
+            laboratoryDiagnosis ,
+            imagingDiagnosis ,
+            clinicalDiagnosis ,
+            nonSurgicalTreatmentProgram ,
+            clinicalPhysicalTherapyFee ,
+            surgicalTreatmentCosts ,
+            anesthesiaFees ,
+            surgeryFees ,
+            rehabilitationCosts ,
+            tcmTreatmentCosts ,
+            medicineCosts ,
+            antimicrobialDrugCosts ,
+            medicineCosts2 ,
+            herbalFee ,
+            bloodFee ,
+            albuminFee ,
+            globulinFee ,
+            coagulationFactorfee ,
+            cytokinesFee ,
+            checkDisposableMedicalMaterialCosts ,
+            therapeuticDisposableMedicalCosts ,
+            surgicalDisposableMedicalCosts ,
+            otherCosts ,
+            bedCharges ,
+            registrationFee ,
+            examinationFee ,
+            birthRate ,
+            careAssistedRespirationRate ,
+            routineInspectionFees ,
+            radionuclideExaminationFee ,
+            ultrasoundFee ,
+            psychiatricTreatmentCosts ,
+            interventionalTreatmentCosts ,
+            specialTreatmentCosts ,
+            radionuclideTherapyCosts ,
+            radiationFee ,
+            interventionalDisposableFee ,
+            operator ,
+            createTime ,
+            updateTime
+    	) VALUES(
+    	#{costId},
+    		#{patientid} ,
+            #{inhospitalId} ,
+            #{totalCost}*100 ,
+            #{selfCost}*100 ,
+            #{generalMedicalServices}*100 ,
+            #{commonMedicalProceduresCost}*100 ,
+            #{nursingFees}*100 ,
+            #{generalMedicalOther}*100 ,
+            #{pathologicalDiagnosis}*100 ,
+            #{laboratoryDiagnosis}*100 ,
+            #{imagingDiagnosis}*100 ,
+            #{clinicalDiagnosis}*100 ,
+            #{nonSurgicalTreatmentProgram}*100 ,
+            #{clinicalPhysicalTherapyFee}*100 ,
+            #{surgicalTreatmentCosts}*100 ,
+            #{anesthesiaFees}*100 ,
+            #{surgeryFees}*100 ,
+            #{rehabilitationCosts}*100 ,
+            #{tcmTreatmentCosts}*100 ,
+            #{medicineCosts}*100 ,
+            #{antimicrobialDrugCosts}*100 ,
+            #{medicineCosts2}*100 ,
+            #{herbalFee}*100 ,
+            #{bloodFee}*100 ,
+            #{albuminFee}*100 ,
+            #{globulinFee}*100 ,
+            #{coagulationFactorfee}*100 ,
+            #{cytokinesFee}*100 ,
+            #{checkDisposableMedicalMaterialCosts}*100 ,
+            #{therapeuticDisposableMedicalCosts}*100 ,
+            #{surgicalDisposableMedicalCosts}*100 ,
+            #{otherCosts}*100 ,
+            #{bedCharges}*100 ,
+            #{registrationFee}*100 ,
+            #{examinationFee}*100 ,
+            #{birthRate}*100 ,
+            #{careAssistedRespirationRate}*100 ,
+            #{routineInspectionFees}*100 ,
+            #{radionuclideExaminationFee}*100 ,
+            #{ultrasoundFee}*100 ,
+            #{psychiatricTreatmentCosts}*100 ,
+            #{interventionalTreatmentCosts}*100 ,
+            #{specialTreatmentCosts}*100 ,
+            #{radionuclideTherapyCosts}*100 ,
+            #{radiationFee}*100 ,
+            #{interventionalDisposableFee}*100 ,
+            #{operator} ,
+            NOW() ,
+            NOW() 
+    	)
+    </insert>
+    
+    <update id="updateEiInhospitalCost" parameterType="com.esuizhen.cloudservice.ehr.model.inhospitalcost.TInhospitalCostInfo">
+        UPDATE ei_inhospital_cost SET 
+            patientid = #{patientid} ,
+            totalCost = #{totalCost}*100 ,
+            selfCost = #{selfCost}*100 ,
+            generalMedicalServices = #{generalMedicalServices}*100 ,
+            commonMedicalProceduresCost = #{commonMedicalProceduresCost}*100 ,
+            nursingFees = #{nursingFees}*100 ,
+            generalMedicalOther = #{generalMedicalOther}*100 ,
+            pathologicalDiagnosis = #{pathologicalDiagnosis}*100 ,
+            laboratoryDiagnosis = #{laboratoryDiagnosis}*100 ,
+            imagingDiagnosis = #{imagingDiagnosis}*100 ,
+            clinicalDiagnosis = #{clinicalDiagnosis}*100 ,
+            nonSurgicalTreatmentProgram = #{nonSurgicalTreatmentProgram}*100 ,
+            clinicalPhysicalTherapyFee = #{clinicalPhysicalTherapyFee}*100 ,
+            surgicalTreatmentCosts = #{surgicalTreatmentCosts}*100 ,
+            anesthesiaFees = #{anesthesiaFees}*100 ,
+            surgeryFees = #{surgeryFees}*100 ,
+            rehabilitationCosts = #{rehabilitationCosts}*100 ,
+            tcmTreatmentCosts = #{tcmTreatmentCosts}*100 ,
+            medicineCosts = #{medicineCosts}*100 ,
+            antimicrobialDrugCosts = #{antimicrobialDrugCosts}*100 ,
+            medicineCosts2 = #{medicineCosts2}*100 ,
+            herbalFee = #{herbalFee}*100 ,
+            bloodFee = #{bloodFee}*100 ,
+            albuminFee = #{albuminFee}*100 ,
+            globulinFee = #{globulinFee}*100 ,
+            coagulationFactorfee = #{coagulationFactorfee}*100 ,
+            cytokinesFee = #{cytokinesFee}*100 ,
+            checkDisposableMedicalMaterialCosts = #{checkDisposableMedicalMaterialCosts}*100 ,
+            therapeuticDisposableMedicalCosts = #{therapeuticDisposableMedicalCosts}*100 ,
+            surgicalDisposableMedicalCosts = #{surgicalDisposableMedicalCosts}*100 ,
+            otherCosts = #{otherCosts}*100 ,
+            bedCharges = #{bedCharges}*100 ,
+            registrationFee = #{registrationFee}*100 ,
+            examinationFee = #{examinationFee}*100 ,
+            birthRate = #{birthRate}*100 ,
+            careAssistedRespirationRate = #{careAssistedRespirationRate}*100 ,
+            routineInspectionFees = #{routineInspectionFees}*100 ,
+            radionuclideExaminationFee = #{radionuclideExaminationFee}*100 ,
+            ultrasoundFee = #{ultrasoundFee}*100 ,
+            psychiatricTreatmentCosts = #{psychiatricTreatmentCosts}*100 ,
+            interventionalTreatmentCosts = #{interventionalTreatmentCosts}*100 ,
+            specialTreatmentCosts = #{specialTreatmentCosts}*100 ,
+            radionuclideTherapyCosts = #{radionuclideTherapyCosts}*100 ,
+            radiationFee = #{radiationFee}*100 ,
+            interventionalDisposableFee = #{interventionalDisposableFee}*100 ,
+            operator = #{operator} ,
+            updateTime = NOW() 
+        WHERE 
+	        inhospitalId = #{inhospitalId}
+	</update>
+	
+	<update id="updateEiInhospitalCostSelective" parameterType="com.esuizhen.cloudservice.ehr.model.inhospitalcost.TInhospitalCostInfo">
+        UPDATE ei_inhospital_cost 
+        <set>
+	        <if test="patientid != null">
+                patientid = #{patientid} ,
+            </if>
+	        <if test="totalCost != null">
+                totalCost = #{totalCost}*100 ,
+            </if>
+	        <if test="selfCost != null">
+                selfCost = #{selfCost}*100 ,
+            </if>
+	        <if test="generalMedicalServices != null">
+                generalMedicalServices = #{generalMedicalServices}*100 ,
+            </if>
+	        <if test="commonMedicalProceduresCost != null">
+                commonMedicalProceduresCost = #{commonMedicalProceduresCost}*100 ,
+            </if>
+	        <if test="nursingFees != null">
+                nursingFees = #{nursingFees}*100 ,
+            </if>
+	        <if test="generalMedicalOther != null">
+                generalMedicalOther = #{generalMedicalOther}*100 ,
+            </if>
+	        <if test="pathologicalDiagnosis != null">
+                pathologicalDiagnosis = #{pathologicalDiagnosis}*100 ,
+            </if>
+	        <if test="laboratoryDiagnosis != null">
+                laboratoryDiagnosis = #{laboratoryDiagnosis}*100 ,
+            </if>
+	        <if test="imagingDiagnosis != null">
+                imagingDiagnosis = #{imagingDiagnosis}*100 ,
+            </if>
+	        <if test="clinicalDiagnosis != null">
+                clinicalDiagnosis = #{clinicalDiagnosis}*100 ,
+            </if>
+	        <if test="nonSurgicalTreatmentProgram != null">
+                nonSurgicalTreatmentProgram = #{nonSurgicalTreatmentProgram}*100 ,
+            </if>
+	        <if test="clinicalPhysicalTherapyFee != null">
+                clinicalPhysicalTherapyFee = #{clinicalPhysicalTherapyFee}*100 ,
+            </if>
+	        <if test="surgicalTreatmentCosts != null">
+                surgicalTreatmentCosts = #{surgicalTreatmentCosts}*100 ,
+            </if>
+	        <if test="anesthesiaFees != null">
+                anesthesiaFees = #{anesthesiaFees}*100 ,
+            </if>
+	        <if test="surgeryFees != null">
+                surgeryFees = #{surgeryFees}*100 ,
+            </if>
+	        <if test="rehabilitationCosts != null">
+                rehabilitationCosts = #{rehabilitationCosts}*100 ,
+            </if>
+	        <if test="tcmTreatmentCosts != null">
+                tcmTreatmentCosts = #{tcmTreatmentCosts}*100 ,
+            </if>
+	        <if test="medicineCosts != null">
+                medicineCosts = #{medicineCosts} ,
+            </if>
+	        <if test="antimicrobialDrugCosts != null">
+                antimicrobialDrugCosts = #{antimicrobialDrugCosts} ,
+            </if>
+	        <if test="medicineCosts2 != null">
+                medicineCosts2 = #{medicineCosts2} ,
+            </if>
+	        <if test="herbalFee != null">
+                herbalFee = #{herbalFee} ,
+            </if>
+	        <if test="bloodFee != null">
+                bloodFee = #{bloodFee} ,
+            </if>
+	        <if test="albuminFee != null">
+                albuminFee = #{albuminFee} ,
+            </if>
+	        <if test="globulinFee != null">
+                globulinFee = #{globulinFee} ,
+            </if>
+	        <if test="coagulationFactorfee != null">
+                coagulationFactorfee = #{coagulationFactorfee} ,
+            </if>
+	        <if test="cytokinesFee != null">
+                cytokinesFee = #{cytokinesFee} ,
+            </if>
+	        <if test="checkDisposableMedicalMaterialCosts != null">
+                checkDisposableMedicalMaterialCosts = #{checkDisposableMedicalMaterialCosts} ,
+            </if>
+	        <if test="therapeuticDisposableMedicalCosts != null">
+                therapeuticDisposableMedicalCosts = #{therapeuticDisposableMedicalCosts} ,
+            </if>
+	        <if test="surgicalDisposableMedicalCosts != null">
+                surgicalDisposableMedicalCosts = #{surgicalDisposableMedicalCosts} ,
+            </if>
+	        <if test="otherCosts != null">
+                otherCosts = #{otherCosts}*100 ,
+            </if>
+	        <if test="bedCharges != null">
+                bedCharges = #{bedCharges}*100 ,
+            </if>
+	        <if test="registrationFee != null">
+                registrationFee = #{registrationFee}*100 ,
+            </if>
+	        <if test="examinationFee != null">
+                examinationFee = #{examinationFee}*100 ,
+            </if>
+	        <if test="birthRate != null">
+                birthRate = #{birthRate}*100 ,
+            </if>
+	        <if test="careAssistedRespirationRate != null">
+                careAssistedRespirationRate = #{careAssistedRespirationRate}*100 ,
+            </if>
+	        <if test="routineInspectionFees != null">
+                routineInspectionFees = #{routineInspectionFees}*100 ,
+            </if>
+	        <if test="radionuclideExaminationFee != null">
+                radionuclideExaminationFee = #{radionuclideExaminationFee}*100 ,
+            </if>
+	        <if test="ultrasoundFee != null">
+                ultrasoundFee = #{ultrasoundFee}*100 ,
+            </if>
+	        <if test="psychiatricTreatmentCosts != null">
+                psychiatricTreatmentCosts = #{psychiatricTreatmentCosts}*100 ,
+            </if>
+	        <if test="interventionalTreatmentCosts != null">
+                interventionalTreatmentCosts = #{interventionalTreatmentCosts}*100 ,
+            </if>
+	        <if test="specialTreatmentCosts != null">
+                specialTreatmentCosts = #{specialTreatmentCosts}*100 ,
+            </if>
+	        <if test="radionuclideTherapyCosts != null">
+                radionuclideTherapyCosts = #{radionuclideTherapyCosts}*100 ,
+            </if>
+	        <if test="radiationFee != null">
+                radiationFee = #{radiationFee}*100 ,
+            </if>
+	        <if test="interventionalDisposableFee != null">
+                interventionalDisposableFee = #{interventionalDisposableFee}*100 ,
+            </if>
+	        <if test="operator != null">
+                operator = #{operator} ,
+            </if>
+            updateTime = NOW() 
+        </set>
+        WHERE 
+	        inhospitalId = #{inhospitalId}
+	</update>
+
+    <delete id="deleteEiInhospitalCost">
+        DELETE FROM ei_inhospital_cost WHERE inhospitalId = #{inhospitalId} 
+    </delete>
+    
+    <select id="queryEiInhospitalCostById" resultType="com.esuizhen.cloudservice.ehr.model.inhospitalcost.TInhospitalCostInfo">
+		SELECT 
+        	<include refid="base_column_list"/>
+		FROM ei_inhospital_cost 
+	    WHERE 
+	        costId = #{costId} 
+	</select>
+	
+	<select id="queryEiInhospitalCostByInhospitalId" resultType="com.esuizhen.cloudservice.ehr.model.inhospitalcost.TInhospitalCostInfo">
+		SELECT <include refid="base_column_list"/>
+		FROM ei_inhospital_cost
+	    WHERE 
+		inhospitalId=#{inhospitalId}
+	</select>
+</mapper>
+

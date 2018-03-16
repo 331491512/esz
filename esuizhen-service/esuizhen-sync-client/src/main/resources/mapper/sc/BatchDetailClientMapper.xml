@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<mapper namespace="com.esuizhen.client.sync.dao.sc.BatchDetailClientDao" >
+	<!-- 插入批次详情 -->
+    <insert id="insert">
+		INSERT INTO sc_db.sync_batch_detail_client(
+			batchId,tableId,createTime
+		)
+		VALUES(
+			#{batchId},#{tableId},now()
+		)
+	</insert>
+	<!-- 获取批次详情List -->
+	<select id="queryBatchDetailList" resultType="com.esuizhen.client.sync.model.TBatchDetailInfo">
+		SELECT t1.batchId,t1.tableId,t1.state,t2.syncSize,t3.hospitalId,t1.pushNum,t1.handleNum,t1.successNum,t1.failNum FROM sc_db.sync_batch_detail_client t1
+		JOIN sc_db.conf_sync_table t2 ON t1.tableId=t2.tableId
+		JOIN sc_db.sync_batch_client t3 ON t1.batchId=t3.batchId
+		WHERE 1
+		<if test="batchId!=null">
+			AND t1.batchId=#{batchId}
+		</if>
+		<if test="tableId!=null">
+			AND t1.tableId=#{tableId}
+		</if>
+		<if test="state!=null">
+			AND t1.state=#{state}
+		</if>
+	</select>
+	
+	<!-- 获取批次详情 -->
+	<select id="queryBatchDetailInfo" resultType="com.esuizhen.client.sync.model.TBatchDetailInfo">
+		SELECT t1.batchId,t1.tableId,t1.state,t2.syncSize,t3.hospitalId,t1.pushNum,t1.handleNum,t1.successNum,t1.failNum 
+		FROM sc_db.sync_batch_detail_client t1 
+		JOIN sc_db.conf_sync_table t2 ON t1.tableId=t2.tableId
+		JOIN sc_db.sync_batch_client t3 ON t1.batchId=t3.batchId
+		WHERE 1
+		<if test="batchId!=null">
+			AND t1.batchId=#{batchId}
+		</if>
+		<if test="tableId!=null">
+			AND t1.tableId=#{tableId}
+		</if>
+		<if test="state!=null">
+			AND t1.state=#{state}
+		</if>
+	</select>
+	
+	<!-- 修改状态 -->
+	<update id="updateState">
+		UPDATE sc_db.sync_batch_detail_client
+		<set>
+			state=#{state},
+			<if test="pushTimes!=null">
+				pushTimes = #{pushTimes},
+			</if>
+			<if test="processTimes!=null">
+				processTimes = #{processTimes},
+			</if>
+			<if test="getTimes!=null">
+				getTimes = #{getTimes},
+			</if>
+			updateTime=now()
+		</set>
+		WHERE batchId=#{batchId} AND tableId=#{tableId}
+	</update>
+	
+	<!-- 修改统计条数 -->
+	<update id="updateCountNum">
+		UPDATE sc_db.sync_batch_detail_client
+		<set>
+			<if test="pushNum!=null">
+				pushNum=#{pushNum},
+			</if>
+			<if test="handleNum!=null">
+				handleNum=#{handleNum},
+			</if>
+			<if test="successNum!=null">
+				successNum=#{successNum},
+			</if>
+			<if test="failNum!=null">
+				failNum=#{failNum},
+			</if>
+			updateTime=now()
+		</set>
+		WHERE batchId=#{batchId} AND tableId=#{tableId}
+	</update>
+</mapper>

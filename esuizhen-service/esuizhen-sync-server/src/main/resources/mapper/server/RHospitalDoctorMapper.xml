@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<mapper namespace="com.esuizhen.server.sync.dao.server.RHospitalDoctorDao" >
+    <insert id="insert">
+    	INSERT INTO user_db.r_hospital_doctor(
+    	 	doctorId,
+    	 	hospitalId,
+    	 	hospitalName,
+    	 	deptId,
+    	 	positionTitle,
+    	 	staffNo,
+    	 	createTime,
+    		doctorUuid,
+    		deptUuid
+		)VALUES(
+			#{doctorId},
+    	 	#{hospitalId},
+    	 	#{hospitalName},
+    	 	#{deptId},
+    	 	#{positionTitle},
+    	 	#{staffNo},
+    	 	#{createTime},
+    		#{doctorUuid},
+    		#{deptUuid}
+		)
+		ON DUPLICATE KEY UPDATE
+			hospitalName=VALUES(hospitalName),
+			deptId=VALUES(deptId),
+			positionTitle=VALUES(positionTitle),
+			staffNo=VALUES(staffNo),
+			createTime=VALUES(createTime),
+			doctorUuid=VALUES(doctorUuid),
+			deptUuid=VALUES(deptUuid)
+    </insert>
+
+    <update id="update">
+		update user_db.r_hospital_doctor
+		<set >
+			<if test="doctorId != null" >
+				doctorId = #{doctorId,jdbcType=BIGINT},
+			</if>
+			<if test="hospitalId != null" >
+				hospitalId = #{hospitalId,jdbcType=INTEGER},
+			</if>
+			<if test="hospitalName != null" >
+				hospitalName = #{hospitalName,jdbcType=VARCHAR},
+			</if>
+			<if test="deptId != null" >
+				deptId = #{deptId,jdbcType=INTEGER},
+			</if>
+			<if test="positionTitle != null" >
+				positionTitle = #{positionTitle,jdbcType=INTEGER},
+			</if>
+			<if test="staffNo != null" >
+				staffNo = #{staffNo,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null" >
+				createTime = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="doctorUuid != null" >
+				doctorUuid = #{doctorUuid,jdbcType=VARCHAR},
+			</if>
+			<if test="deptUuid != null" >
+				deptUuid = #{deptUuid,jdbcType=VARCHAR},
+			</if>
+    	</set>
+    	<where>
+			doctorId=#{doctorId}
+    		AND
+    		hospitalId=#{hospitalId}
+    	</where>
+    </update>
+    
+    <select id="queryHospitalDoctorRelation" resultType="com.esuizhen.server.sync.model.server.RHospitalDoctor">
+    	select 
+	    	doctorId,
+    	 	hospitalId,
+    	 	hospitalName,
+    	 	deptId,
+    	 	positionTitle,
+    	 	staffNo,
+    	 	createTime,
+    		doctorUuid,
+    		deptUuid,
+    		hospitalUuid
+		from user_db.r_hospital_doctor
+		where doctorId=#{doctorId} AND hospitalId=#{hospitalId}
+    </select>
+</mapper>

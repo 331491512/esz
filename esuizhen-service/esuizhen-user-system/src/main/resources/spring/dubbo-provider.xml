@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<beans xmlns="http://www.springframework.org/schema/beans"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+    xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"  
+    xsi:schemaLocation="http://www.springframework.org/schema/beans  http://www.springframework.org/schema/beans/spring-beans.xsd  
+        http://code.alibabatech.com/schema/dubbo  http://code.alibabatech.com/schema/dubbo/dubbo.xsd ">  
+ 
+ 	<!-- 用户服务对外提供的接口 -->
+    <dubbo:service interface="com.westangel.common.service.UserService" protocol="dubbo" ref="userCommonService" retries="0" timeout="10000"/>    
+    <bean id="userCommonService" class="com.esuizhen.cloudservice.user.service.impl.UserServiceImpl" />
+ 
+ 	<!-- 患者服务对外提供的接口 -->
+    <dubbo:service interface="com.westangel.common.service.PatientService" protocol="dubbo" ref="patientCommonService" retries="0" timeout="10000"/>    
+    <bean id="patientCommonService" class="com.esuizhen.cloudservice.user.service.impl.PatientServiceImpl" />
+ 
+ 	<!-- 职务服务对外提供的接口 -->
+    <dubbo:service interface="com.westangel.common.service.ProfessionalRankService"  protocol="dubbo" ref="professionalRankCommonService" retries="0" timeout="10000"/>    
+    <bean id="professionalRankCommonService" class="com.esuizhen.cloudservice.user.service.impl.ProfessionalRankServiceImpl" />
+ 
+ 	<!-- 职称服务对外提供的接口 -->
+    <dubbo:service interface="com.westangel.common.service.PositionTitleService" protocol="dubbo" ref="positionTitleCommonService" retries="0" timeout="10000"/>    
+    <bean id="positionTitleCommonService" class="com.esuizhen.cloudservice.user.service.impl.PositionTitleServiceImpl" />
+ 
+ 	<!-- 医生服务对外提供的接口 -->
+    <dubbo:service interface="com.westangel.common.service.DoctorService" protocol="dubbo" ref="doctorCommonService" retries="0" timeout="10000"/>    
+    <bean id="doctorCommonService" class="com.esuizhen.cloudservice.user.service.impl.DoctorServiceImpl" />
+ 
+ 	<!-- 医院/科室服务对外提供的接口 -->
+    <dubbo:service interface="com.westangel.common.service.HospitalService" protocol="dubbo" ref="hospitalCommonService" retries="0" timeout="10000"/>    
+    <bean id="hospitalCommonService" class="com.esuizhen.cloudservice.user.service.impl.HospitalServiceImpl" />
+    
+ 	<!-- 医院/患者服务对外提供的接口 -->
+    <dubbo:service interface="com.westangel.common.service.HospitalPatientService" protocol="dubbo" ref="hospitalPatientCommonService" retries="0" timeout="10000"/>    
+    <bean id="hospitalPatientCommonService" class="com.esuizhen.cloudservice.user.service.impl.HospitalPatientServiceImpl" />
+	
+</beans>

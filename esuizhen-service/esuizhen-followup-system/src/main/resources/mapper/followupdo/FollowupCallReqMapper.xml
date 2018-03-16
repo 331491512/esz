@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followupdo.FollowupCallReqDao">
+
+	<insert id="insertFollowupCallReq"  parameterType="com.esuizhen.cloudservice.followup.model.followupdo.TFollowupPhoneCallStatusInfo" keyProperty="reqId" useGeneratedKeys="true">
+        INSERT INTO followup_call_req (
+        	followupTaskId ,
+        	followupAssignId,
+        	hospitalId,
+        	patientId,
+        	callId,
+        	followupDate,
+        	trueName,
+        	telphone,
+        	state,
+        	followupResultBuffId,
+        	followupResultId,
+        	operator,
+			callType,
+			isInstallVoiceBox,
+        	createTime,
+        	updateTime 
+        ) VALUES (
+        	#{followupTaskId} ,
+        	#{followupAssignId},
+        	#{hospitalId},
+        	#{patientId},
+        	#{callId},
+        	#{followupDate},
+        	#{trueName},
+        	#{telphone},
+        	#{state},
+        	#{followupResultBuffId},
+        	#{followupResultId},
+        	#{operator},
+			#{callType},
+			#{isInstallVoiceBox},
+        	now(),
+        	now()
+        )
+	</insert>
+    
+	<update id="updateFollowupCallReq" parameterType="com.esuizhen.cloudservice.followup.model.followupdo.TFollowupPhoneCallStatusInfo">
+        UPDATE followup_call_req 
+        <set>
+	        <if test="state != null">
+                state = #{state} ,
+            </if>
+	        <if test="resultProcessState != null">
+                resultProcessState = #{resultProcessState} ,
+            </if>
+	        <if test="followupResultBuffId != null">
+                followupResultBuffId = #{followupResultBuffId} ,
+            </if>
+             <if test="followupResultId != null">
+                followupResultId = #{followupResultId}
+            </if>
+        </set>
+        <where>
+        	<if test="followupTaskId != null">
+               and followupTaskId = #{followupTaskId} 
+            </if>
+        	<if test="followupAssignId != null">
+               and followupAssignId = #{followupAssignId} 
+            </if>
+	        <if test="patientId != null">
+               and patientId = #{patientId} 
+            </if>
+	        <if test="reqId != null">
+               and reqId = #{reqId}
+            </if>
+        </where>
+	</update>
+	
+	<select id="queryFollowupCallReqLast" parameterType="java.util.Map" resultType="com.esuizhen.cloudservice.followup.model.followupdo.TFollowupPhoneCallStatusInfo">
+		select * from followup_call_req
+        <where>
+        	mergeFlag!=2
+        	<if test="followupTaskId != null">
+               and followupTaskId = #{followupTaskId} 
+            </if>
+        	<if test="followupAssignId != null">
+               and followupAssignId = #{followupAssignId} 
+            </if>
+	        <if test="patientId != null">
+               and patientId = #{patientId} 
+            </if>
+	        <if test="reqId != null">
+               and reqId = #{reqId} 
+            </if>
+        </where>
+        order by createTime desc
+        limit 1
+	</select>
+</mapper>
+

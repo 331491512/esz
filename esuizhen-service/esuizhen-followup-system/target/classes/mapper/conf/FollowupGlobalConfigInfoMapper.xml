@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.conf.FollowupGlobalConfigInfoDao">
+
+	<sql id="Base_Column_List">
+		followupCycle, phoneResultMustConnectFlag, otherAsValidResultFlag,autoPatientNoPaddingFlag,autoGuessDiedFlag,
+		autoPatientNoPaddingDigits, cancerFilterFlag, deathDateRequiredFlag, diseaseTypeSelfDefineFlag, isOutsideCallAuth,outsideCallNum,isIpCall,ipCallNum,hospitalId,
+		hospitalName, rolloutTime, deployTime,followupResultFlag,notMalignantTumorFlag,validResultControlFlag, createTime, updateTime,
+		PERIOD_DIFF(DATE_FORMAT(NOW(),'%Y%m'),DATE_FORMAT(rolloutTime,'%Y%m')) rolloutMonth,
+		followupRangeFlag,smsTemplateShowPatientNameFlag,deployLocation,displayFollowupTable,followupActivateSmsFlag,exportSensitiveDataFlag,
+		confirmedDateFlag,IFNULL(confirmedDateModCount, -1) confirmedDateModCount,confirmedDateModPersonFlag
+	</sql>
+
+	<select id="selectFollowupGlobalConfigInfo" resultType="com.esuizhen.cloudservice.followup.model.conf.TFollowupGlobalConfigInfo">
+		select 
+		      <include refid="Base_Column_List" />
+		from conf_global
+	</select>
+	
+	<!-- 系统全局配置 -->
+	<select id="queryFollowupGlobalConfigInfo" resultType="java.util.LinkedHashMap">
+		select followupCycle,autoPatientNoPaddingFlag,autoPatientNoPaddingDigits from followup_db.conf_global
+	</select>
+	
+	<insert id="createFollowupGlobalConfigInfo" parameterType="com.esuizhen.cloudservice.followup.model.conf.TFollowupGlobalConfigInfo">
+	    insert into conf_global (followupCycle, phoneResultMustConnectFlag, 
+	      otherAsValidResultFlag, autoPatientNoPaddingFlag, 
+	      autoPatientNoPaddingDigits, cancerFilterFlag, deathDateRequiredFlag,
+	      diseaseTypeSelfDefineFlag, isOutsideCallAuth,outsideCallNum,isIpCall,ipCallNum,hospitalId, 
+	      hospitalName, rolloutTime, deployTime, followupResultFlag,notMalignantTumorFlag,validResultControlFlag,smsTemplateShowPatientNameFlag,
+	      exportSensitiveDataFlag,confirmedDateFlag,confirmedDateModCount,confirmedDateModPersonFlag,createTime, updateTime)
+	    values (#{followupCycle}, #{phoneResultMustConnectFlag}, 
+	      #{otherAsValidResultFlag}, #{autoPatientNoPaddingFlag}, 
+	      #{autoPatientNoPaddingDigits}, #{cancerFilterFlag}, #{deathDateRequiredFlag},
+	      #{diseaseTypeSelfDefineFlag}, 
+	      #{isOutsideCallAuth},#{outsideCallNum},#{isIpCall},#{ipCallNum},
+	      #{hospitalId}, #{hospitalName}, #{rolloutTime}, #{deployTime}, #{followupResultFlag}, 
+	      #{notMalignantTumorFlag}, #{validResultControlFlag},#{smsTemplateShowPatientNameFlag},#{exportSensitiveDataFlag},
+	      #{confirmedDateFlag},#{confirmedDateModCount},#{confirmedDateModPersonFlag},now(), now())
+	</insert>
+	
+	<update id="updateFollowupGlobalConfigInfo" parameterType="com.esuizhen.cloudservice.followup.model.conf.TFollowupGlobalConfigInfo" >
+	    update conf_global
+	    <set >
+	      <if test="followupCycle != null" >
+	        followupCycle = #{followupCycle},
+	      </if>
+	      <if test="phoneResultMustConnectFlag != null" >
+	        phoneResultMustConnectFlag = #{phoneResultMustConnectFlag},
+	      </if>
+	      <if test="otherAsValidResultFlag != null" >
+	        otherAsValidResultFlag = #{otherAsValidResultFlag},
+	      </if>
+	      <if test="autoPatientNoPaddingFlag != null" >
+	        autoPatientNoPaddingFlag = #{autoPatientNoPaddingFlag},
+	      </if>
+	      <if test="autoPatientNoPaddingDigits != null" >
+	        autoPatientNoPaddingDigits = #{autoPatientNoPaddingDigits},
+	      </if>
+	      <if test="cancerFilterFlag != null" >
+	        cancerFilterFlag = #{cancerFilterFlag},
+	      </if>
+	      <if test="deathDateRequiredFlag != null" >
+	        deathDateRequiredFlag = #{deathDateRequiredFlag},
+	      </if>
+	      <if test="diseaseTypeSelfDefineFlag != null" >
+	        diseaseTypeSelfDefineFlag = #{diseaseTypeSelfDefineFlag},
+	      </if>
+	      <if test="isOutsideCallAuth != null" >
+	        isOutsideCallAuth = #{isOutsideCallAuth},
+	      </if>
+	      <if test="outsideCallNum != null" >
+	        outsideCallNum = #{outsideCallNum},
+	      </if>
+	      <if test="isIpCall != null" >
+	        isIpCall = #{isIpCall},
+	      </if>
+	      ipCallNum = #{ipCallNum},
+	      <if test="hospitalName != null" >
+	        hospitalName = #{hospitalName},
+	      </if>
+	      <if test="rolloutTime != null" >
+	        rolloutTime = #{rolloutTime},
+	      </if>
+	      <if test="deployTime != null" >
+	        deployTime = #{deployTime},
+	      </if>
+	      <if test="followupResultFlag != null" >
+	        followupResultFlag = #{followupResultFlag},
+	      </if>
+	      <if test="validResultControlFlag != null" >
+	        validResultControlFlag = #{validResultControlFlag},
+	      </if>
+	      <if test="createTime != null" >
+	        createTime = #{createTime},
+	      </if>
+	      <if test="autoGuessDiedFlag != null" >
+	        autoGuessDiedFlag = #{autoGuessDiedFlag},
+	      </if>
+	      <if test="followupRangeFlag!=null">
+	      	followupRangeFlag = #{followupRangeFlag},
+	      </if>
+	      <if test="notMalignantTumorFlag!=null">
+	        notMalignantTumorFlag = #{notMalignantTumorFlag},
+	      </if>
+	      <if test="smsTemplateShowPatientNameFlag!=null">
+	        smsTemplateShowPatientNameFlag = #{smsTemplateShowPatientNameFlag},
+	      </if>
+	      <if test="followupActivateSmsFlag !=null">
+	        followupActivateSmsFlag = #{followupActivateSmsFlag},
+	      </if>
+	      <if test="exportSensitiveDataFlag !=null">
+	        exportSensitiveDataFlag = #{exportSensitiveDataFlag},
+	      </if>
+	      <if test="confirmedDateFlag !=null">
+	        confirmedDateFlag = #{confirmedDateFlag},
+	      </if>
+	        confirmedDateModCount = #{confirmedDateModCount},
+	      <!-- 
+	      <if test="confirmedDateModCount !=null">
+	      </if>
+	       -->
+	      <if test="confirmedDateModPersonFlag !=null">
+	        confirmedDateModPersonFlag = #{confirmedDateModPersonFlag},
+	      </if>
+	        updateTime = now()
+	    </set>
+	    <!-- where hospitalId=#{hospitalId} -->
+     </update>
+</mapper>

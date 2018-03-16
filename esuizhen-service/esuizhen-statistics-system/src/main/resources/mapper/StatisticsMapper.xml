@@ -1,0 +1,676 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.statistics.dao.StatisticsDao">
+	<!-- 生存率统计 
+	<select id="querySurvivalResult" resultType="java.util.LinkedHashMap">
+	select
+	SUM(CASE survival3 WHEN 1 THEN 1 ELSE 0 END) su3,SUM(CASE
+	survival3 WHEN -1 THEN 1 ELSE 0 END) los3,SUM(CASE survival3 WHEN 0
+	THEN 1 WHEN 1 THEN 1 ELSE 0 END) effective3,SUM(CASE WHEN survival3 IS
+	NOT NULL THEN 1 ELSE 0 END) total3,
+	SUM(CASE survival6 WHEN 1 THEN 1 ELSE 0 END) su6,SUM(CASE survival6 WHEN -1
+	THEN 1 ELSE 0 END) los6,SUM(CASE survival6 WHEN 0 THEN 1 WHEN 1 THEN 1
+	ELSE 0 END) effective6,SUM(CASE WHEN survival6 IS NOT NULL THEN 1 ELSE
+	0 END) total6,
+	SUM(CASE survival9 WHEN 1 THEN 1 ELSE 0 END) su9,SUM(CASE survival9 WHEN -1
+	THEN 1 ELSE 0 END) los9,SUM(CASE survival9 WHEN 0 THEN 1 WHEN 1 THEN 1
+	ELSE 0 END) effective9,SUM(CASE WHEN survival9 IS NOT NULL THEN 1 ELSE
+	0 END) total9,
+	SUM(CASE survival12 WHEN 1 THEN 1 ELSE 0 END) su12,SUM(CASE survival12 WHEN -1
+	THEN 1 ELSE 0 END) los12,SUM(CASE survival12 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective12,SUM(CASE WHEN survival12 IS NOT NULL THEN 1
+	ELSE 0 END) total12,
+	SUM(CASE survival15 WHEN 1 THEN 1 ELSE 0 END) su15,SUM(CASE survival15 WHEN -1
+	THEN 1 ELSE 0 END) los15,SUM(CASE survival15 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective15,SUM(CASE WHEN survival15 IS NOT NULL THEN 1
+	ELSE 0 END) total15,
+	SUM(CASE survival18 WHEN 1 THEN 1 ELSE 0 END) su18,SUM(CASE survival18 WHEN -1
+	THEN 1 ELSE 0 END) los18,SUM(CASE survival18 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective18,SUM(CASE WHEN survival18 IS NOT NULL THEN 1
+	ELSE 0 END) total18,
+	SUM(CASE survival21 WHEN 1 THEN 1 ELSE 0 END) su21,SUM(CASE survival21 WHEN -1
+	THEN 1 ELSE 0 END) los21,SUM(CASE survival21 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective21,SUM(CASE WHEN survival21 IS NOT NULL THEN 1
+	ELSE 0 END) total21,
+	SUM(CASE survival24 WHEN 1 THEN 1 ELSE 0 END) su24,SUM(CASE survival24 WHEN -1
+	THEN 1 ELSE 0 END) los24,SUM(CASE survival24 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective24,SUM(CASE WHEN survival24 IS NOT NULL THEN 1
+	ELSE 0 END) total24,
+	SUM(CASE survival27 WHEN 1 THEN 1 ELSE 0 END) su27,SUM(CASE survival27 WHEN -1
+	THEN 1 ELSE 0 END) los27,SUM(CASE survival27 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective27,SUM(CASE WHEN survival27 IS NOT NULL THEN 1
+	ELSE 0 END) total27,
+	SUM(CASE survival30 WHEN 1 THEN 1 ELSE 0 END) su30,SUM(CASE survival30 WHEN -1
+	THEN 1 ELSE 0 END) los30,SUM(CASE survival30 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective30,SUM(CASE WHEN survival30 IS NOT NULL THEN 1
+	ELSE 0 END) total30,
+	SUM(CASE survival33 WHEN 1 THEN 1 ELSE 0 END) su33,SUM(CASE survival33 WHEN -1
+	THEN 1 ELSE 0 END) los33,SUM(CASE survival33 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective33,SUM(CASE WHEN survival33 IS NOT NULL THEN 1
+	ELSE 0 END) total33,
+	SUM(CASE survival36 WHEN 1 THEN 1 ELSE 0 END) su36,SUM(CASE survival36 WHEN -1
+	THEN 1 ELSE 0 END) los36,SUM(CASE survival36 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective36,SUM(CASE WHEN survival36 IS NOT NULL THEN 1
+	ELSE 0 END) total36,
+	SUM(CASE survival39 WHEN 1 THEN 1 ELSE 0 END) su39,SUM(CASE survival39 WHEN -1
+	THEN 1 ELSE 0 END) los39,SUM(CASE survival39 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective39,SUM(CASE WHEN survival39 IS NOT NULL THEN 1
+	ELSE 0 END) total39,
+	SUM(CASE survival42 WHEN 1 THEN 1 ELSE 0 END) su42,SUM(CASE survival42 WHEN -1
+	THEN 1 ELSE 0 END) los42,SUM(CASE survival42 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective42,SUM(CASE WHEN survival42 IS NOT NULL THEN 1
+	ELSE 0 END) total42,
+	SUM(CASE survival45 WHEN 1 THEN 1 ELSE 0 END) su45,SUM(CASE survival45 WHEN -1
+	THEN 1 ELSE 0 END) los45,SUM(CASE survival45 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective45,SUM(CASE WHEN survival45 IS NOT NULL THEN 1
+	ELSE 0 END) total45,
+	SUM(CASE survival48 WHEN 1 THEN 1 ELSE 0 END) su48,SUM(CASE survival48 WHEN -1
+	THEN 1 ELSE 0 END) los48,SUM(CASE survival48 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective48,SUM(CASE WHEN survival48 IS NOT NULL THEN 1
+	ELSE 0 END) total48,
+	SUM(CASE survival51 WHEN 1 THEN 1 ELSE 0 END) su51,SUM(CASE survival51 WHEN -1
+	THEN 1 ELSE 0 END) los51,SUM(CASE survival51 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective51,SUM(CASE WHEN survival51 IS NOT NULL THEN 1
+	ELSE 0 END) total51,
+	SUM(CASE survival54 WHEN 1 THEN 1 ELSE 0 END) su54,SUM(CASE survival54 WHEN -1
+	THEN 1 ELSE 0 END) los54,SUM(CASE survival54 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective54,SUM(CASE WHEN survival54 IS NOT NULL THEN 1
+	ELSE 0 END) total54,
+	SUM(CASE survival57 WHEN 1 THEN 1 ELSE 0 END) su57,SUM(CASE survival57 WHEN -1
+	THEN 1 ELSE 0 END) los57,SUM(CASE survival57 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective57,SUM(CASE WHEN survival57 IS NOT NULL THEN 1
+	ELSE 0 END) total57,
+	SUM(CASE survival60 WHEN 1 THEN 1 ELSE 0 END) su60,SUM(CASE survival60 WHEN -1
+	THEN 1 ELSE 0 END) los60,SUM(CASE survival60 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective60,SUM(CASE WHEN survival60 IS NOT NULL THEN 1
+	ELSE 0 END) total60,
+	SUM(CASE survival72 WHEN 1 THEN 1 ELSE 0 END) su72,SUM(CASE survival72 WHEN -1
+	THEN 1 ELSE 0 END) los72,SUM(CASE survival72 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective72,SUM(CASE WHEN survival72 IS NOT NULL THEN 1
+	ELSE 0 END) total72,
+	SUM(CASE survival84 WHEN 1 THEN 1 ELSE 0 END) su84,SUM(CASE survival84 WHEN -1
+	THEN 1 ELSE 0 END) los84,SUM(CASE survival84 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective84,SUM(CASE WHEN survival84 IS NOT NULL THEN 1
+	ELSE 0 END) total84,
+	SUM(CASE survival96 WHEN 1 THEN 1 ELSE 0 END) su96,SUM(CASE survival96 WHEN -1
+	THEN 1 ELSE 0 END) los96,SUM(CASE survival96 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective96,SUM(CASE WHEN survival96 IS NOT NULL THEN 1
+	ELSE 0 END) total96,
+	SUM(CASE survival108 WHEN 1 THEN 1 ELSE 0 END) su108,SUM(CASE survival108 WHEN
+	-1 THEN 1 ELSE 0 END) los108,SUM(CASE survival108 WHEN 0 THEN 1 WHEN 1
+	THEN 1 ELSE 0 END) effective108,SUM(CASE WHEN survival108 IS NOT NULL
+	THEN 1 ELSE 0 END) total108,
+	SUM(CASE survival120 WHEN 1 THEN 1 ELSE 0 END) su120,SUM(CASE survival120 WHEN
+	-1 THEN 1 ELSE 0 END) los120,SUM(CASE survival120 WHEN 0 THEN 1 WHEN 1
+	THEN 1 ELSE 0 END) effective120,SUM(CASE WHEN survival120 IS NOT NULL
+	THEN 1 ELSE 0 END) total120
+	<if test="wantDiseaseType!=null and wantDiseaseType==1">
+		,t2.diseaseTypeName,t2.diseaseTypeId
+	</if>
+	from patient_survival t1
+	<if test="wantDiseaseType!=null and wantDiseaseType==1">
+		INNER JOIN ehr_db.meta_c_disease_type t2 ON t1.diseaseTypeId=t2.diseaseTypeId 
+		AND t2.diseaseTypeId in
+		<foreach collection="diseaseTypes" open="(" close=")" separator="," item="item">
+			#{item}
+		</foreach> 
+	</if>
+	<if test="sql!=null">
+	JOIN (${sql})
+	t ON t1.patientId = t.patientId
+	</if>
+	where confirmedDate is
+	not null
+	<if test="wantDiseaseType!=null and wantDiseaseType==1">
+		GROUP BY t2.diseaseTypeId
+	</if>
+	</select>-->
+	
+	
+	<!-- 随访日报统计
+	<select id="queryFollowupReportResult" resultType="java.util.LinkedHashMap">
+	select
+	COUNT(t1.patientId) patientCount,
+	SUM(CASE WHEN t1.followupResultType IS NULL OR t1.followupResultType=2 THEN 1 ELSE 0 END) invalidCount,
+	SUM(CASE WHEN t1.followupResultType=1 THEN 1 ELSE 0 END) effectiveCount,
+	SUM(CASE WHEN t1.liveStatus=1 THEN 1 ELSE 0 END) survivalCount,
+	SUM(CASE WHEN t1.liveStatus=0 THEN 1 ELSE 0 END) deathCount,
+	SUM(CASE survival3 WHEN 1 THEN 1 ELSE 0 END) su3,SUM(CASE
+	survival3 WHEN -1 THEN 1 ELSE 0 END) los3,SUM(CASE survival3 WHEN 0
+	THEN 1 WHEN 1 THEN 1 ELSE 0 END) effective3,SUM(CASE WHEN survival3 IS
+	NOT NULL THEN 1 ELSE 0 END) total3,
+	SUM(CASE survival6 WHEN 1 THEN 1 ELSE 0 END) su6,SUM(CASE survival6 WHEN -1
+	THEN 1 ELSE 0 END) los6,SUM(CASE survival6 WHEN 0 THEN 1 WHEN 1 THEN 1
+	ELSE 0 END) effective6,SUM(CASE WHEN survival6 IS NOT NULL THEN 1 ELSE
+	0 END) total6,
+	SUM(CASE survival9 WHEN 1 THEN 1 ELSE 0 END) su9,SUM(CASE survival9 WHEN -1
+	THEN 1 ELSE 0 END) los9,SUM(CASE survival9 WHEN 0 THEN 1 WHEN 1 THEN 1
+	ELSE 0 END) effective9,SUM(CASE WHEN survival9 IS NOT NULL THEN 1 ELSE
+	0 END) total9,
+	SUM(CASE survival12 WHEN 1 THEN 1 ELSE 0 END) su12,SUM(CASE survival12 WHEN -1
+	THEN 1 ELSE 0 END) los12,SUM(CASE survival12 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective12,SUM(CASE WHEN survival12 IS NOT NULL THEN 1
+	ELSE 0 END) total12,
+	SUM(CASE survival15 WHEN 1 THEN 1 ELSE 0 END) su15,SUM(CASE survival15 WHEN -1
+	THEN 1 ELSE 0 END) los15,SUM(CASE survival15 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective15,SUM(CASE WHEN survival15 IS NOT NULL THEN 1
+	ELSE 0 END) total15,
+	SUM(CASE survival18 WHEN 1 THEN 1 ELSE 0 END) su18,SUM(CASE survival18 WHEN -1
+	THEN 1 ELSE 0 END) los18,SUM(CASE survival18 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective18,SUM(CASE WHEN survival18 IS NOT NULL THEN 1
+	ELSE 0 END) total18,
+	SUM(CASE survival21 WHEN 1 THEN 1 ELSE 0 END) su21,SUM(CASE survival21 WHEN -1
+	THEN 1 ELSE 0 END) los21,SUM(CASE survival21 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective21,SUM(CASE WHEN survival21 IS NOT NULL THEN 1
+	ELSE 0 END) total21,
+	SUM(CASE survival24 WHEN 1 THEN 1 ELSE 0 END) su24,SUM(CASE survival24 WHEN -1
+	THEN 1 ELSE 0 END) los24,SUM(CASE survival24 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective24,SUM(CASE WHEN survival24 IS NOT NULL THEN 1
+	ELSE 0 END) total24,
+	SUM(CASE survival27 WHEN 1 THEN 1 ELSE 0 END) su27,SUM(CASE survival27 WHEN -1
+	THEN 1 ELSE 0 END) los27,SUM(CASE survival27 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective27,SUM(CASE WHEN survival27 IS NOT NULL THEN 1
+	ELSE 0 END) total27,
+	SUM(CASE survival30 WHEN 1 THEN 1 ELSE 0 END) su30,SUM(CASE survival30 WHEN -1
+	THEN 1 ELSE 0 END) los30,SUM(CASE survival30 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective30,SUM(CASE WHEN survival30 IS NOT NULL THEN 1
+	ELSE 0 END) total30,
+	SUM(CASE survival33 WHEN 1 THEN 1 ELSE 0 END) su33,SUM(CASE survival33 WHEN -1
+	THEN 1 ELSE 0 END) los33,SUM(CASE survival33 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective33,SUM(CASE WHEN survival33 IS NOT NULL THEN 1
+	ELSE 0 END) total33,
+	SUM(CASE survival36 WHEN 1 THEN 1 ELSE 0 END) su36,SUM(CASE survival36 WHEN -1
+	THEN 1 ELSE 0 END) los36,SUM(CASE survival36 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective36,SUM(CASE WHEN survival36 IS NOT NULL THEN 1
+	ELSE 0 END) total36,
+	SUM(CASE survival39 WHEN 1 THEN 1 ELSE 0 END) su39,SUM(CASE survival39 WHEN -1
+	THEN 1 ELSE 0 END) los39,SUM(CASE survival39 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective39,SUM(CASE WHEN survival39 IS NOT NULL THEN 1
+	ELSE 0 END) total39,
+	SUM(CASE survival42 WHEN 1 THEN 1 ELSE 0 END) su42,SUM(CASE survival42 WHEN -1
+	THEN 1 ELSE 0 END) los42,SUM(CASE survival42 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective42,SUM(CASE WHEN survival42 IS NOT NULL THEN 1
+	ELSE 0 END) total42,
+	SUM(CASE survival45 WHEN 1 THEN 1 ELSE 0 END) su45,SUM(CASE survival45 WHEN -1
+	THEN 1 ELSE 0 END) los45,SUM(CASE survival45 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective45,SUM(CASE WHEN survival45 IS NOT NULL THEN 1
+	ELSE 0 END) total45,
+	SUM(CASE survival48 WHEN 1 THEN 1 ELSE 0 END) su48,SUM(CASE survival48 WHEN -1
+	THEN 1 ELSE 0 END) los48,SUM(CASE survival48 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective48,SUM(CASE WHEN survival48 IS NOT NULL THEN 1
+	ELSE 0 END) total48,
+	SUM(CASE survival51 WHEN 1 THEN 1 ELSE 0 END) su51,SUM(CASE survival51 WHEN -1
+	THEN 1 ELSE 0 END) los51,SUM(CASE survival51 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective51,SUM(CASE WHEN survival51 IS NOT NULL THEN 1
+	ELSE 0 END) total51,
+	SUM(CASE survival54 WHEN 1 THEN 1 ELSE 0 END) su54,SUM(CASE survival54 WHEN -1
+	THEN 1 ELSE 0 END) los54,SUM(CASE survival54 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective54,SUM(CASE WHEN survival54 IS NOT NULL THEN 1
+	ELSE 0 END) total54,
+	SUM(CASE survival57 WHEN 1 THEN 1 ELSE 0 END) su57,SUM(CASE survival57 WHEN -1
+	THEN 1 ELSE 0 END) los57,SUM(CASE survival57 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective57,SUM(CASE WHEN survival57 IS NOT NULL THEN 1
+	ELSE 0 END) total57,
+	SUM(CASE survival60 WHEN 1 THEN 1 ELSE 0 END) su60,SUM(CASE survival60 WHEN -1
+	THEN 1 ELSE 0 END) los60,SUM(CASE survival60 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective60,SUM(CASE WHEN survival60 IS NOT NULL THEN 1
+	ELSE 0 END) total60,
+	SUM(CASE survival72 WHEN 1 THEN 1 ELSE 0 END) su72,SUM(CASE survival72 WHEN -1
+	THEN 1 ELSE 0 END) los72,SUM(CASE survival72 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective72,SUM(CASE WHEN survival72 IS NOT NULL THEN 1
+	ELSE 0 END) total72,
+	SUM(CASE survival84 WHEN 1 THEN 1 ELSE 0 END) su84,SUM(CASE survival84 WHEN -1
+	THEN 1 ELSE 0 END) los84,SUM(CASE survival84 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective84,SUM(CASE WHEN survival84 IS NOT NULL THEN 1
+	ELSE 0 END) total84,
+	SUM(CASE survival96 WHEN 1 THEN 1 ELSE 0 END) su96,SUM(CASE survival96 WHEN -1
+	THEN 1 ELSE 0 END) los96,SUM(CASE survival96 WHEN 0 THEN 1 WHEN 1 THEN
+	1 ELSE 0 END) effective96,SUM(CASE WHEN survival96 IS NOT NULL THEN 1
+	ELSE 0 END) total96,
+	SUM(CASE survival108 WHEN 1 THEN 1 ELSE 0 END) su108,SUM(CASE survival108 WHEN
+	-1 THEN 1 ELSE 0 END) los108,SUM(CASE survival108 WHEN 0 THEN 1 WHEN 1
+	THEN 1 ELSE 0 END) effective108,SUM(CASE WHEN survival108 IS NOT NULL
+	THEN 1 ELSE 0 END) total108,
+	SUM(CASE survival120 WHEN 1 THEN 1 ELSE 0 END) su120,SUM(CASE survival120 WHEN
+	-1 THEN 1 ELSE 0 END) los120,SUM(CASE survival120 WHEN 0 THEN 1 WHEN 1
+	THEN 1 ELSE 0 END) effective120,SUM(CASE WHEN survival120 IS NOT NULL
+	THEN 1 ELSE 0 END) total120
+	<if test="wantDiseaseType!=null and wantDiseaseType==1">
+		,t2.diseaseTypeName,t2.diseaseTypeId
+	</if>
+	from ods_db.patient_baseinfo t1
+	LEFT JOIN ods_db.patient_survival t3 ON t1.patientId=t3.patientId
+	<if test="wantDiseaseType!=null and wantDiseaseType==1">
+		INNER JOIN ehr_db.meta_c_disease_type t2 ON t1.diseaseTypeId=t2.diseaseTypeId 
+		AND t2.diseaseTypeId in
+		<foreach collection="diseaseTypes" open="(" close=")" separator="," item="item">
+			#{item}
+		</foreach> 
+	</if>
+	<if test="doctorId!=null">
+		JOIN
+		<include refid="doctor_archit"/>
+		t ON t1.patientId = t.patientId
+	</if>
+	where 1=1
+	<if test="userRole==2">
+		and t1.patientId in (select patientId from user_db.r_doctor_patient where doctorId in (select doctorId from user_db.u_doctor where userId =#{userId})) 
+	</if>
+	<if test="wantDiseaseType!=null and wantDiseaseType==1">
+		GROUP BY t2.diseaseTypeId
+	</if>
+	</select>
+	 -->
+	<!-- 获取医生的病种 -->
+	<select id="queryDoctorDiseaseList" resultType="java.lang.Integer">
+		SELECT diseaseTypeId FROM
+		(
+		SELECT t4.diseaseTypeId,COUNT(t1.patientId) pnum 
+		FROM user_db.u_patient t1
+		JOIN followup_db.var_patient_followup t2 ON t1.patientId = t2.patientId
+		JOIN ehr_db.meta_c_disease_type t4 ON t1.sourceDiseaseTypeId=t4.diseaseTypeId
+		<if test="sql!=null">
+			JOIN (${sql})
+			t ON t1.patientId = t.patientId		
+		</if>
+		WHERE t4.diseaseTypeId not in (999,9999)
+		GROUP BY t4.diseaseTypeId
+		ORDER BY pnum desc
+		<if test="diseaseTypeNum!=null">
+			LIMIT #{diseaseTypeNum}
+		</if>
+		)t
+	</select>
+	
+	<!-- 性别年龄查询 -->
+	<select id="querySexAgeResult" resultType="com.esuizhen.cloudservice.statistics.bean.TSexAgeSpread">
+			select 
+			SUM(CASE sex WHEN 0 THEN 1 END) unknownSex, 
+			SUM(CASE sex WHEN 1 THEN 1 END) male, 
+			SUM(CASE sex WHEN 2 THEN 1 END) female,
+			<![CDATA[
+			SUM(CASE WHEN age<20 THEN 1 END) age20,
+			SUM(CASE WHEN age>=20 AND age <40 THEN 1 END) age40,
+			SUM(CASE WHEN age>=40 AND age <60 THEN 1 END) age60,
+			SUM(CASE WHEN age>=60 AND age <80 THEN 1 END) age80,
+			SUM(CASE WHEN age>=80 THEN 1 END) agemore,
+			]]> 
+			SUM(CASE WHEN age IS NULL THEN 1 END) unknownAge
+			from ods_db.patient_baseinfo t1
+			<if test="sql!=null">
+			JOIN (${sql})
+			t ON t1.patientId = t.patientId
+			</if>
+			where t1.patientId is not null
+	</select>
+	
+	<!-- 省份查询 -->
+	<select id="queryProvinceResult" resultType="com.esuizhen.cloudservice.statistics.bean.TProvinceSpreadItem">
+		select sum(number) number,CASE WHEN (provinceName="黑龙江省" OR provinceName="内蒙古自治区") THEN LEFT(provinceName,3) ELSE LEFT(provinceName,2)  END provinceName,regionCode provinceId from (
+			select COUNT(t1.patientId) number,CASE WHEN t1.provincedId is NULL THEN 0 ELSE t1.provincedId END provincedId 
+			from patient_baseinfo t1
+			<if test="sql!=null">
+			JOIN (${sql})
+			t ON t1.patientId = t.patientId
+			</if>
+			where t1.patientId is not null
+			GROUP BY t1.provincedId 
+		)t,user_db.meta_province t1 where t.provincedId=t1.provinceId  group by provinceId  order by number DESC
+	</select>
+	
+	<!-- 联系方式统计 -->
+	<select id="queryContactwaySpread" resultType="com.esuizhen.cloudservice.statistics.bean.TContactWaySpread">
+		select 
+		count(t2.patientId) totalNum,
+		count(CASE WHEN t2.weixinFlag=1 AND t2.mobile is not null THEN 1 END) hasWeixinAndMobile,
+		count(CASE WHEN t2.weixinFlag=1 AND t2.mobile is null THEN 1 END) justWeixin,
+		count(CASE WHEN t2.weixinFlag=0 AND t2.mobile is not null THEN 1 END) justMobile,
+		count(CASE WHEN t2.weixinFlag=0 AND t2.mobile is null THEN 1 END) noContactMethod
+		FROM
+		ods_db.patient_baseinfo t2
+		<if test="sql!=null">
+			JOIN (${sql})
+			t ON t2.patientId = t.patientId
+		</if>
+	</select>
+	
+	<!-- 是否随访统计 -->
+	<select id="queryFollowupSpread" resultType="com.esuizhen.cloudservice.statistics.bean.TFollowupSpread">
+		select 
+		count(t2.patientId) totalNum,
+		count(CASE WHEN followupResultType IS NULL THEN 1 END) noFollowup,
+		count(CASE WHEN followupResultType=1 THEN 1 END) effectiveFollowup,
+		count(CASE WHEN followupResultType=2 THEN 1 END) invalidFollowup
+		FROM 
+		ods_db.patient_baseinfo t2
+		<if test="sql!=null">
+			JOIN (${sql})
+			t ON t2.patientId = t.patientId
+		</if>
+	</select>
+	
+	<!-- 随访结果统计 -->
+	<select id="queryFollowupResultSpread" resultType="com.esuizhen.cloudservice.statistics.bean.TFollowupResultSpread">
+		select t.*,
+		@s:=FORMAT(stableNum / totalNum, 2) stableRate,
+		@r:=FORMAT(recurrenceNum / totalNum, 2) recurrenceRate,
+		@t:=FORMAT(transferNum / totalNum, 2) transferRate,
+		ROUND(@n-@s-@r-@t, 2) deathRate
+		from(
+		select 
+				COUNT(t2.patientId) totalNum,
+				COUNT(CASE t2.followupResultValueId WHEN 1 THEN 1 END) stableNum,
+				COUNT(CASE t2.followupResultValueId WHEN 2 THEN 1 END) recurrenceNum,
+				COUNT(CASE t2.followupResultValueId WHEN 3 THEN 1 END) transferNum,
+				COUNT(CASE t2.followupResultValueId WHEN 4 THEN 1 END) deathNum
+				FROM 
+				ods_db.patient_baseinfo t2
+				<if test="sql!=null">
+				JOIN (${sql})
+				t ON t2.patientId = t.patientId
+				</if>
+				WHERE 
+				t2.followupResultValueId in (1,2,3,4)
+		) t,(select @n:=1,@s:=0,@r:=0,@t:=0)n
+	</select>
+	
+	<!-- 病种统计 -->
+	<select id="queryDiseaseSpreadItem" resultType="com.esuizhen.cloudservice.statistics.bean.TDiseaseSpreadItem">
+		SELECT
+		count(t2.patientId) diseaseNum,
+		CASE WHEN t3.diseaseTypeId IS NULL THEN '未知' ELSE t3.diseaseTypeName END diseaseTypeName
+		FROM
+		ods_db.patient_baseinfo t2
+		<if test="sql!=null">
+				JOIN (${sql})
+		t ON t2.patientId = t.patientId
+		</if>
+		LEFT JOIN ehr_db.meta_c_disease_type t3 ON  t3.diseaseTypeId=t2.diseaseTypeId
+		group by t3.diseaseTypeId
+		order by diseaseNum desc	
+	</select>
+	
+	<!-- 更新每日新增随访结果数据和患者数据 -->
+	<select id="updateDayStatistics" statementType="CALLABLE">
+		call ods_db.update_statics_day() 
+	</select>
+	
+	
+	<!-- 平台均线查看 -->
+	<select id="querySurvivalAvg" resultType="java.util.LinkedHashMap">
+		SELECT * FROM ods_db.var_survival_avg
+		<where>
+			type =1
+			<choose>
+				<when test="wantDiseaseType==1 and diseaseTypes!=null">
+					AND typeId IN
+					<foreach collection="diseaseTypes" open="(" close=")" item="item" separator=",">
+						#{item}
+					</foreach>
+				</when>
+				<otherwise>
+					AND typeId = 0
+				</otherwise>
+			</choose>
+		</where>
+		<if test="wantDiseaseType==1 and diseaseTypes!=null">
+			<foreach collection="diseaseTypes" open="ORDER BY field(typeId," close=")" item="item" separator=",">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+	<!-- 医生统计查询  -->
+	<select id="queryDoctorSurvivalCount" resultType="java.util.LinkedHashMap">
+	SELECT t.*,t.totalNum-unvalidNum validNum
+	FROM
+	(
+		SELECT  
+		<if test="wantDiseaseType==1">
+			sourceDiseaseTypeId typeId,
+			t4.diseaseTypeName typeName,
+		</if>
+		COUNT(0) totalNum, 
+		SUM(IF(t3.type=2 OR t1.liveStatus=0 AND t1.deathDate IS NULL,1,0)) unvalidNum,
+		SUM(IF(t1.liveStatus=0 AND t1.deathDate IS NOT NULL,1,0))deathNum
+		FROM user_db.u_patient t1
+		<if test="sql!=null">
+			JOIN (${sql})
+			t ON t1.patientId = t.patientId
+		</if>
+		JOIN followup_db.var_patient_followup t2 ON t1.patientId = t2.patientId
+		JOIN followup_db.meta_followup_result_value t3 ON t2.followupResultValue = t3.followupResultValueId
+		<if test="wantDiseaseType==1">
+		JOIN ehr_db.meta_c_disease_type t4 ON t1.sourceDiseaseTypeId = t4.diseaseTypeId
+		</if>
+		<where>
+			<if test="wantDiseaseType==1 and diseaseTypes!=null">
+				t1.sourceDiseaseTypeId IN
+				<foreach collection="diseaseTypes" item="item" open="(" close=")" separator=",">
+					#{item}
+				</foreach>
+				GROUP BY sourceDiseaseTypeId
+			</if>
+			AND t1.patientType=1
+		</where>
+	)t
+	<if test="wantDiseaseType==1 and diseaseTypes!=null">
+			<foreach collection="diseaseTypes" open="ORDER BY field(typeId," close=")" item="item" separator=",">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+	
+	<!-- 返回结果 -->
+	<sql id="statisSurvivalOutPro">
+		<![CDATA[
+			CASE WHEN @maxMonth>3 THEN ROUND(IF(MIN(3m) IS NULL,1,MIN(3m))*100,2) ELSE NULL END survivalRate3
+			,CASE WHEN @maxMonth>6 THEN ROUND(IF(MIN(6m) IS NULL,1,MIN(6m))*100,2) ELSE NULL END survivalRate6
+			,CASE WHEN @maxMonth>9 THEN ROUND(IF(MIN(9m) IS NULL,1,MIN(9m))*100,2) ELSE NULL END survivalRate9
+			,CASE WHEN @maxMonth>12 THEN ROUND(IF(MIN(12m) IS NULL,1,MIN(12m))*100,2) ELSE NULL END survivalRate12
+			,CASE WHEN @maxMonth>15 THEN ROUND(IF(MIN(15m) IS NULL,1,MIN(15m))*100,2) ELSE NULL END survivalRate15
+			,CASE WHEN @maxMonth>18 THEN ROUND(IF(MIN(18m) IS NULL,1,MIN(18m))*100,2) ELSE NULL END survivalRate18
+			,CASE WHEN @maxMonth>21 THEN ROUND(IF(MIN(21m) IS NULL,1,MIN(21m))*100,2) ELSE NULL END survivalRate21
+			,CASE WHEN @maxMonth>24 THEN ROUND(IF(MIN(24m) IS NULL,1,MIN(24m))*100,2) ELSE NULL END survivalRate24
+			,CASE WHEN @maxMonth>27 THEN ROUND(IF(MIN(27m) IS NULL,1,MIN(27m))*100,2) ELSE NULL END survivalRate27
+			,CASE WHEN @maxMonth>30 THEN ROUND(IF(MIN(30m) IS NULL,1,MIN(30m))*100,2) ELSE NULL END survivalRate30
+			,CASE WHEN @maxMonth>33 THEN ROUND(IF(MIN(33m) IS NULL,1,MIN(33m))*100,2) ELSE NULL END survivalRate33
+			,CASE WHEN @maxMonth>36 THEN ROUND(IF(MIN(36m) IS NULL,1,MIN(36m))*100,2) ELSE NULL END survivalRate36
+			,CASE WHEN @maxMonth>39 THEN ROUND(IF(MIN(39m) IS NULL,1,MIN(39m))*100,2) ELSE NULL END survivalRate39
+			,CASE WHEN @maxMonth>42 THEN ROUND(IF(MIN(42m) IS NULL,1,MIN(42m))*100,2) ELSE NULL END survivalRate42
+			,CASE WHEN @maxMonth>45 THEN ROUND(IF(MIN(45m) IS NULL,1,MIN(45m))*100,2) ELSE NULL END survivalRate45
+			,CASE WHEN @maxMonth>48 THEN ROUND(IF(MIN(48m) IS NULL,1,MIN(48m))*100,2) ELSE NULL END survivalRate48
+			,CASE WHEN @maxMonth>51 THEN ROUND(IF(MIN(51m) IS NULL,1,MIN(51m))*100,2) ELSE NULL END survivalRate51
+			,CASE WHEN @maxMonth>54 THEN ROUND(IF(MIN(54m) IS NULL,1,MIN(54m))*100,2) ELSE NULL END survivalRate54
+			,CASE WHEN @maxMonth>57 THEN ROUND(IF(MIN(57m) IS NULL,1,MIN(57m))*100,2) ELSE NULL END survivalRate57
+			,CASE WHEN @maxMonth>60 THEN ROUND(IF(MIN(60m) IS NULL,1,MIN(60m))*100,2) ELSE NULL END survivalRate60
+			,CASE 
+			WHEN MIN(mlive) IS NOT NULL THEN MIN(mlive)
+			ELSE
+			IF(MAX(llive) IS NOT NULL AND MIN(rlive) IS NOT NULL,ROUND((MIN(llive)+MAX(rlive))/2,1),"-")
+			END middleMonth
+		]]>
+	</sql>
+	<!-- 单病种统计 -->
+	<select id="statisSurvivalRate" resultType="java.util.LinkedHashMap">
+		SELECT 
+			<include refid="statisSurvivalOutPro"/>
+		FROM
+		(
+		SELECT @maxMonth:=liveMonth maxMonth
+		,@dethReat:=ROUND(t.live/incount,5) dethReat
+		,@csurReat:=1-@dethReat csurReat 
+		,@surReat:= CASE WHEN @surReat IS NULL THEN @csurReat ELSE ROUND(@csurReat*@surReat,5) END surReat
+		,IF(liveMonth&lt;3,@thm:=@surReat,null) 3m
+		,IF(liveMonth&lt;6,@sim:=@surReat,null) 6m
+		,IF(liveMonth&lt;9,@nim:=@surReat,null) 9m
+		,IF(liveMonth&lt;12,@twm:=@surReat,null) 12m
+		,IF(liveMonth&lt;15,@twm:=@surReat,null) 15m
+		,IF(liveMonth&lt;18,@twm:=@surReat,null) 18m
+		,IF(liveMonth&lt;21,@twm:=@surReat,null) 21m
+		,IF(liveMonth&lt;24,@twm:=@surReat,null) 24m
+		,IF(liveMonth&lt;27,@twm:=@surReat,null) 27m
+		,IF(liveMonth&lt;30,@twm:=@surReat,null) 30m
+		,IF(liveMonth&lt;33,@twm:=@surReat,null) 33m
+		,IF(liveMonth&lt;36,@twm:=@surReat,null) 36m
+		,IF(liveMonth&lt;39,@twm:=@surReat,null) 39m
+		,IF(liveMonth&lt;42,@twy:=@surReat,null) 42m
+		,IF(liveMonth&lt;45,@thy:=@surReat,null) 45m
+		,IF(liveMonth&lt;48,@foy:=@surReat,null) 48m
+		,IF(liveMonth&lt;51,@foy:=@surReat,null) 51m
+		,IF(liveMonth&lt;54,@foy:=@surReat,null) 54m
+		,IF(liveMonth&lt;57,@foy:=@surReat,null) 57m
+		,IF(liveMonth&lt;60,@foy:=@surReat,null) 60m
+		,IF(@surReat=0.5,@m:=liveMonth,null) mlive
+		,IF(@surReat&lt;0.5,@ml:=liveMonth,null) llive
+		,IF(@surReat&gt;0.5,@m:=liveMonth,null) rlive
+		FROM
+		(
+		select t.*,
+		@row_count:=@row_count+1 incount FROM
+		(
+		SELECT
+			t1.trueName,
+			CASE WHEN t1.liveStatus=1 THEN 0 ELSE 1 END live,
+			t1.deathDate,
+			t2.latestFollowupTime,
+			t2.liveDay,
+			t2.liveMonth
+		FROM
+			user_db.u_patient t1
+			JOIN followup_db.var_patient_followup t2 ON t1.patientId = t2.patientId
+			JOIN followup_db.meta_followup_result_value t3 ON t2.followupValidResultValue = t3.followupResultValueId AND t3.type=1
+			<if test="sql!=null">
+				JOIN (${sql})
+				t ON t.patientId = t1.patientId
+			</if>
+			<where>
+				<if test="typeId!=null">
+					t1.sourceDiseaseTypeId = #{typeId}
+				</if>
+				AND t1.patientType=1
+			</where>
+		ORDER BY
+			liveDay DESC,liveStatus DESC
+		)t,(SELECT @row_count:=0) n
+		ORDER BY incount DESC
+		)t,
+		(SELECT @deaReat:=0,@csurReat:=0,@surReat:=NULL
+		,@thm:=NULL,@sixm:=NULL,@nim:=NULL,@twm:=NULL,@twy:=NULL,@thy:=NULL,@foy:=NULL,@fiy:=NULL
+		,@ml:=NULL,@mr:=NULL,@m:=NULL,@maxMonth:=NULL
+		) n
+		)t
+		
+	</select>
+	
+	<!-- 组织架构公共查询语句  -->
+	<sql id="doctor_archit">
+		(
+		SELECT
+		t1.patientId
+		FROM
+		user_db.r_doctor_patient t1
+		LEFT JOIN user_db.r_doctor t2 ON
+		t2.state = 1
+		AND t1.doctorId = t2.doctorId
+		WHERE 1
+		<choose>
+			<when test="doctorLevel==1">
+				AND t2.deanDoctorId=#{doctorId}
+			</when>
+			<when test="doctorLevel==2">
+				AND t2.deptDoctorId=#{doctorId}
+			</when>
+			<when test="doctorLevel==21">
+				AND t2.deptSecDoctorId=#{doctorId}
+			</when>
+			<when test="doctorLevel==3">
+				AND t2.directorDoctorId=#{doctorId}
+			</when>
+			<when test="doctorLevel==4">
+				AND t2.inchargeDoctorId=#{doctorId}
+			</when>
+			<otherwise>
+				AND t1.doctorId=#{doctorId}
+			</otherwise>
+		</choose>
+		GROUP BY patientId
+		<if test="doctorLevel==1">
+			UNION
+			SELECT
+			t1.patientId
+			FROM
+			user_db.r_hospital_patient t1
+			JOIN
+			user_db.r_hospital_doctor t2 ON t1.hospitalId = t2.hospitalId
+			WHERE
+			t2.doctorId = #{doctorId}
+		</if>
+		)
+	</sql>
+	
+	<!-- 随访进度统计-近一年随访结果 -->
+	<select id="statisticsFollowupProgressively" resultType="com.esuizhen.cloudservice.statistics.bean.TFollowupSpread">
+		select *
+			<!-- ,FORMAT(noFollowup/totalNum,3) noFollowupRate -->
+			,FORMAT(effectiveFollowup/totalNum,3) effectiveRate
+			,FORMAT(invalidFollowup/totalNum,3) invalidRate
+		from(
+		SELECT 
+		COUNT(DISTINCT t1.patientId) totalNum,
+		COUNT(DISTINCT CASE WHEN t2.followupResultValue IN(1,2,3,4,15,16) THEN t2.patientId END) effectiveFollowup,
+		COUNT(DISTINCT CASE WHEN t2.followupResultValue BETWEEN 5 AND 14 THEN t2.patientId END) invalidFollowup
+		 FROM 
+		user_db.u_patient t1
+		LEFT JOIN followup_db.var_patient_followup t2 ON t1.patientId=t2.patientId
+		<if test="statisticResultType != null">
+			<if test="statisticResultType == 1">
+				<![CDATA[
+					and DATE_FORMAT(t2.latestFollowupTime,'%Y-%m-%d') >=DATE_FORMAT(DATE_ADD(NOW(),INTERVAL -365 DAY),'%Y-%m-%d')
+				]]>
+			</if>
+		</if>
+		<if test="sql!=null">
+				JOIN (${sql})
+		t ON t1.patientId = t.patientId
+		</if>
+		WHERE t1.patientType = 1 AND t1.mergeFlag != 2
+		) t
+	</select>
+	
+	<!-- 统计患者近一年末次有效随访结果 -->
+	<select id="statisticsLastEffectiveFollowupResult" resultType="com.esuizhen.cloudservice.statistics.bean.TFollowupResultSpread">
+		select *
+		,FORMAT(stableNum/totalNum,2) stableRate
+		,FORMAT(recurrenceNum/totalNum,2) recurrenceRate
+		,FORMAT(transferNum/totalNum,2) transferRate
+		,FORMAT(deathNum/totalNum,2) deathRate
+		from(
+		select 
+			COUNT(t1.patientId) totalNum,
+			COUNT(CASE WHEN t1.followupResultValue IN(1,15,16) THEN 1 END) stableNum,
+			COUNT(CASE t1.followupResultValue WHEN 2 THEN 1 END) recurrenceNum,
+			COUNT(CASE t1.followupResultValue WHEN 3 THEN 1 END) transferNum,
+			COUNT(CASE t1.followupResultValue WHEN 4 THEN 1 END) deathNum
+			FROM 
+			followup_db.var_patient_followup t1
+			<if test="sql!=null">
+				JOIN (${sql})
+			t ON t1.patientId = t.patientId
+			</if>
+			JOIN user_db.u_patient t2 ON t1.patientId=t2.patientId AND t2.patientType=1
+			WHERE 
+			t1.followupResultValue in (1,2,3,4,15,16)
+			<if test="statisticResultType != null">
+				<if test="statisticResultType == 2">
+					<![CDATA[
+						and DATE_FORMAT(t1.latestFollowupTime,'%Y-%m-%d') >=DATE_FORMAT(DATE_ADD(NOW(),INTERVAL -365 DAY),'%Y-%m-%d')
+					]]>
+				</if>
+			</if>
+		) t
+	</select>
+</mapper>
+

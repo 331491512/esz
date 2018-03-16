@@ -1,0 +1,828 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.TPatientWideDao">
+
+	<select id="queryPatientWideByPatientId" parameterType="Long" resultType="com.esuizhen.cloudservice.user.model.TPatientWide">
+		select * from ehr_db.e_patient_wide_table 
+		<where>
+			patientId=#{patientId}
+		</where>
+	</select>
+	
+	<insert id="insertPatientWide" parameterType="com.esuizhen.cloudservice.user.model.TPatientWide" >
+    insert into ehr_db.e_patient_wide_table (id, patientId, sourceDiagnosisId, 
+      sourceDiagnosisId2, inhospitalId, inhospitalId2, 
+      familyName1, patientRelationId1, patientRelation1, 
+      familyPhone1, address1, isValid1, 
+      familyName2, patientRelationId2, patientRelation2, 
+      familyPhone2, address2, isValid2, 
+      familyName3, patientRelationId3, patientRelation3, 
+      familyPhone3, address3, isValid3, 
+      familyCreateTime3, sourceInhospitalWay, 
+      sourceInhospitalWayName, sourceInhospitalDate, 
+      sourceOuthospitalDate, sourceInhospitalDeptId, 
+      sourceInhospitalDeptName, sourceOuthospitalDeptId, 
+      sourceOuthospitalDeptName, sourceTurnDeptId, 
+      sourceTurnDeptName, sourceDeptDoctor, sourceDeptDoctorName, 
+      sourceDirectorDoctor, sourceDirectorDoctorName, 
+      sourceInchargeDoctor, sourceInchargeDoctorName, 
+      sourceInhospitalDoctor, sourceInhospitalDoctorName, 
+      sourceAttendingDoctor, sourceAttendingDoctorName, 
+      sourceCancerNum, confirmedDate, confirmedAge, 
+      sourceDiseaseTypeId, sourceDiseaseTypeName, 
+      sourceDiagnosis, sourceDiseaseCode, secondaryDiagnosis, 
+      secondaryDiseaseCode, secondaryPathologyDiagnosis, 
+      secondaryPathologyDiseaseCode, sourceDiagnosis2, 
+      sourceDiseaseCode2, sourcePathologyDiagnosis2, 
+      sourcePathologyDiseaseCode2, tumourPeriodizationClinic, 
+      tumourPeriodizationTNM, diagnosis1, diagnosis2, 
+      diagnosis3, diagnosis4, diagnosis5, 
+      diseaseCode1, diseaseCode2, diseaseCode3, 
+      diseaseCode4, diseaseCode5, pathologyDiagnosis1, 
+      pathologyDiagnosis2, pathologyDiagnosis3, 
+      pathologyDiagnosis4, pathologyDiagnosis5, 
+      pathologyDiagnosisCode1, pathologyDiagnosisCode2, 
+      pathologyDiagnosisCode3, pathologyDiagnosisCode4, 
+      pathologyDiagnosisCode5, disagnosisPeriodizationId1, 
+      disagnosisPeriodizationId2, disagnosisPeriodizationId3, 
+      disagnosisPeriodizationId4, disagnosisPeriodizationId5, 
+      disagnosisPeriodizationName1, disagnosisPeriodizationName2, 
+      disagnosisPeriodizationName3, disagnosisPeriodizationName4, 
+      disagnosisPeriodizationName5, surgeryDate1, 
+      surgeryDate2, surgeryDate3, surgeryDate4, 
+      surgeryDate5, surgeryDate6, surgeryDate7, 
+      surgeryDate8, surgeryName1, surgeryName2, 
+      surgeryName3, surgeryName4, surgeryName5, 
+      surgeryName6, surgeryName7, surgeryName8, 
+      opCode1, opCode2, opCode3, 
+      opCode4, opCode5, opCode6, 
+      opCode7, opCode8, surgeryDoctor1, 
+      surgeryDoctor2, surgeryDoctor3, surgeryDoctor4, 
+      surgeryDoctor5, surgeryDoctor6, surgeryDoctor7, 
+      surgeryDoctor8, surgeryDoctorName1, surgeryDoctorName2, 
+      surgeryDoctorName3, surgeryDoctorName4, 
+      surgeryDoctorName5, surgeryDoctorName6, 
+      surgeryDoctorName7, surgeryDoctorName8, 
+      familyCreateTime1, familyCreateTime2, 
+      diagnosisCreateTime1, diagnosisCreateTime2, 
+      diagnosisCreateTime3, diagnosisCreateTime4, 
+      diagnosisCreateTime5, diagnosisType1, 
+      diagnosisType2, diagnosisType3, diagnosisType4, 
+      diagnosisType5, diagnosisId1, diagnosisId2, 
+      diagnosisId3, diagnosisId4, diagnosisId5, 
+      surgeryCreateTime1, surgeryCreateTime2, 
+      surgeryCreateTime3, surgeryCreateTime4, 
+      surgeryCreateTime5, surgeryCreateTime6, 
+      surgeryCreateTime7, surgeryCreateTime8, 
+      treatmentNames, treatmentHistory, firstOuthospitalDeptId, 
+      firstOuthospitalDeptName, latestOuthospitalDeptId, 
+      latestOuthospitalDeptName, latestClinicDate, 
+      latestInhospitalDate, latestOuthospitalDate, 
+      createTime)
+    values (#{id,jdbcType=INTEGER}, #{patientId,jdbcType=BIGINT}, #{sourceDiagnosisId,jdbcType=VARCHAR}, 
+      #{sourceDiagnosisId2,jdbcType=VARCHAR}, #{inhospitalId,jdbcType=VARCHAR}, #{inhospitalId2,jdbcType=VARCHAR}, 
+      #{familyName1,jdbcType=VARCHAR}, #{patientRelationId1,jdbcType=INTEGER}, #{patientRelation1,jdbcType=VARCHAR}, 
+      #{familyPhone1,jdbcType=VARCHAR}, #{address1,jdbcType=VARCHAR}, #{isValid1,jdbcType=INTEGER}, 
+      #{familyName2,jdbcType=VARCHAR}, #{patientRelationId2,jdbcType=INTEGER}, #{patientRelation2,jdbcType=VARCHAR}, 
+      #{familyPhone2,jdbcType=VARCHAR}, #{address2,jdbcType=VARCHAR}, #{isValid2,jdbcType=INTEGER}, 
+      #{familyName3,jdbcType=VARCHAR}, #{patientRelationId3,jdbcType=INTEGER}, #{patientRelation3,jdbcType=VARCHAR}, 
+      #{familyPhone3,jdbcType=VARCHAR}, #{address3,jdbcType=VARCHAR}, #{isValid3,jdbcType=INTEGER}, 
+      #{familyCreateTime3,jdbcType=TIMESTAMP}, #{sourceInhospitalWay,jdbcType=INTEGER}, 
+      #{sourceInhospitalWayName,jdbcType=VARCHAR}, #{sourceInhospitalDate,jdbcType=DATE}, 
+      #{sourceOuthospitalDate,jdbcType=DATE}, #{sourceInhospitalDeptId,jdbcType=INTEGER}, 
+      #{sourceInhospitalDeptName,jdbcType=VARCHAR}, #{sourceOuthospitalDeptId,jdbcType=INTEGER}, 
+      #{sourceOuthospitalDeptName,jdbcType=VARCHAR}, #{sourceTurnDeptId,jdbcType=INTEGER}, 
+      #{sourceTurnDeptName,jdbcType=VARCHAR}, #{sourceDeptDoctor,jdbcType=INTEGER}, #{sourceDeptDoctorName,jdbcType=VARCHAR}, 
+      #{sourceDirectorDoctor,jdbcType=INTEGER}, #{sourceDirectorDoctorName,jdbcType=VARCHAR}, 
+      #{sourceInchargeDoctor,jdbcType=INTEGER}, #{sourceInchargeDoctorName,jdbcType=VARCHAR}, 
+      #{sourceInhospitalDoctor,jdbcType=INTEGER}, #{sourceInhospitalDoctorName,jdbcType=VARCHAR}, 
+      #{sourceAttendingDoctor,jdbcType=INTEGER}, #{sourceAttendingDoctorName,jdbcType=VARCHAR}, 
+      #{sourceCancerNum,jdbcType=INTEGER}, #{confirmedDate,jdbcType=DATE}, #{confirmedAge,jdbcType=INTEGER}, 
+      #{sourceDiseaseTypeId,jdbcType=INTEGER}, #{sourceDiseaseTypeName,jdbcType=VARCHAR}, 
+      #{sourceDiagnosis,jdbcType=VARCHAR}, #{sourceDiseaseCode,jdbcType=VARCHAR}, #{secondaryDiagnosis,jdbcType=VARCHAR}, 
+      #{secondaryDiseaseCode,jdbcType=VARCHAR}, #{secondaryPathologyDiagnosis,jdbcType=VARCHAR}, 
+      #{secondaryPathologyDiseaseCode,jdbcType=VARCHAR}, #{sourceDiagnosis2,jdbcType=VARCHAR}, 
+      #{sourceDiseaseCode2,jdbcType=VARCHAR}, #{sourcePathologyDiagnosis2,jdbcType=VARCHAR}, 
+      #{sourcePathologyDiseaseCode2,jdbcType=VARCHAR}, #{tumourPeriodizationClinic,jdbcType=VARCHAR}, 
+      #{tumourPeriodizationTNM,jdbcType=VARCHAR}, #{diagnosis1,jdbcType=VARCHAR}, #{diagnosis2,jdbcType=VARCHAR}, 
+      #{diagnosis3,jdbcType=VARCHAR}, #{diagnosis4,jdbcType=VARCHAR}, #{diagnosis5,jdbcType=VARCHAR}, 
+      #{diseaseCode1,jdbcType=VARCHAR}, #{diseaseCode2,jdbcType=VARCHAR}, #{diseaseCode3,jdbcType=VARCHAR}, 
+      #{diseaseCode4,jdbcType=VARCHAR}, #{diseaseCode5,jdbcType=VARCHAR}, #{pathologyDiagnosis1,jdbcType=VARCHAR}, 
+      #{pathologyDiagnosis2,jdbcType=VARCHAR}, #{pathologyDiagnosis3,jdbcType=VARCHAR}, 
+      #{pathologyDiagnosis4,jdbcType=VARCHAR}, #{pathologyDiagnosis5,jdbcType=VARCHAR}, 
+      #{pathologyDiagnosisCode1,jdbcType=VARCHAR}, #{pathologyDiagnosisCode2,jdbcType=VARCHAR}, 
+      #{pathologyDiagnosisCode3,jdbcType=VARCHAR}, #{pathologyDiagnosisCode4,jdbcType=VARCHAR}, 
+      #{pathologyDiagnosisCode5,jdbcType=VARCHAR}, #{disagnosisPeriodizationId1,jdbcType=INTEGER}, 
+      #{disagnosisPeriodizationId2,jdbcType=INTEGER}, #{disagnosisPeriodizationId3,jdbcType=INTEGER}, 
+      #{disagnosisPeriodizationId4,jdbcType=INTEGER}, #{disagnosisPeriodizationId5,jdbcType=INTEGER}, 
+      #{disagnosisPeriodizationName1,jdbcType=VARCHAR}, #{disagnosisPeriodizationName2,jdbcType=VARCHAR}, 
+      #{disagnosisPeriodizationName3,jdbcType=VARCHAR}, #{disagnosisPeriodizationName4,jdbcType=VARCHAR}, 
+      #{disagnosisPeriodizationName5,jdbcType=VARCHAR}, #{surgeryDate1,jdbcType=DATE}, 
+      #{surgeryDate2,jdbcType=DATE}, #{surgeryDate3,jdbcType=DATE}, #{surgeryDate4,jdbcType=DATE}, 
+      #{surgeryDate5,jdbcType=DATE}, #{surgeryDate6,jdbcType=DATE}, #{surgeryDate7,jdbcType=DATE}, 
+      #{surgeryDate8,jdbcType=DATE}, #{surgeryName1,jdbcType=VARCHAR}, #{surgeryName2,jdbcType=VARCHAR}, 
+      #{surgeryName3,jdbcType=VARCHAR}, #{surgeryName4,jdbcType=VARCHAR}, #{surgeryName5,jdbcType=VARCHAR}, 
+      #{surgeryName6,jdbcType=VARCHAR}, #{surgeryName7,jdbcType=VARCHAR}, #{surgeryName8,jdbcType=VARCHAR}, 
+      #{opCode1,jdbcType=VARCHAR}, #{opCode2,jdbcType=VARCHAR}, #{opCode3,jdbcType=VARCHAR}, 
+      #{opCode4,jdbcType=VARCHAR}, #{opCode5,jdbcType=VARCHAR}, #{opCode6,jdbcType=VARCHAR}, 
+      #{opCode7,jdbcType=VARCHAR}, #{opCode8,jdbcType=VARCHAR}, #{surgeryDoctor1,jdbcType=BIGINT}, 
+      #{surgeryDoctor2,jdbcType=BIGINT}, #{surgeryDoctor3,jdbcType=BIGINT}, #{surgeryDoctor4,jdbcType=BIGINT}, 
+      #{surgeryDoctor5,jdbcType=BIGINT}, #{surgeryDoctor6,jdbcType=BIGINT}, #{surgeryDoctor7,jdbcType=BIGINT}, 
+      #{surgeryDoctor8,jdbcType=BIGINT}, #{surgeryDoctorName1,jdbcType=VARCHAR}, #{surgeryDoctorName2,jdbcType=VARCHAR}, 
+      #{surgeryDoctorName3,jdbcType=VARCHAR}, #{surgeryDoctorName4,jdbcType=VARCHAR}, 
+      #{surgeryDoctorName5,jdbcType=VARCHAR}, #{surgeryDoctorName6,jdbcType=VARCHAR}, 
+      #{surgeryDoctorName7,jdbcType=VARCHAR}, #{surgeryDoctorName8,jdbcType=VARCHAR}, 
+      #{familyCreateTime1,jdbcType=TIMESTAMP}, #{familyCreateTime2,jdbcType=TIMESTAMP}, 
+      #{diagnosisCreateTime1,jdbcType=TIMESTAMP}, #{diagnosisCreateTime2,jdbcType=TIMESTAMP}, 
+      #{diagnosisCreateTime3,jdbcType=TIMESTAMP}, #{diagnosisCreateTime4,jdbcType=TIMESTAMP}, 
+      #{diagnosisCreateTime5,jdbcType=TIMESTAMP}, #{diagnosisType1,jdbcType=INTEGER}, 
+      #{diagnosisType2,jdbcType=INTEGER}, #{diagnosisType3,jdbcType=INTEGER}, #{diagnosisType4,jdbcType=INTEGER}, 
+      #{diagnosisType5,jdbcType=INTEGER}, #{diagnosisId1,jdbcType=VARCHAR}, #{diagnosisId2,jdbcType=VARCHAR}, 
+      #{diagnosisId3,jdbcType=VARCHAR}, #{diagnosisId4,jdbcType=VARCHAR}, #{diagnosisId5,jdbcType=VARCHAR}, 
+      #{surgeryCreateTime1,jdbcType=TIMESTAMP}, #{surgeryCreateTime2,jdbcType=TIMESTAMP}, 
+      #{surgeryCreateTime3,jdbcType=TIMESTAMP}, #{surgeryCreateTime4,jdbcType=TIMESTAMP}, 
+      #{surgeryCreateTime5,jdbcType=TIMESTAMP}, #{surgeryCreateTime6,jdbcType=TIMESTAMP}, 
+      #{surgeryCreateTime7,jdbcType=TIMESTAMP}, #{surgeryCreateTime8,jdbcType=TIMESTAMP}, 
+      #{treatmentNames,jdbcType=VARCHAR}, #{treatmentHistory,jdbcType=VARCHAR}, #{firstOuthospitalDeptId,jdbcType=INTEGER}, 
+      #{firstOuthospitalDeptName,jdbcType=VARCHAR}, #{latestOuthospitalDeptId,jdbcType=INTEGER}, 
+      #{latestOuthospitalDeptName,jdbcType=VARCHAR}, #{latestClinicDate,jdbcType=DATE}, 
+      #{latestInhospitalDate,jdbcType=DATE}, #{latestOuthospitalDate,jdbcType=DATE}, 
+      #{createTime,jdbcType=TIMESTAMP})
+    </insert>
+	
+	<update id="updatePatientWide" parameterType="com.esuizhen.cloudservice.user.model.TPatientWide" >
+    update ehr_db.e_patient_wide_table
+    <set >
+      <if test="patientId != null" >
+        patientId = #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="sourceDiagnosisId != null" >
+        sourceDiagnosisId = #{sourceDiagnosisId,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDiagnosisId2 != null" >
+        sourceDiagnosisId2 = #{sourceDiagnosisId2,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalId != null" >
+        inhospitalId = #{inhospitalId,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalId2 != null" >
+        inhospitalId2 = #{inhospitalId2,jdbcType=VARCHAR},
+      </if>
+      <if test="familyName1 != null" >
+        familyName1 = #{familyName1,jdbcType=VARCHAR},
+      </if>
+      <if test="patientRelationId1 != null" >
+        patientRelationId1 = #{patientRelationId1,jdbcType=INTEGER},
+      </if>
+      <if test="patientRelation1 != null" >
+        patientRelation1 = #{patientRelation1,jdbcType=VARCHAR},
+      </if>
+      <if test="familyPhone1 != null" >
+        familyPhone1 = #{familyPhone1,jdbcType=VARCHAR},
+      </if>
+      <if test="address1 != null" >
+        address1 = #{address1,jdbcType=VARCHAR},
+      </if>
+      <if test="isValid1 != null" >
+        isValid1 = #{isValid1,jdbcType=INTEGER},
+      </if>
+      <if test="familyName2 != null" >
+        familyName2 = #{familyName2,jdbcType=VARCHAR},
+      </if>
+      <if test="patientRelationId2 != null" >
+        patientRelationId2 = #{patientRelationId2,jdbcType=INTEGER},
+      </if>
+      <if test="patientRelation2 != null" >
+        patientRelation2 = #{patientRelation2,jdbcType=VARCHAR},
+      </if>
+      <if test="familyPhone2 != null" >
+        familyPhone2 = #{familyPhone2,jdbcType=VARCHAR},
+      </if>
+      <if test="address2 != null" >
+        address2 = #{address2,jdbcType=VARCHAR},
+      </if>
+      <if test="isValid2 != null" >
+        isValid2 = #{isValid2,jdbcType=INTEGER},
+      </if>
+      <if test="familyName3 != null" >
+        familyName3 = #{familyName3,jdbcType=VARCHAR},
+      </if>
+      <if test="patientRelationId3 != null" >
+        patientRelationId3 = #{patientRelationId3,jdbcType=INTEGER},
+      </if>
+      <if test="patientRelation3 != null" >
+        patientRelation3 = #{patientRelation3,jdbcType=VARCHAR},
+      </if>
+      <if test="familyPhone3 != null" >
+        familyPhone3 = #{familyPhone3,jdbcType=VARCHAR},
+      </if>
+      <if test="address3 != null" >
+        address3 = #{address3,jdbcType=VARCHAR},
+      </if>
+      <if test="isValid3 != null" >
+        isValid3 = #{isValid3,jdbcType=INTEGER},
+      </if>
+      <if test="familyCreateTime3 != null" >
+        familyCreateTime3 = #{familyCreateTime3,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sourceInhospitalWay != null" >
+        sourceInhospitalWay = #{sourceInhospitalWay,jdbcType=INTEGER},
+      </if>
+      <if test="sourceInhospitalWayName != null" >
+        sourceInhospitalWayName = #{sourceInhospitalWayName,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceInhospitalDate != null" >
+        sourceInhospitalDate = #{sourceInhospitalDate,jdbcType=DATE},
+      </if>
+      <if test="sourceOuthospitalDate != null" >
+        sourceOuthospitalDate = #{sourceOuthospitalDate,jdbcType=DATE},
+      </if>
+      <if test="sourceInhospitalDeptId != null" >
+        sourceInhospitalDeptId = #{sourceInhospitalDeptId,jdbcType=INTEGER},
+      </if>
+      <if test="sourceInhospitalDeptName != null" >
+        sourceInhospitalDeptName = #{sourceInhospitalDeptName,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceOuthospitalDeptId != null" >
+        sourceOuthospitalDeptId = #{sourceOuthospitalDeptId,jdbcType=INTEGER},
+      </if>
+      <if test="sourceOuthospitalDeptName != null" >
+        sourceOuthospitalDeptName = #{sourceOuthospitalDeptName,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceTurnDeptId != null" >
+        sourceTurnDeptId = #{sourceTurnDeptId,jdbcType=INTEGER},
+      </if>
+      <if test="sourceTurnDeptName != null" >
+        sourceTurnDeptName = #{sourceTurnDeptName,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDeptDoctor != null" >
+        sourceDeptDoctor = #{sourceDeptDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="sourceDeptDoctorName != null" >
+        sourceDeptDoctorName = #{sourceDeptDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDirectorDoctor != null" >
+        sourceDirectorDoctor = #{sourceDirectorDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="sourceDirectorDoctorName != null" >
+        sourceDirectorDoctorName = #{sourceDirectorDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceInchargeDoctor != null" >
+        sourceInchargeDoctor = #{sourceInchargeDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="sourceInchargeDoctorName != null" >
+        sourceInchargeDoctorName = #{sourceInchargeDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceInhospitalDoctor != null" >
+        sourceInhospitalDoctor = #{sourceInhospitalDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="sourceInhospitalDoctorName != null" >
+        sourceInhospitalDoctorName = #{sourceInhospitalDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceAttendingDoctor != null" >
+        sourceAttendingDoctor = #{sourceAttendingDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="sourceAttendingDoctorName != null" >
+        sourceAttendingDoctorName = #{sourceAttendingDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceCancerNum != null" >
+        sourceCancerNum = #{sourceCancerNum,jdbcType=INTEGER},
+      </if>
+      <if test="confirmedDate != null" >
+        confirmedDate = #{confirmedDate,jdbcType=DATE},
+      </if>
+      <if test="confirmedAge != null" >
+        confirmedAge = #{confirmedAge,jdbcType=INTEGER},
+      </if>
+      <if test="sourceDiseaseTypeId != null" >
+        sourceDiseaseTypeId = #{sourceDiseaseTypeId,jdbcType=INTEGER},
+      </if>
+      <if test="sourceDiseaseTypeName != null" >
+        sourceDiseaseTypeName = #{sourceDiseaseTypeName,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDiagnosis != null" >
+        sourceDiagnosis = #{sourceDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDiseaseCode != null" >
+        sourceDiseaseCode = #{sourceDiseaseCode,jdbcType=VARCHAR},
+      </if>
+      <if test="secondaryDiagnosis != null" >
+        secondaryDiagnosis = #{secondaryDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="secondaryDiseaseCode != null" >
+        secondaryDiseaseCode = #{secondaryDiseaseCode,jdbcType=VARCHAR},
+      </if>
+      <if test="secondaryPathologyDiagnosis != null" >
+        secondaryPathologyDiagnosis = #{secondaryPathologyDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="secondaryPathologyDiseaseCode != null" >
+        secondaryPathologyDiseaseCode = #{secondaryPathologyDiseaseCode,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDiagnosis2 != null" >
+        sourceDiagnosis2 = #{sourceDiagnosis2,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDiseaseCode2 != null" >
+        sourceDiseaseCode2 = #{sourceDiseaseCode2,jdbcType=VARCHAR},
+      </if>
+      <if test="sourcePathologyDiagnosis2 != null" >
+        sourcePathologyDiagnosis2 = #{sourcePathologyDiagnosis2,jdbcType=VARCHAR},
+      </if>
+      <if test="sourcePathologyDiseaseCode2 != null" >
+        sourcePathologyDiseaseCode2 = #{sourcePathologyDiseaseCode2,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodizationClinic != null" >
+        tumourPeriodizationClinic = #{tumourPeriodizationClinic,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodizationTNM != null" >
+        tumourPeriodizationTNM = #{tumourPeriodizationTNM,jdbcType=VARCHAR},
+      </if>
+      <if test="diagnosis1 != null" >
+        diagnosis1 = #{diagnosis1,jdbcType=VARCHAR},
+      </if>
+      <if test="diagnosis2 != null" >
+        diagnosis2 = #{diagnosis2,jdbcType=VARCHAR},
+      </if>
+      <if test="diagnosis3 != null" >
+        diagnosis3 = #{diagnosis3,jdbcType=VARCHAR},
+      </if>
+      <if test="diagnosis4 != null" >
+        diagnosis4 = #{diagnosis4,jdbcType=VARCHAR},
+      </if>
+      <if test="diagnosis5 != null" >
+        diagnosis5 = #{diagnosis5,jdbcType=VARCHAR},
+      </if>
+      <if test="diseaseCode1 != null" >
+        diseaseCode1 = #{diseaseCode1,jdbcType=VARCHAR},
+      </if>
+      <if test="diseaseCode2 != null" >
+        diseaseCode2 = #{diseaseCode2,jdbcType=VARCHAR},
+      </if>
+      <if test="diseaseCode3 != null" >
+        diseaseCode3 = #{diseaseCode3,jdbcType=VARCHAR},
+      </if>
+      <if test="diseaseCode4 != null" >
+        diseaseCode4 = #{diseaseCode4,jdbcType=VARCHAR},
+      </if>
+      <if test="diseaseCode5 != null" >
+        diseaseCode5 = #{diseaseCode5,jdbcType=VARCHAR},
+      </if>
+      <if test="pathologyDiagnosis1 != null" >
+        pathologyDiagnosis1 = #{pathologyDiagnosis1,jdbcType=VARCHAR},
+      </if>
+      <if test="pathologyDiagnosis2 != null" >
+        pathologyDiagnosis2 = #{pathologyDiagnosis2,jdbcType=VARCHAR},
+      </if>
+      <if test="pathologyDiagnosis3 != null" >
+        pathologyDiagnosis3 = #{pathologyDiagnosis3,jdbcType=VARCHAR},
+      </if>
+      <if test="pathologyDiagnosis4 != null" >
+        pathologyDiagnosis4 = #{pathologyDiagnosis4,jdbcType=VARCHAR},
+      </if>
+      <if test="pathologyDiagnosis5 != null" >
+        pathologyDiagnosis5 = #{pathologyDiagnosis5,jdbcType=VARCHAR},
+      </if>
+      <if test="pathologyDiagnosisCode1 != null" >
+        pathologyDiagnosisCode1 = #{pathologyDiagnosisCode1,jdbcType=VARCHAR},
+      </if>
+      <if test="pathologyDiagnosisCode2 != null" >
+        pathologyDiagnosisCode2 = #{pathologyDiagnosisCode2,jdbcType=VARCHAR},
+      </if>
+      <if test="pathologyDiagnosisCode3 != null" >
+        pathologyDiagnosisCode3 = #{pathologyDiagnosisCode3,jdbcType=VARCHAR},
+      </if>
+      <if test="pathologyDiagnosisCode4 != null" >
+        pathologyDiagnosisCode4 = #{pathologyDiagnosisCode4,jdbcType=VARCHAR},
+      </if>
+      <if test="pathologyDiagnosisCode5 != null" >
+        pathologyDiagnosisCode5 = #{pathologyDiagnosisCode5,jdbcType=VARCHAR},
+      </if>
+      <if test="disagnosisPeriodizationId1 != null" >
+        disagnosisPeriodizationId1 = #{disagnosisPeriodizationId1,jdbcType=INTEGER},
+      </if>
+      <if test="disagnosisPeriodizationId2 != null" >
+        disagnosisPeriodizationId2 = #{disagnosisPeriodizationId2,jdbcType=INTEGER},
+      </if>
+      <if test="disagnosisPeriodizationId3 != null" >
+        disagnosisPeriodizationId3 = #{disagnosisPeriodizationId3,jdbcType=INTEGER},
+      </if>
+      <if test="disagnosisPeriodizationId4 != null" >
+        disagnosisPeriodizationId4 = #{disagnosisPeriodizationId4,jdbcType=INTEGER},
+      </if>
+      <if test="disagnosisPeriodizationId5 != null" >
+        disagnosisPeriodizationId5 = #{disagnosisPeriodizationId5,jdbcType=INTEGER},
+      </if>
+      <if test="disagnosisPeriodizationName1 != null" >
+        disagnosisPeriodizationName1 = #{disagnosisPeriodizationName1,jdbcType=VARCHAR},
+      </if>
+      <if test="disagnosisPeriodizationName2 != null" >
+        disagnosisPeriodizationName2 = #{disagnosisPeriodizationName2,jdbcType=VARCHAR},
+      </if>
+      <if test="disagnosisPeriodizationName3 != null" >
+        disagnosisPeriodizationName3 = #{disagnosisPeriodizationName3,jdbcType=VARCHAR},
+      </if>
+      <if test="disagnosisPeriodizationName4 != null" >
+        disagnosisPeriodizationName4 = #{disagnosisPeriodizationName4,jdbcType=VARCHAR},
+      </if>
+      <if test="disagnosisPeriodizationName5 != null" >
+        disagnosisPeriodizationName5 = #{disagnosisPeriodizationName5,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryDate1 != null" >
+        surgeryDate1 = #{surgeryDate1,jdbcType=DATE},
+      </if>
+      <if test="surgeryDate2 != null" >
+        surgeryDate2 = #{surgeryDate2,jdbcType=DATE},
+      </if>
+      <if test="surgeryDate3 != null" >
+        surgeryDate3 = #{surgeryDate3,jdbcType=DATE},
+      </if>
+      <if test="surgeryDate4 != null" >
+        surgeryDate4 = #{surgeryDate4,jdbcType=DATE},
+      </if>
+      <if test="surgeryDate5 != null" >
+        surgeryDate5 = #{surgeryDate5,jdbcType=DATE},
+      </if>
+      <if test="surgeryDate6 != null" >
+        surgeryDate6 = #{surgeryDate6,jdbcType=DATE},
+      </if>
+      <if test="surgeryDate7 != null" >
+        surgeryDate7 = #{surgeryDate7,jdbcType=DATE},
+      </if>
+      <if test="surgeryDate8 != null" >
+        surgeryDate8 = #{surgeryDate8,jdbcType=DATE},
+      </if>
+      <if test="surgeryName1 != null" >
+        surgeryName1 = #{surgeryName1,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryName2 != null" >
+        surgeryName2 = #{surgeryName2,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryName3 != null" >
+        surgeryName3 = #{surgeryName3,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryName4 != null" >
+        surgeryName4 = #{surgeryName4,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryName5 != null" >
+        surgeryName5 = #{surgeryName5,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryName6 != null" >
+        surgeryName6 = #{surgeryName6,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryName7 != null" >
+        surgeryName7 = #{surgeryName7,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryName8 != null" >
+        surgeryName8 = #{surgeryName8,jdbcType=VARCHAR},
+      </if>
+      <if test="opCode1 != null" >
+        opCode1 = #{opCode1,jdbcType=VARCHAR},
+      </if>
+      <if test="opCode2 != null" >
+        opCode2 = #{opCode2,jdbcType=VARCHAR},
+      </if>
+      <if test="opCode3 != null" >
+        opCode3 = #{opCode3,jdbcType=VARCHAR},
+      </if>
+      <if test="opCode4 != null" >
+        opCode4 = #{opCode4,jdbcType=VARCHAR},
+      </if>
+      <if test="opCode5 != null" >
+        opCode5 = #{opCode5,jdbcType=VARCHAR},
+      </if>
+      <if test="opCode6 != null" >
+        opCode6 = #{opCode6,jdbcType=VARCHAR},
+      </if>
+      <if test="opCode7 != null" >
+        opCode7 = #{opCode7,jdbcType=VARCHAR},
+      </if>
+      <if test="opCode8 != null" >
+        opCode8 = #{opCode8,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryDoctor1 != null" >
+        surgeryDoctor1 = #{surgeryDoctor1,jdbcType=BIGINT},
+      </if>
+      <if test="surgeryDoctor2 != null" >
+        surgeryDoctor2 = #{surgeryDoctor2,jdbcType=BIGINT},
+      </if>
+      <if test="surgeryDoctor3 != null" >
+        surgeryDoctor3 = #{surgeryDoctor3,jdbcType=BIGINT},
+      </if>
+      <if test="surgeryDoctor4 != null" >
+        surgeryDoctor4 = #{surgeryDoctor4,jdbcType=BIGINT},
+      </if>
+      <if test="surgeryDoctor5 != null" >
+        surgeryDoctor5 = #{surgeryDoctor5,jdbcType=BIGINT},
+      </if>
+      <if test="surgeryDoctor6 != null" >
+        surgeryDoctor6 = #{surgeryDoctor6,jdbcType=BIGINT},
+      </if>
+      <if test="surgeryDoctor7 != null" >
+        surgeryDoctor7 = #{surgeryDoctor7,jdbcType=BIGINT},
+      </if>
+      <if test="surgeryDoctor8 != null" >
+        surgeryDoctor8 = #{surgeryDoctor8,jdbcType=BIGINT},
+      </if>
+      <if test="surgeryDoctorName1 != null" >
+        surgeryDoctorName1 = #{surgeryDoctorName1,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryDoctorName2 != null" >
+        surgeryDoctorName2 = #{surgeryDoctorName2,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryDoctorName3 != null" >
+        surgeryDoctorName3 = #{surgeryDoctorName3,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryDoctorName4 != null" >
+        surgeryDoctorName4 = #{surgeryDoctorName4,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryDoctorName5 != null" >
+        surgeryDoctorName5 = #{surgeryDoctorName5,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryDoctorName6 != null" >
+        surgeryDoctorName6 = #{surgeryDoctorName6,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryDoctorName7 != null" >
+        surgeryDoctorName7 = #{surgeryDoctorName7,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryDoctorName8 != null" >
+        surgeryDoctorName8 = #{surgeryDoctorName8,jdbcType=VARCHAR},
+      </if>
+      <if test="familyCreateTime1 != null" >
+        familyCreateTime1 = #{familyCreateTime1,jdbcType=TIMESTAMP},
+      </if>
+      <if test="familyCreateTime2 != null" >
+        familyCreateTime2 = #{familyCreateTime2,jdbcType=TIMESTAMP},
+      </if>
+      <if test="diagnosisCreateTime1 != null" >
+        diagnosisCreateTime1 = #{diagnosisCreateTime1,jdbcType=TIMESTAMP},
+      </if>
+      <if test="diagnosisCreateTime2 != null" >
+        diagnosisCreateTime2 = #{diagnosisCreateTime2,jdbcType=TIMESTAMP},
+      </if>
+      <if test="diagnosisCreateTime3 != null" >
+        diagnosisCreateTime3 = #{diagnosisCreateTime3,jdbcType=TIMESTAMP},
+      </if>
+      <if test="diagnosisCreateTime4 != null" >
+        diagnosisCreateTime4 = #{diagnosisCreateTime4,jdbcType=TIMESTAMP},
+      </if>
+      <if test="diagnosisCreateTime5 != null" >
+        diagnosisCreateTime5 = #{diagnosisCreateTime5,jdbcType=TIMESTAMP},
+      </if>
+      <if test="diagnosisType1 != null" >
+        diagnosisType1 = #{diagnosisType1,jdbcType=INTEGER},
+      </if>
+      <if test="diagnosisType2 != null" >
+        diagnosisType2 = #{diagnosisType2,jdbcType=INTEGER},
+      </if>
+      <if test="diagnosisType3 != null" >
+        diagnosisType3 = #{diagnosisType3,jdbcType=INTEGER},
+      </if>
+      <if test="diagnosisType4 != null" >
+        diagnosisType4 = #{diagnosisType4,jdbcType=INTEGER},
+      </if>
+      <if test="diagnosisType5 != null" >
+        diagnosisType5 = #{diagnosisType5,jdbcType=INTEGER},
+      </if>
+      <if test="diagnosisId1 != null" >
+        diagnosisId1 = #{diagnosisId1,jdbcType=VARCHAR},
+      </if>
+      <if test="diagnosisId2 != null" >
+        diagnosisId2 = #{diagnosisId2,jdbcType=VARCHAR},
+      </if>
+      <if test="diagnosisId3 != null" >
+        diagnosisId3 = #{diagnosisId3,jdbcType=VARCHAR},
+      </if>
+      <if test="diagnosisId4 != null" >
+        diagnosisId4 = #{diagnosisId4,jdbcType=VARCHAR},
+      </if>
+      <if test="diagnosisId5 != null" >
+        diagnosisId5 = #{diagnosisId5,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryCreateTime1 != null" >
+        surgeryCreateTime1 = #{surgeryCreateTime1,jdbcType=TIMESTAMP},
+      </if>
+      <if test="surgeryCreateTime2 != null" >
+        surgeryCreateTime2 = #{surgeryCreateTime2,jdbcType=TIMESTAMP},
+      </if>
+      <if test="surgeryCreateTime3 != null" >
+        surgeryCreateTime3 = #{surgeryCreateTime3,jdbcType=TIMESTAMP},
+      </if>
+      <if test="surgeryCreateTime4 != null" >
+        surgeryCreateTime4 = #{surgeryCreateTime4,jdbcType=TIMESTAMP},
+      </if>
+      <if test="surgeryCreateTime5 != null" >
+        surgeryCreateTime5 = #{surgeryCreateTime5,jdbcType=TIMESTAMP},
+      </if>
+      <if test="surgeryCreateTime6 != null" >
+        surgeryCreateTime6 = #{surgeryCreateTime6,jdbcType=TIMESTAMP},
+      </if>
+      <if test="surgeryCreateTime7 != null" >
+        surgeryCreateTime7 = #{surgeryCreateTime7,jdbcType=TIMESTAMP},
+      </if>
+      <if test="surgeryCreateTime8 != null" >
+        surgeryCreateTime8 = #{surgeryCreateTime8,jdbcType=TIMESTAMP},
+      </if>
+      <if test="treatmentNames != null" >
+        treatmentNames = #{treatmentNames,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentHistory != null" >
+        treatmentHistory = #{treatmentHistory,jdbcType=VARCHAR},
+      </if>
+      <if test="firstOuthospitalDeptId != null" >
+        firstOuthospitalDeptId = #{firstOuthospitalDeptId,jdbcType=INTEGER},
+      </if>
+      <if test="firstOuthospitalDeptName != null" >
+        firstOuthospitalDeptName = #{firstOuthospitalDeptName,jdbcType=VARCHAR},
+      </if>
+      <if test="latestOuthospitalDeptId != null" >
+        latestOuthospitalDeptId = #{latestOuthospitalDeptId,jdbcType=INTEGER},
+      </if>
+      <if test="latestOuthospitalDeptName != null" >
+        latestOuthospitalDeptName = #{latestOuthospitalDeptName,jdbcType=VARCHAR},
+      </if>
+      <if test="latestClinicDate != null" >
+        latestClinicDate = #{latestClinicDate,jdbcType=DATE},
+      </if>
+      <if test="latestInhospitalDate != null" >
+        latestInhospitalDate = #{latestInhospitalDate,jdbcType=DATE},
+      </if>
+      <if test="latestOuthospitalDate != null" >
+        latestOuthospitalDate = #{latestOuthospitalDate,jdbcType=DATE},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateByPrimaryKey" parameterType="com.esuizhen.cloudservice.user.model.TPatientWide" >
+    update ehr_db.e_patient_wide_table
+    set patientId = #{patientId,jdbcType=BIGINT},
+      sourceDiagnosisId = #{sourceDiagnosisId,jdbcType=VARCHAR},
+      sourceDiagnosisId2 = #{sourceDiagnosisId2,jdbcType=VARCHAR},
+      inhospitalId = #{inhospitalId,jdbcType=VARCHAR},
+      inhospitalId2 = #{inhospitalId2,jdbcType=VARCHAR},
+      familyName1 = #{familyName1,jdbcType=VARCHAR},
+      patientRelationId1 = #{patientRelationId1,jdbcType=INTEGER},
+      patientRelation1 = #{patientRelation1,jdbcType=VARCHAR},
+      familyPhone1 = #{familyPhone1,jdbcType=VARCHAR},
+      address1 = #{address1,jdbcType=VARCHAR},
+      isValid1 = #{isValid1,jdbcType=INTEGER},
+      familyName2 = #{familyName2,jdbcType=VARCHAR},
+      patientRelationId2 = #{patientRelationId2,jdbcType=INTEGER},
+      patientRelation2 = #{patientRelation2,jdbcType=VARCHAR},
+      familyPhone2 = #{familyPhone2,jdbcType=VARCHAR},
+      address2 = #{address2,jdbcType=VARCHAR},
+      isValid2 = #{isValid2,jdbcType=INTEGER},
+      familyName3 = #{familyName3,jdbcType=VARCHAR},
+      patientRelationId3 = #{patientRelationId3,jdbcType=INTEGER},
+      patientRelation3 = #{patientRelation3,jdbcType=VARCHAR},
+      familyPhone3 = #{familyPhone3,jdbcType=VARCHAR},
+      address3 = #{address3,jdbcType=VARCHAR},
+      isValid3 = #{isValid3,jdbcType=INTEGER},
+      familyCreateTime3 = #{familyCreateTime3,jdbcType=TIMESTAMP},
+      sourceInhospitalWay = #{sourceInhospitalWay,jdbcType=INTEGER},
+      sourceInhospitalWayName = #{sourceInhospitalWayName,jdbcType=VARCHAR},
+      sourceInhospitalDate = #{sourceInhospitalDate,jdbcType=DATE},
+      sourceOuthospitalDate = #{sourceOuthospitalDate,jdbcType=DATE},
+      sourceInhospitalDeptId = #{sourceInhospitalDeptId,jdbcType=INTEGER},
+      sourceInhospitalDeptName = #{sourceInhospitalDeptName,jdbcType=VARCHAR},
+      sourceOuthospitalDeptId = #{sourceOuthospitalDeptId,jdbcType=INTEGER},
+      sourceOuthospitalDeptName = #{sourceOuthospitalDeptName,jdbcType=VARCHAR},
+      sourceTurnDeptId = #{sourceTurnDeptId,jdbcType=INTEGER},
+      sourceTurnDeptName = #{sourceTurnDeptName,jdbcType=VARCHAR},
+      sourceDeptDoctor = #{sourceDeptDoctor,jdbcType=INTEGER},
+      sourceDeptDoctorName = #{sourceDeptDoctorName,jdbcType=VARCHAR},
+      sourceDirectorDoctor = #{sourceDirectorDoctor,jdbcType=INTEGER},
+      sourceDirectorDoctorName = #{sourceDirectorDoctorName,jdbcType=VARCHAR},
+      sourceInchargeDoctor = #{sourceInchargeDoctor,jdbcType=INTEGER},
+      sourceInchargeDoctorName = #{sourceInchargeDoctorName,jdbcType=VARCHAR},
+      sourceInhospitalDoctor = #{sourceInhospitalDoctor,jdbcType=INTEGER},
+      sourceInhospitalDoctorName = #{sourceInhospitalDoctorName,jdbcType=VARCHAR},
+      sourceAttendingDoctor = #{sourceAttendingDoctor,jdbcType=INTEGER},
+      sourceAttendingDoctorName = #{sourceAttendingDoctorName,jdbcType=VARCHAR},
+      sourceCancerNum = #{sourceCancerNum,jdbcType=INTEGER},
+      confirmedDate = #{confirmedDate,jdbcType=DATE},
+      confirmedAge = #{confirmedAge,jdbcType=INTEGER},
+      sourceDiseaseTypeId = #{sourceDiseaseTypeId,jdbcType=INTEGER},
+      sourceDiseaseTypeName = #{sourceDiseaseTypeName,jdbcType=VARCHAR},
+      sourceDiagnosis = #{sourceDiagnosis,jdbcType=VARCHAR},
+      sourceDiseaseCode = #{sourceDiseaseCode,jdbcType=VARCHAR},
+      secondaryDiagnosis = #{secondaryDiagnosis,jdbcType=VARCHAR},
+      secondaryDiseaseCode = #{secondaryDiseaseCode,jdbcType=VARCHAR},
+      secondaryPathologyDiagnosis = #{secondaryPathologyDiagnosis,jdbcType=VARCHAR},
+      secondaryPathologyDiseaseCode = #{secondaryPathologyDiseaseCode,jdbcType=VARCHAR},
+      sourceDiagnosis2 = #{sourceDiagnosis2,jdbcType=VARCHAR},
+      sourceDiseaseCode2 = #{sourceDiseaseCode2,jdbcType=VARCHAR},
+      sourcePathologyDiagnosis2 = #{sourcePathologyDiagnosis2,jdbcType=VARCHAR},
+      sourcePathologyDiseaseCode2 = #{sourcePathologyDiseaseCode2,jdbcType=VARCHAR},
+      tumourPeriodizationClinic = #{tumourPeriodizationClinic,jdbcType=VARCHAR},
+      tumourPeriodizationTNM = #{tumourPeriodizationTNM,jdbcType=VARCHAR},
+      diagnosis1 = #{diagnosis1,jdbcType=VARCHAR},
+      diagnosis2 = #{diagnosis2,jdbcType=VARCHAR},
+      diagnosis3 = #{diagnosis3,jdbcType=VARCHAR},
+      diagnosis4 = #{diagnosis4,jdbcType=VARCHAR},
+      diagnosis5 = #{diagnosis5,jdbcType=VARCHAR},
+      diseaseCode1 = #{diseaseCode1,jdbcType=VARCHAR},
+      diseaseCode2 = #{diseaseCode2,jdbcType=VARCHAR},
+      diseaseCode3 = #{diseaseCode3,jdbcType=VARCHAR},
+      diseaseCode4 = #{diseaseCode4,jdbcType=VARCHAR},
+      diseaseCode5 = #{diseaseCode5,jdbcType=VARCHAR},
+      pathologyDiagnosis1 = #{pathologyDiagnosis1,jdbcType=VARCHAR},
+      pathologyDiagnosis2 = #{pathologyDiagnosis2,jdbcType=VARCHAR},
+      pathologyDiagnosis3 = #{pathologyDiagnosis3,jdbcType=VARCHAR},
+      pathologyDiagnosis4 = #{pathologyDiagnosis4,jdbcType=VARCHAR},
+      pathologyDiagnosis5 = #{pathologyDiagnosis5,jdbcType=VARCHAR},
+      pathologyDiagnosisCode1 = #{pathologyDiagnosisCode1,jdbcType=VARCHAR},
+      pathologyDiagnosisCode2 = #{pathologyDiagnosisCode2,jdbcType=VARCHAR},
+      pathologyDiagnosisCode3 = #{pathologyDiagnosisCode3,jdbcType=VARCHAR},
+      pathologyDiagnosisCode4 = #{pathologyDiagnosisCode4,jdbcType=VARCHAR},
+      pathologyDiagnosisCode5 = #{pathologyDiagnosisCode5,jdbcType=VARCHAR},
+      disagnosisPeriodizationId1 = #{disagnosisPeriodizationId1,jdbcType=INTEGER},
+      disagnosisPeriodizationId2 = #{disagnosisPeriodizationId2,jdbcType=INTEGER},
+      disagnosisPeriodizationId3 = #{disagnosisPeriodizationId3,jdbcType=INTEGER},
+      disagnosisPeriodizationId4 = #{disagnosisPeriodizationId4,jdbcType=INTEGER},
+      disagnosisPeriodizationId5 = #{disagnosisPeriodizationId5,jdbcType=INTEGER},
+      disagnosisPeriodizationName1 = #{disagnosisPeriodizationName1,jdbcType=VARCHAR},
+      disagnosisPeriodizationName2 = #{disagnosisPeriodizationName2,jdbcType=VARCHAR},
+      disagnosisPeriodizationName3 = #{disagnosisPeriodizationName3,jdbcType=VARCHAR},
+      disagnosisPeriodizationName4 = #{disagnosisPeriodizationName4,jdbcType=VARCHAR},
+      disagnosisPeriodizationName5 = #{disagnosisPeriodizationName5,jdbcType=VARCHAR},
+      surgeryDate1 = #{surgeryDate1,jdbcType=DATE},
+      surgeryDate2 = #{surgeryDate2,jdbcType=DATE},
+      surgeryDate3 = #{surgeryDate3,jdbcType=DATE},
+      surgeryDate4 = #{surgeryDate4,jdbcType=DATE},
+      surgeryDate5 = #{surgeryDate5,jdbcType=DATE},
+      surgeryDate6 = #{surgeryDate6,jdbcType=DATE},
+      surgeryDate7 = #{surgeryDate7,jdbcType=DATE},
+      surgeryDate8 = #{surgeryDate8,jdbcType=DATE},
+      surgeryName1 = #{surgeryName1,jdbcType=VARCHAR},
+      surgeryName2 = #{surgeryName2,jdbcType=VARCHAR},
+      surgeryName3 = #{surgeryName3,jdbcType=VARCHAR},
+      surgeryName4 = #{surgeryName4,jdbcType=VARCHAR},
+      surgeryName5 = #{surgeryName5,jdbcType=VARCHAR},
+      surgeryName6 = #{surgeryName6,jdbcType=VARCHAR},
+      surgeryName7 = #{surgeryName7,jdbcType=VARCHAR},
+      surgeryName8 = #{surgeryName8,jdbcType=VARCHAR},
+      opCode1 = #{opCode1,jdbcType=VARCHAR},
+      opCode2 = #{opCode2,jdbcType=VARCHAR},
+      opCode3 = #{opCode3,jdbcType=VARCHAR},
+      opCode4 = #{opCode4,jdbcType=VARCHAR},
+      opCode5 = #{opCode5,jdbcType=VARCHAR},
+      opCode6 = #{opCode6,jdbcType=VARCHAR},
+      opCode7 = #{opCode7,jdbcType=VARCHAR},
+      opCode8 = #{opCode8,jdbcType=VARCHAR},
+      surgeryDoctor1 = #{surgeryDoctor1,jdbcType=BIGINT},
+      surgeryDoctor2 = #{surgeryDoctor2,jdbcType=BIGINT},
+      surgeryDoctor3 = #{surgeryDoctor3,jdbcType=BIGINT},
+      surgeryDoctor4 = #{surgeryDoctor4,jdbcType=BIGINT},
+      surgeryDoctor5 = #{surgeryDoctor5,jdbcType=BIGINT},
+      surgeryDoctor6 = #{surgeryDoctor6,jdbcType=BIGINT},
+      surgeryDoctor7 = #{surgeryDoctor7,jdbcType=BIGINT},
+      surgeryDoctor8 = #{surgeryDoctor8,jdbcType=BIGINT},
+      surgeryDoctorName1 = #{surgeryDoctorName1,jdbcType=VARCHAR},
+      surgeryDoctorName2 = #{surgeryDoctorName2,jdbcType=VARCHAR},
+      surgeryDoctorName3 = #{surgeryDoctorName3,jdbcType=VARCHAR},
+      surgeryDoctorName4 = #{surgeryDoctorName4,jdbcType=VARCHAR},
+      surgeryDoctorName5 = #{surgeryDoctorName5,jdbcType=VARCHAR},
+      surgeryDoctorName6 = #{surgeryDoctorName6,jdbcType=VARCHAR},
+      surgeryDoctorName7 = #{surgeryDoctorName7,jdbcType=VARCHAR},
+      surgeryDoctorName8 = #{surgeryDoctorName8,jdbcType=VARCHAR},
+      familyCreateTime1 = #{familyCreateTime1,jdbcType=TIMESTAMP},
+      familyCreateTime2 = #{familyCreateTime2,jdbcType=TIMESTAMP},
+      diagnosisCreateTime1 = #{diagnosisCreateTime1,jdbcType=TIMESTAMP},
+      diagnosisCreateTime2 = #{diagnosisCreateTime2,jdbcType=TIMESTAMP},
+      diagnosisCreateTime3 = #{diagnosisCreateTime3,jdbcType=TIMESTAMP},
+      diagnosisCreateTime4 = #{diagnosisCreateTime4,jdbcType=TIMESTAMP},
+      diagnosisCreateTime5 = #{diagnosisCreateTime5,jdbcType=TIMESTAMP},
+      diagnosisType1 = #{diagnosisType1,jdbcType=INTEGER},
+      diagnosisType2 = #{diagnosisType2,jdbcType=INTEGER},
+      diagnosisType3 = #{diagnosisType3,jdbcType=INTEGER},
+      diagnosisType4 = #{diagnosisType4,jdbcType=INTEGER},
+      diagnosisType5 = #{diagnosisType5,jdbcType=INTEGER},
+      diagnosisId1 = #{diagnosisId1,jdbcType=VARCHAR},
+      diagnosisId2 = #{diagnosisId2,jdbcType=VARCHAR},
+      diagnosisId3 = #{diagnosisId3,jdbcType=VARCHAR},
+      diagnosisId4 = #{diagnosisId4,jdbcType=VARCHAR},
+      diagnosisId5 = #{diagnosisId5,jdbcType=VARCHAR},
+      surgeryCreateTime1 = #{surgeryCreateTime1,jdbcType=TIMESTAMP},
+      surgeryCreateTime2 = #{surgeryCreateTime2,jdbcType=TIMESTAMP},
+      surgeryCreateTime3 = #{surgeryCreateTime3,jdbcType=TIMESTAMP},
+      surgeryCreateTime4 = #{surgeryCreateTime4,jdbcType=TIMESTAMP},
+      surgeryCreateTime5 = #{surgeryCreateTime5,jdbcType=TIMESTAMP},
+      surgeryCreateTime6 = #{surgeryCreateTime6,jdbcType=TIMESTAMP},
+      surgeryCreateTime7 = #{surgeryCreateTime7,jdbcType=TIMESTAMP},
+      surgeryCreateTime8 = #{surgeryCreateTime8,jdbcType=TIMESTAMP},
+      treatmentNames = #{treatmentNames,jdbcType=VARCHAR},
+      treatmentHistory = #{treatmentHistory,jdbcType=VARCHAR},
+      firstOuthospitalDeptId = #{firstOuthospitalDeptId,jdbcType=INTEGER},
+      firstOuthospitalDeptName = #{firstOuthospitalDeptName,jdbcType=VARCHAR},
+      latestOuthospitalDeptId = #{latestOuthospitalDeptId,jdbcType=INTEGER},
+      latestOuthospitalDeptName = #{latestOuthospitalDeptName,jdbcType=VARCHAR},
+      latestClinicDate = #{latestClinicDate,jdbcType=DATE},
+      latestInhospitalDate = #{latestInhospitalDate,jdbcType=DATE},
+      latestOuthospitalDate = #{latestOuthospitalDate,jdbcType=DATE},
+      createTime = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

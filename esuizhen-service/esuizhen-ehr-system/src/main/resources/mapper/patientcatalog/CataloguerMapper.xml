@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.patientcatalog.CataloguerDao">
+    
+    <select id="queryList" resultType="com.esuizhen.cloudservice.ehr.model.patientcatalog.CatalogueInfo">
+    	SELECT 
+    	IFNULL(t2.hospitalId,0) hospitalId,
+    	IFNULL(t3.hospitalName,'未知') hospitalName,
+    	COUNT(t1.patientId) patientQuantity,
+    	COUNT(CASE WHEN DATE_FORMAT(t1.createTime,'%Y-%m-%d')=DATE_FORMAT(ADDDATE(NOW(),-1),'%Y-%m-%d') THEN t1.createTime END) incPatientQuantityWithDate,
+    	COUNT(CASE WHEN t1.catalogState=3 THEN 1 END) archivedQuantity,
+    	COUNT(DISTINCT CASE WHEN t1.catalogState=3 and ((SELECT clinicMedicalId FROM ehr_db.ec_clinic_medical_note WHERE patientId=t1.patientId AND t1.catalogDate <![CDATA[<]]> createTime LIMIT 1) IS NOT NULL OR (SELECT inhospitalId FROM ehr_db.ei_inhospital_note WHERE patientId=t1.patientId AND t1.catalogDate <![CDATA[<]]> createTime LIMIT 1) IS NOT NULL) THEN t2.patientId END) archivedQuantityWithUpdate,
+    	COUNT(CASE WHEN DATE_FORMAT(t1.catalogDate,'%Y-%m-%d')=DATE_FORMAT(ADDDATE(NOW(),-1),'%Y-%m-%d') and t1.catalogState=3 THEN 1 END) archivedQuantityWithDate  
+		FROM user_db.u_patient t1 
+		RIGHT JOIN user_db.r_hospital_patient t2 ON t1.patientId=t2.patientId
+		LEFT JOIN user_db.u_hospital t3 ON t2.hospitalId=t3.hospitalId
+		<where>
+			t1.patientType=1 AND t1.mergeFlag!=2
+			<if test="hospitalName != null">
+				AND t3.hospitalName LIKE CONCAT('%',#{hospitalName},'%')
+			</if>
+		</where> 
+		GROUP BY t2.hospitalId
+		 <if test="startRow != null">
+			LIMIT #{startRow},#{pageSize}
+		</if>
+    </select>
+    <select id="countTotalNum" resultType="java.lang.Integer">
+    	SELECT COUNT(*) FROM(
+			SELECT
+				t2.hospitalId
+	
+			FROM
+				user_db.u_patient t1
+			RIGHT JOIN user_db.r_hospital_patient t2 ON t1.patientId = t2.patientId
+			LEFT JOIN user_db.u_hospital t3 ON t2.hospitalId = t3.hospitalId
+			<where>
+				t1.patientType=1 AND t1.mergeFlag!=2
+				<if test="hospitalName != null">
+					AND t3.hospitalName LIKE CONCAT('%',#{hospitalName},'%')
+				</if>
+			</where>
+			GROUP BY t2.hospitalId
+		) v1
+    </select>
+    <insert id="insert"></insert>
+</mapper>
+

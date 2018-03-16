@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_match_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.match.MatchMedicalRecordDao">
+
+	<resultMap type="com.esuizhen.cloudservice.sync.model.MedicalRecord"
+		id="baseResultMap">
+		<id column="emrId" property="emrId" jdbcType="VARCHAR" />
+		<result column="emrNo" property="emrNo" jdbcType="VARCHAR" />
+		<result column="patientId" property="patientId" jdbcType="BIGINT" />
+		<result column="patientUuid" property="patientUuid" jdbcType="VARCHAR" />
+		<result column="patientNo" property="patientNo" jdbcType="VARCHAR" />
+		<result column="emrType" property="emrType" jdbcType="INTEGER" />
+		<result column="emrSubType" property="emrSubType" jdbcType="INTEGER" />
+		<result column="subdivision" property="subdivision" jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="creatorId" property="creatorId" jdbcType="BIGINT" />
+		<result column="creatorUuid" property="creatorUuid" jdbcType="VARCHAR" />
+		<result column="hospitalId" property="hospitalId" jdbcType="BIGINT" />
+		<result column="hospitalUuid" property="hospitalUuid" jdbcType="VARCHAR" />
+		<result column="sourceFlag" property="sourceFlag" jdbcType="INTEGER" />
+		<result column="structFlag" property="structFlag" jdbcType="INTEGER" />
+		<result column="visibleFlag" property="visibleFlag" jdbcType="INTEGER" />
+		<result column="visitTime" property="visitTime" jdbcType="TIMESTAMP" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<sql id="base_column_list">
+		t1.emrId,
+		t1.emrNo,
+		t1.patientUuid,
+		t1.patientNo,
+		t1.emrType,
+		t1.emrSubType,
+		t1.subdivision,
+		t1.remark,
+		t1.creatorUuid,
+		t1.sourceFlag,
+		t1.structFlag,
+		t1.visibleFlag,
+		t1.visitTime,
+		t1.createTime,
+		t1.updateTime,
+		t1.syncFlag
+	</sql>
+
+	<select id="findByEmrId" resultMap="baseResultMap"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="base_column_list"></include>
+		FROM cloud_sync_match_db.e_medical_record t1
+		WHERE
+		t1.emrId=#{emrId,jdbcType=VARCHAR}
+	</select>
+
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.sync.model.MedicalRecord">
+		INSERT INTO cloud_sync_match_db.e_medical_record(
+		emrId,
+		emrNo,
+		patientUuid,
+		patientNo,
+		emrType,
+		emrSubType,
+		subdivision,
+		remark,
+		creatorUuid,
+		hospitalId,
+		sourceFlag,
+		structFlag,
+		visibleFlag,
+		visitTime,
+		createTime,
+		updateTime,
+		syncFlag,
+		syncTime
+		) VALUES
+		(
+		#{emrId},
+		#{emrNo},
+		#{patientUuid},
+		#{patientNo},
+		#{emrType},
+		#{emrSubType},
+		#{subdivision},
+		#{remark},
+		#{creatorUuid},
+		#{hospitalId},
+		#{sourceFlag},
+		#{structFlag},
+		#{visibleFlag},
+		#{visitTime},
+		#{createTime},
+		#{updateTime},
+		#{syncFlag},
+		NOW()
+		)
+	</insert>
+
+	<update id="updatePatientUuid">
+		UPDATE cloud_sync_match_db.e_medical_record
+		<set>
+			<if test="uuidFinal != null">
+				patientUuid=#{uuidFinal,jdbcType=VARCHAR}
+			</if>
+		</set>
+		WHERE patientUuid IN
+		(
+		<foreach collection="uuidRelationships" item="uuidRelationship"
+			index="index" separator=",">
+			#{uuidRelationship.uuid,jdbcType=VARCHAR}
+		</foreach>
+		)
+	</update>
+
+	<delete id="delete" parameterType="java.lang.String">
+		DELETE FROM cloud_sync_match_db.e_medical_record WHERE
+		emrId=#{emrId,jdbcType=VARCHAR}
+	</delete>
+</mapper>

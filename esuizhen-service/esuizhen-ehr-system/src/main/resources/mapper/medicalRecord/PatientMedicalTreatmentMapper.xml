@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.esuizhen.cloudservice.ehr.dao.medicalRecord.PatientMedicalTreatmentDao">
+
+	<!-- 患者历次就诊记录详情 -->
+	<resultMap id="queryPatientMedicalTreatmentDetailResultMap"
+		type="com.esuizhen.cloudservice.ehr.bean.PatientMedicalTreatmentResp">
+		<result property="inhospitalId" column="inhospitalId" />
+		<result property="inhospitalDate" column="inhospitalDate" />
+		<result property="outhospitalDate" column="outhospitalDate" />
+		<result property="hospitalName" column="hospitalName" />
+		<result property="mainDiagnosis" column="mainDiagnosis" />
+		<collection property="treatmentList"
+			ofType="com.esuizhen.cloudservice.ehr.bean.TreatmentResp">
+			<result property="treatmentTypeName" column="treatmentTypeName" />
+			<result property="surgeryName" column="surgeryName" />
+			<result property="surgeryDate" column="surgeryDate" />
+		</collection>
+	</resultMap>
+
+	<!-- 患者历次就诊次数 -->
+	<select id="getPatientMedicalTreatmentTotal"
+		parameterType="com.esuizhen.cloudservice.ehr.bean.PatientMedicalTreatmentResp"
+		resultType="com.esuizhen.cloudservice.ehr.bean.PatientMedicalTreatmentResp">
+SELECT
+	a.total + b.total total
+FROM
+	(
+		SELECT
+			count(1) total
+		FROM
+			ehr_db.ei_inhospital_note
+		WHERE
+			patientId = #{patientId}
+	) a,
+	(
+		SELECT
+			count(1) total
+		FROM
+			ehr_db.ec_clinic_medical_note
+		WHERE
+			patientId = #{patientId}
+	) b
+	</select>
+
+	<!-- 患者历次就诊记录列表 -->
+	<select id="getPatientMedicalTreatmentList"
+		parameterType="com.esuizhen.cloudservice.ehr.bean.PatientMedicalTreatmentResp"
+		resultType="java.util.LinkedHashMap">
+(
+	SELECT DISTINCT
+		a.inhospitalId,
+		b.hospitalName,
+		d.treatmentTypeName,
+		NULL AS 'clinicMedicalId',
+		a.mainDiagnosis AS 'diagnosis',
+		a.inhospitalDate 'reportDate'
+	FROM
+		ehr_db.ei_inhospital_note a
+	LEFT JOIN user_db.u_hospital b ON a.hospitalId = b.hospitalId
+	LEFT JOIN ehr_db.eci_treatment_note c ON a.inhospitalId = c.inhospitalId
+	LEFT JOIN ehr_db.meta_e_treatment d ON c.treatmentTypeId = d.treatmentTypeId
+	WHERE
+		a.patientId = #{patientId}
+)
+UNION ALL
+	(
+		SELECT
+			NULL AS 'inhospitalId',
+			b.hospitalName,
+			NULL AS 'treatmentTypeName',
+			clinicMedicalId,
+			diagnosis,
+			visitTime 'reportDate'
+		FROM
+			ehr_db.ec_clinic_medical_note a
+		LEFT JOIN user_db.u_hospital b ON a.hospitalId = b.hospitalId
+		WHERE
+			a.patientId = #{patientId}
+	)
+ORDER BY
+	reportDate
+		<if test="sortNum == 1">
+			DESC
+		</if>
+	</select>
+
+	<!-- 患者历次就诊记录详情 -->
+	<select id="getPatientMedicalTreatmentDetail"
+		parameterType="com.esuizhen.cloudservice.ehr.bean.PatientMedicalTreatmentResp"
+		resultMap="queryPatientMedicalTreatmentDetailResultMap">
+SELECT DISTINCT
+	a.inhospitalId,
+	a.inhospitalDate,
+	a.outhospitalDate,
+	b.hospitalName,
+	a.mainDiagnosis,
+	d.treatmentTypeName,
+	e.surgeryName,
+	e.surgeryDate
+FROM
+	ehr_db.ei_inhospital_note a
+LEFT JOIN user_db.u_hospital b ON a.hospitalId = b.hospitalId
+LEFT JOIN ehr_db.eci_treatment_note c ON a.inhospitalId = c.inHospitalId
+LEFT JOIN ehr_db.meta_e_treatment d ON c.treatmentTypeId = d.treatmentTypeId
+LEFT JOIN ehr_db.eci_surgery_note e ON a.inhospitalId = e.inhospitalId
+WHERE
+	a.inhospitalId = #{inhospitalId}
+	</select>
+
+	<!-- 查询其他诊断信息列表 -->
+	<select id="getOtherDiagnosisList"
+		parameterType="com.esuizhen.cloudservice.ehr.bean.PatientMedicalTreatmentResp"
+		resultType="java.lang.String">
+SELECT
+	a.diagnosis AS otherDiagnosis
+FROM
+	ehr_db.e_diagnosis_info a
+WHERE
+	a.diagnosisTypeId != 1
+AND a.inhospitalId = #{inhospitalId}
+	</select>
+</mapper>
+

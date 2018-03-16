@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.QRcodeDao">
+	<resultMap id="baseQRCodeResultMap" type="com.westangel.common.bean.user.QRCode">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="businessId" property="businessId" jdbcType="INTEGER" />
+		<result column="productId" property="productId" jdbcType="INTEGER" />
+		<result column="userId" property="userId" jdbcType="BIGINT" />
+		<result column="targetId" property="targetId" jdbcType="VARCHAR" />
+		<result column="role" property="userRole" jdbcType="INTEGER" />
+		<result column="qrcodeUrl" property="qrcodeUrl" jdbcType="VARCHAR" />
+		<result column="ticketId" property="ticketId" jdbcType="BIGINT" />
+		<result column="ticket" property="ticket" jdbcType="VARCHAR" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<resultMap id="baseUserLoginOutRespResultMap"
+		type="com.westangel.common.bean.user.UserLoginOutResp">
+		<result column="businessId" property="businessId" jdbcType="INTEGER" />
+		<result column="productId" property="productId" jdbcType="INTEGER" />
+		<result column="userId" property="userId" jdbcType="BIGINT" />
+		<result column="targetId" property="targetId" jdbcType="VARCHAR" />
+		<result column="role" property="role" jdbcType="INTEGER" />
+		<result column="doctorId" property="doctorId" jdbcType="BIGINT" />
+		<result column="trueName" property="trueName" jdbcType="VARCHAR" />
+		<result column="hospitalId" property="hospitalId" jdbcType="BIGINT" />
+		<result column="hospitalName" property="hospitalName" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="base_column_list">
+		t1.id, t1.businessId, t1.productId, t1.userId, t1.targetId, t1.role, t1.qrcodeUrl,
+		t1.ticketId, t1.ticket, t1.createTime, t1.updateTime
+	</sql>
+
+	<select id="findByUserId" resultMap="baseQRCodeResultMap">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM u_qrcode t1
+		WHERE t1.userId=#{userId,jdbcType=BIGINT} AND t1.role=#{role,jdbcType=INTEGER}
+	</select>
+	
+	<select id="findByTicket" resultMap="baseQRCodeResultMap">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM u_qrcode t1
+		WHERE t1.ticket=#{ticket,jdbcType=VARCHAR}
+	</select>
+
+	<select id="findUserLoginOutRespByTicket" resultMap="baseUserLoginOutRespResultMap"
+		parameterType="java.lang.String">
+		SELECT 
+			t1.businessId, 
+			t1.productId, 
+			t1.userId, 
+			t1.targetId, 
+			t1.role,
+			t2.doctorId,
+			t2.trueName,
+			IFNULL(t3.hospitalId,(SELECT t.hospitalId FROM user_db.r_hospital_doctor t WHERE t.doctorId=t2.doctorId LIMIT 1)) hospitalId,
+			t3.hospitalName
+		FROM 
+			u_qrcode t1
+		LEFT JOIN u_doctor t2 ON t1.userId=t2.userId
+		LEFT JOIN u_hospital t3 ON t1.userId=t3.userId
+		WHERE 
+			t1.ticket=#{ticket,jdbcType=VARCHAR}
+	</select>
+	
+	<insert id="insert" parameterType="com.westangel.common.bean.user.QRCode">
+		<selectKey resultType="long" keyProperty="id" order="AFTER">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO u_qrcode(businessId, productId, userId, targetId, role, qrcodeUrl, ticketId, ticket, createTime, updateTime)
+		VALUES(
+			#{businessId,jdbcType=INTEGER},
+			#{productId,jdbcType=INTEGER},
+			#{userId,jdbcType=BIGINT},
+			#{targetId,jdbcType=VARCHAR},
+			#{userRole,jdbcType=INTEGER},
+			#{qrcodeUrl,jdbcType=VARCHAR},
+			#{ticketId,jdbcType=VARCHAR},
+			#{ticket,jdbcType=VARCHAR},
+			NOW(), NOW()
+		)
+	</insert>
+	
+	<delete id="delete">
+		DELETE FROM u_qrcode WHERE id=#{id,jdbcType=BIGINT}
+	</delete>
+	
+</mapper>

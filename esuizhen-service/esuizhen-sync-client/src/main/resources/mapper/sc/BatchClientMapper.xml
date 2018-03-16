@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.client.sync.dao.sc.BatchClientDao" >
+	<!-- 插入 -->
+    <insert id="insert">
+		INSERT INTO sc_db.sync_batch_client(
+			batchId,hospitalId,createTime
+		)
+		VALUES(
+			#{batchId},#{hospitalId},now()
+		)
+	</insert>
+	<!-- 获取批次 -->
+	<select id="queryBatchInfo" resultType="com.esuizhen.client.sync.model.TBatchInfo">
+		SELECT batchId,hospitalId,state FROM sc_db.sync_batch_client WHERE 1
+		<if test="batchId">
+			AND batchId = #{batchId}
+		</if>
+		<if test="state!=null">
+			AND state=#{state}
+		</if>
+		<if test="hospitalId!=null">
+			AND hospitalId=#{hospitalId}
+		</if>
+		LIMIT 1
+	</select>
+	
+	
+	<!-- 获取批次列表 -->
+	<select id="queryBatchInfoList" resultType="com.esuizhen.client.sync.model.TBatchInfo">
+		SELECT batchId,hospitalId,state FROM sc_db.sync_batch_client WHERE 1
+		<if test="batchId">
+			AND batchId = #{batchId}
+		</if>
+		<if test="state!=null">
+			AND state=#{state}
+		</if>
+		<if test="hospitalId!=null">
+			AND hospitalId=#{hospitalId}
+		</if>
+	</select>
+	
+	<!-- 修改状态 -->
+	<update id="updateState">
+		UPDATE sc_db.sync_batch_client
+		<set>
+			state=#{state},
+			<if test="pushTimes!=null">
+				pushTimes = #{pushTimes},
+			</if>
+			<if test="processTimes!=null">
+				processTimes = #{processTimes},
+			</if>
+			<if test="getTimes!=null">
+				getTimes = #{getTimes},
+			</if>
+			updateTime=now()
+		</set>
+		WHERE batchId=#{batchId}
+	</update>
+	<!-- 未推送完成的批次更新为初始状态  -->
+	<update id="updateUnfinishedPush">
+		UPDATE sc_db.sync_batch_client t1
+		SET t1.state=0
+		WHERE t1.state = 1
+	</update>
+</mapper>

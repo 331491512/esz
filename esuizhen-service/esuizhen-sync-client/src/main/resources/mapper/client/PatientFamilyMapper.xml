@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.client.sync.dao.PatientFamilyDao" >	
+  	
+	<select id="getBatchSyncPatientFamily" resultType="java.util.LinkedHashMap" parameterType="com.esuizhen.client.sync.model.TBatchDetailInfo">
+		SELECT
+			t1.id,t1.contactId,IF(t11.syncFlag=2,1,t11.syncFlag) as opFlag,t1.patientId,t2.uuid as patientUuid,t1.patientRelation,t1.familyName,t1.familyPhone,t1.zipcode,t1.address,
+			t1.isDefault,t1.isValid,t1.createTime,t1.updateTime,t1.phoneStatus,t1.operator,t3.uuid as operatorUuid,
+			t1.remark,t1.rawCreateTime,t1.sourceFlag,t1.mergeFlag,t1.mergeFrom,
+			IFNULL(t1.mergeFromUuid,(SELECT uuid FROM user_db.u_patient WHERE patientId =t1.mergeFrom)) AS mergeFromUuid,
+			t1.mergeTarget,
+			IFNULL(t1.mergeTargetUuid,(SELECT uuid FROM user_db.u_patient WHERE patientId =t1.mergeTarget)) AS mergeTargetUuid,
+			t1.mergeTime,t1.specialDiseaseRegisterId
+		FROM
+			 user_db.u_patient_family t1
+		JOIN user_db.u_patient t2 ON t1.patientId = t2.patientId
+		JOIN sc_db.u_patient_sync_result_client t22 ON t2.uuid = t22.uuid
+		JOIN sc_db.u_patient_family_sync_result_client t11 ON t1.contactId = t11.contactId 
+		LEFT JOIN (SELECT t1.* FROM user_db.u_doctor t1 JOIN sc_db.u_doctor_sync_result_client t2 ON t1.uuid=t2.uuid and t2.syncFlag=1) t3 ON t1.operator = t3.doctorId
+		WHERE
+				  t22.syncFlag = 1 AND t11.syncFlag in (0,2)
+		LIMIT #{detailInfo.syncSize}
+  	</select>
+  	<update id="updatePatientFamilySyncflag" parameterType="java.lang.String">
+		UPDATE sc_db.u_patient_family_sync_result_client t1
+		SET t1.opFlag=IF(t1.syncFlag=0,1,2),t1.syncFlag = 9 , t1.syncTime=NOW(),t1.updateTime = NOW()
+		WHERE
+			t1.contactId IN (${contactIds})
+	</update>
+	
+	<update id="updateSyncResult" parameterType="com.esuizhen.client.sync.bean.TBatchDataResultInfo">
+		UPDATE sc_db.u_patient_family_sync_result_client t1
+		SET 
+		    t1.batchId = #{tBatchDataResultInfo.batchId},
+		    t1.syncFlag = #{tBatchDataResultInfo.syncFlag},
+			t1.cause = #{tBatchDataResultInfo.cause},
+			t1.updateTime = NOW()
+		WHERE
+			t1.contactId = #{tBatchDataResultInfo.resultId} and t1.syncFlag = 9
+	</update>
+</mapper>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.DoctorPatientRemarkDao">
+	 <!-- 查询备忘录 -->
+	 <select id="queryPatientRemark" resultType="com.esuizhen.cloudservice.user.bean.TPatientRemark">
+	 	SELECT 
+	 	remarkId,createTime,remark 
+	 	FROM user_db.s_doctor_patient_remark 
+	 	WHERE 
+	 	patientId= #{patientId} 
+	 	AND doctorId = #{doctorId}
+	 	ORDER BY createTime desc 
+	 </select>
+	 <!-- 新增备忘录 -->
+	 <insert id="createRemark">
+	 	<selectKey resultType="Integer" keyProperty="remarkId" order="AFTER">
+			SELECT
+			LAST_INSERT_ID() as remarkId
+		</selectKey>
+	 	INSERT INTO 
+	 	user_db.s_doctor_patient_remark(doctorId,patientId,remark,createTime) 
+	 	VALUES(#{doctorId},#{patientId},#{remark},NOW())
+	 </insert>
+	 
+	 <!-- 修改备注信息 -->
+	 <update id="modifyRemark">
+	 	UPDATE user_db.s_doctor_patient_remark
+	 	<set>
+	 		remark=#{remark}
+	 	</set>
+	 	WHERE
+	 	remarkId=#{remarkId}
+	 	AND doctorId=#{doctorId}
+	 </update>
+	 
+	 <!-- 删除备注信息 -->
+	 <delete id="deleteRemark">
+	 	DELETE FROM user_db.s_doctor_patient_remark
+	 	WHERE
+	 	remarkId = #{remarkId}
+	 	AND doctorId=#{doctorId}
+	 </delete>
+</mapper>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_incre_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.match.MatchPatientPatientNoDao">
+
+	<insert id="insert">
+		INSERT INTO cloud_sync_match_db.r_uuid_patientno (
+			uuid,
+			patientId,
+			patientNo,
+			newPatientNo,
+			hospitalId,
+			type,
+			flag,
+			syncFlag,
+			syncTime,
+			createTime,
+			updateTime
+		)
+		VALUES(
+			#{uuid},
+			#{patientId},
+			#{patientNo},
+			#{newPatientNo},
+			#{hospitalId},
+			#{type},
+			#{flag},
+			#{syncFlag},
+			now(),
+			#{createTime},
+			#{updateTime}		
+		)
+	</insert>
+	
+	<select id="getPatientPatientNoByUuid" resultType="com.westangel.common.bean.TPatientAndPatientNoRelation">
+		select
+			id, 
+			uuid,
+			patientId,
+			patientNo,
+			newPatientNo,
+			hospitalId,
+			type,
+			flag,
+			syncFlag,
+			createTime,
+			updateTime
+		from
+			cloud_sync_match_db.r_uuid_patientno
+		where
+			uuid=#{uuid}
+	</select>
+	
+	 <update id="updatePatientUuid">
+	 	UPDATE cloud_sync_match_db.r_uuid_patientno
+	 	<set>
+	 		<if test="uuidFinal != null">
+	 			uuid=#{uuidFinal}
+	 		</if>
+	 	</set>
+	 	WHERE uuid IN
+		(
+			<foreach collection="uuidRelationships" item="uuidRelationship" index="index" separator=",">
+				#{uuidRelationship.uuid,jdbcType=VARCHAR}
+			</foreach>
+		)
+	 </update>
+	
+	<delete id="delete">
+		delete from cloud_sync_match_db.r_uuid_patientno where id=#{id}
+	</delete>
+</mapper>

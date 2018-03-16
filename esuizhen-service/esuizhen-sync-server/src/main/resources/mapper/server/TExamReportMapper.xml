@@ -1,0 +1,1200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.server.TExamReportDao" >
+
+  <insert id="insertSelective" parameterType="com.esuizhen.server.sync.bean.server.ExamReportRes" >
+    insert into lis_db.eci_exam_report
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="examReportId != null" >
+        examReportId,
+      </if>
+      <if test="emrId != null" >
+        emrId,
+      </if>
+      <if test="patientId != null" >
+        patientId,
+      </if>
+      <if test="patientName != null" >
+        patientName,
+      </if>
+      <if test="patientNo != null" >
+        patientNo,
+      </if>
+      <if test="inhospitalTimes != null" >
+        inhospitalTimes,
+      </if>
+      <if test="patientUuid != null" >
+        patientUuid,
+      </if>
+      <if test="outPatientFlag != null" >
+        outPatientFlag,
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId,
+      </if>
+      <if test="examTypeId != null" >
+        examTypeId,
+      </if>
+      <if test="examChildTypeId != null" >
+        examChildTypeId,
+      </if>
+      <if test="examTypeName != null" >
+        examTypeName,
+      </if>
+      <if test="deptId != null" >
+        deptId,
+      </if>
+      <if test="deptUuid != null" >
+        deptUuid,
+      </if>
+      <if test="deptName != null" >
+        deptName,
+      </if>
+      <if test="reportTitle != null" >
+        reportTitle,
+      </if>
+      <if test="scanningTechnique != null" >
+        scanningTechnique,
+      </if>
+      <if test="examWay != null" >
+        examWay,
+      </if>
+      <if test="obtainWay != null" >
+        obtainWay,
+      </if>
+      <if test="organCode != null" >
+        organCode,
+      </if>
+      <if test="organ != null" >
+        organ,
+      </if>
+      <if test="bodyCode != null" >
+        bodyCode,
+      </if>
+      <if test="bodyPart != null" >
+        bodyPart,
+      </if>
+      <if test="nidusCode != null" >
+        nidusCode,
+      </if>
+      <if test="nidus != null" >
+        nidus,
+      </if>
+      <if test="nidusSourceFlag != null" >
+        nidusSourceFlag,
+      </if>
+      <if test="longestDiameter != null" >
+        longestDiameter,
+      </if>
+      <if test="shortestDiameter != null" >
+        shortestDiameter,
+      </if>
+      <if test="examFinding != null" >
+        examFinding,
+      </if>
+      <if test="examConclusion != null" >
+        examConclusion,
+      </if>
+      <if test="examConclusionRtf != null" >
+        examConclusionRtf,
+      </if>
+      <if test="hasImage != null" >
+        hasImage,
+      </if>
+      <if test="picFileUrls != null" >
+        picFileUrls,
+      </if>
+      <if test="imageFileFormat != null" >
+        imageFileFormat,
+      </if>
+      <if test="applyDoctorId != null" >
+        applyDoctorId,
+      </if>
+      <if test="applyDoctorNo != null" >
+        applyDoctorNo,
+      </if>
+      <if test="applyDoctorName != null" >
+        applyDoctorName,
+      </if>
+      <if test="reportDoctorId != null" >
+        reportDoctorId,
+      </if>
+      <if test="reportDoctorNo != null" >
+        reportDoctorNo,
+      </if>
+      <if test="reportDoctorName != null" >
+        reportDoctorName,
+      </if>
+      <if test="state != null" >
+        state,
+      </if>
+      <if test="readFlag != null" >
+        readFlag,
+      </if>
+      <if test="applyTime != null" >
+        applyTime,
+      </if>
+      <if test="excuteTime != null" >
+        excuteTime,
+      </if>
+      <if test="reportTime != null" >
+        reportTime,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+      <if test="updateTime != null" >
+        updateTime,
+      </if>
+      <if test="syncTime != null" >
+        syncTime,
+      </if>
+      <if test="syncFlag != null" >
+        syncFlag,
+      </if>
+      <if test="patientSex != null" >
+        patientSex,
+      </if>
+      <if test="patientBirth != null" >
+        patientBirth,
+      </if>
+      <if test="patientIdno != null" >
+        patientIdno,
+      </if>
+      <if test="patientMobile != null" >
+        patientMobile,
+      </if>
+      <if test="patientAddress != null" >
+        patientAddress,
+      </if>
+      <if test="applyDoctorUuid != null" >
+        applyDoctorUuid,
+      </if>
+      <if test="reportDoctorUuid != null" >
+        reportDoctorUuid,
+      </if>
+      <if test="rawCreateTime != null" >
+        rawCreateTime,
+      </if>
+      <if test="operateDoctorUuid != null" >
+        operateDoctorUuid,
+      </if>
+      <if test="auditDoctorUuid != null" >
+        auditDoctorUuid,
+      </if>
+      <if test="mergeFlag != null" >
+        mergeFlag,
+      </if>
+      <if test="mergeFrom != null" >
+        mergeFrom,
+      </if>
+      <if test="mergeTarget != null" >
+        mergeTarget,
+      </if>
+      <if test="mergeTime != null" >
+        mergeTime,
+      </if>
+      <if test="mergeFromUuid != null" >
+        mergeFromUuid,
+      </if>
+      <if test="mergeTargetUuid != null" >
+        mergeTargetUuid,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="examReportId != null" >
+        #{examReportId,jdbcType=VARCHAR},
+      </if>
+      <if test="emrId != null" >
+        #{emrId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        #{patientId,jdbcType=INTEGER},
+      </if>
+      <if test="patientName != null" >
+        #{patientName,jdbcType=VARCHAR},
+      </if>
+      <if test="patientNo != null" >
+        #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalTimes != null" >
+        #{inhospitalTimes,jdbcType=INTEGER},
+      </if>
+      <if test="patientUuid != null" >
+        #{patientUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="outPatientFlag != null" >
+        #{outPatientFlag,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="examTypeId != null" >
+        #{examTypeId,jdbcType=INTEGER},
+      </if>
+      <if test="examChildTypeId != null" >
+        #{examChildTypeId,jdbcType=INTEGER},
+      </if>
+      <if test="examTypeName != null" >
+        #{examTypeName,jdbcType=VARCHAR},
+      </if>
+      <if test="deptId != null" >
+        #{deptId,jdbcType=INTEGER},
+      </if>
+      <if test="deptUuid != null" >
+        #{deptUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="deptName != null" >
+        #{deptName,jdbcType=VARCHAR},
+      </if>
+      <if test="reportTitle != null" >
+        #{reportTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="scanningTechnique != null" >
+        #{scanningTechnique,jdbcType=VARCHAR},
+      </if>
+      <if test="examWay != null" >
+        #{examWay,jdbcType=INTEGER},
+      </if>
+      <if test="obtainWay != null" >
+        #{obtainWay,jdbcType=VARCHAR},
+      </if>
+      <if test="organCode != null" >
+        #{organCode,jdbcType=VARCHAR},
+      </if>
+      <if test="organ != null" >
+        #{organ,jdbcType=VARCHAR},
+      </if>
+      <if test="bodyCode != null" >
+        #{bodyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="bodyPart != null" >
+        #{bodyPart,jdbcType=VARCHAR},
+      </if>
+      <if test="nidusCode != null" >
+        #{nidusCode,jdbcType=VARCHAR},
+      </if>
+      <if test="nidus != null" >
+        #{nidus,jdbcType=VARCHAR},
+      </if>
+      <if test="nidusSourceFlag != null" >
+        #{nidusSourceFlag,jdbcType=INTEGER},
+      </if>
+      <if test="longestDiameter != null" >
+        #{longestDiameter,jdbcType=REAL},
+      </if>
+      <if test="shortestDiameter != null" >
+        #{shortestDiameter,jdbcType=REAL},
+      </if>
+      <if test="examFinding != null" >
+        #{examFinding,jdbcType=VARCHAR},
+      </if>
+      <if test="examConclusion != null" >
+        #{examConclusion,jdbcType=VARCHAR},
+      </if>
+      <if test="examConclusionRtf != null" >
+        #{examConclusionRtf,jdbcType=VARCHAR},
+      </if>
+      <if test="hasImage != null" >
+        #{hasImage,jdbcType=INTEGER},
+      </if>
+      <if test="picFileUrls != null" >
+        #{picFileUrls,jdbcType=VARCHAR},
+      </if>
+      <if test="imageFileFormat != null" >
+        #{imageFileFormat,jdbcType=VARCHAR},
+      </if>
+      <if test="applyDoctorId != null" >
+        #{applyDoctorId,jdbcType=BIGINT},
+      </if>
+      <if test="applyDoctorNo != null" >
+        #{applyDoctorNo,jdbcType=VARCHAR},
+      </if>
+      <if test="applyDoctorName != null" >
+        #{applyDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="reportDoctorId != null" >
+        #{reportDoctorId,jdbcType=BIGINT},
+      </if>
+      <if test="reportDoctorNo != null" >
+        #{reportDoctorNo,jdbcType=VARCHAR},
+      </if>
+      <if test="reportDoctorName != null" >
+        #{reportDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=INTEGER},
+      </if>
+      <if test="readFlag != null" >
+        #{readFlag,jdbcType=INTEGER},
+      </if>
+      <if test="applyTime != null" >
+        #{applyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="excuteTime != null" >
+        #{excuteTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="reportTime != null" >
+        #{reportTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncTime != null" >
+        #{syncTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncFlag != null" >
+        #{syncFlag,jdbcType=INTEGER},
+      </if>
+      <if test="patientSex != null" >
+        #{patientSex,jdbcType=INTEGER},
+      </if>
+      <if test="patientBirth != null" >
+        #{patientBirth,jdbcType=VARCHAR},
+      </if>
+      <if test="patientIdno != null" >
+        #{patientIdno,jdbcType=VARCHAR},
+      </if>
+      <if test="patientMobile != null" >
+        #{patientMobile,jdbcType=VARCHAR},
+      </if>
+      <if test="patientAddress != null" >
+        #{patientAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="applyDoctorUuid != null" >
+        #{applyDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="reportDoctorUuid != null" >
+        #{reportDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="rawCreateTime != null" >
+        #{rawCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="operateDoctorUuid != null" >
+        #{operateDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="auditDoctorUuid != null" >
+        #{auditDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeFlag != null" >
+        #{mergeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mergeFrom != null" >
+        #{mergeFrom,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTarget != null" >
+        #{mergeTarget,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTime != null" >
+        #{mergeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFromUuid != null" >
+        #{mergeFromUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeTargetUuid != null" >
+        #{mergeTargetUuid,jdbcType=VARCHAR},
+      </if>
+    </trim>
+    ON DUPLICATE KEY UPDATE
+    createTime = VALUES(createTime)
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.server.sync.bean.server.ExamReportRes" >
+    update lis_db.eci_exam_report
+    <set>
+      <if test="emrId != null" >
+        emrId = #{emrId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        patientId = #{patientId,jdbcType=INTEGER},
+      </if>
+      <if test="patientName != null" >
+        patientName = #{patientName,jdbcType=VARCHAR},
+      </if>
+      <if test="patientNo != null" >
+        patientNo = #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalTimes != null" >
+        inhospitalTimes = #{inhospitalTimes,jdbcType=INTEGER},
+      </if>
+      <if test="patientUuid != null" >
+        patientUuid = #{patientUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="outPatientFlag != null" >
+        outPatientFlag = #{outPatientFlag,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="examTypeId != null" >
+        examTypeId = #{examTypeId,jdbcType=INTEGER},
+      </if>
+      <if test="examChildTypeId != null" >
+        examChildTypeId = #{examChildTypeId,jdbcType=INTEGER},
+      </if>
+      <if test="examTypeName != null" >
+        examTypeName = #{examTypeName,jdbcType=VARCHAR},
+      </if>
+      <if test="deptId != null" >
+        deptId = #{deptId,jdbcType=INTEGER},
+      </if>
+      <if test="deptUuid != null" >
+        deptUuid = #{deptUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="deptName != null" >
+        deptName = #{deptName,jdbcType=VARCHAR},
+      </if>
+      <if test="reportTitle != null" >
+        reportTitle = #{reportTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="scanningTechnique != null" >
+        scanningTechnique = #{scanningTechnique,jdbcType=VARCHAR},
+      </if>
+      <if test="examWay != null" >
+        examWay = #{examWay,jdbcType=INTEGER},
+      </if>
+      <if test="obtainWay != null" >
+        obtainWay = #{obtainWay,jdbcType=VARCHAR},
+      </if>
+      <if test="organCode != null" >
+        organCode = #{organCode,jdbcType=VARCHAR},
+      </if>
+      <if test="organ != null" >
+        organ = #{organ,jdbcType=VARCHAR},
+      </if>
+      <if test="bodyCode != null" >
+        bodyCode = #{bodyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="bodyPart != null" >
+        bodyPart = #{bodyPart,jdbcType=VARCHAR},
+      </if>
+      <if test="nidusCode != null" >
+        nidusCode = #{nidusCode,jdbcType=VARCHAR},
+      </if>
+      <if test="nidus != null" >
+        nidus = #{nidus,jdbcType=VARCHAR},
+      </if>
+      <if test="nidusSourceFlag != null" >
+        nidusSourceFlag = #{nidusSourceFlag,jdbcType=INTEGER},
+      </if>
+      <if test="longestDiameter != null" >
+        longestDiameter = #{longestDiameter,jdbcType=REAL},
+      </if>
+      <if test="shortestDiameter != null" >
+        shortestDiameter = #{shortestDiameter,jdbcType=REAL},
+      </if>
+      <if test="examFinding != null" >
+        examFinding = #{examFinding,jdbcType=VARCHAR},
+      </if>
+      <if test="examConclusion != null" >
+        examConclusion = #{examConclusion,jdbcType=VARCHAR},
+      </if>
+      <if test="examConclusionRtf != null" >
+        examConclusionRtf = #{examConclusionRtf,jdbcType=VARCHAR},
+      </if>
+      <if test="hasImage != null" >
+        hasImage = #{hasImage,jdbcType=INTEGER},
+      </if>
+      <if test="picFileUrls != null" >
+        picFileUrls = #{picFileUrls,jdbcType=VARCHAR},
+      </if>
+      <if test="imageFileFormat != null" >
+        imageFileFormat = #{imageFileFormat,jdbcType=VARCHAR},
+      </if>
+      <if test="applyDoctorId != null" >
+        applyDoctorId = #{applyDoctorId,jdbcType=BIGINT},
+      </if>
+      <if test="applyDoctorNo != null" >
+        applyDoctorNo = #{applyDoctorNo,jdbcType=VARCHAR},
+      </if>
+      <if test="applyDoctorName != null" >
+        applyDoctorName = #{applyDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="reportDoctorId != null" >
+        reportDoctorId = #{reportDoctorId,jdbcType=BIGINT},
+      </if>
+      <if test="reportDoctorNo != null" >
+        reportDoctorNo = #{reportDoctorNo,jdbcType=VARCHAR},
+      </if>
+      <if test="reportDoctorName != null" >
+        reportDoctorName = #{reportDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        state = #{state,jdbcType=INTEGER},
+      </if>
+      <if test="readFlag != null" >
+        readFlag = #{readFlag,jdbcType=INTEGER},
+      </if>
+      <if test="applyTime != null" >
+        applyTime = #{applyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="excuteTime != null" >
+        excuteTime = #{excuteTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="reportTime != null" >
+        reportTime = #{reportTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncTime != null" >
+        syncTime = #{syncTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncFlag != null" >
+        syncFlag = #{syncFlag,jdbcType=INTEGER},
+      </if>
+      <if test="patientSex != null" >
+        patientSex = #{patientSex,jdbcType=INTEGER},
+      </if>
+      <if test="patientBirth != null" >
+        patientBirth = #{patientBirth,jdbcType=VARCHAR},
+      </if>
+      <if test="patientIdno != null" >
+        patientIdno = #{patientIdno,jdbcType=VARCHAR},
+      </if>
+      <if test="patientMobile != null" >
+        patientMobile = #{patientMobile,jdbcType=VARCHAR},
+      </if>
+      <if test="patientAddress != null" >
+        patientAddress = #{patientAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="applyDoctorUuid != null" >
+        applyDoctorUuid = #{applyDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="reportDoctorUuid != null" >
+        reportDoctorUuid = #{reportDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="rawCreateTime != null" >
+        rawCreateTime = #{rawCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="operateDoctorUuid != null" >
+        operateDoctorUuid = #{operateDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="auditDoctorUuid != null" >
+        auditDoctorUuid = #{auditDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeFlag != null" >
+        mergeFlag = #{mergeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mergeFrom != null" >
+        mergeFrom = #{mergeFrom,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTarget != null" >
+        mergeTarget = #{mergeTarget,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTime != null" >
+        mergeTime = #{mergeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFromUuid != null" >
+        mergeFromUuid = #{mergeFromUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeTargetUuid != null" >
+        mergeTargetUuid = #{mergeTargetUuid,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where examReportId = #{examReportId,jdbcType=VARCHAR}
+  </update>
+
+  <insert id="insertRealtimeSelective" parameterType="com.esuizhen.server.sync.bean.server.ExamReportRes" >
+    insert into lis_realtime_db.eci_exam_report
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="examReportId != null" >
+        examReportId,
+      </if>
+      <if test="emrId != null" >
+        emrId,
+      </if>
+      <if test="patientId != null" >
+        patientId,
+      </if>
+      <if test="patientName != null" >
+        patientName,
+      </if>
+      <if test="patientNo != null" >
+        patientNo,
+      </if>
+      <if test="inhospitalTimes != null" >
+        inhospitalTimes,
+      </if>
+      <if test="patientUuid != null" >
+        patientUuid,
+      </if>
+      <if test="outPatientFlag != null" >
+        outPatientFlag,
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId,
+      </if>
+      <if test="examTypeId != null" >
+        examTypeId,
+      </if>
+      <if test="examChildTypeId != null" >
+        examChildTypeId,
+      </if>
+      <if test="examTypeName != null" >
+        examTypeName,
+      </if>
+      <if test="deptId != null" >
+        deptId,
+      </if>
+      <if test="deptUuid != null" >
+        deptUuid,
+      </if>
+      <if test="deptName != null" >
+        deptName,
+      </if>
+      <if test="reportTitle != null" >
+        reportTitle,
+      </if>
+      <if test="scanningTechnique != null" >
+        scanningTechnique,
+      </if>
+      <if test="examWay != null" >
+        examWay,
+      </if>
+      <if test="obtainWay != null" >
+        obtainWay,
+      </if>
+      <if test="organCode != null" >
+        organCode,
+      </if>
+      <if test="organ != null" >
+        organ,
+      </if>
+      <if test="bodyCode != null" >
+        bodyCode,
+      </if>
+      <if test="bodyPart != null" >
+        bodyPart,
+      </if>
+      <if test="nidusCode != null" >
+        nidusCode,
+      </if>
+      <if test="nidus != null" >
+        nidus,
+      </if>
+      <if test="nidusSourceFlag != null" >
+        nidusSourceFlag,
+      </if>
+      <if test="longestDiameter != null" >
+        longestDiameter,
+      </if>
+      <if test="shortestDiameter != null" >
+        shortestDiameter,
+      </if>
+      <if test="examFinding != null" >
+        examFinding,
+      </if>
+      <if test="examConclusion != null" >
+        examConclusion,
+      </if>
+      <if test="examConclusionRtf != null" >
+        examConclusionRtf,
+      </if>
+      <if test="hasImage != null" >
+        hasImage,
+      </if>
+      <if test="picFileUrls != null" >
+        picFileUrls,
+      </if>
+      <if test="imageFileFormat != null" >
+        imageFileFormat,
+      </if>
+      <if test="applyDoctorId != null" >
+        applyDoctorId,
+      </if>
+      <if test="applyDoctorNo != null" >
+        applyDoctorNo,
+      </if>
+      <if test="applyDoctorName != null" >
+        applyDoctorName,
+      </if>
+      <if test="reportDoctorId != null" >
+        reportDoctorId,
+      </if>
+      <if test="reportDoctorNo != null" >
+        reportDoctorNo,
+      </if>
+      <if test="reportDoctorName != null" >
+        reportDoctorName,
+      </if>
+      <if test="state != null" >
+        state,
+      </if>
+      <if test="readFlag != null" >
+        readFlag,
+      </if>
+      <if test="applyTime != null" >
+        applyTime,
+      </if>
+      <if test="excuteTime != null" >
+        excuteTime,
+      </if>
+      <if test="reportTime != null" >
+        reportTime,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+      <if test="updateTime != null" >
+        updateTime,
+      </if>
+      <if test="syncTime != null" >
+        syncTime,
+      </if>
+      <if test="syncFlag != null" >
+        syncFlag,
+      </if>
+      <if test="patientSex != null" >
+        patientSex,
+      </if>
+      <if test="patientBirth != null" >
+        patientBirth,
+      </if>
+      <if test="patientIdno != null" >
+        patientIdno,
+      </if>
+      <if test="patientMobile != null" >
+        patientMobile,
+      </if>
+      <if test="patientAddress != null" >
+        patientAddress,
+      </if>
+      <if test="applyDoctorUuid != null" >
+        applyDoctorUuid,
+      </if>
+      <if test="reportDoctorUuid != null" >
+        reportDoctorUuid,
+      </if>
+      <if test="rawCreateTime != null" >
+        rawCreateTime,
+      </if>
+      <if test="operateDoctorUuid != null" >
+        operateDoctorUuid,
+      </if>
+      <if test="auditDoctorUuid != null" >
+        auditDoctorUuid,
+      </if>
+      <if test="mergeFlag != null" >
+        mergeFlag,
+      </if>
+      <if test="mergeFrom != null" >
+        mergeFrom,
+      </if>
+      <if test="mergeTarget != null" >
+        mergeTarget,
+      </if>
+      <if test="mergeTime != null" >
+        mergeTime,
+      </if>
+      <if test="mergeFromUuid != null" >
+        mergeFromUuid,
+      </if>
+      <if test="mergeTargetUuid != null" >
+        mergeTargetUuid,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="examReportId != null" >
+        #{examReportId,jdbcType=VARCHAR},
+      </if>
+      <if test="emrId != null" >
+        #{emrId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        #{patientId,jdbcType=INTEGER},
+      </if>
+      <if test="patientName != null" >
+        #{patientName,jdbcType=VARCHAR},
+      </if>
+      <if test="patientNo != null" >
+        #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalTimes != null" >
+        #{inhospitalTimes,jdbcType=INTEGER},
+      </if>
+      <if test="patientUuid != null" >
+        #{patientUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="outPatientFlag != null" >
+        #{outPatientFlag,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="examTypeId != null" >
+        #{examTypeId,jdbcType=INTEGER},
+      </if>
+      <if test="examChildTypeId != null" >
+        #{examChildTypeId,jdbcType=INTEGER},
+      </if>
+      <if test="examTypeName != null" >
+        #{examTypeName,jdbcType=VARCHAR},
+      </if>
+      <if test="deptId != null" >
+        #{deptId,jdbcType=INTEGER},
+      </if>
+      <if test="deptUuid != null" >
+        #{deptUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="deptName != null" >
+        #{deptName,jdbcType=VARCHAR},
+      </if>
+      <if test="reportTitle != null" >
+        #{reportTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="scanningTechnique != null" >
+        #{scanningTechnique,jdbcType=VARCHAR},
+      </if>
+      <if test="examWay != null" >
+        #{examWay,jdbcType=INTEGER},
+      </if>
+      <if test="obtainWay != null" >
+        #{obtainWay,jdbcType=VARCHAR},
+      </if>
+      <if test="organCode != null" >
+        #{organCode,jdbcType=VARCHAR},
+      </if>
+      <if test="organ != null" >
+        #{organ,jdbcType=VARCHAR},
+      </if>
+      <if test="bodyCode != null" >
+        #{bodyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="bodyPart != null" >
+        #{bodyPart,jdbcType=VARCHAR},
+      </if>
+      <if test="nidusCode != null" >
+        #{nidusCode,jdbcType=VARCHAR},
+      </if>
+      <if test="nidus != null" >
+        #{nidus,jdbcType=VARCHAR},
+      </if>
+      <if test="nidusSourceFlag != null" >
+        #{nidusSourceFlag,jdbcType=INTEGER},
+      </if>
+      <if test="longestDiameter != null" >
+        #{longestDiameter,jdbcType=REAL},
+      </if>
+      <if test="shortestDiameter != null" >
+        #{shortestDiameter,jdbcType=REAL},
+      </if>
+      <if test="examFinding != null" >
+        #{examFinding,jdbcType=VARCHAR},
+      </if>
+      <if test="examConclusion != null" >
+        #{examConclusion,jdbcType=VARCHAR},
+      </if>
+      <if test="examConclusionRtf != null" >
+        #{examConclusionRtf,jdbcType=VARCHAR},
+      </if>
+      <if test="hasImage != null" >
+        #{hasImage,jdbcType=INTEGER},
+      </if>
+      <if test="picFileUrls != null" >
+        #{picFileUrls,jdbcType=VARCHAR},
+      </if>
+      <if test="imageFileFormat != null" >
+        #{imageFileFormat,jdbcType=VARCHAR},
+      </if>
+      <if test="applyDoctorId != null" >
+        #{applyDoctorId,jdbcType=BIGINT},
+      </if>
+      <if test="applyDoctorNo != null" >
+        #{applyDoctorNo,jdbcType=VARCHAR},
+      </if>
+      <if test="applyDoctorName != null" >
+        #{applyDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="reportDoctorId != null" >
+        #{reportDoctorId,jdbcType=BIGINT},
+      </if>
+      <if test="reportDoctorNo != null" >
+        #{reportDoctorNo,jdbcType=VARCHAR},
+      </if>
+      <if test="reportDoctorName != null" >
+        #{reportDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=INTEGER},
+      </if>
+      <if test="readFlag != null" >
+        #{readFlag,jdbcType=INTEGER},
+      </if>
+      <if test="applyTime != null" >
+        #{applyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="excuteTime != null" >
+        #{excuteTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="reportTime != null" >
+        #{reportTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncTime != null" >
+        #{syncTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncFlag != null" >
+        #{syncFlag,jdbcType=INTEGER},
+      </if>
+      <if test="patientSex != null" >
+        #{patientSex,jdbcType=INTEGER},
+      </if>
+      <if test="patientBirth != null" >
+        #{patientBirth,jdbcType=VARCHAR},
+      </if>
+      <if test="patientIdno != null" >
+        #{patientIdno,jdbcType=VARCHAR},
+      </if>
+      <if test="patientMobile != null" >
+        #{patientMobile,jdbcType=VARCHAR},
+      </if>
+      <if test="patientAddress != null" >
+        #{patientAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="applyDoctorUuid != null" >
+        #{applyDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="reportDoctorUuid != null" >
+        #{reportDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="rawCreateTime != null" >
+        #{rawCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="operateDoctorUuid != null" >
+        #{operateDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="auditDoctorUuid != null" >
+        #{auditDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeFlag != null" >
+        #{mergeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mergeFrom != null" >
+        #{mergeFrom,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTarget != null" >
+        #{mergeTarget,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTime != null" >
+        #{mergeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFromUuid != null" >
+        #{mergeFromUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeTargetUuid != null" >
+        #{mergeTargetUuid,jdbcType=VARCHAR},
+      </if>
+    </trim>
+    ON DUPLICATE KEY UPDATE
+    createTime = VALUES(createTime)
+  </insert>
+  <update id="updateRealtimeByPrimaryKeySelective" parameterType="com.esuizhen.server.sync.bean.server.ExamReportRes" >
+    update lis_realtime_db.eci_exam_report
+    <set>
+      <if test="emrId != null" >
+        emrId = #{emrId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        patientId = #{patientId,jdbcType=INTEGER},
+      </if>
+      <if test="patientName != null" >
+        patientName = #{patientName,jdbcType=VARCHAR},
+      </if>
+      <if test="patientNo != null" >
+        patientNo = #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalTimes != null" >
+        inhospitalTimes = #{inhospitalTimes,jdbcType=INTEGER},
+      </if>
+      <if test="patientUuid != null" >
+        patientUuid = #{patientUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="outPatientFlag != null" >
+        outPatientFlag = #{outPatientFlag,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="examTypeId != null" >
+        examTypeId = #{examTypeId,jdbcType=INTEGER},
+      </if>
+      <if test="examChildTypeId != null" >
+        examChildTypeId = #{examChildTypeId,jdbcType=INTEGER},
+      </if>
+      <if test="examTypeName != null" >
+        examTypeName = #{examTypeName,jdbcType=VARCHAR},
+      </if>
+      <if test="deptId != null" >
+        deptId = #{deptId,jdbcType=INTEGER},
+      </if>
+      <if test="deptUuid != null" >
+        deptUuid = #{deptUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="deptName != null" >
+        deptName = #{deptName,jdbcType=VARCHAR},
+      </if>
+      <if test="reportTitle != null" >
+        reportTitle = #{reportTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="scanningTechnique != null" >
+        scanningTechnique = #{scanningTechnique,jdbcType=VARCHAR},
+      </if>
+      <if test="examWay != null" >
+        examWay = #{examWay,jdbcType=INTEGER},
+      </if>
+      <if test="obtainWay != null" >
+        obtainWay = #{obtainWay,jdbcType=VARCHAR},
+      </if>
+      <if test="organCode != null" >
+        organCode = #{organCode,jdbcType=VARCHAR},
+      </if>
+      <if test="organ != null" >
+        organ = #{organ,jdbcType=VARCHAR},
+      </if>
+      <if test="bodyCode != null" >
+        bodyCode = #{bodyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="bodyPart != null" >
+        bodyPart = #{bodyPart,jdbcType=VARCHAR},
+      </if>
+      <if test="nidusCode != null" >
+        nidusCode = #{nidusCode,jdbcType=VARCHAR},
+      </if>
+      <if test="nidus != null" >
+        nidus = #{nidus,jdbcType=VARCHAR},
+      </if>
+      <if test="nidusSourceFlag != null" >
+        nidusSourceFlag = #{nidusSourceFlag,jdbcType=INTEGER},
+      </if>
+      <if test="longestDiameter != null" >
+        longestDiameter = #{longestDiameter,jdbcType=REAL},
+      </if>
+      <if test="shortestDiameter != null" >
+        shortestDiameter = #{shortestDiameter,jdbcType=REAL},
+      </if>
+      <if test="examFinding != null" >
+        examFinding = #{examFinding,jdbcType=VARCHAR},
+      </if>
+      <if test="examConclusion != null" >
+        examConclusion = #{examConclusion,jdbcType=VARCHAR},
+      </if>
+      <if test="examConclusionRtf != null" >
+        examConclusionRtf = #{examConclusionRtf,jdbcType=VARCHAR},
+      </if>
+      <if test="hasImage != null" >
+        hasImage = #{hasImage,jdbcType=INTEGER},
+      </if>
+      <if test="picFileUrls != null" >
+        picFileUrls = #{picFileUrls,jdbcType=VARCHAR},
+      </if>
+      <if test="imageFileFormat != null" >
+        imageFileFormat = #{imageFileFormat,jdbcType=VARCHAR},
+      </if>
+      <if test="applyDoctorId != null" >
+        applyDoctorId = #{applyDoctorId,jdbcType=BIGINT},
+      </if>
+      <if test="applyDoctorNo != null" >
+        applyDoctorNo = #{applyDoctorNo,jdbcType=VARCHAR},
+      </if>
+      <if test="applyDoctorName != null" >
+        applyDoctorName = #{applyDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="reportDoctorId != null" >
+        reportDoctorId = #{reportDoctorId,jdbcType=BIGINT},
+      </if>
+      <if test="reportDoctorNo != null" >
+        reportDoctorNo = #{reportDoctorNo,jdbcType=VARCHAR},
+      </if>
+      <if test="reportDoctorName != null" >
+        reportDoctorName = #{reportDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        state = #{state,jdbcType=INTEGER},
+      </if>
+      <if test="readFlag != null" >
+        readFlag = #{readFlag,jdbcType=INTEGER},
+      </if>
+      <if test="applyTime != null" >
+        applyTime = #{applyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="excuteTime != null" >
+        excuteTime = #{excuteTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="reportTime != null" >
+        reportTime = #{reportTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncTime != null" >
+        syncTime = #{syncTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncFlag != null" >
+        syncFlag = #{syncFlag,jdbcType=INTEGER},
+      </if>
+      <if test="patientSex != null" >
+        patientSex = #{patientSex,jdbcType=INTEGER},
+      </if>
+      <if test="patientBirth != null" >
+        patientBirth = #{patientBirth,jdbcType=VARCHAR},
+      </if>
+      <if test="patientIdno != null" >
+        patientIdno = #{patientIdno,jdbcType=VARCHAR},
+      </if>
+      <if test="patientMobile != null" >
+        patientMobile = #{patientMobile,jdbcType=VARCHAR},
+      </if>
+      <if test="patientAddress != null" >
+        patientAddress = #{patientAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="applyDoctorUuid != null" >
+        applyDoctorUuid = #{applyDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="reportDoctorUuid != null" >
+        reportDoctorUuid = #{reportDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="rawCreateTime != null" >
+        rawCreateTime = #{rawCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="operateDoctorUuid != null" >
+        operateDoctorUuid = #{operateDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="auditDoctorUuid != null" >
+        auditDoctorUuid = #{auditDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeFlag != null" >
+        mergeFlag = #{mergeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mergeFrom != null" >
+        mergeFrom = #{mergeFrom,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTarget != null" >
+        mergeTarget = #{mergeTarget,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTime != null" >
+        mergeTime = #{mergeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFromUuid != null" >
+        mergeFromUuid = #{mergeFromUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeTargetUuid != null" >
+        mergeTargetUuid = #{mergeTargetUuid,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where examReportId = #{examReportId,jdbcType=VARCHAR}
+  </update>
+</mapper>

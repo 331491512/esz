@@ -1,0 +1,1050 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.DoctorDao">
+	<resultMap id="baseResultMap" type="com.westangel.common.bean.Doctor">
+		<id column="doctorId" property="doctorId" jdbcType="BIGINT" />
+		<result column="userId" property="userId" jdbcType="BIGINT" />
+		<result column="trueName" property="trueName" jdbcType="VARCHAR" />
+		<result column="nickName" property="nickName" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="sex" property="sex" jdbcType="INTEGER" />
+		<result column="birthDate" property="birthDate" jdbcType="TIMESTAMP" />
+		<result column="userPictureUrl" property="userPictureUrl" jdbcType="VARCHAR" />
+		<result column="professionCredence" property="professionCredence" jdbcType="VARCHAR" />
+		<result column="registerCredence" property="registerCredence" jdbcType="VARCHAR" />
+		<result column="professionCredencePicUrl" property="professionCredencePicUrl" jdbcType="VARCHAR" />
+		<result column="registerCredencePicUrl" property="registerCredencePicUrl" jdbcType="VARCHAR" />
+		<result column="isExpert" property="isExpert" jdbcType="INTEGER" />
+		<result column="skills" property="skills" jdbcType="VARCHAR" />
+		<result column="tagIds" property="tagIds" jdbcType="VARCHAR" />
+		<result column="tags" property="tags" jdbcType="VARCHAR" />
+		<result column="positionTitle" property="positionTitle" jdbcType="INTEGER" />
+		<result column="professionalRank" property="professionalRank" jdbcType="INTEGER" />
+		<result column="tel" property="tel" jdbcType="VARCHAR" />
+		<result column="introduction" property="introduction" jdbcType="VARCHAR" />
+		<result column="hospitalId" property="hospitalId" jdbcType="BIGINT"></result>
+		<result column="hospitalName" property="hospitalName" jdbcType="VARCHAR"></result>
+		<result column="auditState" property="auditState" jdbcType="INTEGER" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<resultMap type="com.westangel.common.bean.DoctorProfile" id="doctorPorfileResultMap">
+		<id column="userId" property="userId" jdbcType="BIGINT" />
+		<id column="doctorId" property="doctorId" jdbcType="BIGINT" />
+		<result column="isExpert" property="isExpert" jdbcType="INTEGER" />
+		<result column="trueName" property="trueName" jdbcType="VARCHAR" />
+		<result column="skills" property="skills" jdbcType="VARCHAR" />
+		<result column="tagIds" property="tagIds" jdbcType="VARCHAR" />
+		<result column="tags" property="tags" jdbcType="VARCHAR" />
+		<result column="positionTitleId" property="positionTitleId" jdbcType="INTEGER" />
+		<result column="positionTitleName" property="positionTitle" jdbcType="VARCHAR" />
+		<result column="professionalRankId" property="professionalRankId" jdbcType="INTEGER" />
+		<result column="professionalRankName" property="professionalRank" jdbcType="VARCHAR" />
+		<result column="qrcodeUrl" property="qrcodeUrl" jdbcType="VARCHAR" />
+		<result column="tel" property="tel" jdbcType="VARCHAR" />
+		<result column="hospitalId" property="hospitalId" jdbcType="BIGINT" />
+		<result column="hospitalName" property="hospitalName" jdbcType="VARCHAR" />
+		<result column="deptId" property="deptId" jdbcType="BIGINT" />
+		<result column="dept" property="dept" jdbcType="VARCHAR" />
+		<result column="childDeptId" property="childDeptId" jdbcType="BIGINT" />
+		<result column="childDept" property="childDept" jdbcType="VARCHAR" />
+		<result column="userPictureUrl" property="userPictureUrl" jdbcType="VARCHAR" />
+		<result column="auditState" property="auditState" jdbcType="INTEGER" />
+		<result column="auditRemark" property="auditRemark" jdbcType="VARCHAR" />
+		<result column="professionCredence" property="professionCredence" jdbcType="VARCHAR" />
+		<result column="registerCredence" property="registerCredence" jdbcType="VARCHAR" />
+		<result column="professionCredencePicUrl" property="professionCredencePicUrl" jdbcType="VARCHAR" />
+		<result column="registerCredencePicUrl" property="registerCredencePicUrl" jdbcType="VARCHAR" />
+		<result column="workCredence" property="workCredence" jdbcType="VARCHAR" />
+		<result column="workCredencePicUrl" property="workCredencePicUrl" jdbcType="VARCHAR" />
+		<result column="introduction" property="introduction" jdbcType="VARCHAR" />
+		<result column="attentionFlag" property="attentionFlag" jdbcType="INTEGER" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+		<result column="tagIds" property="tagIds" jdbcType="VARCHAR" />
+		<result column="tags" property="tags" jdbcType="VARCHAR" />
+		<result column="hospitalSignedFlag" property="hospitalSignedFlag" jdbcType="INTEGER" />
+	</resultMap>
+
+	<resultMap type="com.westangel.common.bean.DoctorTag" id="DoctorTagResultMap">
+		<id column="tagId" property="tagId" jdbcType="BIGINT" />
+		<result column="tagName" property="tagName" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<resultMap type="java.util.Map" id="screenDoctorResultMap">
+		<result column="userId" property="userId" jdbcType="BIGINT" />
+		<result column="doctorId" property="doctorId" jdbcType="BIGINT" />
+		<result column="doctorName" property="doctorName" jdbcType="VARCHAR" />
+		<result column="sex" property="sex" jdbcType="INTEGER" />
+		<result column="professionalRank" property="professionalRank" jdbcType="VARCHAR" />
+		<result column="deptName" property="deptName" jdbcType="VARCHAR" />
+		<result column="hospitalName" property="hospitalName" jdbcType="VARCHAR" />
+		<result column="userPictureUrl" property="userPictureUrl" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<resultMap type="com.esuizhen.cloudservice.user.bean.DoctorHospitalSimpleInfo" id="doctorHospitalSimpleInfoResultMap">
+		<result column="hospitalName" property="doctorInfo.hospitalName" jdbcType="VARCHAR" />
+		<result column="tel" property="doctorInfo.tel" jdbcType="VARCHAR" />
+		<result column="userId" property="doctorInfo.userId" jdbcType="BIGINT" />
+		<result column="doctorId" property="doctorInfo.doctorId" jdbcType="BIGINT" />
+		<result column="trueName" property="doctorInfo.trueName" jdbcType="VARCHAR" />
+		<result column="userPictureUrl" property="doctorInfo.userPictureUrl" jdbcType="VARCHAR" />
+		<result column="sex" property="doctorInfo.sex" jdbcType="VARCHAR" />
+		<result column="professionalRankName" property="doctorInfo.professionalRank" jdbcType="VARCHAR" />
+		<result column="deptName" property="doctorInfo.deptName" jdbcType="VARCHAR" />
+		<result column="childDept" property="doctorInfo.childDept" jdbcType="VARCHAR" />
+		<result column="mobile" property="doctorInfo.mobile" jdbcType="VARCHAR" />
+		<result column="tagIds" property="doctorInfo.tagIds" jdbcType="VARCHAR" />
+		<result column="tags" property="doctorInfo.tags" jdbcType="VARCHAR" />
+		<result column="updateTime" property="doctorInfo.updateTime" jdbcType="TIMESTAMP" />
+		
+		<collection property="doctorInfo.productList" ofType="com.westangel.common.bean.ProductSimpleInfo" column="userId" select="selectProducts"></collection>
+	</resultMap>
+	
+	<resultMap type="com.westangel.common.bean.ProductSimpleInfo" id="baseProductSimpleInfoResultMap">
+		<id column="productId" property="productId" jdbcType="VARCHAR" />
+		<result column="productName" property="productName" jdbcType="VARCHAR" />
+		<result column="productType" property="productType" jdbcType="INTEGER" />
+		<result column="unitPrice" property="unitPrice" jdbcType="FLOAT" />
+		<result column="state" property="state" jdbcType="INTEGER" />
+	</resultMap>
+
+	<resultMap type="com.westangel.common.bean.DoctorSimpleInfo" id="doctorSimpleInfoResultMap">
+		<id column="doctorId" property="doctorId" jdbcType="BIGINT" />
+		<result column="userId" property="userId" jdbcType="BIGINT" />
+		<result column="trueName" property="trueName" jdbcType="VARCHAR" />
+		<result column="sex" property="sex" jdbcType="INTEGER" />
+		<result column="tags" property="tags" jdbcType="VARCHAR" />
+		<result column="professionalRank" property="professionalRank" jdbcType="VARCHAR" />
+		<result column="deptName" property="deptName" jdbcType="VARCHAR" />
+		<result column="childDept" property="childDept" jdbcType="VARCHAR" />
+		<result column="hospitalName" property="hospitalName" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="tel" property="tel" jdbcType="VARCHAR" />
+		<result column="userPictureUrl" property="userPictureUrl" jdbcType="VARCHAR" />
+		<result column="accountType" property="accountType" jdbcType="INTEGER"/>
+		<collection column="userId" property="productList" ofType="com.westangel.common.bean.ProductSimpleInfo">
+			<id column="productId" property="productId" jdbcType="VARCHAR" />
+			<result column="productName" property="productName" jdbcType="VARCHAR" />
+			<result column="productType" property="productType" jdbcType="INTEGER" />
+			<result column="unitPrice" property="unitPrice" jdbcType="VARCHAR" />
+			<result column="state" property="state" jdbcType="INTEGER" />
+		</collection>
+	</resultMap>
+	
+	<!-- 医生组合查询 -->
+	<resultMap type="com.westangel.common.bean.DoctorSimpleInfo" id="doctorSimpleInfoResultKeyWordMap">
+		<id column="doctorId" property="doctorId" jdbcType="BIGINT" />
+		<result column="userId" property="userId" jdbcType="BIGINT" />
+		<result column="trueName" property="trueName" jdbcType="VARCHAR" />
+		<result column="sex" property="sex" jdbcType="INTEGER" />
+		<result column="tags" property="tags" jdbcType="VARCHAR" />
+		<result column="professionalRank" property="professionalRank" jdbcType="VARCHAR" />
+		<result column="deptName" property="deptName" jdbcType="VARCHAR" />
+		<result column="childDept" property="childDept" jdbcType="VARCHAR" />
+		<result column="hospitalName" property="hospitalName" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="tel" property="tel" jdbcType="VARCHAR" />
+		<result column="userPictureUrl" property="userPictureUrl" jdbcType="VARCHAR" />
+		<collection property="productList" ofType="com.westangel.common.bean.ProductSimpleInfo" column="userId" select="selectProducts"></collection>
+	</resultMap>
+
+	<sql id="base_column_list">
+		doctorId, userId, trueName, nickName, mobile, sex, birthDate, userPictureUrl,
+		professionCredence,
+		registerCredence, professionCredencePicUrl, registerCredencePicUrl, isExpert, skills,
+		tagIds, tags, positionTitle, professionalRank, tel, introduction,
+		auditState,createTime, updateTime
+	</sql>
+	
+	<select id="findByIdentificationCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(0)
+		FROM u_doctor t1
+			INNER JOIN u_user t2 ON t1.userId=t2.userId
+		WHERE t2.idType=#{idType} AND t2.identification=#{identification}
+		<if test="auditState != null">
+			AND t1.auditState=#{auditState}
+		</if>
+		<if test="auditState == null">
+			AND t1.auditState>0
+		</if>
+		AND t2.accountType>0
+	</select>
+
+	<select id="findDoctorIdAndNameByPatientIdOrPatientUserId" resultMap="doctorSimpleInfoResultMap">
+		SELECT t1.userId, t1.doctorId, t1.trueName
+		FROM u_doctor t1
+		INNER JOIN r_doctor_patient t2 ON t1.doctorId=t2.doctorId
+		INNER JOIN u_patient t3 ON t2.patientId=t3.patientId
+		WHERE
+		<choose>
+			<when test="tag == 'patient_userId'">
+				t3.userId=#{id,jdbcType=BIGINT}
+			</when>
+			<otherwise>
+				t3.patientId=#{id,jdbcType=BIGINT}
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findByPatientIdAndProductType" resultMap="doctorSimpleInfoResultMap">
+		SELECT d1.userId, d1.doctorId, d1.trueName, d1.sex, d1.tags,
+			d3.professionalRankName professionalRank,
+			CASE WHEN d5.parentId IS NULL THEN d5.deptName ELSE d9.deptName END deptName,
+			CASE WHEN d5.parentId IS NULL then d9.deptName ELSE d5.deptName END childDept, 
+			d6.hospitalName, d1.mobile, d1.tel,
+			d7.productId, d7.productName, d7.productType, d7.unitPrice, d7.state,
+			(CASE WHEN(d8.vipFlag IS NULL OR d8.vipFlag=0) THEN NULL ELSE d8.createTime
+			END) vip_createTime,
+			(CASE WHEN d1.userPictureUrl IS NOT NULL AND TRIM(d1.userPictureUrl)!='' THEN d1.userPictureUrl
+			WHEN d1.sex=2 THEN #{defaultWomanPicUrl}
+			ELSE #{defaultManPicUrl} END) userPictureUrl
+		FROM u_doctor d1
+			JOIN u_user t ON d1.userId=t.userId AND t.state!=-1
+			JOIN r_doctor_patient d2 ON d1.doctorId=d2.doctorId AND d2.patientId=#{patientId,jdbcType=BIGINT}
+			JOIN meta_professional_rank d3 ON d1.professionalRank=d3.professionalRankId
+			LEFT JOIN r_hospital_doctor d4 ON d1.doctorId=d4.doctorId
+			LEFT JOIN u_department d5 ON d4.deptId=d5.deptId
+			LEFT JOIN u_hospital d6 ON d4.hospitalId=d6.hospitalId
+			LEFT JOIN com_trade_db.product d7 ON d1.userId=d7.vendor
+			LEFT JOIN hds_db.var_patient_business d8 ON d2.patientId=d8.patientId AND d1.doctorId=d8.doctorId
+			LEFT JOIN u_department d9 ON d9.deptId=d5.parentId
+		WHERE 1=1
+			AND d7.productType=#{productType,jdbcType=BIGINT} AND d7.state=1
+			AND d2.patientId=#{patientId,jdbcType=BIGINT} ORDER BY vip_createTime DESC
+	</select>
+	
+	<!-- 正在进行中的服务医生信息 -->
+	<select id="findByBuyerAndProductType" resultMap="doctorSimpleInfoResultMap">
+		SELECT d1.userId, d1.doctorId, d1.trueName, d1.sex, d1.tags,
+			d3.professionalRankName professionalRank,
+			CASE WHEN d5.parentId IS NULL THEN d5.deptName ELSE d9.deptName END deptName,
+			CASE WHEN d5.parentId IS NULL then d9.deptName ELSE d5.deptName END childDept, 
+			d6.hospitalName, d1.mobile, d1.tel,
+			(CASE WHEN(d8.vipFlag IS NULL OR d8.vipFlag=0) THEN NULL ELSE d8.createTime
+			END) vip_createTime
+		FROM u_doctor d1
+			JOIN user_db.u_patient d2
+			JOIN meta_professional_rank d3 ON d1.professionalRank=d3.professionalRankId
+			JOIN hds_db.s_product_service_apply t1 ON t1.buyer=d2.userId AND t1.vendor = d1.userId AND t1.subscriptionFlag>-1
+			LEFT JOIN r_hospital_doctor d4 ON d1.doctorId=d4.doctorId
+			LEFT JOIN u_department d5 ON d4.deptId=d5.deptId
+			LEFT JOIN u_hospital d6 ON d4.hospitalId=d6.hospitalId
+			LEFT JOIN hds_db.var_patient_business d8 ON d2.patientId=d8.patientId AND d1.doctorId=d8.doctorId
+			LEFT JOIN u_department d9 ON d9.deptId=d5.parentId
+		WHERE 1
+			AND
+			t1.productType=#{productType}
+			AND
+			d2.userId=#{buyer}
+			ORDER BY vip_createTime DESC
+	</select>
+
+	<select id="findByPatientId" resultMap="doctorSimpleInfoResultMap">
+		SELECT d1.userId, d1.doctorId, d1.trueName, d1.sex, d1.tags,
+			d3.professionalRankName professionalRank,
+			CASE WHEN d5.parentId IS NULL THEN d5.deptName ELSE d7.deptName END deptName,
+			CASE WHEN d5.parentId IS NULL then d7.deptName ELSE d5.deptName END childDept, 
+			d6.hospitalName, d1.mobile, d1.tel,
+			(CASE WHEN d1.userPictureUrl IS NOT NULL AND TRIM(d1.userPictureUrl)!='' THEN d1.userPictureUrl
+			WHEN d1.sex=2 THEN #{defaultWomanPicUrl}
+			ELSE #{defaultManPicUrl} END) userPictureUrl,
+			t.accountType
+		FROM u_doctor d1
+			JOIN u_user t ON t.userId = d1.userId AND t.state!=-1
+			JOIN r_doctor_patient d2 ON d1.doctorId=d2.doctorId AND
+			d2.patientId=#{patientId,jdbcType=BIGINT}
+			JOIN meta_professional_rank d3 ON
+			d1.professionalRank=d3.professionalRankId
+			LEFT JOIN r_hospital_doctor d4 ON d1.doctorId=d4.doctorId
+			LEFT JOIN u_department d5 ON d4.deptId=d5.deptId
+			LEFT JOIN u_hospital d6 ON d4.hospitalId=d6.hospitalId
+			LEFT JOIN u_department d7 ON d7.deptId=d5.parentId
+			JOIN u_patient p ON p.patientId=d2.patientId
+			LEFT JOIN hds_db.s_product_service_apply s ON s.buyer=p.userId and s.vendor=d1.userId
+		WHERE d2.patientId=#{patientId,jdbcType=BIGINT}
+		ORDER BY IF(d2.sourceFlag=2,1,0) DESC, d2.vipFlag DESC, s.productApplyId DESC , t.lastLoginTime DESC
+	</select>
+	
+	<select id="selectProducts" parameterType="long" resultMap="baseProductSimpleInfoResultMap">
+        SELECT d7.productId, d7.productName, d7.productType, CONVERT(d7.unitPrice/100, DECIMAL(7, 2)) AS unitPrice, d7.state
+        FROM com_trade_db.product d7 WHERE d7.vendor=#{userId} AND d7.productType IN(1,2)
+    </select>
+
+ 	<select id="findDoctorHospitalSimpleInfoesCount" resultType="java.lang.Integer">
+ 		<if test="keyword!=null">
+			<bind name="pattern" value="'%' + keyword + '%'" />
+ 		</if>
+		SELECT 
+			COUNT(0)
+		FROM
+			u_doctor t1
+		JOIN user_db.u_user t8 ON t1.userId = t8.userId AND t8.state!=-1
+		LEFT JOIN meta_professional_rank t2 ON t1.professionalRank=t2.professionalRankId
+		LEFT JOIN r_hospital_doctor t3 ON t1.doctorId=t3.doctorId
+		LEFT JOIN u_hospital t5 ON t3.hospitalId=t5.hospitalId
+		<if test="userId!=null">
+			<![CDATA[
+			JOIN user_db.u_user t9 ON t8.userFlag<=t9.userFlag AND t9.userId=#{userId}
+			]]>
+		</if>
+		WHERE 1 
+		<if test="keyword!=null">
+		 AND
+		(
+				t1.tags LIKE #{pattern,jdbcType=VARCHAR} 
+			OR 	t1.trueName LIKE #{pattern,jdbcType=VARCHAR}
+		)
+		</if>
+		<if test="cityCode != null">
+			AND t5.cityId IN (SELECT cityId FROM meta_city where LEFT(cityCode,#{prefixLen})=#{cityCode,jdbcType=VARCHAR})			
+		</if>
+	</select>
+ 
+ 	<select id="findDoctorHospitalSimpleInfoes" resultMap="doctorHospitalSimpleInfoResultMap" parameterType="java.lang.String">
+ 		<if test="keyword!=null">
+			<bind name="pattern" value="'%' + keyword + '%'" />
+		</if>
+		SELECT 
+			t5.hospitalName, 
+			t1.tel, 
+			t1.updateTime,
+			t1.userId, 
+			t1.doctorId, 
+			t1.trueName, 
+			t1.sex, 
+			t2.professionalRankName,
+			t1.mobile, 
+			t1.tagIds, 
+			t1.tags,
+			CASE WHEN t4.parentId IS NULL THEN t4.deptName ELSE t6.deptName END deptName,
+			CASE WHEN t4.parentId IS NULL then t6.deptName ELSE t4.deptName END childDept, 
+			(CASE WHEN t1.userPictureUrl IS NOT NULL AND TRIM(t1.userPictureUrl)!='' THEN t1.userPictureUrl
+			WHEN t1.sex=2 THEN #{defaultWomanPicUrl}
+			ELSE #{defaultManPicUrl} END) userPictureUrl
+		FROM 
+			u_doctor t1
+		JOIN user_db.u_user t8 ON t1.userId = t8.userId AND t8.state!=-1
+		LEFT JOIN meta_professional_rank t2 ON t1.professionalRank=t2.professionalRankId
+		LEFT JOIN r_hospital_doctor t3 ON t1.doctorId=t3.doctorId
+		LEFT JOIN u_department t4 ON t3.deptId=t4.deptId
+		LEFT JOIN u_hospital t5 ON t3.hospitalId=t5.hospitalId
+		LEFT JOIN u_department t6 ON t6.deptId=t4.parentId
+		<if test="userId!=null">
+			<![CDATA[
+			JOIN user_db.u_user t9 ON t8.userFlag<=t9.userFlag AND t9.userId=#{userId}
+			]]>
+		</if>
+		WHERE 
+		1 
+		<if test="keyword!=null">
+		 AND
+		(
+				t1.tags LIKE #{pattern,jdbcType=VARCHAR} 
+			OR 	t1.trueName LIKE #{pattern,jdbcType=VARCHAR}
+		)
+		</if>
+		<if test="cityCode != null">
+		 AND t5.cityId IN (SELECT cityId FROM meta_city where LEFT(cityCode,#{prefixLen})=#{cityCode,jdbcType=VARCHAR})			
+		</if>
+	</select>
+ 	
+	<select id="recommendDoctor" resultMap="doctorSimpleInfoResultMap">
+		SELECT t5.hospitalName, t1.tel, t1.updateTime,
+		(CASE WHEN t1.userPictureUrl IS NOT NULL AND TRIM(t1.userPictureUrl)!='' THEN t1.userPictureUrl
+		WHEN t1.sex=2 THEN #{defaultWomanPicUrl}
+		ELSE #{defaultManPicUrl} END) userPictureUrl,
+		t1.userId, t1.doctorId, t1.trueName, t1.sex, t2.professionalRankName professionalRank,
+		CASE WHEN t4.parentId IS NULL THEN t4.deptName ELSE t6.deptName END deptName,
+		CASE WHEN t4.parentId IS NULL then t6.deptName ELSE t4.deptName END childDept,
+		t1.mobile
+		FROM u_doctor t1
+		JOIN u_user t ON t1.userId=t.userId AND t.state!=-1
+		LEFT JOIN meta_professional_rank t2 ON t1.professionalRank=t2.professionalRankId
+		<if test="hospitalId == null">
+			LEFT JOIN r_hospital_doctor t3 ON t1.doctorId=t3.doctorId
+		</if>
+		<if test="hospitalId != null">
+			JOIN r_hospital_doctor t3 ON t1.doctorId=t3.doctorId AND t3.hospitalId=#{hospitalId}
+		</if>
+		LEFT JOIN u_department t4 ON t3.deptId=t4.deptId
+		LEFT JOIN u_hospital t5 ON t3.hospitalId=t5.hospitalId
+		LEFT JOIN u_department t6 ON t6.deptId=t4.parentId
+		WHERE t1.recommendFlag=1
+	</select>
+
+	<select id="recommendDoctorByHospital" resultMap="doctorSimpleInfoResultMap">
+		SELECT
+			t1.tel,t1.updateTime,
+			(CASE WHEN t1.userPictureUrl IS NOT NULL AND TRIM(t1.userPictureUrl)!='' THEN t1.userPictureUrl
+			WHEN t1.sex=2 THEN #{defaultWomanPicUrl}
+			ELSE #{defaultManPicUrl} END) userPictureUrl,
+			t1.userId,t1.doctorId,t1.trueName,t1.sex,t8.hospitalName,
+			t6.professionalRankName professionalRank,
+			CASE WHEN t7.parentId IS NULL THEN t7.deptName ELSE t9.deptName END deptName,
+			CASE WHEN t7.parentId IS NULL then t9.deptName ELSE t7.deptName END childDept,
+			t1.mobile
+		FROM user_db.u_doctor t1
+		JOIN user_db.u_user t5 ON t1.userId=t5.userId AND t5.state!=-1 AND t1.recommendFlag=1
+		LEFT JOIN user_db.meta_professional_rank t6 ON t1.professionalRank=t6.professionalRankId
+		JOIN user_db.r_hospital_doctor t2 ON t2.doctorId=t1.doctorId
+		JOIN user_db.r_hospital_patient t3 ON  t3.hospitalId=t2.hospitalId
+		JOIN user_db.u_patient t4 ON t4.patientId=t3.patientId AND t4.patientId=#{patientId}
+		LEFT JOIN user_db.u_department t7 ON t7.deptId=t2.deptId
+		LEFT JOIN user_db.u_hospital t8 ON t8.hospitalId=t2.hospitalId
+		LEFT JOIN user_db.u_department t9 ON t9.deptId=t7.parentId
+
+	</select>
+
+	<select id="recommendDoctorByTag" resultMap="doctorSimpleInfoResultMap">
+		SELECT
+			t1.tel,t1.updateTime,
+		(CASE WHEN t1.userPictureUrl IS NOT NULL AND TRIM(t1.userPictureUrl)!='' THEN t1.userPictureUrl
+		WHEN t1.sex=2 THEN #{defaultWomanPicUrl}
+		ELSE #{defaultManPicUrl} END) userPictureUrl,
+		t1.userId,t1.doctorId,t1.trueName,t1.sex,t8.hospitalName,
+		t6.professionalRankName professionalRank,
+		CASE WHEN t7.parentId IS NULL THEN t7.deptName ELSE t9.deptName END deptName,
+		CASE WHEN t7.parentId IS NULL then t9.deptName ELSE t7.deptName END childDept,
+		t1.mobile
+		FROM user_db.u_doctor t1
+		JOIN user_db.u_user t5 ON t1.userId=t5.userId AND t5.state!=-1
+		LEFT JOIN user_db.meta_professional_rank t6 ON t1.professionalRank=t6.professionalRankId
+		<if test="tags!=null">
+			JOIN operation_db.r_doctor_tag t3 ON  t3.doctorId=t1.doctorId AND t3.tagId IN
+			<foreach collection="tags" item="item" open="(" close=")" separator=",">#{item.tagId}</foreach>
+		</if>
+		JOIN user_db.r_hospital_doctor t2 ON t2.doctorId=t1.doctorId
+		LEFT JOIN user_db.u_department t7 ON t7.deptId=t2.deptId
+		LEFT JOIN user_db.u_hospital t8 ON t8.hospitalId=t2.hospitalId
+		LEFT JOIN user_db.u_department t9 ON t9.deptId=t7.parentId
+
+	</select>
+	
+	<select id="findDoctorIdByUserId" resultType="java.lang.Long" parameterType="java.lang.Long">
+		select t1.doctorId from u_doctor t1 where
+		t1.userId=#{userId,jdbcType=BIGINT}
+	</select>
+
+	<select id="selectDoctorProfileByDoctorId" resultMap="doctorPorfileResultMap">
+		SELECT u1.userId ,u1.doctorId, u1.trueName, u1.skills,
+		u2.positionTitleId, u2.positionTitleName, u3.professionalRankId,
+		u3.professionalRankName, u5.hospitalId, u5.hospitalName, 
+		CASE WHEN u6.parentId IS NULL THEN u6.deptId ELSE u7.deptId END deptId,
+		CASE WHEN u6.parentId IS NULL THEN u6.deptName ELSE u7.deptName END dept,
+		CASE WHEN u6.parentId IS NULL then u7.deptId ELSE u6.deptId END childDeptId, 
+		CASE WHEN u6.parentId IS NULL then u7.deptName ELSE u6.deptName END childDept, 
+		u1.isExpert, u1.professionCredence, u1.registerCredence, u1.workCredence,
+		u1.professionCredencePicUrl, u1.registerCredencePicUrl,
+		u1.workCredencePicUrl, u1.tel, u1.auditState, u1.auditRemark,
+		u1.introduction, u1.createTime, u1.updateTime, u1.tagIds, u1.tags, u9.qrcodeUrl,
+			(CASE WHEN u1.userPictureUrl IS NOT NULL AND TRIM(u1.userPictureUrl)!='' THEN u1.userPictureUrl
+			WHEN u1.sex=2 THEN #{defaultWomanPicUrl}
+			ELSE #{defaultManPicUrl} END) userPictureUrl
+		<if test="patientId != null">
+			,(SELECT CASE COUNT(1) WHEN 0 THEN 0 ELSE 1 END FROM r_doctor_patient t1
+			WHERE t1.doctorId=u1.doctorId AND
+			t1.patientId=#{patientId,jdbcType=BIGINT}) attentionFlag
+		</if>
+		,(CASE WHEN u10.hospitalId IS NOT NULL THEN 1 ELSE 0 END) hospitalSignedFlag
+		FROM u_doctor u1
+		LEFT JOIN meta_position_title u2 ON u1.positionTitle=u2.positionTitleId
+		LEFT JOIN meta_professional_rank u3 ON
+		u1.professionalRank=u3.professionalRankId
+		LEFT JOIN r_hospital_doctor u4 ON u1.doctorId=u4.doctorId
+		LEFT JOIN u_hospital u5 ON u4.hospitalId=u5.hospitalId
+		LEFT JOIN u_department u6 ON u4.deptId=u6.deptId
+		LEFT JOIN u_department u7 ON u7.deptId=u6.parentId
+		LEFT JOIN u_qrcode u9 ON u9.userId=u1.userId AND u9.id=(SELECT MAX(id)
+		FROM u_qrcode t1 WHERE t1.userId=u1.userId)
+		LEFT JOIN conf_hospital_signed u10 ON u10.hospitalId=u4.hospitalId AND u10.signedFlag=1 
+		WHERE
+		u1.doctorId=#{doctorId,jdbcType=BIGINT}
+	</select>
+
+	<select id="selectDoctorProfileByUserId" resultMap="doctorPorfileResultMap">
+		SELECT
+			u1.userId ,u1.doctorId, u1.trueName, u1.skills, u2.positionTitleId,
+			u2.positionTitleName, u3.professionalRankId, u3.professionalRankName, u5.hospitalId,
+			(CASE WHEN u5.hospitalName IS NULL THEN u4.hospitalName ELSE u5.hospitalName END) hospitalName,
+			CASE WHEN u6.parentId IS NULL THEN u6.deptId ELSE u7.deptId END deptId,
+			CASE WHEN u6.parentId IS NULL THEN u6.deptName ELSE u7.deptName END dept,
+			CASE WHEN u6.parentId IS NULL then u7.deptId ELSE u6.deptId END childDeptId, 
+			CASE WHEN u6.parentId IS NULL then u7.deptName ELSE u6.deptName END childDept, 
+			u1.isExpert, u1.professionCredence, u1.registerCredence, u1.workCredence, u1.professionCredencePicUrl,
+			u1.registerCredencePicUrl, u1.workCredencePicUrl, u1.tel, u1.auditState, u1.auditRemark,
+			u1.introduction, u1.createTime, u1.updateTime, u1.tagIds, u1.tags, u9.qrcodeUrl,
+			(CASE WHEN u1.userPictureUrl IS NOT NULL AND TRIM(u1.userPictureUrl)!='' THEN u1.userPictureUrl
+				WHEN u1.sex=2 THEN #{defaultWomanPicUrl}
+				ELSE #{defaultManPicUrl} END) userPictureUrl,
+			(CASE WHEN u10.signedFlag IS NULL THEN 0 ELSE u10.signedFlag END) hospitalSignedFlag
+		<if test="patientId != null">
+			,(SELECT CASE COUNT(1) WHEN 0 THEN 0 ELSE 1 END FROM r_doctor_patient t1
+			WHERE t1.doctorId=u1.doctorId AND
+			t1.patientId=#{patientId,jdbcType=BIGINT}) attentionFlag
+		</if>
+		FROM u_doctor u1
+			LEFT JOIN meta_position_title u2 ON u1.positionTitle=u2.positionTitleId
+			LEFT JOIN meta_professional_rank u3 ON
+			u1.professionalRank=u3.professionalRankId
+			LEFT JOIN r_hospital_doctor u4 ON u1.doctorId=u4.doctorId
+			LEFT JOIN u_hospital u5 ON u4.hospitalId=u5.hospitalId
+			LEFT JOIN u_department u6 ON u4.deptId=u6.deptId
+			LEFT JOIN u_department u7 ON u7.deptId=u6.parentId
+			LEFT JOIN u_qrcode u9 ON u9.userId=u1.userId AND u9.id=(SELECT MAX(id)
+				FROM u_qrcode t1 WHERE t1.userId=u1.userId)
+			LEFT JOIN conf_hospital_signed u10 ON u4.hospitalId=u10.hospitalId
+		WHERE u1.userId=#{userId,jdbcType=BIGINT}
+	</select>
+
+	<select id="selectByPrimaryKey" resultMap="baseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="base_column_list" />
+		from u_doctor where doctorId = #{doctorid,jdbcType=BIGINT}
+	</select>
+
+	<select id="searchDoctorTagList" resultMap="DoctorTagResultMap">
+		select tagId,tagName from meta_doctor_tag
+	</select>
+
+	<select id="screenDoctor" resultMap="screenDoctorResultMap" parameterType="java.util.Map">
+		SELECT
+			t.email,
+			t1.userId, 
+			t1.doctorId,
+			t1.trueName doctorName,
+			t1.sex,
+			t1.tags,
+			t2.hospitalId,
+			t2.deptId,
+			t5.professionalRankId,
+			t5.professionalRankName professionalRank,
+			t1.mobile,
+			CASE WHEN t3.parentId IS NULL THEN t3.deptName ELSE t6.deptName END deptName,
+			CASE WHEN t3.parentId IS NULL then t6.deptName ELSE t3.deptName END childDept, 
+			t4.hospitalName,
+			(
+				CASE
+					WHEN t1.userPictureUrl IS NOT NULL AND TRIM(t1.userPictureUrl)!=''
+					THEN t1.userPictureUrl
+					WHEN t1.sex=2 THEN #{defaultWomanPicUrl}
+					ELSE #{defaultManPicUrl}
+				END
+			) userPictureUrl
+		FROM u_doctor t1
+		JOIN u_user t ON t1.userId= t.userId AND t.state!=-1
+		LEFT JOIN r_hospital_doctor t2 ON t1.doctorId=t2.doctorId
+		LEFT JOIN u_department t3 ON t2.deptId=t3.deptId
+		LEFT JOIN u_hospital t4 ON t2.hospitalId=t4.hospitalId
+		LEFT JOIN meta_professional_rank t5 ON t1.professionalRank=t5.professionalRankId
+		LEFT JOIN u_department t6 ON t6.deptId=t3.parentId
+		WHERE 1
+		<trim prefixOverrides=" and ">
+			<if test="hospitalId != null">
+				AND t4.hospitalId=#{hospitalId,jdbcType=BIGINT}
+			</if>
+			<if test="deptId != null">
+				AND (t3.deptId=#{deptId} OR t3.parentId=#{deptId})
+			</if>
+			<if test="doctorName != null">
+				<bind name="pattern" value="'%' + doctorName + '%'" />
+				AND t1.trueName like #{pattern}
+			</if>
+			<if test="mobile != null">
+				<bind name="patternMobile" value="'%' + mobile + '%'" />
+				AND t1.mobile like #{patternMobile}
+			</if>
+		</trim>
+	</select>
+
+	<select id="findByUserId" resultMap="baseResultMap" parameterType="java.lang.Long">
+		SELECT t1.doctorId, t1.userId, t1.trueName, t1.nickName, t1.mobile, t1.sex,
+		t1.birthDate, t1.userPictureUrl, t1.professionCredence,
+		t1.registerCredence, t1.professionCredencePicUrl,
+		t1.registerCredencePicUrl, t1.isExpert, t1.skills,
+		t1.tagIds, t1.tags, t1.positionTitle, t1.professionalRank, t1.tel,
+		t1.introduction, t2.hospitalId, t3.hospitalName,
+		t1.auditState, t1.createTime, t1.updateTime
+		FROM u_doctor t1
+		LEFT JOIN r_hospital_doctor t2 ON t1.doctorId=t2.doctorId
+		LEFT JOIN u_hospital t3 ON t2.hospitalId=t3.hospitalId
+		WHERE t1.userId=#{userId,jdbcType=BIGINT}
+	</select>
+
+	<select id="searchDoctor" resultMap="baseResultMap" parameterType="java.lang.String">
+		SELECT t1.doctorId, t1.userId, t1.trueName, t1.nickName, t1.mobile, t1.sex,
+		t1.birthDate, t1.userPictureUrl, t1.professionCredence,
+		t1.registerCredence, t1.professionCredencePicUrl,
+		t1.registerCredencePicUrl, t1.isExpert, t1.skills,
+		t1.tagIds, t1.tags, t1.positionTitle, t1.professionalRank, t1.tel,
+		t1.introduction, t2.hospitalId, t3.hospitalName,
+		t1.auditState, t1.createTime, t1.updateTime
+		FROM u_doctor t1
+		LEFT JOIN r_hospital_doctor t2 ON t1.doctorId=t2.doctorId
+		LEFT JOIN u_hospital t3 ON t2.hospitalId=t3.hospitalId
+		WHERE t1.mobile=#{mobile,jdbcType=VARCHAR}
+	</select>
+
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from u_doctor where doctorId=#{doctorId,jdbcType=BIGINT}
+	</delete>
+
+	<delete id="deleteDoctorByUserId" parameterType="java.lang.Long">
+		delete from u_doctor where userId = #{userId,jdbcType=BIGINT}
+	</delete>
+
+	<insert id="insert" parameterType="com.westangel.common.bean.Doctor">
+		<selectKey resultType="long" keyProperty="doctorId" order="AFTER">
+			SELECT LAST_INSERT_ID() as doctorId
+		</selectKey>
+		insert into u_doctor (
+		uuid,userId, trueName,
+		nickName, mobile, sex,
+		birthDate, userPictureUrl, professionCredence,
+		registerCredence, professionCredencePicUrl,
+		registerCredencePicUrl, isExpert, skills,
+		tagIds, tags, positionTitle,
+		professionalRank, tel, introduction, auditState, createTime, updateTime)
+		values (
+		(SELECT uuid FROM user_db.u_user WHERE userId=#{userId}),
+		#{userId,jdbcType=BIGINT}, #{trueName,jdbcType=VARCHAR},
+		#{nickName,jdbcType=VARCHAR}, #{mobile,jdbcType=VARCHAR},
+		#{sex,jdbcType=INTEGER},
+		#{birthDate,jdbcType=TIMESTAMP}, #{userPictureUrl,jdbcType=VARCHAR},
+		#{professionCredence,jdbcType=VARCHAR},
+		#{registerCredence,jdbcType=VARCHAR},
+		#{professionCredencePicUrl,jdbcType=VARCHAR},
+		#{registerCredencePicUrl,jdbcType=VARCHAR},
+		#{isExpert,jdbcType=INTEGER}, #{skills,jdbcType=VARCHAR},
+		#{tagIds,jdbcType=VARCHAR}, #{tags,jdbcType=VARCHAR},
+		#{positionTitle,jdbcType=INTEGER},
+		#{professionalRank,jdbcType=INTEGER}, #{tel,jdbcType=VARCHAR},
+		#{introduction,jdbcType=VARCHAR}, #{auditState,jdbcType=INTEGER},
+		NOW(), NOW())
+	</insert>
+
+	<update id="updateDoctor" parameterType="map">
+		update u_doctor
+		<set>
+			<!-- <if test="record.userId != null"> userId=#{record.userId,jdbcType=INTEGER}, 
+				</if> -->
+			<if test="record.trueName != null">
+				trueName=#{record.trueName,jdbcType=VARCHAR},
+			</if>
+			<if test="record.nickName != null">
+				nickName=#{record.nickName,jdbcType=VARCHAR},
+			</if>
+			<if test="record.mobile != null">
+				mobile=#{record.mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="record.sex != null">
+				sex=#{record.sex,jdbcType=INTEGER},
+			</if>
+			<if test="record.birthDate != null">
+				birthDate=#{record.birthDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="record.userPictureUrl != null">
+				userPictureUrl=#{record.userPictureUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="record.professionCredence != null">
+				professionCredence=#{record.professionCredence,jdbcType=VARCHAR},
+			</if>
+			<if test="record.registerCredence != null">
+				registerCredence=#{record.registerCredence,jdbcType=VARCHAR},
+			</if>
+			<if test="record.workCredence != null">
+				workCredence=#{record.workCredence,jdbcType=VARCHAR},
+			</if>
+			<if test="record.workCredencePicUrl != null">
+				workCredencePicUrl=#{record.workCredencePicUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="record.professionCredencePicUrl != null">
+				professionCredencePicUrl=#{record.professionCredencePicUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="record.registerCredencePicUrl != null">
+				registerCredencePicUrl=#{record.registerCredencePicUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="record.isExpert != null">
+				isExpert=#{record.isExpert,jdbcType=INTEGER},
+			</if>
+			<if test="record.skills != null">
+				skills=#{record.skills,jdbcType=VARCHAR},
+			</if>
+			<if test="record.positionTitle != null">
+				positionTitle=#{record.positionTitle,jdbcType=INTEGER},
+			</if>
+			<if test="record.professionalRank != null">
+				professionalRank=#{record.professionalRank,jdbcType=INTEGER},
+			</if>
+			<if test="record.tel != null">
+				tel=#{record.tel,jdbcType=VARCHAR},
+			</if>
+			<if test="record.introduction != null">
+				introduction=#{record.introduction,jdbcType=VARCHAR},
+			</if>
+			<if test="record.auditState != null">
+				auditState=#{record.auditState,jdbcType=INTEGER},
+			</if>
+			tagIds=#{record.tagIds,jdbcType=VARCHAR},
+			tags=#{record.tags,jdbcType=VARCHAR},
+			updateTime=#{record.updateTime,jdbcType=TIMESTAMP}
+		</set>
+		where doctorId=#{record.doctorId,jdbcType=BIGINT}
+	</update>
+	
+	<update id="updateByPrimaryKey" parameterType="com.westangel.common.bean.Doctor">
+		update u_doctor
+		<set>
+			<if test="userId != null">
+				userId = #{userId,jdbcType=BIGINT},
+			</if>
+			<if test="trueName != null">
+				trueName=#{trueName,jdbcType=VARCHAR},
+			</if>
+			<if test="nickName != null">
+				nickName = #{nickName,jdbcType=VARCHAR},
+			</if>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="sex != null">
+				sex = #{sex,jdbcType=INTEGER},
+			</if>
+			<if test="birthDate != null">
+				birthDate = #{birthDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="userPictureUrl != null">
+				userPictureUrl = #{userPictureUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="professionCredence != null">
+				professionCredence =
+				#{professionCredence,jdbcType=VARCHAR},
+			</if>
+			<if test="registerCredence != null">
+				registerCredence = #{registerCredence,jdbcType=VARCHAR},
+			</if>
+			<if test="professionCredencePicUrl != null">
+				professionCredencePicUrl =
+				#{professionCredencePicUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="registerCredencePicUrl != null">
+				registerCredencePicUrl =
+				#{registerCredencePicUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="isExpert != null">
+				isExpert = #{isExpert,jdbcType=INTEGER},
+			</if>
+			<if test="skills != null">
+				skills = #{skills,jdbcType=VARCHAR},
+			</if>
+			<if test="tagIds != null">
+				tagIds = #{tagIds,jdbcType=VARCHAR},
+			</if>
+			<if test="tags != null">
+				tags = #{tags,jdbcType=VARCHAR},
+			</if>
+			<if test="positionTitle != null">
+				positionTitle = #{positionTitle,jdbcType=INTEGER},
+			</if>
+			<if test="professionalRank != null">
+				professionalRank = #{professionalRank,jdbcType=INTEGER},
+			</if>
+			<if test="tel != null">
+				tel = #{tel,jdbcType=VARCHAR},
+			</if>
+			<if test="introduction != null">
+				introduction = #{introduction,jdbcType=VARCHAR},
+			</if>
+			<if test="auditState != null">
+				auditState = #{auditState,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				createTime = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			updateTime=NOW()
+		</set>
+		where doctorId=#{doctorId,jdbcType=BIGINT}
+	</update>
+
+	<!-- 根据doctorId，得到userId -->
+	<select id="getUserIdByDoctorId" resultType="java.lang.Long">
+		SELECT userId FROM u_doctor WHERE doctorId=#{doctorId}
+	</select>
+	
+	<!-- 通过userId获取医生确认信息 -->
+	<select id="selectToconfirmedDoctor" resultType="com.westangel.common.bean.user.TTobeconfirmedDoctor">
+		SELECT t1.userId, t1.doctorId, t1.trueName, t2.staffNo, t4.hospitalName,
+			CASE WHEN t5.parentId IS NULL THEN t5.deptName ELSE t6.deptName END deptName,
+			CASE WHEN t5.parentId IS NULL then t6.deptName ELSE t5.deptName END subDeptName,  
+			t7.professionalRankName
+			FROM u_doctor t1
+			LEFT JOIN r_hospital_doctor t2 ON t1.doctorId=t2.doctorId
+			LEFT JOIN u_hospital t4 ON t2.hospitalId=t4.hospitalId
+			LEFT JOIN u_department t5 ON t2.deptId=t5.deptId
+			LEFT JOIN u_department t6 ON t6.deptId=t5.parentId
+			LEFT JOIN meta_professional_rank t7 ON t1.professionalRank=t7.professionalRankId
+			WHERE t1.userId=#{userId}
+		<!-- 
+	 	SELECT 
+	 		doc.userId as userId,
+	 		doc.doctorId as doctorId,
+	 		doc.trueName as trueName,
+	 		rhd.staffNo as staffNo,
+	 		hos.hospitalName as hospitalName,
+	 		dep.deptName as deptName,
+	 		mpr.professionalRankName as professionalRankName
+	 	FROM
+	 		u_doctor doc,
+	 		u_hospital hos,
+	 		u_department dep,
+	 		meta_professional_rank mpr,
+	 		r_hospital_doctor rhd
+	 	WHERE 
+	 	(
+	 		doc.userId=#{userId}
+	 		AND doc.doctorId=rhd.doctorId 
+	 		AND mpr.professionalRankId=doc.professionalRank
+	 		AND rhd.hospitalId=hos.hospitalId
+	 		AND rhd.deptId=dep.deptId
+	 	)
+	 	 -->
+	 </select>
+	 
+	 <!-- 患者数统计 -->
+	 <select id="queryDoctorPatientNum" resultType="com.esuizhen.cloudservice.user.bean.TDoctorStatisProfile">
+	 	SELECT
+			COUNT(0) totalPatientNum,
+			COUNT(CASE WHEN t2.tobFlag=1 THEN 1 END) hospitalPatientNum,
+			COUNT(CASE WHEN t2.tobFlag!=1 THEN 1 END) nonhospitalPatientNum
+		FROM
+			user_db.u_patient t1
+		JOIN user_db.u_user t2 ON t1.userId = t2.userId AND t1.patientType=1
+		<if test="sql!=null">
+			JOIN (
+				${sql}
+			) t
+			ON
+			t1.patientId = t.patientId
+		</if>
+	 </select>
+	 
+	 
+	 
+	 <select id="findDoctorSimpleInfoes" resultMap="doctorSimpleInfoResultKeyWordMap">
+	 	<if test="keyword!=null">
+			<bind name="pattern" value="'%' + keyword + '%'" />
+		</if>
+		SELECT 
+			t5.hospitalName, 
+			t1.tel, 
+			t1.updateTime,
+			t1.userId, 
+			t1.doctorId, 
+			t1.trueName, 
+			t1.sex, 
+			t2.professionalRankName,
+			t1.mobile, 
+			t1.tagIds, 
+			t1.tags,
+			CASE WHEN t4.parentId IS NULL THEN t4.deptName ELSE t6.deptName END deptName,
+			CASE WHEN t4.parentId IS NULL then t6.deptName ELSE t4.deptName END childDept, 
+			(CASE WHEN t1.userPictureUrl IS NOT NULL AND TRIM(t1.userPictureUrl)!='' THEN t1.userPictureUrl
+			WHEN t1.sex=2 THEN #{defaultWomanPicUrl}
+			ELSE #{defaultManPicUrl} END) userPictureUrl
+		FROM 
+			u_doctor t1
+			JOIN user_db.u_user t8 ON t1.userId = t8.userId AND t8.state!=-1
+		LEFT JOIN meta_professional_rank t2 ON t1.professionalRank=t2.professionalRankId
+		<choose>
+			<when test="hospitalId!=null">
+				INNER JOIN r_hospital_doctor t3 ON t1.doctorId=t3.doctorId AND t3.hospitalId =#{hospitalId}
+				<if test="deptId!=null">
+					AND t3.deptId=#{deptId}
+				</if>
+			</when>
+			<otherwise>
+				LEFT JOIN r_hospital_doctor t3 ON t1.doctorId=t3.doctorId
+			</otherwise>
+		</choose>
+		LEFT JOIN u_department t4 ON t3.deptId=t4.deptId
+		LEFT JOIN u_hospital t5 ON t3.hospitalId=t5.hospitalId
+		LEFT JOIN u_department t6 ON t6.deptId=t4.parentId
+		<if test="userId!=null">
+			<![CDATA[
+			JOIN user_db.u_user t9 ON t8.userFlag<=t9.userFlag AND t9.userId=#{userId}
+			]]>
+		</if>
+		WHERE 
+		1
+		<if test="keyword!=null">
+		    AND (
+					t1.tags LIKE #{pattern,jdbcType=VARCHAR} 
+				OR 	t1.trueName LIKE #{pattern,jdbcType=VARCHAR}
+			)
+		</if> 
+		<if test="cityCode != null">
+			AND t5.cityId IN (SELECT cityId FROM meta_city where LEFT(cityCode,#{prefixLen})=#{cityCode,jdbcType=VARCHAR})			
+		</if>
+		<if test="tag!=null">
+			AND LOCATE(#{tag},t1.tags) 
+		</if>
+	</select>
+	
+	 <select id="findDoctorSimpleInfoesCount" resultType="java.lang.Integer">
+	 	<if test="keyword!=null">
+			<bind name="pattern" value="'%' + keyword + '%'" />
+		</if>
+		SELECT 
+			count(0)
+		FROM 
+			u_doctor t1
+			JOIN user_db.u_user t8 ON t1.userId = t8.userId AND t8.state!=-1
+		LEFT JOIN meta_professional_rank t2 ON t1.professionalRank=t2.professionalRankId
+		<choose>
+			<when test="hospitalId!=null">
+				INNER JOIN r_hospital_doctor t3 ON t1.doctorId=t3.doctorId AND t3.hospitalId =#{hospitalId}
+			</when>
+			<otherwise>
+				LEFT JOIN r_hospital_doctor t3 ON t1.doctorId=t3.doctorId
+			</otherwise>
+		</choose>
+		LEFT JOIN u_department t4 ON t3.deptId=t4.deptId
+		LEFT JOIN u_hospital t5 ON t3.hospitalId=t5.hospitalId
+		<if test="userId!=null">
+			<![CDATA[
+			JOIN user_db.u_user t9 ON t8.userFlag<=t9.userFlag AND t9.userId=#{userId}
+			]]>
+		</if>
+		WHERE
+		1
+		<if test="keyword!=null">
+			AND (
+					t1.tags LIKE #{pattern,jdbcType=VARCHAR} 
+				OR 	t1.trueName LIKE #{pattern,jdbcType=VARCHAR}
+			)
+		</if> 
+		
+		<if test="cityCode != null">
+			AND t5.cityId IN (SELECT cityId FROM meta_city where LEFT(cityCode,#{prefixLen})=#{cityCode,jdbcType=VARCHAR})			
+		</if>
+		<if test="tag!=null">
+			AND LOCATE(#{tag}, t1.tags) 
+		</if>
+	</select>
+	
+	<select id="findDoctorSimpleInfoesByHospitalTrueNameCount" resultType="java.lang.Integer">
+		SELECT 
+			count(0)
+		FROM 
+			u_doctor t1
+		LEFT JOIN meta_professional_rank t2 ON t1.professionalRank=t2.professionalRankId
+		INNER JOIN r_hospital_doctor t3 ON t1.doctorId=t3.doctorId
+		INNER JOIN u_hospital t5 ON t3.hospitalId=t5.hospitalId
+		LEFT JOIN u_department t4 ON t3.deptId=t4.deptId
+		WHERE 
+		1 
+		<if test="keyword!=null">
+			AND (
+				LOCATE(#{keyword},t5.hospitalName) 
+			OR 	LOCATE(#{keyword},t5.nickName) 
+			)
+		</if>
+		<if test="cityCode != null">
+			AND t5.cityId IN (SELECT cityId FROM meta_city where LEFT(cityCode,#{prefixLen})=#{cityCode,jdbcType=VARCHAR})			
+		</if>
+		<if test="tag!=null">
+			AND LOCATE(#{tag}, t1.tags) 
+		</if>
+	</select>
+	<select id="findDoctorSimpleInfoesByHospitalTrueName" resultMap="doctorSimpleInfoResultKeyWordMap">
+		SELECT 
+			t5.hospitalName, 
+			t1.tel, 
+			t1.updateTime,
+			t1.userId, 
+			t1.doctorId, 
+			t1.trueName, 
+			t1.sex, 
+			t2.professionalRankName,
+			t1.mobile, 
+			t1.tagIds, 
+			t1.tags,
+			CASE WHEN t4.parentId IS NULL THEN t4.deptName ELSE t6.deptName END deptName,
+			CASE WHEN t4.parentId IS NULL then t6.deptName ELSE t4.deptName END childDept, 
+			(CASE WHEN t1.userPictureUrl IS NOT NULL AND TRIM(t1.userPictureUrl)!='' THEN t1.userPictureUrl
+			WHEN t1.sex=2 THEN #{defaultWomanPicUrl}
+			ELSE #{defaultManPicUrl} END) userPictureUrl
+		FROM 
+			u_doctor t1
+		LEFT JOIN meta_professional_rank t2 ON t1.professionalRank=t2.professionalRankId
+		LEFT JOIN r_hospital_doctor t3 ON t1.doctorId=t3.doctorId
+		LEFT JOIN u_hospital t5 ON t3.hospitalId=t5.hospitalId
+		LEFT JOIN u_department t4 ON t3.deptId=t4.deptId
+		LEFT JOIN u_department t6 ON t6.deptId=t4.parentId
+		WHERE 
+		1 
+		<if test="keyword!=null">
+			AND (
+				LOCATE(#{keyword},t5.hospitalName) 
+			OR 	LOCATE(#{keyword},t5.nickName) 
+			)
+		</if>
+		<if test="cityCode != null">
+			AND t5.cityId IN (SELECT cityId FROM meta_city where LEFT(cityCode,#{prefixLen})=#{cityCode,jdbcType=VARCHAR})			
+		</if>
+		<if test="tag!=null">
+			AND LOCATE(#{tag},t1.tags) 
+		</if>
+		<if test="hospitalId!=null">
+			AND t3.hospitalId=#{hospitalId}
+		</if>
+		<if test="deptId!=null">
+			AND t3.deptId=#{deptId}
+		</if>
+	</select>
+	
+	<select id="getDoctorList" resultType="com.esuizhen.cloudservice.user.bean.TDoctorMinInfo">
+		SELECT
+			t1.userId,
+			t1.doctorId,
+			t1.trueName,
+			t3.hospitalName,
+			t4.deptName
+		FROM user_db.u_doctor t1
+			LEFT JOIN user_db.r_hospital_doctor t2 ON t2.doctorId = t1.doctorId
+			LEFT JOIN user_db.u_hospital t3 ON t3.hospitalId = t2.hospitalId
+			LEFT JOIN user_db.u_department t4 ON t4.deptId = t2.deptId
+		where 1=1
+		<if test="hospitalId != null">
+			AND t2.hospitalId=#{hospitalId}
+		</if>
+		<if test="doctorId != null">
+			AND t1.doctorId=#{doctorId}
+		</if>
+		<if test="trueName != null">
+			AND  t1.trueName like '%${trueName}%'
+		</if>
+		<if test="reqFlag==1">
+			AND EXISTS (SELECT 1 FROM user_db.r_doctor_patient where doctorId = t1.doctorId AND firstVisitFlag = 1)
+		</if>
+	</select>
+	
+	
+	<select id="selectDoctorHospitalBydoctorId" resultType="java.lang.Integer">
+		select hospitalId from user_db.r_hospital_doctor where doctorId=#{doctorId} 
+	
+	</select>
+	
+	<select id="getActivateRight" resultType="java.lang.Integer" parameterType="java.lang.Long">
+		select datediff( Date(NOW()),IFNULL(DATE(lastActivateDate),date_sub(DATE(NOW()),INTERVAL 30 DAY)) ) from user_db.u_doctor d
+		WHERE d.doctorId=#{doctorId}
+	</select>
+	<update id="modifyActivateDate" parameterType="java.lang.Long">
+		UPDATE user_db.u_doctor SET lastActivateDate=NOW() WHERE doctorId=#{doctorId}
+	</update>
+	
+</mapper>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<mapper namespace="com.esuizhen.server.sync.dao.temp.TempEciExamReportDao" >
+    <!-- 向temp表推送数据 -->
+    <insert id="insert">
+		INSERT INTO server_sync_temp_db.eci_exam_report (
+		    examReportId,emrId,patientId,patientName,patientNo,inhospitalTimes,
+			patientUuid,outPatientFlag,hospitalId,examTypeId,examChildTypeId,examTypeName,
+			deptId,deptUuid,deptName,reportTitle,scanningTechnique,examWay,obtainWay,organCode,
+			organ,bodyCode,bodyPart,nidusCode,nidus,nidusSourceFlag,longestDiameter,
+			shortestDiameter,examFinding,examConclusion,hasImage,picFileUrls,imageFileFormat,
+			applyDoctorId,applyDoctorUuid,applyDoctorNo,applyDoctorName,reportDoctorId,reportDoctorUuid,
+			reportDoctorNo,reportDoctorName,state,readFlag,applyTime,excuteTime,reportTime,
+			createTime,updateTime,patientSex,patientBirth,patientIdno,patientMobile,patientAddress,
+			examConclusionRtf,rawCreateTime,mergeFlag,mergeFrom,mergeFromUuid,mergeTarget,
+			mergeTargetUuid,mergeTime,batchId,sourceFlag
+			)
+		VALUES(
+			#{examReportId},#{emrId},#{patientId},#{patientName},#{patientNo},#{inhospitalTimes},
+			#{patientUuid},#{outPatientFlag},#{hospitalId},#{examTypeId},#{examChildTypeId},#{examTypeName},
+			#{deptId},#{deptUuid},#{deptName},#{reportTitle},#{scanningTechnique},#{examWay},#{obtainWay},#{organCode},
+			#{organ},#{bodyCode},#{bodyPart},#{nidusCode},#{nidus},#{nidusSourceFlag},#{longestDiameter},
+			#{shortestDiameter},#{examFinding},#{examConclusion},#{hasImage},#{picFileUrls},#{imageFileFormat},
+			#{applyDoctorId},#{applyDoctorUuid},#{applyDoctorNo},#{applyDoctorName},#{reportDoctorId},#{reportDoctorUuid},
+			#{reportDoctorNo},#{reportDoctorName},#{state},#{readFlag},#{applyTime},#{excuteTime},#{reportTime},
+			#{createTime},#{updateTime},#{patientSex},#{patientBirth},#{patientIdno},#{patientMobile},#{patientAddress},
+			#{examConclusionRtf},#{rawCreateTime},#{mergeFlag},#{mergeFrom},#{mergeFromUuid},#{mergeTarget},
+			#{mergeTargetUuid},#{mergeTime},#{batchId},#{sourceFlag}
+		)
+	</insert>
+
+	<select id="getSyncExamReport" resultType="com.esuizhen.server.sync.bean.server.ExamReportRes" parameterType="com.esuizhen.server.sync.bean.TBatchDetailInfo">
+		SELECT
+			t1.examReportId,t1.emrId,
+			IFNULL(t3.patientId,t31.patientId) patientId,
+			t1.patientName,t1.patientNo,t1.inhospitalTimes,t1.patientUuid,
+			t1.outPatientFlag,t1.hospitalId,t1.examTypeId,t1.examChildTypeId,t1.examTypeName,t6.deptId,t1.deptUuid,t1.deptName,t1.reportTitle,
+			t1.scanningTechnique,t1.examWay,t1.obtainWay,t1.organCode,t1.organ,t1.bodyCode,t1.bodyPart,t1.nidusCode,t1.nidus,
+			t1.nidusSourceFlag,t1.longestDiameter,t1.shortestDiameter,t1.examFinding,t1.examConclusion,
+			t1.hasImage,t1.picFileUrls,t1.imageFileFormat,
+			IFNULL(t4.doctorId,t41.doctorId) applyDoctorId,
+			t1.applyDoctorUuid,t1.applyDoctorNo,t1.applyDoctorName,
+			IFNULL(t5.doctorId,t51.doctorId) reportDoctorId,
+			t1.reportDoctorNo,t1.reportDoctorUuid,t1.reportDoctorName,
+			t1.state,t1.readFlag,t1.applyTime,t1.excuteTime,t1.reportTime,t1.createTime,t1.updateTime,t1.patientSex,
+			t1.patientBirth,t1.patientIdno,t1.patientMobile,t1.patientAddress,t1.examConclusionRtf,t1.rawCreateTime,t1.mergeFlag,
+			t1.mergeFromUuid,t1.mergeTargetUuid,t1.mergeTime,
+			if(t2.examReportId IS NULL ,1,2) opFlag
+		FROM
+		     server_sync_temp_db.eci_exam_report t1
+		LEFT JOIN lis_db.eci_exam_report t2 ON t2.examReportId=t1.examReportId
+		LEFT JOIN user_db.u_patient t3 ON t3.uuid=t1.patientUuid
+		LEFT JOIN user_db.r_uuid_patient_relationship t31 ON t1.patientUuid=t31.uuid
+		LEFT JOIN user_db.u_doctor t4 ON t4.uuid=t1.applyDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t41 ON t1.applyDoctorUuid=t41.uuid
+		LEFT JOIN user_db.u_doctor t5 ON t5.uuid=t1.reportDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t51 ON t1.reportDoctorUuid=t51.uuid
+		LEFT JOIN user_db.u_department t6 ON t1.deptUuid=t6.uuid
+		WHERE t1.batchId=#{batchId}
+	</select>
+
+	<select id="getSyncExamReportByRealtime" resultType="com.esuizhen.server.sync.bean.server.ExamReportRes" parameterType="com.esuizhen.server.sync.bean.TBatchDetailInfo">
+		SELECT
+		t1.examReportId,t1.emrId,
+		IFNULL(t3.patientId,t31.patientId) patientId,
+		t1.patientName,t1.patientNo,t1.inhospitalTimes,t1.patientUuid,
+		t1.outPatientFlag,t1.hospitalId,t1.examTypeId,t1.examChildTypeId,t1.examTypeName,t6.deptId,t1.deptUuid,t1.deptName,t1.reportTitle,
+		t1.scanningTechnique,t1.examWay,t1.obtainWay,t1.organCode,t1.organ,t1.bodyCode,t1.bodyPart,t1.nidusCode,t1.nidus,
+		t1.nidusSourceFlag,t1.longestDiameter,t1.shortestDiameter,t1.examFinding,t1.examConclusion,
+		t1.hasImage,t1.picFileUrls,t1.imageFileFormat,
+		IFNULL(t4.doctorId,t41.doctorId) applyDoctorId,
+		t1.applyDoctorUuid,t1.applyDoctorNo,t1.applyDoctorName,
+		IFNULL(t5.doctorId,t51.doctorId) reportDoctorId,
+		t1.reportDoctorNo,t1.reportDoctorUuid,t1.reportDoctorName,
+		t1.state,t1.readFlag,t1.applyTime,t1.excuteTime,t1.reportTime,t1.createTime,t1.updateTime,t1.patientSex,
+		t1.patientBirth,t1.patientIdno,t1.patientMobile,t1.patientAddress,t1.examConclusionRtf,t1.rawCreateTime,t1.mergeFlag,
+		t1.mergeFromUuid,t1.mergeTargetUuid,t1.mergeTime,
+		if(t2.examReportId IS NULL ,0,1) upFlag
+		FROM
+		server_sync_temp_db.eci_exam_report t1
+		LEFT JOIN lis_realtime_db.eci_exam_report t2 ON t2.examReportId=t1.examReportId
+		LEFT JOIN user_db.u_patient t3 ON t3.uuid=t1.patientUuid
+		LEFT JOIN user_db.r_uuid_patient_relationship t31 ON t1.patientUuid=t31.uuid
+		LEFT JOIN user_db.u_doctor t4 ON t4.uuid=t1.applyDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t41 ON t1.applyDoctorUuid=t41.uuid
+		LEFT JOIN user_db.u_doctor t5 ON t5.uuid=t1.reportDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t51 ON t1.reportDoctorUuid=t51.uuid
+		LEFT JOIN user_db.u_department t6 ON t1.deptUuid=t6.uuid
+		WHERE t1.batchId=#{batchId}
+	</select>
+</mapper>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.user.dao.TRDoctorDao">
+
+	<insert id="insertRdoctor" useGeneratedKeys="true" parameterType="com.westangel.common.bean.user.TRDoctor">
+		<selectKey resultType="long" keyProperty="id" order="AFTER" >
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+        INSERT INTO r_doctor 
+        (
+        	doctorId ,
+        	inhospitalDoctorId ,
+        	inchargeDoctorId ,
+        	directorDoctorId ,
+        	deptDoctorId ,
+        	deptSecDoctorId ,
+        	deanDoctorId ,
+        	doctorLevel ,
+        	hospitalId ,
+        	state ,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{doctorId} ,
+        	#{inhospitalDoctorId} ,
+        	#{inchargeDoctorId} ,
+        	#{directorDoctorId} ,
+        	#{deptDoctorId} ,
+        	#{deptSecDoctorId} ,
+        	#{deanDoctorId} ,
+        	#{doctorLevel} ,
+        	#{hospitalId} ,
+        	#{state} ,
+        	#{createTime} ,
+        	#{updateTime} 
+        )
+	</insert>
+    
+	<update id="updateRdoctor" parameterType="com.westangel.common.bean.user.TRDoctor">
+        UPDATE r_doctor 
+        <set>
+	        <if test="doctorId != null">
+                doctorId = #{doctorId} ,
+            </if>
+	        <if test="inhospitalDoctorId != null">
+                inhospitalDoctorId = #{inhospitalDoctorId} ,
+            </if>
+	        <if test="inchargeDoctorId != null">
+                inchargeDoctorId = #{inchargeDoctorId} ,
+            </if>
+	        <if test="directorDoctorId != null">
+                directorDoctorId = #{directorDoctorId} ,
+            </if>
+	        <if test="deptDoctorId != null">
+                deptDoctorId = #{deptDoctorId} ,
+            </if>
+	        <if test="deptSecDoctorId != null">
+                deptSecDoctorId = #{deptSecDoctorId} ,
+            </if>
+	        <if test="deanDoctorId != null">
+                deanDoctorId = #{deanDoctorId} ,
+            </if>
+	        <if test="doctorLevel != null">
+                doctorLevel = #{doctorLevel} ,
+            </if>
+	        <if test="hospitalId != null">
+                hospitalId = #{hospitalId} ,
+            </if>
+	        <if test="state != null">
+                state = #{state} ,
+            </if>
+	        <if test="1==1">
+                updateTime = NOW() ,
+            </if>
+        </set>
+        WHERE 
+	        id = #{id} 
+	</update>
+
+    <delete id="deleteRdoctor">
+        DELETE FROM r_doctor WHERE id = #{id} 
+    </delete>
+    
+    <select id="queryRdoctorById" resultType="com.westangel.common.bean.user.TRDoctor">
+		SELECT 
+        	id,
+        	doctorId,
+        	inhospitalDoctorId,
+        	inchargeDoctorId,
+        	directorDoctorId,
+        	deptDoctorId,
+        	deptSecDoctorId,
+        	deanDoctorId,
+        	doctorLevel,
+        	hospitalId,
+        	state,
+        	createTime,
+        	updateTime
+		FROM r_doctor 
+	    WHERE 
+	        id = #{id} 
+	</select>
+	
+	<select id="queryRDoctorByDoctorId" resultType="com.westangel.common.bean.user.TRDoctor">
+		SELECT 
+        	id,
+        	doctorId,
+        	inhospitalDoctorId,
+        	inchargeDoctorId,
+        	directorDoctorId,
+        	deptDoctorId,
+        	deptSecDoctorId,
+        	deanDoctorId,
+        	doctorLevel,
+        	hospitalId,
+        	state,
+        	createTime,
+        	updateTime
+		FROM r_doctor 
+	    WHERE doctorId = #{doctorId} 
+	    AND state=1    
+	    LIMIT 1
+	</select>
+</mapper>
+

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.server.DoctorDao">
+	<sql id="Base_Column_sql">
+		doctorId,userId,parentId,parentUuid,uuid,mobile,
+		trueName,auditState,nickName,sex,birthDate,userPictureUrl,
+		professionCredence,registerCredence,workCredence,professionCredencePicUrl,
+		registerCredencePicUrl,workCredencePicUrl,isExpert,skills,tagIds,tags,
+		positionTitle,professionalRank,qrcodeUrl,tel,introduction,auditRemark,
+		recommendFlag,createTime,staffNo
+	</sql>
+
+	<select id="queryDoctorByUserId" resultType="com.esuizhen.server.sync.model.server.TDoctor">
+		SELECT
+		<include refid="Base_Column_sql" />
+		FROM user_db.u_doctor
+		WHERE userId=#{userId}
+	</select>
+	
+	<select id="queryDoctorByUuid" resultType="com.esuizhen.server.sync.model.server.TDoctor">
+		SELECT
+		<include refid="Base_Column_sql" />
+		FROM user_db.u_doctor
+		WHERE uuid=#{uuid}
+	</select>
+	
+	<select id="queryDoctorByMobileUnique" resultType="java.lang.Integer">
+		SELECT
+		COUNT(0)
+		FROM user_db.u_doctor
+		WHERE mobile=#{mobile} AND syncFlag=#{syncFlag}
+	</select>
+
+	<insert id="insert">
+		<selectKey resultType="long" keyProperty="doctorId" order="AFTER">
+			SELECT LAST_INSERT_ID() as doctorId
+		</selectKey>
+		insert into user_db.u_doctor(
+		<include refid="Base_Column_sql" />
+		)
+		values(
+		#{doctorId},#{userId},#{parentId},#{parentUuid},#{uuid},#{mobile},
+		#{trueName},#{auditState},#{nickName},#{sex},#{birthDate},#{userPictureUrl},
+		#{professionCredence},#{registerCredence},#{workCredence},#{professionCredencePicUrl},
+		#{registerCredencePicUrl},#{workCredencePicUrl},#{isExpert},#{skills},#{tagIds},#{tags},
+		#{positionTitle},#{professionalRank},#{qrcodeUrl},#{tel},#{introduction},#{auditRemark},
+		#{recommendFlag},#{createTime},#{staffNo}
+		)
+	</insert>
+
+	<update id="update">
+		update user_db.u_doctor
+		<set>
+			<if test="parentId!=null">
+				parentId=#{parentId},
+			</if>
+			<if test="parentUuid!=null">
+				parentUuid=#{parentUuid},
+			</if>
+			<if test="uuid!=null">
+				uuid=#{uuid},
+			</if>
+			<if test="mobile!=null">
+				mobile=#{mobile},
+			</if>
+			<if test="trueName!=null">
+				trueName=#{trueName},
+			</if>
+			<if test="auditState!=null">
+				auditState=#{auditState},
+			</if>
+			<if test="nickName!=null">
+				nickName=#{nickName},
+			</if>
+			<if test="sex!=null">
+				sex=#{sex},
+			</if>
+			<if test="birthDate!=null">
+				birthDate=#{birthDate},
+			</if>
+			<if test="userPictureUrl!=null">
+				userPictureUrl=#{userPictureUrl},
+			</if>
+			<if test="professionCredence!=null">
+				professionCredence=#{professionCredence},
+			</if>
+			<if test="registerCredence!=null">
+				registerCredence=#{registerCredence},
+			</if>
+			<if test="workCredence!=null">
+				workCredence=#{workCredence},
+			</if>
+			<if test="professionCredencePicUrl!=null">
+				professionCredencePicUrl=#{professionCredencePicUrl},
+			</if>
+			<if test="registerCredencePicUrl!=null">
+				registerCredencePicUrl=#{registerCredencePicUrl},
+			</if>
+			<if test="workCredencePicUrl!=null">
+				workCredencePicUrl=#{workCredencePicUrl},
+			</if>
+			<if test="isExpert!=null">
+				isExpert=#{isExpert},
+			</if>
+			<if test="skills!=null">
+				skills=#{skills},
+			</if>
+			<if test="tagIds!=null">
+				tagIds=#{tagIds},
+			</if>
+			<if test="tags!=null">
+				tags=#{tags},
+			</if>
+			<if test="positionTitle!=null">
+				positionTitle=#{positionTitle},
+			</if>
+			<if test="professionalRank!=null">
+				professionalRank=#{professionalRank},
+			</if>
+			<if test="qrcodeUrl!=null">
+				qrcodeUrl=#{qrcodeUrl},
+			</if>
+			<if test="tel!=null">
+				tel=#{tel},
+			</if>
+			<if test="introduction!=null">
+				introduction=#{introduction},
+			</if>
+			<if test="auditRemark!=null">
+				auditRemark=#{auditRemark},
+			</if>
+			<if test="recommendFlag!=null">
+				recommendFlag=#{recommendFlag},
+			</if>
+			<if test="createTime!=null">
+				createTime=#{createTime},
+			</if>
+			<if test="staffNo!=null">
+				staffNo=#{staffNo},
+			</if>
+		</set>
+		where doctorId=#{doctorId}
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM user_db.u_doctor 
+		WHERE doctorId = #{doctorId}
+	</delete>
+</mapper>

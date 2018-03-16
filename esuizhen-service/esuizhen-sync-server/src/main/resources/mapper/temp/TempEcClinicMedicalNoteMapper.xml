@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<mapper namespace="com.esuizhen.server.sync.dao.temp.TempEcClinicMedicalNoteDao" >
+    <!-- 向temp表推送数据 -->
+    <insert id="insert">
+		INSERT INTO server_sync_temp_db.ec_clinic_medical_note (
+			clinicMedicalId,emrId,tempId,clinicNo,patientId,patientUuid,patientNo,
+			hospitalId,healthCardNo,patientName,patientIdno,patientAddress,patientMobile,
+	        patientSex,patientBirth,patientAge,deptId,deptUuid,deptName,attendingDoctorId,attendingDoctorUuid,
+			attendingDoctorNo,attendingDoctorName,symptomSummary,diagnosis,diseaseCode,remark,
+			clinicDoctor,clinicDoctorUuid,visitTimes,visitTime,createTime,updateTime,
+			rawCreateTime,mergeFlag,mergeFrom,mergeFromUuid,mergeTarget,
+            mergeTargetUuid,mergeTime,batchId,sourceFlag
+		)
+		VALUES(
+			#{clinicMedicalId},#{emrId},#{tempId},#{clinicNo},#{patientId},#{patientUuid},#{patientNo},
+			#{hospitalId},#{healthCardNo},#{patientName},#{patientIdno},#{patientAddress},#{patientMobile},
+	        #{patientSex},#{patientBirth},#{patientAge},#{deptId},#{deptUuid},#{deptName},#{attendingDoctorId},#{attendingDoctorUuid},
+			#{attendingDoctorNo},#{attendingDoctorName},#{symptomSummary},#{diagnosis},#{diseaseCode},#{remark},
+			#{clinicDoctor},#{clinicDoctorUuid},#{visitTimes},#{visitTime},#{createTime},#{updateTime},
+			#{rawCreateTime},#{mergeFlag},#{mergeFrom},#{mergeFromUuid},#{mergeTarget},
+            #{mergeTargetUuid},#{mergeTime},#{batchId},#{sourceFlag}
+		)
+	</insert>
+
+	<select id="getSyncClinicMedicalNote" resultType="com.esuizhen.server.sync.bean.server.ClinicMedicalNoteRes" parameterType="com.esuizhen.server.sync.bean.TBatchDetailInfo">
+		SELECT
+			t1.clinicMedicalId,t1.emrId,t1.tempId,t1.clinicNo,
+			IFNULL(t2.patientId,t21.patientId) patientId,t1.patientUuid,t1.patientNo,
+			t1.hospitalId,t1.healthCardNo,t1.patientName,t1.patientIdno,t1.patientAddress,t1.patientMobile,t1.patientSex,
+			t1.patientBirth,t1.patientAge,
+			t6.deptId,t1.deptName,
+			IFNULL(t3.doctorId,t31.doctorId) attendingDoctorId,
+			t1.attendingDoctorUuid,
+			t1.attendingDoctorNo,t1.attendingDoctorName,t1.symptomSummary,t1.diagnosis,t1.diseaseCode,t1.remark,
+			IFNULL(t4.doctorId,t41.doctorId) clinicDoctor,
+			t1.clinicDoctorUuid,
+			t1.visitTimes,t1.visitTime,t1.createTime,t1.updateTime,t1.rawCreateTime,t1.mergeFlag,
+			t1.mergeFromUuid,t1.mergeTargetUuid,t1.mergeTime,
+			if(t5.clinicMedicalId is null,1,2) opFlag,
+			t1.deptUuid,
+			t1.sourceFlag
+		FROM
+		     server_sync_temp_db.ec_clinic_medical_note t1
+		LEFT JOIN user_db.u_patient t2 on t2.uuid=t1.patientUuid
+		LEFT JOIN user_db.r_uuid_patient_relationship t21 ON t1.patientUuid=t21.uuid
+		LEFT JOIN user_db.u_doctor t3 ON t3.uuid=t1.attendingDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t31 ON t1.attendingDoctorUuid=t31.uuid
+		LEFT JOIN user_db.u_doctor t4 ON t4.uuid=t1.clinicDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t41 ON t1.clinicDoctorUuid=t41.uuid
+		LEFT JOIN ehr_db.ec_clinic_medical_note t5 ON t5.clinicMedicalId=t1.clinicMedicalId
+		LEFT JOIN user_db.u_department t6 ON t1.deptUuid=t6.uuid
+		WHERE t1.batchId=#{batchId}
+	</select>
+</mapper>

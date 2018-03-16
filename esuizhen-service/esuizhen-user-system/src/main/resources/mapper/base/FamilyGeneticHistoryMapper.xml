@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.FamilyGeneticHistoryDao">
+	<!-- add by fanpanwei -->
+	<insert id="insertGeneticHistory" parameterType="com.esuizhen.cloudservice.user.bean.GeneticDiseaseContact">
+		INSERT INTO user_db.u_patient_family_genetic_history(
+			name,relationId,
+			relationName,
+			patientId,diseaseTypeId,
+			diseaseTypeName,
+			notTumorDiseaseHistory,liveState,deathTime,
+			createTime,updateTime,specialDiseaseRegisterId
+		)VALUES(
+			#{familyName},#{relationId},
+			(SELECT relationName FROM user_db.meta_relation mr WHERE mr.relationId=#{relationId}),
+			#{patientId},#{diseaseTypeId},
+			(SELECT diseaseTypeName FROM ehr_db.meta_c_disease_type cdt WHERE cdt.diseaseTypeId=#{diseaseTypeId}),
+			#{otherGeneDisease},#{liveStatus},#{deathDate},
+			NOW(),NOW(),#{specialDiseaseRegisterId}
+		)
+	</insert>
+	<update id="updateGeneticHistory" parameterType="com.esuizhen.cloudservice.user.bean.GeneticDiseaseContact">
+		update user_db.u_patient_family_genetic_history
+		<set>
+			<if test="familyName != null">
+				name=#{familyName,jdbcType=VARCHAR},
+			</if>
+			<if test="relationId != null">
+				relationId=#{relationId},
+				relationName=(SELECT relationName FROM user_db.meta_relation mr WHERE mr.relationId=#{relationId}),
+			</if>
+			<if test="patientId != null">
+				patientId=#{patientId},
+			</if>
+			<if test="diseaseTypeId != null">
+				diseaseTypeId=#{diseaseTypeId},
+				diseaseTypeName=(SELECT diseaseTypeName FROM ehr_db.meta_c_disease_type cdt WHERE cdt.diseaseTypeId=#{diseaseTypeId}),
+			</if>
+			<if test="otherGeneDisease != null">
+				notTumorDiseaseHistory=#{otherGeneDisease},
+			</if>
+			<if test="liveStatus != null">
+				liveStatus=#{liveStatus},
+			</if>
+			<if test="deathDate != null">
+				deathTime=#{deathDate},
+			</if>
+			updateTime=NOW()
+		</set>
+		where id=#{geneId,jdbcType=BIGINT}
+	</update>
+	<delete id="deleteGeneticHistory" parameterType="java.lang.Integer">
+		DELETE FROM 
+			user_db.u_patient_family_genetic_history
+		WHERE 
+			patientId=#{patientId}
+			<if test="specialDiseaseRegisterId != null">
+			AND specialDiseaseRegisterId=#{specialDiseaseRegisterId}
+		</if>
+	</delete>
+	<select id="findGeneticHistory" resultType="com.esuizhen.cloudservice.user.bean.GeneticDiseaseContact" parameterType="java.lang.Integer">
+		SELECT gen.geneticHistoryId geneId,
+			gen.relationId,gen.name familyName,gen.diseaseTypeId diseaseTypeId,
+			gen.notTumorDiseaseHistory otherGeneDisease,gen.liveState liveStatus,
+			gen.deathTime deathDate,gen.specialDiseaseRegisterId
+		FROM user_db.u_patient_family_genetic_history gen WHERE
+		gen.patientId=#{patientId}
+		<if test="specialDiseaseRegisterId != null">
+			AND gen.specialDiseaseRegisterId=#{specialDiseaseRegisterId}
+		</if>
+	</select>
+	<!-- end by fanpanwei -->
+</mapper>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<beans xmlns="http://www.springframework.org/schema/beans"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"  
+    xsi:schemaLocation="http://www.springframework.org/schema/beans  
+        http://www.springframework.org/schema/beans/spring-beans.xsd  
+        http://code.alibabatech.com/schema/dubbo  
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd  
+        ">  
+  		
+    <!-- 短信接口，生成远程服务代理，可以像使用本地bean一样使用demoService -->  
+   	<dubbo:reference id="smsInnerService" interface="com.westangel.common.service.SmsInnerService" check="false" />
+   	
+    <!-- 随访接口，生成远程服务代理，可以像使用本地bean一样使用demoService -->  
+   	<dubbo:reference id="followupService" interface="com.westangel.common.service.FollowupService" check="false" />
+   	
+    <!-- 随访接口，生成远程服务代理，可以像使用本地bean一样使用demoService -->  
+   	<dubbo:reference id="accountService" interface="com.westangel.common.service.AccountService" check="false" />
+   	<dubbo:reference id="couponService" interface="com.westangel.common.service.CouponInnerService" check="false" />
+  	<!-- 推送接口 -->
+   	<dubbo:reference id="pushInnerService" interface="com.westangel.common.service.PushInnerService" check="false" />   
+  	<!-- 消息接口 -->
+   	<dubbo:reference id="messageInnerService" interface="com.westangel.common.service.MessageInnerService" check="false" />
+   	<!-- emr接口 -->   
+   	<dubbo:reference id="emrInnerService" interface="com.westangel.common.service.EmrInnerService" check="false" />
+   	<dubbo:reference id="diagInnerService" interface="com.westangel.common.service.DiagInnerService" check="false" />
+   	<!-- uuidRelationship接口 -->
+   	<dubbo:reference id="uuidRelationshipService" interface="com.westangel.common.service.UuidRelationshipService" check="false" />
+   	
+   	<!-- weixin接口 -->
+   	<dubbo:reference id="weixinInnerService" interface="com.westangel.common.service.WeixinInnerService" check="false" />
+   	
+   	<!-- 权限系统接口 -->
+   	<dubbo:reference id="authorizationService" interface="com.westangel.common.service.AuthorizationService" check="false" />   	
+</beans>

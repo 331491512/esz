@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.CloudPatientContacInfoDao" >
+
+	<resultMap id="baseResultMap" type="com.esuizhen.cloudservice.sync.bean.TPatientContactInfo">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="patientId" property="patientId" jdbcType="BIGINT" />
+		<result column="patientRelation" property="patientRelation" jdbcType="INTEGER" />
+		<result column="familyName" property="familyName" jdbcType="VARCHAR" />
+		<result column="familyPhone" property="familyPhone" jdbcType="VARCHAR" />
+		<result column="contactId" property="contactId" />
+		<result column="flag" property="flag" />
+	    <result column="phoneStatus" property="phoneStatus" />
+		<result column="zipcode" property="zipcode" />
+		<result column="isDefault" property="isDefault" />
+		<result column="isValid" property="isValid" />
+	   	<result column="address" property="address" />
+	    <result column="remark" property="remark" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="sourceFlag" property="sourceFlag" jdbcType="INTEGER" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="base_column_list">
+		t1.id, t1.patientId, t1.patientRelation,
+		t1.familyName, t1.familyPhone,
+		t1.contactId,
+		t1.flag,
+	    t1.phoneStatus,
+		t1.zipcode,
+		t1.isDefault,
+		t1.isValid,
+	     t1.address,
+	     t1.remark,
+		 t1.address,
+		 t1.sourceFlag, t1.createTime, 
+		 t1.updateTime, t1.remark
+	</sql>
+
+	<select id="find" resultMap="baseResultMap" parameterType="com.esuizhen.cloudservice.sync.bean.TPatientContactInfo">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM user_db.u_patient_family t1
+		WHERE t1.familyPhone=#{familyPhone,jdbcType=VARCHAR} AND t1.patientId=#{patientId,jdbcType=BIGINT}
+	</select>
+
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.sync.bean.TPatientContactInfo" >
+		<selectKey resultType="long" keyProperty="id" order="AFTER" >
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+	     insert into user_db.u_patient_family(
+	     	patientId,
+	     	patientRelation,
+	     	familyName,
+	     	familyPhone,
+	     	contactId,
+			flag,
+	     	phoneStatus,
+			zipcode,
+			isDefault,
+			isValid,
+	     	address,
+	     	remark,
+	     	sourceFlag,
+	     	createTime,
+	     	updateTime,
+	     	syncTime
+	     )values(
+			#{patientId,jdbcType=BIGINT},
+			#{patientRelation,jdbcType=INTEGER},
+			#{familyName,jdbcType=VARCHAR},
+			#{familyPhone,jdbcType=VARCHAR},
+			#{contactId},
+			#{flag},
+			#{phoneStatus},
+			#{zipcode},
+			#{isDefault},
+			#{isValid},
+			#{address,jdbcType=VARCHAR},
+			#{remark,jdbcType=VARCHAR},
+			#{sourceFlag},
+			IFNULL(#{createTime},NOW()),
+			#{updateTime},
+			NOW()
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.esuizhen.cloudservice.sync.bean.TPatientContactInfo">
+		UPDATE user_db.u_patient_family
+		<set>
+			<if test="patientId != null">
+				patientId=#{patientId,jdbcType=BIGINT},
+			</if>
+			<if test="patientRelation != null">
+				patientRelation=#{patientRelation,jdbcType=INTEGER},
+			</if>
+			<if test="familyName != null">
+				familyName=#{familyName,jdbcType=VARCHAR},
+			</if>
+			<if test="familyPhone != null">
+				familyPhone=#{familyPhone,jdbcType=VARCHAR},
+			</if>
+			<if test="contactId != null">
+				contactId=#{contactId},
+			</if>
+			<if test="flag != null">
+				flag=#{flag},
+			</if>
+			<if test="phoneStatus != null">
+				phoneStatus=#{phoneStatus},
+			</if>
+			<if test="zipcode != null">
+				zipcode=#{zipcode},
+			</if>
+			<if test="isDefault != null">
+				isDefault=#{isDefault},
+			</if>
+			<if test="isValid != null">
+				isValid=#{isValid},
+			</if>
+			<if test="address != null">
+				address=#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="sourceFlag != null">
+				sourceFlag=#{sourceFlag},
+			</if>
+			updateTime=NOW()
+		</set>
+		WHERE id=#{id,jdbcType=BIGINT}
+	</update>
+	
+	<update id="updateSourceFlag" parameterType="com.esuizhen.cloudservice.sync.bean.TPatientContactInfo">
+		UPDATE user_db.u_patient_family
+		<set>
+			<if test="sourceFlag != null">
+				sourceFlag=#{sourceFlag},
+			</if>
+			updateTime=NOW()
+		</set>
+		WHERE id=#{id,jdbcType=BIGINT}
+	</update>
+	
+</mapper>

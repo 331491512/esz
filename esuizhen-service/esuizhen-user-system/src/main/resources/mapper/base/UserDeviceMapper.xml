@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.UserDeviceDao">
+	<sql id="base_Column_List">
+		u1.id, u1.luid, u1.role, u1.deviceId, u1.deviceType, u1.businessId bussinessId, u1.productId, u1.userId, u1.phoneVendorId, u1.phoneBrand, u1.platform,
+		u1.appVersion, u1.versionCode, u1.location, u1.iccid, u1.imei, u1.imsi, u1.ipAddress, u1.macAddress, u1.invitationCode, u1.createTime, u1.updateTime
+	</sql>
+	
+	<select id="exsitDeviceInfo" resultType="java.lang.Integer" parameterType="java.lang.String">
+		SELECT
+			COUNT(0)
+		FROM user_db.u_user_device
+		WHERE luid = #{luid}
+	</select>
+	
+	<select id="findByLuid" resultType="com.esuizhen.cloudservice.user.model.UUserDevice">
+		SELECT
+			<include refid="base_Column_List" />
+		FROM user_db.u_user_device u1 WHERE u1.luid=#{luid}
+			<if test="opFlag != null">
+				AND u1.opFlag=#{opFlag}
+			</if>
+	</select>
+	
+	<select id="queryCount" resultType="java.lang.Integer">
+		SELECT COUNT(0) FROM user_db.u_user_device u1
+		WHERE u1.deviceId=#{record.deviceId} AND u1.role=#{record.role} AND u1.productId=#{record.productId}
+		<if test="userId != null">
+			AND userId = #{userId}
+		</if>
+	</select>
+
+	<select id="selectByPrimaryKey" resultType="com.esuizhen.cloudservice.user.model.UUserDevice" parameterType="java.lang.Integer">
+		SELECT
+			<include refid="base_Column_List" />
+		FROM user_db.u_user_device u1 where u1.id=#{id,jdbcType=INTEGER}
+	</select>
+
+	<select id="selectByUserIdAndDeviceId" resultType="com.esuizhen.cloudservice.user.model.UUserDevice" parameterType="java.lang.Long">
+		select
+			<include refid="base_Column_List" />
+		FROM user_db.u_user_device u1 where u1.userId=#{userId,jdbcType=BIGINT}
+	</select>
+
+	<select id="searchUserDeviceListByDeviceId" resultType="com.esuizhen.cloudservice.user.model.UUserDevice">
+		SELECT
+			<include refid="base_Column_List" />
+		FROM user_db.u_user_device u1 where u1.deviceId=#{deviceId} AND u1.userId>1 AND u1.role=#{role} AND opFlag=0
+	</select>
+
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from u_user_device where id=#{id,jdbcType=INTEGER}
+	</delete>
+
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.user.model.UUserDevice">
+		<selectKey resultType="long" keyProperty="id" order="AFTER">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO user_db.u_user_device(luid, role, deviceId,
+			deviceType, businessId, productId, userId, phoneVendorId,
+			phoneBrand, platform, appVersion, versionCode, location, iccid, 
+			imei, imsi, ipAddress, macAddress, invitationCode, opFlag, createTime, updateTime)
+		VALUES(#{luid}, #{role}, #{deviceId}, #{deviceType}, #{bussinessId}, #{productId},
+			#{userId}, #{phoneVendorId}, #{phoneBrand}, #{platform}, #{appVersion},
+			#{versionCode}, #{location}, #{iccid}, #{imei}, #{imsi}, #{ipAddress},
+			#{macAddress}, #{invitationCode}, #{opFlag}, NOW(), NOW())
+	</insert>
+	
+	<update id="update" parameterType="com.esuizhen.cloudservice.user.model.UUserDevice">
+		update u_user_device
+		<set>
+			<if test="record.luid != null">
+				luid = #{record.luid},
+			</if>
+			<if test="record.role != null">
+				role = #{record.role},
+			</if>
+			<if test="record.deviceId != null">
+				deviceId = #{record.deviceId},
+			</if>
+			<if test="record.deviceType != null">
+				deviceType = #{record.deviceType},
+			</if>
+			<if test="record.bussinessId != null">
+				businessId = #{record.bussinessId},
+			</if>
+			<if test="productId != null">
+				productId = #{productId},
+			</if>
+			<if test="record.userId != null">
+				userId = #{record.userId},
+			</if>
+			<if test="record.phoneVendorId != null">
+				phoneVendorId = #{record.phoneVendorId},
+			</if>
+			<if test="record.phoneBrand != null">
+				phoneBrand = #{record.phoneBrand},
+			</if>
+			<if test="record.platform != null">
+				platform = #{record.platform},
+			</if>
+			<if test="record.appVersion != null">
+				appVersion = #{record.appVersion},
+			</if>
+			<if test="record.versionCode != null">
+				versionCode = #{record.versionCode},
+			</if>
+			<if test="record.location != null">
+				location = #{record.location},
+			</if>
+			<if test="record.iccid != null">
+				iccid = #{record.iccid},
+			</if>
+			<if test="record.imei != null">
+				imei = #{record.imei},
+			</if>
+			<if test="record.imsi != null">
+				imsi = #{record.imsi},
+			</if>
+			<if test="record.ipAddress != null">
+				ipAddress = #{record.ipAddress},
+			</if>
+			<if test="record.macAddress != null">
+				macAddress = #{record.macAddress},
+			</if>
+			<if test="record.invitationCode != null">
+				invitationCode = #{record.invitationCode},
+			</if>
+			updateTime = NOW()
+		</set>
+		WHERE id=#{record.id}
+		<if test="role != null">
+			AND role = #{role}
+		</if>
+		<if test="productId != null">
+			AND productId = #{productId}
+		</if>
+	</update>
+	
+	<update id="updateUserDevice">
+		UPDATE user_db.u_user_device
+		<set>
+			appVersion = #{appVersion},
+			updateTime=NOW()
+		</set>
+		WHERE luid = #{luid}
+	</update>
+</mapper>

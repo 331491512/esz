@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followup.FollowupResultDao">
+
+	<insert id="insertFollowupResult"  parameterType="com.esuizhen.cloudservice.followup.model.followup.FollowupResult">
+        INSERT INTO followup_db.followup_result (
+        	followupResultId ,
+        	followupTaskId ,
+        	patientId ,
+        	operator ,
+        	followupResultValue ,
+        	relapseParts ,
+        	relapseDate ,
+        	transferParts ,
+        	transferDate ,
+        	deathDate ,
+        	isInHospitalDeath ,
+        	isTumourDeath ,
+        	deathCause ,
+        	otherCause ,
+        	followupWay ,
+        	contentTemplateId ,
+        	followupResultPhone ,
+        	followupTime ,
+        	phoneRecordUrl ,
+        	remark ,
+        	syncFlag ,
+        	hospitalId,
+        	sourceFlag ,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{followupResultId} ,
+        	#{followupTaskId} ,
+        	#{patientId} ,
+        	#{operator} ,
+        	#{followupResultValue} ,
+        	#{relapseParts} ,
+        	#{relapseDate} ,
+        	#{transferParts} ,
+        	#{transferDate} ,
+        	#{deathDate} ,
+        	#{isInHospitalDeath} ,
+        	#{isTumourDeath} ,
+        	#{deathCause} ,
+        	#{otherCause} ,
+        	#{followupWay} ,
+        	#{contentTemplateId} ,
+        	#{followupResultPhone} ,
+        	#{followupTime} ,
+        	#{phoneRecordUrl} ,
+        	#{remark} ,
+        	#{syncFlag} ,
+        	#{hospitalId},
+        	#{sourceFlag} ,
+        	#{createTime} ,
+        	#{updateTime} 
+        )
+	</insert>
+    
+	<update id="updateFollowupResult" parameterType="com.esuizhen.cloudservice.followup.model.followup.FollowupResult">
+        UPDATE followup_db.followup_result 
+        <set>
+	        <if test="followupTaskId != null">
+                followupTaskId = #{followupTaskId} ,
+            </if>
+	        <if test="patientId != null">
+                patientId = #{patientId} ,
+            </if>
+	        <if test="operator != null">
+                operator = #{operator} ,
+            </if>
+	        <if test="followupResultValue != null">
+                followupResultValue = #{followupResultValue} ,
+            </if>
+	        <if test="relapseParts != null">
+                relapseParts = #{relapseParts} ,
+            </if>
+	        <if test="relapseDate != null">
+                relapseDate = #{relapseDate} ,
+            </if>
+	        <if test="transferParts != null">
+                transferParts = #{transferParts} ,
+            </if>
+	        <if test="transferDate != null">
+                transferDate = #{transferDate} ,
+            </if>
+	        <if test="deathDate != null">
+                deathDate = #{deathDate} ,
+            </if>
+	        <if test="isInHospitalDeath != null">
+                isInHospitalDeath = #{isInHospitalDeath} ,
+            </if>
+	        <if test="isTumourDeath != null">
+                isTumourDeath = #{isTumourDeath} ,
+            </if>
+	        <if test="deathCause != null">
+                deathCause = #{deathCause} ,
+            </if>
+	        <if test="otherCause != null">
+                otherCause = #{otherCause} ,
+            </if>
+	        <if test="followupWay != null">
+                followupWay = #{followupWay} ,
+            </if>
+	        <if test="contentTemplateId != null">
+                contentTemplateId = #{contentTemplateId} ,
+            </if>
+	        <if test="followupResultPhone != null">
+                followupResultPhone = #{followupResultPhone} ,
+            </if>
+	        <if test="followupTime != null">
+                followupTime = #{followupTime} ,
+            </if>
+	        <if test="phoneRecordUrl != null">
+                phoneRecordUrl = #{phoneRecordUrl} ,
+            </if>
+	        <if test="remark != null">
+                remark = #{remark} ,
+            </if>
+	        <if test="syncFlag != null">
+                syncFlag = #{syncFlag} ,
+            </if>
+	        <if test="sourceFlag != null">
+                sourceFlag = #{sourceFlag} ,
+            </if>
+	        <if test="createTime != null">
+                createTime = #{createTime} ,
+            </if>
+	        <if test="updateTime != null">
+                updateTime = #{updateTime}
+            </if>
+        </set>
+        WHERE 
+	        followupResultId = #{followupResultId} 
+	</update>
+
+    <delete id="deleteFollowupResult">
+        DELETE FROM followup_db.followup_result WHERE
+        followupResultId = #{followupResultId} 
+    </delete>
+    
+    <select id="queryFollowupResultById" resultType="com.esuizhen.cloudservice.followup.model.followup.FollowupResult">
+		SELECT 
+        	followupResultId,
+        	followupTaskId,
+        	patientId,
+        	operator,
+        	followupResultValue,
+        	relapseParts,
+        	relapseDate,
+        	transferParts,
+        	transferDate,
+        	deathDate,
+        	isInHospitalDeath,
+        	isTumourDeath,
+        	deathCause,
+        	otherCause,
+        	followupWay,
+        	contentTemplateId,
+        	followupResultPhone,
+        	followupTime,
+        	phoneRecordUrl,
+        	remark,
+        	syncFlag,
+        	sourceFlag,
+        	createTime,
+        	updateTime
+		FROM followup_db.followup_result 
+	    WHERE 
+	        followupResultId = #{followupResultId} 
+	</select>
+	
+	
+	<select id="queryLastFollowupResultByUserId" resultType="com.westangel.common.bean.TFollowupResultInfo">
+		SELECT
+			t3.followupResultValueId,
+			t3.followupResultValueName,
+			t4.followupWayName,
+			t1.followupTime followupDate
+		FROM
+			followup_db.followup_result_buff t1
+		INNER JOIN user_db.u_patient t2 ON t1.patientId = t2.patientId AND t2.userId = #{userId}
+		INNER JOIN followup_db.meta_followup_result_value t3 ON t1.followupResultValue = t3.followupResultValueId
+		LEFT JOIN followup_db.meta_followup_way t4 ON t1.followupWay = t4.followupWayId
+		ORDER BY
+			t1.followupTime DESC
+		LIMIT 1
+	</select>
+	
+</mapper>
+

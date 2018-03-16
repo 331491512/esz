@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.temp.TempEciTreatmentNoteDao" >
+    <!-- 向temp表推送数据 -->
+    <insert id="insert">
+		INSERT INTO server_sync_temp_db.eci_treatment_note (
+			treatmentId,inhospitalId,emrId,tempId,patientId,patientUuid,patientNo,hospitalId,treatmentTypeId,
+			rawTreatmentType,opCode,treatmentName,treatmentCourse,totalCourse,treatmentProcessFlag,
+			treatmentEffect,treatmentDesc,treatmentBeginTime,treatmentEndTime,sourceFlag,createTime,
+			updateTime,rawCreateTime,mergeFlag,mergeFrom,mergeFromUuid,mergeTarget,mergeTargetUuid,
+			mergeTime,batchId
+		)
+		VALUES(
+			#{treatmentId},#{inhospitalId},#{emrId},#{tempId},#{patientId},#{patientUuid},#{patientNo},#{hospitalId},#{treatmentTypeId},
+			#{rawTreatmentType},#{opCode},#{treatmentName},#{treatmentCourse},#{totalCourse},#{treatmentProcessFlag},
+			#{treatmentEffect},#{treatmentDesc},#{treatmentBeginTime},#{treatmentEndTime},#{sourceFlag},#{createTime},
+			#{updateTime},#{rawCreateTime},#{mergeFlag},#{mergeFrom},#{mergeFromUuid},#{mergeTarget},#{mergeTargetUuid},
+			#{mergeTime},#{batchId}
+		)
+	</insert>
+	
+	<select id="getSyncTreatmentNote" resultType="com.esuizhen.server.sync.bean.server.TreatmentNoteRes" parameterType="com.esuizhen.server.sync.bean.TBatchDetailInfo">
+		SELECT
+			t1.treatmentId,t1.emrId,t1.tempId,t1.inhospitalId,
+			IFNULL(t4.patientId,t41.patientId) patientId,
+			t1.patientUuid,t1.patientNo,
+			t1.hospitalId,t1.treatmentTypeId,t1.rawTreatmentType,t1.opCode,t1.treatmentName,
+			t1.treatmentCourse,t1.totalCourse,t1.treatmentProcessFlag,t1.treatmentEffect,
+			t1.treatmentDesc,t1.treatmentBeginTime,t1.treatmentEndTime,t1.sourceFlag,t1.createTime,
+			t1.updateTime,t1.rawCreateTime,t1.mergeFlag,t1.mergeFrom,
+			t1.mergeFromUuid,t1.mergeTarget,t1.mergeTargetUuid,t1.mergeTime,
+			if(t2.treatmentId is null,1,2) opFlag
+		FROM
+		     server_sync_temp_db.eci_treatment_note t1
+		LEFT JOIN ehr_db.eci_treatment_note t2 ON t2.treatmentId=t1.treatmentId
+		LEFT JOIN user_db.u_patient t4 ON t4.uuid=t1.patientUuid
+		LEFT JOIN user_db.r_uuid_patient_relationship t41 ON t1.patientUuid=t41.uuid
+		WHERE t1.batchId=#{batchId}
+	</select>
+</mapper>

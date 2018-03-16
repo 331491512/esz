@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followupresult.FollowupTaskPatientDao">
+    <!-- 更新随访结果 -->
+	<update id="updateFollowupTaskPatient" parameterType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupTaskPatient">
+        UPDATE r_followup_task_patient 
+        <set>
+	       <if test="state != null">
+               state = #{state} ,
+            </if>
+            <if test="wxState != null">
+               wxState = #{wxState} ,
+            </if>
+            <if test="smsState != null">
+               smsState = #{smsState} ,
+            </if>
+            <if test="wxReqId != null">
+               wxReqId = #{wxReqId} ,
+            </if>
+            <if test="smsReqId != null">
+               smsReqId = #{smsReqId},
+            </if>
+            updateTime=now()
+            
+        </set>
+        <where>
+        	<if test="followupTaskId != null">
+               and followupTaskId = #{followupTaskId} 
+            </if>
+        	<if test="followupAssignId != null">
+               and followupAssignId = #{followupAssignId} 
+            </if>
+	        <if test="patientId != null">
+               and patientId = #{patientId} 
+            </if>
+        </where>
+	</update>
+	
+	<select id="queryFollowupTaskByPatientId" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupTaskPatient">
+		select rftp.*,taskAssign.operator from r_followup_task_patient rftp 
+			left join r_followup_task_assign taskAssign on rftp.followupAssignId=taskAssign.followupAssignId
+		<where>
+			rftp.mergeFlag!=2
+			<if test="followupAssignId !=null">
+				and rftp.followupAssignId=#{followupAssignId}
+			</if>
+			<if test="followupTaskId !=null">
+				and rftp.followupTaskId=#{followupTaskId}
+			</if>
+			<if test="patientId !=null">
+				and rftp.patientId=#{patientId}
+			</if>
+		</where>
+	</select>
+	
+	<select id="queryUnfinishedFollowupTaskByPatientId" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupTaskPatient">
+		select rftp.*,taskAssign.operator from r_followup_task_patient rftp 
+			join r_followup_task_assign taskAssign on rftp.followupAssignId=taskAssign.followupAssignId
+			JOIN followup_db.followup_task t3 ON t3.followupTaskId=taskAssign.followupTaskId AND t3.state <![CDATA[<]]> 2
+		<where>
+			rftp.mergeFlag!=2
+			and taskAssign.state in(0,1)
+			and rftp.state=0
+			<if test="patientId !=null">
+				and rftp.patientId=#{patientId}
+			</if>
+			<if test="followupTime !=null">
+				and rftp.createTime &lt;= #{followupTime}
+			</if>
+		</where>
+	</select>
+</mapper>

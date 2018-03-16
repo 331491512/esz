@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.business.dao.business.ServiceColumnDao">
+
+	<select id="findServiceColumns" resultType="com.esuizhen.cloudservice.business.bean.ServiceColumnResult">
+		SELECT s.serviceName,s.linkUrl,s.pictureUrl FROM (
+			<if test="tags!=null" >
+				SELECT t1.serviceColumnId from hds_db.s_service_column t1
+				JOIN hds_db.r_service_column_tag t2 ON t1.serviceColumnId=t2.serviceColumnId AND t2.tagId IN
+				<foreach collection="tags" item="item" open="(" close=")" separator=",">#{item.tagId}</foreach>
+				UNION
+			</if>
+			SELECT serviceColumnId from hds_db.s_service_column t1 WHERE t1.isShow=1 AND NOT EXISTS (SELECT 0 FROM hds_db.r_service_column_tag t2 WHERE t2.serviceColumnId=t1.serviceColumnId)
+		) t1
+		JOIN hds_db.s_service_column s ON s.serviceColumnId=t1.serviceColumnId
+		WHERE s.state=1 AND
+		NOT EXISTS (
+		SELECT rh.`hospitalId`
+		FROM hds_db.r_service_column_excluded_hospital rh
+		JOIN user_db.r_hospital_patient p ON rh.`hospitalId`=p.`hospitalId`
+		WHERE patientId=#{patientId} AND rh.`serviceColumnId`=s.serviceColumnId )
+		GROUP BY s.serviceColumnId
+		ORDER BY s.sortIndex
+	</select>
+
+	<select id="findServiceColumnByIsShow" resultType="com.esuizhen.cloudservice.business.bean.ServiceColumnResult">
+		SELECT serviceName,linkUrl,pictureUrl
+		FROM hds_db.s_service_column
+		where isShow=#{isShow} AND state=1
+		ORDER BY sortIndex
+	</select>
+
+</mapper>

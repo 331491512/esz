@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.esuizhen.cloudservice.statistics.dao.QuestionnaireStatisticsDao">
+	<!-- <select id="findQuestionnaireSurvey" resultType="com.esuizhen.cloudservice.statistics.bean.TQuestionnaireSurveyInfo">
+		SELECT
+			t1.questionnaireId,
+			t1.`subject`,
+			t3.followupTaskName,
+			(
+				SELECT
+					COUNT(0)
+				FROM followup_db.questionnaire_result m1
+				WHERE m1.questionnaireId = t1.questionnaireId AND m1.followupItemId=t2.followupTaskId
+			)feedbackTotalQuantity
+		FROM followup_db.questionnaire t1
+			JOIN followup_db.r_followup_task_content_template t2 ON t2.contentTemplateId = t1.contentTemplateId AND t2.contentTemplateType=6
+			JOIN followup_db.followup_task t3 ON t3.followupTaskId = t2.followupTaskId
+		<if test="sql != null and sql != ''">
+			join 
+			(
+			${sql}
+			) s on s.doctorId = t1.author
+		</if>
+			LEFT JOIN followup_db.questionnaire_result r on r.questionnaireId=t1.questionnaireId 
+			<if test="sql != null and sql != ''">
+			join 
+			(
+			${sql}
+			) s1 on s1.doctorId = (select doctorId from user_db.u_doctor where userId =r.creatorId)
+		</if>
+
+		WHERE 1 = 1
+		<if test="followupTaskName != null">
+			AND t3.followupTaskName LIKE "%"#{followupTaskName}"%"
+		</if>
+		<if test="subject != null">
+			AND t1.`subject` LIKE "%"#{subject}"%"
+		</if>
+		GROUP BY t1.questionnaireId,t3.followupTaskId
+	</select>
+	 -->
+	
+	<select id="findQuestionnaireSurvey" resultType="com.esuizhen.cloudservice.statistics.bean.TQuestionnaireSurveyInfo">
+		SELECT
+			t1.questionnaireId,
+			t1.`subject`,
+			t3.followupTaskName,
+			t2.followupTaskId,
+			count(DISTINCT r.questionnaireResultId) feedbackTotalQuantity
+		FROM followup_db.questionnaire t1
+			JOIN followup_db.r_followup_task_content_template t2 ON t2.contentTemplateId = t1.contentTemplateId AND t2.contentTemplateType=6
+			JOIN followup_db.followup_task t3 ON t3.followupTaskId = t2.followupTaskId
+			LEFT JOIN followup_db.questionnaire_result r on r.questionnaireId=t1.questionnaireId and r.followupItemId=t2.followupTaskId  
+			LEFT JOIN followup_db.r_followup_task_assign t5 ON t3.followupTaskId = t5.followupTaskId
+			<if test="sql != null and sql != ''">
+			join 
+			(
+			${sql}
+			) s1 on (
+			s1.doctorId = (select doctorId from user_db.u_doctor where userId =r.creatorId)
+			or s1.doctorId =t1.author or s1.doctorId=t3.creator
+			OR s1.doctorId=t5.operator
+			)
+		</if>
+
+		WHERE 1 = 1
+		<if test="followupTaskName != null">
+			AND t3.followupTaskName LIKE "%"#{followupTaskName}"%"
+		</if>
+		<if test="subject != null">
+			AND t1.`subject` LIKE "%"#{subject}"%"
+		</if>
+		GROUP BY t1.questionnaireId,t3.followupTaskId
+	</select>
+	
+	<select id="findQuestionnaireStems" resultType="com.esuizhen.cloudservice.statistics.bean.TQuestionnaireStemStatisInfo">
+		SELECT
+			t1.questionnaireStemId,
+			t1.content,
+			t1.sectionTitle,
+			<if test="followupTaskId != null">
+			#{followupTaskId} followupTaskId,
+			</if>
+			(
+				SELECT
+					COUNT(DISTINCT m1.questionnaireResultStemId)
+				FROM followup_db.questionnaire_result_stem m1
+				<if test="followupTaskId != null">
+				INNER JOIN followup_db.questionnaire_result t
+					ON m1.questionnaireId = t.questionnaireId
+					AND m1.questionnaireResultId=t.questionnaireResultId
+					AND t.followupItemId=#{followupTaskId}
+				</if>
+				WHERE m1.questionnaireStemId = t1.questionnaireStemId
+			)feedbackQuantity
+		FROM followup_db.questionnaire_stem t1
+		WHERE t1.questionnaireId = #{questionnaireId}
+		GROUP BY t1.questionnaireStemId
+		ORDER BY t1.stemIndex ASC
+	</select>
+	
+	<select id="findFirstFloorOptions" resultType="com.esuizhen.cloudservice.statistics.bean.TQuestionnaireOptionsStatisInfo">
+		SELECT
+			f1.*,
+			(
+				CASE WHEN f1.feedbackQuantity = 0 THEN 0
+				ELSE CONVERT(CONVERT(f1.feedbackQuantity / #{feedbackQuantity}, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)) END
+			)feedbackRate
+		FROM(
+			SELECT
+				t1.questionnaireOptionId,
+				t1.content,
+				t1.`level`,
+				<if test="followupTaskId != null">
+				#{followupTaskId} followupTaskId,
+				</if>
+				(
+					SELECT
+						COUNT(m1.questionnaireOptionId)
+					FROM followup_db.questionnaire_result_options_detail m1
+					<if test="followupTaskId != null">
+					INNER JOIN followup_db.questionnaire_result t
+						ON m1.questionnaireId = t.questionnaireId
+						AND m1.questionnaireResultId=t.questionnaireResultId
+						AND t.followupItemId=#{followupTaskId}
+					</if>
+					WHERE m1.questionnaireOptionId = t1.questionnaireOptionId
+				)feedbackQuantity
+			FROM followup_db.questionnaire_options_detail t1
+			WHERE t1.questionnaireStemId = #{questionnaireStemId} AND t1.`level` = 0
+			ORDER BY t1.optionIndex
+		) f1
+	</select>
+	
+	<select id="findNestedOptions" resultType="com.esuizhen.cloudservice.statistics.bean.TQuestionnaireOptionsStatisInfo">
+		SELECT
+			f1.*,
+			(
+				CASE WHEN f1.feedbackQuantity = 0 THEN 0
+				ELSE CONVERT(CONVERT(f1.feedbackQuantity / #{feedbackQuantity}, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)) END
+			)feedbackRate
+		FROM(
+			SELECT
+				t1.questionnaireOptionId,
+				t1.content,
+				t1.`level`,
+				<if test="followupTaskId != null">
+				#{followupTaskId} followupTaskId,
+				</if>
+				(
+					SELECT
+						COUNT(m1.questionnaireOptionId)
+					FROM followup_db.questionnaire_result_options_detail m1
+					<if test="followupTaskId != null">
+					INNER JOIN followup_db.questionnaire_result t
+						ON m1.questionnaireId = t.questionnaireId
+						AND m1.questionnaireResultId=t.questionnaireResultId
+						AND t.followupItemId=#{followupTaskId}
+					</if>
+					WHERE m1.questionnaireOptionId = t1.questionnaireOptionId
+				)feedbackQuantity
+			FROM followup_db.questionnaire_options_detail t1
+			WHERE t1.parentOptionId = #{questionnaireOptionId}
+			ORDER BY t1.optionIndex
+		) f1
+	</select>
+</mapper>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<beans xmlns="http://www.springframework.org/schema/beans"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"  
+    xsi:schemaLocation="http://www.springframework.org/schema/beans  
+        http://www.springframework.org/schema/beans/spring-beans.xsd  
+        http://code.alibabatech.com/schema/dubbo  
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd  
+        ">  
+  		
+    <!-- 短信接口，生成远程服务代理，可以像使用本地bean一样使用demoService -->  
+   	<dubbo:reference id="smsInnerService" interface="com.westangel.common.service.SmsInnerService" check="false" />
+   	<dubbo:reference id="pushService" interface="com.westangel.common.service.PushInnerService" check="false" />
+   	<dubbo:reference id="hopitalService" interface="com.westangel.common.service.HospitalService" check="false" />
+   	<!-- 
+   	<dubbo:reference id="timertaskService" interface="com.westangel.common.service.TimertaskService" check="false" />
+   	 -->
+</beans>

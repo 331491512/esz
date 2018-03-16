@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.server.PatientFamilyDao" >
+    <insert id="insert">
+    	INSERT INTO user_db.u_patient_family (
+			contactId,patientId,patientUuid,patientRelation,familyName,familyPhone,
+			zipcode,address,isDefault,isValid,createTime,updateTime,
+			phoneStatus,operator,operatorUuid,remark,rawCreateTime,sourceFlag,
+			mergeFlag,mergeFromUuid,mergeTargetUuid,mergeTime,
+			specialDiseaseRegisterId
+		)
+		VALUES(
+			#{contactId},#{patientId},#{patientUuid},#{patientRelation},#{familyName},#{familyPhone},
+			#{zipcode},#{address},#{isDefault},#{isValid},#{createTime},#{updateTime},
+			#{phoneStatus},#{operator},#{operatorUuid},#{remark},#{rawCreateTime},#{sourceFlag},
+			#{mergeFlag},#{mergeFromUuid},#{mergeTargetUuid},#{mergeTime},
+			#{specialDiseaseRegisterId}
+		)
+		ON DUPLICATE KEY UPDATE
+			contactId=VALUES(contactId),
+			patientId=VALUES(patientId),
+			patientUuid=VALUES(patientUuid),
+			patientRelation=VALUES(patientRelation),
+			familyName=VALUES(familyName),
+			familyPhone=VALUES(familyPhone),
+			zipcode=VALUES(zipcode),
+			address=VALUES(address),
+			isDefault=VALUES(isDefault),
+			isValid=VALUES(isValid),
+			createTime=VALUES(createTime),
+			updateTime=VALUES(updateTime),
+			phoneStatus=VALUES(phoneStatus),
+			operator=VALUES(operator),
+			operatorUuid=VALUES(operatorUuid),
+			remark=VALUES(remark),
+			rawCreateTime=VALUES(rawCreateTime),
+			sourceFlag=VALUES(sourceFlag),
+			mergeFlag=VALUES(mergeFlag),
+			mergeFromUuid=VALUES(mergeFromUuid),
+			mergeTargetUuid=VALUES(mergeTargetUuid),
+			mergeTime=VALUES(mergeTime),
+			specialDiseaseRegisterId=VALUES(specialDiseaseRegisterId)
+    </insert>
+
+</mapper>

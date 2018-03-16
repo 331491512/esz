@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.OperationHistoryDao">
+	<sql id="Base_Column_List">
+		operationName,description,actionType,recordType,relevanceId,operatorId,createTime
+	</sql>
+	<insert id="insert"
+		parameterType="com.esuizhen.cloudservice.user.model.OperationHistory">
+		<selectKey resultType="long" keyProperty="operationId"
+			order="AFTER">
+			SELECT LAST_INSERT_ID() as operationId
+		</selectKey>
+		insert into s_operation_history(operationName,description,actionType,recordType,relevanceId,
+		operatorId,createTime)
+		values (#{operationName,jdbcType=VARCHAR},
+		#{description,jdbcType=VARCHAR},
+		#{actionType,jdbcType=INTEGER},
+		#{recordType,jdbcType=INTEGER},
+		#{relevanceId,jdbcType=VARCHAR},
+		#{operatorId,jdbcType=BIGINT},
+		IFNULL(#{createTime,jdbcType=TIMESTAMP},now()))
+	</insert>
+	<select id="getList" parameterType="java.util.HashMap" resultType="com.esuizhen.cloudservice.user.model.OperationHistory">
+		SELECT <include refid="Base_Column_List"></include> FROM s_operation_history
+		<where>
+			<if test="operator != null">
+			AND operatorId=${operator}
+			</if>
+			<if test="actionType != null">
+			AND actionType=${actionType}
+			</if>
+		</where>
+		<if test="startRow != null">
+			LIMIT #{startRow},#{num}
+		</if>
+	</select>
+	
+	<select id="getOperationHistory" parameterType="com.esuizhen.cloudservice.user.model.OperationHistory" resultType="java.util.HashMap">
+		SELECT <include refid="Base_Column_List"></include> FROM user_db.s_operation_history
+		WHERE 1=1
+			<if test="operatorId != null">
+			AND operatorId=${operatorId}
+			</if>
+			<if test="actionType != null">
+			AND actionType=${actionType}
+			</if>
+			<if test="recordType != null">
+			AND recordType=${recordType}
+			</if>
+			<if test="relevanceId!=null">
+			AND relevanceId=#{relevanceId}
+			</if>
+		ORDER BY createTime DESC
+	</select>
+</mapper>

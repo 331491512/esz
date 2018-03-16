@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.statistics.dao.StatsExportInfoDao" >
+  
+  <sql id="Template_Base_Column_List">
+  	t.exportTemplateId,t.titles,t.subject,t.filename
+  </sql>
+  
+  <!-- 统计数据导出模版 -->
+  <select id="statsExportTemplate" resultType="com.esuizhen.cloudservice.statistics.model.TStatsExportTemplateInfo" parameterType="java.lang.String">
+  	SELECT <include refid="Template_Base_Column_List"></include>
+  	FROM stats_export_template t WHERE t.exportTemplateId=#{exportTemplateId}
+  </select>
+  
+  <!-- 统计数据导出 -->
+  <select id="statsExportValue" resultType="java.lang.String" parameterType="java.util.HashMap">
+  	SELECT t.values FROM var_stats_export_value t WHERE t.exportTemplateId=#{exportTemplateId} AND t.searchId=#{searchId}
+  </select>
+</mapper>

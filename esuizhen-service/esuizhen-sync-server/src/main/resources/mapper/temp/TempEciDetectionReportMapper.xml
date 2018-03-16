@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<mapper namespace="com.esuizhen.server.sync.dao.temp.TempEciDetectionReportDao" >
+    <!-- 向temp表推送数据 -->
+    <insert id="insert">
+		INSERT INTO server_sync_temp_db.eci_detection_report (
+			detectionReportId,emrId,patientId,patientUuid,patientNo,inhospitalTimes,
+			patientIdno,patientAddress,patientMobile,patientSex,patientAge,patientBirth,
+			patientName,wardArea,bedNo,outPatientFlag,hospitalId,detectionTypeId,
+			detectionChildTypeId,detectionTypeName,deptId,deptUuid,deptName,diagnosis,sampleNo,
+			sampleName,sampleType,sampleState,instrument,applyDoctorId,applyDoctorUuid,
+			applyDoctorNo,applyDoctorName,operateDoctorId,operateDoctorUuid,operateDoctorNo,
+			operateDoctorName,reportDoctorId,reportDoctorUuid,reportDoctorNo,reportDoctorName,
+			auditDoctorId,auditDoctorUuid,auditDoctorNo,auditDoctorName,remark,readFlag,applyTime,
+			sampleTime,acceptTime,reportTime,state,createTime,updateTime,rawDetectionTypeId,
+			rawDetectionChildTypeId,mainID,rawCreateTime,mergeFlag,mergeFrom,mergeFromUuid,
+			mergeTarget,mergeTargetUuid,mergeTime,batchId,sourceFlag
+		)
+		VALUES(
+			#{detectionReportId},#{emrId},#{patientId},#{patientUuid},#{patientNo},#{inhospitalTimes},
+			#{patientIdno},#{patientAddress},#{patientMobile},#{patientSex},#{patientAge},#{patientBirth},
+			#{patientName},#{wardArea},#{bedNo},#{outPatientFlag},#{hospitalId},#{detectionTypeId},
+			#{detectionChildTypeId},#{detectionTypeName},#{deptId},#{deptUuid},#{deptName},#{diagnosis},#{sampleNo},
+			#{sampleName},#{sampleType},#{sampleState},#{instrument},#{applyDoctorId},#{applyDoctorUuid},
+			#{applyDoctorNo},#{applyDoctorName},#{operateDoctorId},#{operateDoctorUuid},#{operateDoctorNo},
+			#{operateDoctorName},#{reportDoctorId},#{reportDoctorUuid},#{reportDoctorNo},#{reportDoctorName},
+			#{auditDoctorId},#{auditDoctorUuid},#{auditDoctorNo},#{auditDoctorName},#{remark},#{readFlag},#{applyTime},
+			#{sampleTime},#{acceptTime},#{reportTime},#{state},#{createTime},#{updateTime},#{rawDetectionTypeId},
+			#{rawDetectionChildTypeId},#{mainID},#{rawCreateTime},#{mergeFlag},#{mergeFrom},#{mergeFromUuid},
+			#{mergeTarget},#{mergeTargetUuid},#{mergeTime},#{batchId},#{sourceFlag}
+		)
+	</insert>
+
+	<select id="getSyncDetectionReport" resultType="com.esuizhen.server.sync.bean.server.DetectionReportRes" parameterType="com.esuizhen.server.sync.bean.TBatchDetailInfo">
+		SELECT
+			t1.detectionReportId,t1.emrId,
+			IFNULL(t3.patientId,t31.patientId) patientId,
+			t1.patientUuid,t1.patientNo,t1.inhospitalTimes,t1.patientIdno,t1.patientAddress,
+			t1.patientMobile,t1.patientSex,t1.patientAge,t1.patientBirth,t1.patientName,t1.wardArea,
+			t1.bedNo,t1.outPatientFlag,t1.hospitalId,t1.detectionTypeId,t1.detectionChildTypeId,
+			t1.detectionTypeName,t8.deptId,t1.deptName,t1.diagnosis,
+			t1.sampleNo,t1.sampleName,t1.sampleType,t1.sampleState,t1.instrument,
+			IFNULL(t4.doctorId,t41.doctorId)  applyDoctorId,
+			t1.applyDoctorUuid,t1.applyDoctorNo,t1.applyDoctorName,
+			IFNULL(t5.doctorId,t51.doctorId)  operateDoctorId,
+			t1.operateDoctorUuid,t1.operateDoctorNo,t1.operateDoctorName,
+			IFNULL(t6.doctorId,t61.doctorId)  reportDoctorId,
+			t1.reportDoctorUuid,t1.reportDoctorNo,t1.reportDoctorName,
+			IFNULL(t7.doctorId,t71.doctorId)  auditDoctorId,
+			t1.auditDoctorUuid,t1.auditDoctorNo,t1.auditDoctorName,
+			t1.remark,t1.readFlag,t1.applyTime,t1.sampleTime,t1.acceptTime,t1.reportTime,
+			t1.state,t1.createTime,t1.updateTime,t1.rawDetectionTypeId,t1.rawDetectionChildTypeId,
+			t1.mainID,t1.rawCreateTime,t1.mergeFlag,
+			t1.mergeFromUuid,t1.mergeTargetUuid,t1.mergeTime,
+			if(t2.detectionReportId IS NULL ,1,2) opFlag,
+			t1.deptUuid
+		FROM
+		     server_sync_temp_db.eci_detection_report t1
+		LEFT JOIN lis_db.eci_detection_report t2 ON t2.detectionReportId=t1.detectionReportId
+		LEFT JOIN user_db.u_patient t3 ON t3.uuid=t1.patientUuid
+		LEFT JOIN user_db.r_uuid_patient_relationship t31 ON t1.patientUuid=t31.uuid
+		LEFT JOIN user_db.u_doctor t4 ON t4.uuid=t1.applyDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t41 ON t1.applyDoctorUuid=t41.uuid
+		LEFT JOIN user_db.u_doctor t5 ON t5.uuid=t1.operateDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t51 ON t1.operateDoctorUuid=t51.uuid
+		LEFT JOIN user_db.u_doctor t6 ON t6.uuid=t1.reportDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t61 ON t1.reportDoctorUuid=t61.uuid
+		LEFT JOIN user_db.u_doctor t7 ON t7.uuid=t1.auditDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t71 ON t1.auditDoctorUuid=t71.uuid
+		LEFT JOIN user_db.u_department t8 ON t1.deptUuid=t8.uuid
+		WHERE t1.batchId=#{batchId}
+	</select>
+
+	<select id="getSyncDetectionReportByRealtime" resultType="com.esuizhen.server.sync.bean.server.DetectionReportRes" parameterType="com.esuizhen.server.sync.bean.TBatchDetailInfo">
+		SELECT
+			t1.detectionReportId,t1.emrId,
+			IFNULL(t3.patientId,t31.patientId) patientId,
+			t1.patientUuid,t1.patientNo,t1.inhospitalTimes,t1.patientIdno,t1.patientAddress,
+			t1.patientMobile,t1.patientSex,t1.patientAge,t1.patientBirth,t1.patientName,t1.wardArea,
+			t1.bedNo,t1.outPatientFlag,t1.hospitalId,t1.detectionTypeId,t1.detectionChildTypeId,
+			t1.detectionTypeName,t8.deptId,t1.deptName,t1.diagnosis,
+			t1.sampleNo,t1.sampleName,t1.sampleType,t1.sampleState,t1.instrument,
+			IFNULL(t4.doctorId,t41.doctorId)  applyDoctorId,
+			t1.applyDoctorUuid,t1.applyDoctorNo,t1.applyDoctorName,
+			IFNULL(t5.doctorId,t51.doctorId)  operateDoctorId,
+			t1.operateDoctorUuid,t1.operateDoctorNo,t1.operateDoctorName,
+			IFNULL(t6.doctorId,t61.doctorId)  reportDoctorId,
+			t1.reportDoctorUuid,t1.reportDoctorNo,t1.reportDoctorName,
+			IFNULL(t7.doctorId,t71.doctorId)  auditDoctorId,
+			t1.auditDoctorUuid,t1.auditDoctorNo,t1.auditDoctorName,
+			t1.remark,t1.readFlag,t1.applyTime,t1.sampleTime,t1.acceptTime,t1.reportTime,
+			t1.state,t1.createTime,t1.updateTime,t1.rawDetectionTypeId,t1.rawDetectionChildTypeId,
+			t1.mainID,t1.rawCreateTime,t1.mergeFlag,
+			t1.mergeFromUuid,t1.mergeTargetUuid,t1.mergeTime,
+			if(t2.detectionReportId IS NULL ,0,1) upFlag,
+			t1.deptUuid
+		FROM
+		     server_sync_temp_db.eci_detection_report t1
+		LEFT JOIN lis_realtime_db.eci_detection_report t2 ON t2.detectionReportId=t1.detectionReportId
+		LEFT JOIN user_db.u_patient t3 ON t3.uuid=t1.patientUuid
+		LEFT JOIN user_db.r_uuid_patient_relationship t31 ON t1.patientUuid=t31.uuid
+		LEFT JOIN user_db.u_doctor t4 ON t4.uuid=t1.applyDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t41 ON t1.applyDoctorUuid=t41.uuid
+		LEFT JOIN user_db.u_doctor t5 ON t5.uuid=t1.operateDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t51 ON t1.operateDoctorUuid=t51.uuid
+		LEFT JOIN user_db.u_doctor t6 ON t6.uuid=t1.reportDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t61 ON t1.reportDoctorUuid=t61.uuid
+		LEFT JOIN user_db.u_doctor t7 ON t7.uuid=t1.auditDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t71 ON t1.auditDoctorUuid=t71.uuid
+		LEFT JOIN user_db.u_department t8 ON t1.deptUuid=t8.uuid
+		WHERE t1.batchId=#{batchId}
+	</select>
+</mapper>

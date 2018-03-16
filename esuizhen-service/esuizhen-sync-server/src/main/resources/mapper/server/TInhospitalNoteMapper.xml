@@ -1,0 +1,1419 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.server.TInhospitalNoteDao" >
+
+  <insert id="insertSelective" parameterType="com.esuizhen.server.sync.bean.server.InhospitalNoteRes" >
+    insert into ehr_db.ei_inhospital_note
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="inhospitalId != null" >
+        inhospitalId,
+      </if>
+      <if test="inhospitalNo != null" >
+        inhospitalNo,
+      </if>
+      <if test="emrId != null" >
+        emrId,
+      </if>
+      <if test="patientId != null" >
+        patientId,
+      </if>
+      <if test="patientNo != null" >
+        patientNo,
+      </if>
+      <if test="inhospitalTimes != null" >
+        inhospitalTimes,
+      </if>
+      <if test="oldPatientNo != null" >
+        oldPatientNo,
+      </if>
+      <if test="oldInhospitalTimes != null" >
+        oldInhospitalTimes,
+      </if>
+      <if test="patientUuid != null" >
+        patientUuid,
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId,
+      </if>
+      <if test="medicalPayType != null" >
+        medicalPayType,
+      </if>
+      <if test="healthCardNo != null" >
+        healthCardNo,
+      </if>
+      <if test="inhospitalWay != null" >
+        inhospitalWay,
+      </if>
+      <if test="inhospitalDate != null" >
+        inhospitalDate,
+      </if>
+      <if test="inhospitalDeptId != null" >
+        inhospitalDeptId,
+      </if>
+      <if test="inhospitalWard != null" >
+        inhospitalWard,
+      </if>
+      <if test="turnDeptId != null" >
+        turnDeptId,
+      </if>
+      <if test="turnDeptDate != null" >
+        turnDeptDate,
+      </if>
+      <if test="outhospitalDate != null" >
+        outhospitalDate,
+      </if>
+      <if test="outhospitalDeptId != null" >
+        outhospitalDeptId,
+      </if>
+      <if test="outhospitalWard != null" >
+        outhospitalWard,
+      </if>
+      <if test="outhoispitalWay != null" >
+        outhoispitalWay,
+      </if>
+      <if test="inhospitalDays != null" >
+        inhospitalDays,
+      </if>
+      <if test="diagnose != null" >
+        diagnose,
+      </if>
+      <if test="diseaseCode != null" >
+        diseaseCode,
+      </if>
+      <if test="deptDoctor != null" >
+        deptDoctor,
+      </if>
+      <if test="directorDoctor != null" >
+        directorDoctor,
+      </if>
+      <if test="inchargeDoctor != null" >
+        inchargeDoctor,
+      </if>
+      <if test="inhospitalDoctor != null" >
+        inhospitalDoctor,
+      </if>
+      <if test="attendingDoctor != null" >
+        attendingDoctor,
+      </if>
+      <if test="dutyNurse != null" >
+        dutyNurse,
+      </if>
+      <if test="postgraduateDoctor != null" >
+        postgraduateDoctor,
+      </if>
+      <if test="internshipDoctor != null" >
+        internshipDoctor,
+      </if>
+      <if test="codePerson != null" >
+        codePerson,
+      </if>
+      <if test="medicalRecordsQuality != null" >
+        medicalRecordsQuality,
+      </if>
+      <if test="qualityControlDoctor != null" >
+        qualityControlDoctor,
+      </if>
+      <if test="qualityControlNurse != null" >
+        qualityControlNurse,
+      </if>
+      <if test="qualityControlDate != null" >
+        qualityControlDate,
+      </if>
+      <if test="mainDiagnosis != null" >
+        mainDiagnosis,
+      </if>
+      <if test="mainDiagnosisCode != null" >
+        mainDiagnosisCode,
+      </if>
+      <if test="inhospitalCondition != null" >
+        inhospitalCondition,
+      </if>
+      <if test="syncflag != null" >
+        syncflag,
+      </if>
+      <if test="sourceFlag != null" >
+        sourceFlag,
+      </if>
+      <if test="historyCuration != null" >
+        historyCuration,
+      </if>
+      <if test="sourceCancerNum != null" >
+        sourceCancerNum,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+      <if test="updateTime != null" >
+        updateTime,
+      </if>
+      <if test="syncTime != null" >
+        syncTime,
+      </if>
+      <if test="tumourPeriodizationT != null" >
+        tumourPeriodizationT,
+      </if>
+      <if test="tumourPeriodizationN != null" >
+        tumourPeriodizationN,
+      </if>
+      <if test="tumourPeriodizationM1 != null" >
+        tumourPeriodizationM1,
+      </if>
+      <if test="tumourPeriodizationM2 != null" >
+        tumourPeriodizationM2,
+      </if>
+      <if test="tumourPeriodizationClinic != null" >
+        tumourPeriodizationClinic,
+      </if>
+      <if test="tumourPeriodization != null" >
+        tumourPeriodization,
+      </if>
+      <if test="catalogState != null" >
+        catalogState,
+      </if>
+      <if test="inhospitalDeptUuid != null" >
+        inhospitalDeptUuid,
+      </if>
+      <if test="turnDeptUuid != null" >
+        turnDeptUuid,
+      </if>
+      <if test="outhospitalDeptUuid != null" >
+        outhospitalDeptUuid,
+      </if>
+      <if test="deptDoctorUuid != null" >
+        deptDoctorUuid,
+      </if>
+      <if test="directorDoctorUuid != null" >
+        directorDoctorUuid,
+      </if>
+      <if test="inchargeDoctorUuid != null" >
+        inchargeDoctorUuid,
+      </if>
+      <if test="inhospitalDoctorUuid != null" >
+        inhospitalDoctorUuid,
+      </if>
+      <if test="attendingDoctorUuid != null" >
+        attendingDoctorUuid,
+      </if>
+      <if test="dutyNurseUuid != null" >
+        dutyNurseUuid,
+      </if>
+      <if test="postgraduateDoctorUuid != null" >
+        postgraduateDoctorUuid,
+      </if>
+      <if test="internshipDoctorUuid != null" >
+        internshipDoctorUuid,
+      </if>
+      <if test="codePersonUuid != null" >
+        codePersonUuid,
+      </if>
+      <if test="qualityControlDoctorUuid != null" >
+        qualityControlDoctorUuid,
+      </if>
+      <if test="qualityControlNurseUuid != null" >
+        qualityControlNurseUuid,
+      </if>
+      <if test="flag != null" >
+        flag,
+      </if>
+      <if test="treatmentSource != null" >
+        treatmentSource,
+      </if>
+      <if test="inhospitalLastTime != null" >
+        inhospitalLastTime,
+      </if>
+      <if test="turnDept != null" >
+        turnDept,
+      </if>
+      <if test="deptDoctorName != null" >
+        deptDoctorName,
+      </if>
+      <if test="directorDoctorName != null" >
+        directorDoctorName,
+      </if>
+      <if test="inchargeDoctorName != null" >
+        inchargeDoctorName,
+      </if>
+      <if test="inhospitalDoctorName != null" >
+        inhospitalDoctorName,
+      </if>
+      <if test="attendingDoctorName != null" >
+        attendingDoctorName,
+      </if>
+      <if test="dutyNurseName != null" >
+        dutyNurseName,
+      </if>
+      <if test="postgraduateDoctorName != null" >
+        postgraduateDoctorName,
+      </if>
+      <if test="internshipDoctorName != null" >
+        internshipDoctorName,
+      </if>
+      <if test="codePersonName != null" >
+        codePersonName,
+      </if>
+      <if test="qualityControlDoctorName != null" >
+        qualityControlDoctorName,
+      </if>
+      <if test="qualityControlNurseName != null" >
+        qualityControlNurseName,
+      </if>
+      <if test="age != null" >
+        age,
+      </if>
+      <if test="occupationId != null" >
+        occupationId,
+      </if>
+      <if test="idType != null" >
+        idType,
+      </if>
+      <if test="identification != null" >
+        identification,
+      </if>
+      <if test="marriageStatus != null" >
+        marriageStatus,
+      </if>
+      <if test="outhospitalCondition != null" >
+        outhospitalCondition,
+      </if>
+      <if test="autopsy != null" >
+        autopsy,
+      </if>
+      <if test="reInhospitalPlan31Days != null" >
+        reInhospitalPlan31Days,
+      </if>
+      <if test="reInhospitalTarget31Days != null" >
+        reInhospitalTarget31Days,
+      </if>
+      <if test="preComaHour != null" >
+        preComaHour,
+      </if>
+      <if test="preComaMinute != null" >
+        preComaMinute,
+      </if>
+      <if test="inComaHour != null" >
+        inComaHour,
+      </if>
+      <if test="inComaMinute != null" >
+        inComaMinute,
+      </if>
+      <if test="inviabilityScore != null" >
+        inviabilityScore,
+      </if>
+      <if test="outviabilityScore != null" >
+        outviabilityScore,
+      </if>
+      <if test="babyAge != null" >
+        babyAge,
+      </if>
+      <if test="babyBornWeight != null" >
+        babyBornWeight,
+      </if>
+      <if test="babyWeightInHospital != null" >
+        babyWeightInHospital,
+      </if>
+      <if test="transfusion != null" >
+        transfusion,
+      </if>
+      <if test="respiratorUseTime != null" >
+        respiratorUseTime,
+      </if>
+      <if test="isAllergy != null" >
+        isAllergy,
+      </if>
+      <if test="allergyDesc != null" >
+        allergyDesc,
+      </if>
+      <if test="aboBlood != null" >
+        aboBlood,
+      </if>
+      <if test="rhBlood != null" >
+        rhBlood,
+      </if>
+      <if test="pathologyDiagnosis != null" >
+        pathologyDiagnosis,
+      </if>
+      <if test="pathologyDiagnosisCode != null" >
+        pathologyDiagnosisCode,
+      </if>
+      <if test="nationalityId != null" >
+        nationalityId,
+      </if>
+      <if test="nativePlaceCityCode != null" >
+        nativePlaceCityCode,
+      </if>
+      <if test="nativePlaceAddress != null" >
+        nativePlaceAddress,
+      </if>
+      <if test="householdZipCode != null" >
+        householdZipCode,
+      </if>
+      <if test="householdAddress != null" >
+        householdAddress,
+      </if>
+      <if test="companyZipCode != null" >
+        companyZipCode,
+      </if>
+      <if test="companyCountyCode != null" >
+        companyCountyCode,
+      </if>
+      <if test="companyAddress != null" >
+        companyAddress,
+      </if>
+      <if test="companyTel != null" >
+        companyTel,
+      </if>
+      <if test="liveZipCode != null" >
+        liveZipCode,
+      </if>
+      <if test="liveCountyCode != null" >
+        liveCountyCode,
+      </if>
+      <if test="liveTel != null" >
+        liveTel,
+      </if>
+      <if test="familyName != null" >
+        familyName,
+      </if>
+      <if test="patientRelation != null" >
+        patientRelation,
+      </if>
+      <if test="familyAddress != null" >
+        familyAddress,
+      </if>
+      <if test="familyTel != null" >
+        familyTel,
+      </if>
+      <if test="familyCountyCode != null" >
+        familyCountyCode,
+      </if>
+      <if test="rawCreateTime != null" >
+        rawCreateTime,
+      </if>
+      <if test="infoState != null" >
+        infoState,
+      </if>
+      <if test="mergeFlag != null" >
+        mergeFlag,
+      </if>
+      <if test="mergeFrom != null" >
+        mergeFrom,
+      </if>
+      <if test="mergeTarget != null" >
+        mergeTarget,
+      </if>
+      <if test="mergeTime != null" >
+        mergeTime,
+      </if>
+      <if test="oldinhospitalid != null" >
+        oldinhospitalid,
+      </if>
+      <if test="deathTime != null" >
+        deathTime,
+      </if>
+      <if test="deathCause != null" >
+        deathCause,
+      </if>
+      <if test="deleteFlag != null" >
+        deleteFlag,
+      </if>
+      <if test="operatorId != null" >
+        operatorId,
+      </if>
+      <if test="operatorName != null" >
+        operatorName,
+      </if>
+      <if test="mergeFromUuid != null" >
+        mergeFromUuid,
+      </if>
+      <if test="mergeTargetUuid != null" >
+        mergeTargetUuid,
+      </if>
+      <if test="inpatientNo != null" >
+        inpatientNo,
+      </if>
+      <if test="inhospitalSource != null" >
+        inhospitalSource,
+      </if>
+      <if test="redBloodCell != null" >
+        redBloodCell,
+      </if>
+      <if test="platelet != null" >
+        platelet,
+      </if>
+      <if test="plasma != null" >
+        plasma,
+      </if>
+      <if test="wholeBlood != null" >
+        wholeBlood,
+      </if>
+      <if test="other != null" >
+        other,
+      </if>
+      <if test="pathologyNo != null" >
+        pathologyNo,
+      </if>
+      <if test="poisoningReason != null" >
+        poisoningReason,
+      </if>
+      <if test="poisoningDiseaseCode != null" >
+        poisoningDiseaseCode,
+      </if>
+      <if test="recHospitalName != null" >
+        recHospitalName,
+      </if>
+      <if test="householdCountyCode != null" >
+        householdCountyCode,
+      </if>
+      <if test="liveAddress != null" >
+        liveAddress,
+      </if>
+      <if test="tempId != null" >
+        tempId,
+      </if>
+      <if test="dataSource != null" >
+        dataSource,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="inhospitalId != null" >
+        #{inhospitalId,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalNo != null" >
+        #{inhospitalNo,jdbcType=VARCHAR},
+      </if>
+      <if test="emrId != null" >
+        #{emrId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalTimes != null" >
+        #{inhospitalTimes,jdbcType=INTEGER},
+      </if>
+      <if test="oldPatientNo != null" >
+        #{oldPatientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="oldInhospitalTimes != null" >
+        #{oldInhospitalTimes,jdbcType=INTEGER},
+      </if>
+      <if test="patientUuid != null" >
+        #{patientUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="medicalPayType != null" >
+        #{medicalPayType,jdbcType=INTEGER},
+      </if>
+      <if test="healthCardNo != null" >
+        #{healthCardNo,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalWay != null" >
+        #{inhospitalWay,jdbcType=INTEGER},
+      </if>
+      <if test="inhospitalDate != null" >
+        #{inhospitalDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="inhospitalDeptId != null" >
+        #{inhospitalDeptId,jdbcType=INTEGER},
+      </if>
+      <if test="inhospitalWard != null" >
+        #{inhospitalWard,jdbcType=VARCHAR},
+      </if>
+      <if test="turnDeptId != null" >
+        #{turnDeptId,jdbcType=INTEGER},
+      </if>
+      <if test="turnDeptDate != null" >
+        #{turnDeptDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="outhospitalDate != null" >
+        #{outhospitalDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="outhospitalDeptId != null" >
+        #{outhospitalDeptId,jdbcType=INTEGER},
+      </if>
+      <if test="outhospitalWard != null" >
+        #{outhospitalWard,jdbcType=VARCHAR},
+      </if>
+      <if test="outhoispitalWay != null" >
+        #{outhoispitalWay,jdbcType=INTEGER},
+      </if>
+      <if test="inhospitalDays != null" >
+        #{inhospitalDays,jdbcType=INTEGER},
+      </if>
+      <if test="diagnose != null" >
+        #{diagnose,jdbcType=VARCHAR},
+      </if>
+      <if test="diseaseCode != null" >
+        #{diseaseCode,jdbcType=VARCHAR},
+      </if>
+      <if test="deptDoctor != null" >
+        #{deptDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="directorDoctor != null" >
+        #{directorDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="inchargeDoctor != null" >
+        #{inchargeDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="inhospitalDoctor != null" >
+        #{inhospitalDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="attendingDoctor != null" >
+        #{attendingDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="dutyNurse != null" >
+        #{dutyNurse,jdbcType=INTEGER},
+      </if>
+      <if test="postgraduateDoctor != null" >
+        #{postgraduateDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="internshipDoctor != null" >
+        #{internshipDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="codePerson != null" >
+        #{codePerson,jdbcType=INTEGER},
+      </if>
+      <if test="medicalRecordsQuality != null" >
+        #{medicalRecordsQuality,jdbcType=INTEGER},
+      </if>
+      <if test="qualityControlDoctor != null" >
+        #{qualityControlDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="qualityControlNurse != null" >
+        #{qualityControlNurse,jdbcType=INTEGER},
+      </if>
+      <if test="qualityControlDate != null" >
+        #{qualityControlDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mainDiagnosis != null" >
+        #{mainDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="mainDiagnosisCode != null" >
+        #{mainDiagnosisCode,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalCondition != null" >
+        #{inhospitalCondition,jdbcType=INTEGER},
+      </if>
+      <if test="syncflag != null" >
+        #{syncflag,jdbcType=INTEGER},
+      </if>
+      <if test="sourceFlag != null" >
+        #{sourceFlag,jdbcType=INTEGER},
+      </if>
+      <if test="historyCuration != null" >
+        #{historyCuration,jdbcType=INTEGER},
+      </if>
+      <if test="sourceCancerNum != null" >
+        #{sourceCancerNum,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncTime != null" >
+        #{syncTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="tumourPeriodizationT != null" >
+        #{tumourPeriodizationT,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodizationN != null" >
+        #{tumourPeriodizationN,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodizationM1 != null" >
+        #{tumourPeriodizationM1,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodizationM2 != null" >
+        #{tumourPeriodizationM2,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodizationClinic != null" >
+        #{tumourPeriodizationClinic,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodization != null" >
+        #{tumourPeriodization,jdbcType=VARCHAR},
+      </if>
+      <if test="catalogState != null" >
+        #{catalogState,jdbcType=INTEGER},
+      </if>
+      <if test="inhospitalDeptUuid != null" >
+        #{inhospitalDeptUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="turnDeptUuid != null" >
+        #{turnDeptUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="outhospitalDeptUuid != null" >
+        #{outhospitalDeptUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="deptDoctorUuid != null" >
+        #{deptDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="directorDoctorUuid != null" >
+        #{directorDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="inchargeDoctorUuid != null" >
+        #{inchargeDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalDoctorUuid != null" >
+        #{inhospitalDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="attendingDoctorUuid != null" >
+        #{attendingDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="dutyNurseUuid != null" >
+        #{dutyNurseUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="postgraduateDoctorUuid != null" >
+        #{postgraduateDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="internshipDoctorUuid != null" >
+        #{internshipDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="codePersonUuid != null" >
+        #{codePersonUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="qualityControlDoctorUuid != null" >
+        #{qualityControlDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="qualityControlNurseUuid != null" >
+        #{qualityControlNurseUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="flag != null" >
+        #{flag,jdbcType=INTEGER},
+      </if>
+      <if test="treatmentSource != null" >
+        #{treatmentSource,jdbcType=INTEGER},
+      </if>
+      <if test="inhospitalLastTime != null" >
+        #{inhospitalLastTime,jdbcType=INTEGER},
+      </if>
+      <if test="turnDept != null" >
+        #{turnDept,jdbcType=VARCHAR},
+      </if>
+      <if test="deptDoctorName != null" >
+        #{deptDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="directorDoctorName != null" >
+        #{directorDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="inchargeDoctorName != null" >
+        #{inchargeDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalDoctorName != null" >
+        #{inhospitalDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="attendingDoctorName != null" >
+        #{attendingDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="dutyNurseName != null" >
+        #{dutyNurseName,jdbcType=VARCHAR},
+      </if>
+      <if test="postgraduateDoctorName != null" >
+        #{postgraduateDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="internshipDoctorName != null" >
+        #{internshipDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="codePersonName != null" >
+        #{codePersonName,jdbcType=VARCHAR},
+      </if>
+      <if test="qualityControlDoctorName != null" >
+        #{qualityControlDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="qualityControlNurseName != null" >
+        #{qualityControlNurseName,jdbcType=VARCHAR},
+      </if>
+      <if test="age != null" >
+        #{age,jdbcType=INTEGER},
+      </if>
+      <if test="occupationId != null" >
+        #{occupationId,jdbcType=INTEGER},
+      </if>
+      <if test="idType != null" >
+        #{idType,jdbcType=INTEGER},
+      </if>
+      <if test="identification != null" >
+        #{identification,jdbcType=VARCHAR},
+      </if>
+      <if test="marriageStatus != null" >
+        #{marriageStatus,jdbcType=INTEGER},
+      </if>
+      <if test="outhospitalCondition != null" >
+        #{outhospitalCondition,jdbcType=INTEGER},
+      </if>
+      <if test="autopsy != null" >
+        #{autopsy,jdbcType=INTEGER},
+      </if>
+      <if test="reInhospitalPlan31Days != null" >
+        #{reInhospitalPlan31Days,jdbcType=INTEGER},
+      </if>
+      <if test="reInhospitalTarget31Days != null" >
+        #{reInhospitalTarget31Days,jdbcType=VARCHAR},
+      </if>
+      <if test="preComaHour != null" >
+        #{preComaHour,jdbcType=INTEGER},
+      </if>
+      <if test="preComaMinute != null" >
+        #{preComaMinute,jdbcType=INTEGER},
+      </if>
+      <if test="inComaHour != null" >
+        #{inComaHour,jdbcType=INTEGER},
+      </if>
+      <if test="inComaMinute != null" >
+        #{inComaMinute,jdbcType=INTEGER},
+      </if>
+      <if test="inviabilityScore != null" >
+        #{inviabilityScore,jdbcType=INTEGER},
+      </if>
+      <if test="outviabilityScore != null" >
+        #{outviabilityScore,jdbcType=INTEGER},
+      </if>
+      <if test="babyAge != null" >
+        #{babyAge,jdbcType=INTEGER},
+      </if>
+      <if test="babyBornWeight != null" >
+        #{babyBornWeight,jdbcType=INTEGER},
+      </if>
+      <if test="babyWeightInHospital != null" >
+        #{babyWeightInHospital,jdbcType=INTEGER},
+      </if>
+      <if test="transfusion != null" >
+        #{transfusion,jdbcType=INTEGER},
+      </if>
+      <if test="respiratorUseTime != null" >
+        #{respiratorUseTime,jdbcType=INTEGER},
+      </if>
+      <if test="isAllergy != null" >
+        #{isAllergy,jdbcType=INTEGER},
+      </if>
+      <if test="allergyDesc != null" >
+        #{allergyDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="aboBlood != null" >
+        #{aboBlood,jdbcType=INTEGER},
+      </if>
+      <if test="rhBlood != null" >
+        #{rhBlood,jdbcType=INTEGER},
+      </if>
+      <if test="pathologyDiagnosis != null" >
+        #{pathologyDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="pathologyDiagnosisCode != null" >
+        #{pathologyDiagnosisCode,jdbcType=VARCHAR},
+      </if>
+      <if test="nationalityId != null" >
+        #{nationalityId,jdbcType=INTEGER},
+      </if>
+      <if test="nativePlaceCityCode != null" >
+        #{nativePlaceCityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="nativePlaceAddress != null" >
+        #{nativePlaceAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="householdZipCode != null" >
+        #{householdZipCode,jdbcType=VARCHAR},
+      </if>
+      <if test="householdAddress != null" >
+        #{householdAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="companyZipCode != null" >
+        #{companyZipCode,jdbcType=VARCHAR},
+      </if>
+      <if test="companyCountyCode != null" >
+        #{companyCountyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="companyAddress != null" >
+        #{companyAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="companyTel != null" >
+        #{companyTel,jdbcType=VARCHAR},
+      </if>
+      <if test="liveZipCode != null" >
+        #{liveZipCode,jdbcType=VARCHAR},
+      </if>
+      <if test="liveCountyCode != null" >
+        #{liveCountyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="liveTel != null" >
+        #{liveTel,jdbcType=VARCHAR},
+      </if>
+      <if test="familyName != null" >
+        #{familyName,jdbcType=VARCHAR},
+      </if>
+      <if test="patientRelation != null" >
+        #{patientRelation,jdbcType=INTEGER},
+      </if>
+      <if test="familyAddress != null" >
+        #{familyAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="familyTel != null" >
+        #{familyTel,jdbcType=VARCHAR},
+      </if>
+      <if test="familyCountyCode != null" >
+        #{familyCountyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="rawCreateTime != null" >
+        #{rawCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="infoState != null" >
+        #{infoState,jdbcType=INTEGER},
+      </if>
+      <if test="mergeFlag != null" >
+        #{mergeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mergeFrom != null" >
+        #{mergeFrom,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTarget != null" >
+        #{mergeTarget,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTime != null" >
+        #{mergeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="oldinhospitalid != null" >
+        #{oldinhospitalid,jdbcType=VARCHAR},
+      </if>
+      <if test="deathTime != null" >
+        #{deathTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="deathCause != null" >
+        #{deathCause,jdbcType=VARCHAR},
+      </if>
+      <if test="deleteFlag != null" >
+        #{deleteFlag,jdbcType=INTEGER},
+      </if>
+      <if test="operatorId != null" >
+        #{operatorId,jdbcType=INTEGER},
+      </if>
+      <if test="operatorName != null" >
+        #{operatorName,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeFromUuid != null" >
+        #{mergeFromUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeTargetUuid != null" >
+        #{mergeTargetUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="inpatientNo != null" >
+        #{inpatientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalSource != null" >
+        #{inhospitalSource,jdbcType=INTEGER},
+      </if>
+      <if test="redBloodCell != null" >
+        #{redBloodCell,jdbcType=INTEGER},
+      </if>
+      <if test="platelet != null" >
+        #{platelet,jdbcType=INTEGER},
+      </if>
+      <if test="plasma != null" >
+        #{plasma,jdbcType=INTEGER},
+      </if>
+      <if test="wholeBlood != null" >
+        #{wholeBlood,jdbcType=INTEGER},
+      </if>
+      <if test="other != null" >
+        #{other,jdbcType=VARCHAR},
+      </if>
+      <if test="pathologyNo != null" >
+        #{pathologyNo,jdbcType=VARCHAR},
+      </if>
+      <if test="poisoningReason != null" >
+        #{poisoningReason,jdbcType=VARCHAR},
+      </if>
+      <if test="poisoningDiseaseCode != null" >
+        #{poisoningDiseaseCode,jdbcType=VARCHAR},
+      </if>
+      <if test="recHospitalName != null" >
+        #{recHospitalName,jdbcType=VARCHAR},
+      </if>
+      <if test="householdCountyCode != null" >
+        #{householdCountyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="liveAddress != null" >
+        #{liveAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="tempId != null" >
+        #{tempId,jdbcType=INTEGER},
+      </if>
+      <if test="dataSource != null" >
+        #{dataSource,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.server.sync.bean.server.InhospitalNoteRes" >
+    update ehr_db.ei_inhospital_note
+    <set >
+      <if test="inhospitalNo != null" >
+        inhospitalNo = #{inhospitalNo,jdbcType=VARCHAR},
+      </if>
+      <if test="emrId != null" >
+        emrId = #{emrId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        patientId = #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        patientNo = #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalTimes != null" >
+        inhospitalTimes = #{inhospitalTimes,jdbcType=INTEGER},
+      </if>
+      <if test="oldPatientNo != null" >
+        oldPatientNo = #{oldPatientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="oldInhospitalTimes != null" >
+        oldInhospitalTimes = #{oldInhospitalTimes,jdbcType=INTEGER},
+      </if>
+      <if test="patientUuid != null" >
+        patientUuid = #{patientUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="medicalPayType != null" >
+        medicalPayType = #{medicalPayType,jdbcType=INTEGER},
+      </if>
+      <if test="healthCardNo != null" >
+        healthCardNo = #{healthCardNo,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalWay != null" >
+        inhospitalWay = #{inhospitalWay,jdbcType=INTEGER},
+      </if>
+      <if test="inhospitalDate != null" >
+        inhospitalDate = #{inhospitalDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="inhospitalDeptId != null" >
+        inhospitalDeptId = #{inhospitalDeptId,jdbcType=INTEGER},
+      </if>
+      <if test="inhospitalWard != null" >
+        inhospitalWard = #{inhospitalWard,jdbcType=VARCHAR},
+      </if>
+      <if test="turnDeptId != null" >
+        turnDeptId = #{turnDeptId,jdbcType=INTEGER},
+      </if>
+      <if test="turnDeptDate != null" >
+        turnDeptDate = #{turnDeptDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="outhospitalDate != null" >
+        outhospitalDate = #{outhospitalDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="outhospitalDeptId != null" >
+        outhospitalDeptId = #{outhospitalDeptId,jdbcType=INTEGER},
+      </if>
+      <if test="outhospitalWard != null" >
+        outhospitalWard = #{outhospitalWard,jdbcType=VARCHAR},
+      </if>
+      <if test="outhoispitalWay != null" >
+        outhoispitalWay = #{outhoispitalWay,jdbcType=INTEGER},
+      </if>
+      <if test="inhospitalDays != null" >
+        inhospitalDays = #{inhospitalDays,jdbcType=INTEGER},
+      </if>
+      <if test="diagnose != null" >
+        diagnose = #{diagnose,jdbcType=VARCHAR},
+      </if>
+      <if test="diseaseCode != null" >
+        diseaseCode = #{diseaseCode,jdbcType=VARCHAR},
+      </if>
+      <if test="deptDoctor != null" >
+        deptDoctor = #{deptDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="directorDoctor != null" >
+        directorDoctor = #{directorDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="inchargeDoctor != null" >
+        inchargeDoctor = #{inchargeDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="inhospitalDoctor != null" >
+        inhospitalDoctor = #{inhospitalDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="attendingDoctor != null" >
+        attendingDoctor = #{attendingDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="dutyNurse != null" >
+        dutyNurse = #{dutyNurse,jdbcType=INTEGER},
+      </if>
+      <if test="postgraduateDoctor != null" >
+        postgraduateDoctor = #{postgraduateDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="internshipDoctor != null" >
+        internshipDoctor = #{internshipDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="codePerson != null" >
+        codePerson = #{codePerson,jdbcType=INTEGER},
+      </if>
+      <if test="medicalRecordsQuality != null" >
+        medicalRecordsQuality = #{medicalRecordsQuality,jdbcType=INTEGER},
+      </if>
+      <if test="qualityControlDoctor != null" >
+        qualityControlDoctor = #{qualityControlDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="qualityControlNurse != null" >
+        qualityControlNurse = #{qualityControlNurse,jdbcType=INTEGER},
+      </if>
+      <if test="qualityControlDate != null" >
+        qualityControlDate = #{qualityControlDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mainDiagnosis != null" >
+        mainDiagnosis = #{mainDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="mainDiagnosisCode != null" >
+        mainDiagnosisCode = #{mainDiagnosisCode,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalCondition != null" >
+        inhospitalCondition = #{inhospitalCondition,jdbcType=INTEGER},
+      </if>
+      <if test="syncflag != null" >
+        syncflag = #{syncflag,jdbcType=INTEGER},
+      </if>
+      <if test="sourceFlag != null" >
+        sourceFlag = #{sourceFlag,jdbcType=INTEGER},
+      </if>
+      <if test="historyCuration != null" >
+        historyCuration = #{historyCuration,jdbcType=INTEGER},
+      </if>
+      <if test="sourceCancerNum != null" >
+        sourceCancerNum = #{sourceCancerNum,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncTime != null" >
+        syncTime = #{syncTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="tumourPeriodizationT != null" >
+        tumourPeriodizationT = #{tumourPeriodizationT,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodizationN != null" >
+        tumourPeriodizationN = #{tumourPeriodizationN,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodizationM1 != null" >
+        tumourPeriodizationM1 = #{tumourPeriodizationM1,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodizationM2 != null" >
+        tumourPeriodizationM2 = #{tumourPeriodizationM2,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodizationClinic != null" >
+        tumourPeriodizationClinic = #{tumourPeriodizationClinic,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodization != null" >
+        tumourPeriodization = #{tumourPeriodization,jdbcType=VARCHAR},
+      </if>
+      <if test="catalogState != null" >
+        catalogState = #{catalogState,jdbcType=INTEGER},
+      </if>
+      <if test="inhospitalDeptUuid != null" >
+        inhospitalDeptUuid = #{inhospitalDeptUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="turnDeptUuid != null" >
+        turnDeptUuid = #{turnDeptUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="outhospitalDeptUuid != null" >
+        outhospitalDeptUuid = #{outhospitalDeptUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="deptDoctorUuid != null" >
+        deptDoctorUuid = #{deptDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="directorDoctorUuid != null" >
+        directorDoctorUuid = #{directorDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="inchargeDoctorUuid != null" >
+        inchargeDoctorUuid = #{inchargeDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalDoctorUuid != null" >
+        inhospitalDoctorUuid = #{inhospitalDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="attendingDoctorUuid != null" >
+        attendingDoctorUuid = #{attendingDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="dutyNurseUuid != null" >
+        dutyNurseUuid = #{dutyNurseUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="postgraduateDoctorUuid != null" >
+        postgraduateDoctorUuid = #{postgraduateDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="internshipDoctorUuid != null" >
+        internshipDoctorUuid = #{internshipDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="codePersonUuid != null" >
+        codePersonUuid = #{codePersonUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="qualityControlDoctorUuid != null" >
+        qualityControlDoctorUuid = #{qualityControlDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="qualityControlNurseUuid != null" >
+        qualityControlNurseUuid = #{qualityControlNurseUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="flag != null" >
+        flag = #{flag,jdbcType=INTEGER},
+      </if>
+      <if test="treatmentSource != null" >
+        treatmentSource = #{treatmentSource,jdbcType=INTEGER},
+      </if>
+      <if test="inhospitalLastTime != null" >
+        inhospitalLastTime = #{inhospitalLastTime,jdbcType=INTEGER},
+      </if>
+      <if test="turnDept != null" >
+        turnDept = #{turnDept,jdbcType=VARCHAR},
+      </if>
+      <if test="deptDoctorName != null" >
+        deptDoctorName = #{deptDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="directorDoctorName != null" >
+        directorDoctorName = #{directorDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="inchargeDoctorName != null" >
+        inchargeDoctorName = #{inchargeDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalDoctorName != null" >
+        inhospitalDoctorName = #{inhospitalDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="attendingDoctorName != null" >
+        attendingDoctorName = #{attendingDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="dutyNurseName != null" >
+        dutyNurseName = #{dutyNurseName,jdbcType=VARCHAR},
+      </if>
+      <if test="postgraduateDoctorName != null" >
+        postgraduateDoctorName = #{postgraduateDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="internshipDoctorName != null" >
+        internshipDoctorName = #{internshipDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="codePersonName != null" >
+        codePersonName = #{codePersonName,jdbcType=VARCHAR},
+      </if>
+      <if test="qualityControlDoctorName != null" >
+        qualityControlDoctorName = #{qualityControlDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="qualityControlNurseName != null" >
+        qualityControlNurseName = #{qualityControlNurseName,jdbcType=VARCHAR},
+      </if>
+      <if test="age != null" >
+        age = #{age,jdbcType=INTEGER},
+      </if>
+      <if test="occupationId != null" >
+        occupationId = #{occupationId,jdbcType=INTEGER},
+      </if>
+      <if test="idType != null" >
+        idType = #{idType,jdbcType=INTEGER},
+      </if>
+      <if test="identification != null" >
+        identification = #{identification,jdbcType=VARCHAR},
+      </if>
+      <if test="marriageStatus != null" >
+        marriageStatus = #{marriageStatus,jdbcType=INTEGER},
+      </if>
+      <if test="outhospitalCondition != null" >
+        outhospitalCondition = #{outhospitalCondition,jdbcType=INTEGER},
+      </if>
+      <if test="autopsy != null" >
+        autopsy = #{autopsy,jdbcType=INTEGER},
+      </if>
+      <if test="reInhospitalPlan31Days != null" >
+        reInhospitalPlan31Days = #{reInhospitalPlan31Days,jdbcType=INTEGER},
+      </if>
+      <if test="reInhospitalTarget31Days != null" >
+        reInhospitalTarget31Days = #{reInhospitalTarget31Days,jdbcType=VARCHAR},
+      </if>
+      <if test="preComaHour != null" >
+        preComaHour = #{preComaHour,jdbcType=INTEGER},
+      </if>
+      <if test="preComaMinute != null" >
+        preComaMinute = #{preComaMinute,jdbcType=INTEGER},
+      </if>
+      <if test="inComaHour != null" >
+        inComaHour = #{inComaHour,jdbcType=INTEGER},
+      </if>
+      <if test="inComaMinute != null" >
+        inComaMinute = #{inComaMinute,jdbcType=INTEGER},
+      </if>
+      <if test="inviabilityScore != null" >
+        inviabilityScore = #{inviabilityScore,jdbcType=INTEGER},
+      </if>
+      <if test="outviabilityScore != null" >
+        outviabilityScore = #{outviabilityScore,jdbcType=INTEGER},
+      </if>
+      <if test="babyAge != null" >
+        babyAge = #{babyAge,jdbcType=INTEGER},
+      </if>
+      <if test="babyBornWeight != null" >
+        babyBornWeight = #{babyBornWeight,jdbcType=INTEGER},
+      </if>
+      <if test="babyWeightInHospital != null" >
+        babyWeightInHospital = #{babyWeightInHospital,jdbcType=INTEGER},
+      </if>
+      <if test="transfusion != null" >
+        transfusion = #{transfusion,jdbcType=INTEGER},
+      </if>
+      <if test="respiratorUseTime != null" >
+        respiratorUseTime = #{respiratorUseTime,jdbcType=INTEGER},
+      </if>
+      <if test="isAllergy != null" >
+        isAllergy = #{isAllergy,jdbcType=INTEGER},
+      </if>
+      <if test="allergyDesc != null" >
+        allergyDesc = #{allergyDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="aboBlood != null" >
+        aboBlood = #{aboBlood,jdbcType=INTEGER},
+      </if>
+      <if test="rhBlood != null" >
+        rhBlood = #{rhBlood,jdbcType=INTEGER},
+      </if>
+      <if test="pathologyDiagnosis != null" >
+        pathologyDiagnosis = #{pathologyDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="pathologyDiagnosisCode != null" >
+        pathologyDiagnosisCode = #{pathologyDiagnosisCode,jdbcType=VARCHAR},
+      </if>
+      <if test="nationalityId != null" >
+        nationalityId = #{nationalityId,jdbcType=INTEGER},
+      </if>
+      <if test="nativePlaceCityCode != null" >
+        nativePlaceCityCode = #{nativePlaceCityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="nativePlaceAddress != null" >
+        nativePlaceAddress = #{nativePlaceAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="householdZipCode != null" >
+        householdZipCode = #{householdZipCode,jdbcType=VARCHAR},
+      </if>
+      <if test="householdAddress != null" >
+        householdAddress = #{householdAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="companyZipCode != null" >
+        companyZipCode = #{companyZipCode,jdbcType=VARCHAR},
+      </if>
+      <if test="companyCountyCode != null" >
+        companyCountyCode = #{companyCountyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="companyAddress != null" >
+        companyAddress = #{companyAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="companyTel != null" >
+        companyTel = #{companyTel,jdbcType=VARCHAR},
+      </if>
+      <if test="liveZipCode != null" >
+        liveZipCode = #{liveZipCode,jdbcType=VARCHAR},
+      </if>
+      <if test="liveCountyCode != null" >
+        liveCountyCode = #{liveCountyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="liveTel != null" >
+        liveTel = #{liveTel,jdbcType=VARCHAR},
+      </if>
+      <if test="familyName != null" >
+        familyName = #{familyName,jdbcType=VARCHAR},
+      </if>
+      <if test="patientRelation != null" >
+        patientRelation = #{patientRelation,jdbcType=INTEGER},
+      </if>
+      <if test="familyAddress != null" >
+        familyAddress = #{familyAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="familyTel != null" >
+        familyTel = #{familyTel,jdbcType=VARCHAR},
+      </if>
+      <if test="familyCountyCode != null" >
+        familyCountyCode = #{familyCountyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="rawCreateTime != null" >
+        rawCreateTime = #{rawCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="infoState != null" >
+        infoState = #{infoState,jdbcType=INTEGER},
+      </if>
+      <if test="mergeFlag != null" >
+        mergeFlag = #{mergeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mergeFrom != null" >
+        mergeFrom = #{mergeFrom,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTarget != null" >
+        mergeTarget = #{mergeTarget,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTime != null" >
+        mergeTime = #{mergeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="oldinhospitalid != null" >
+        oldinhospitalid = #{oldinhospitalid,jdbcType=VARCHAR},
+      </if>
+      <if test="deathTime != null" >
+        deathTime = #{deathTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="deathCause != null" >
+        deathCause = #{deathCause,jdbcType=VARCHAR},
+      </if>
+      <if test="deleteFlag != null" >
+        deleteFlag = #{deleteFlag,jdbcType=INTEGER},
+      </if>
+      <if test="operatorId != null" >
+        operatorId = #{operatorId,jdbcType=INTEGER},
+      </if>
+      <if test="operatorName != null" >
+        operatorName = #{operatorName,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeFromUuid != null" >
+        mergeFromUuid = #{mergeFromUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeTargetUuid != null" >
+        mergeTargetUuid = #{mergeTargetUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="inpatientNo != null" >
+        inpatientNo = #{inpatientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalSource != null" >
+        inhospitalSource = #{inhospitalSource,jdbcType=INTEGER},
+      </if>
+      <if test="redBloodCell != null" >
+        redBloodCell = #{redBloodCell,jdbcType=INTEGER},
+      </if>
+      <if test="platelet != null" >
+        platelet = #{platelet,jdbcType=INTEGER},
+      </if>
+      <if test="plasma != null" >
+        plasma = #{plasma,jdbcType=INTEGER},
+      </if>
+      <if test="wholeBlood != null" >
+        wholeBlood = #{wholeBlood,jdbcType=INTEGER},
+      </if>
+      <if test="other != null" >
+        other = #{other,jdbcType=VARCHAR},
+      </if>
+      <if test="pathologyNo != null" >
+        pathologyNo = #{pathologyNo,jdbcType=VARCHAR},
+      </if>
+      <if test="poisoningReason != null" >
+        poisoningReason = #{poisoningReason,jdbcType=VARCHAR},
+      </if>
+      <if test="poisoningDiseaseCode != null" >
+        poisoningDiseaseCode = #{poisoningDiseaseCode,jdbcType=VARCHAR},
+      </if>
+      <if test="recHospitalName != null" >
+        recHospitalName = #{recHospitalName,jdbcType=VARCHAR},
+      </if>
+      <if test="householdCountyCode != null" >
+        householdCountyCode = #{householdCountyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="liveAddress != null" >
+        liveAddress = #{liveAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="tempId != null" >
+        tempId = #{tempId,jdbcType=INTEGER},
+      </if>
+      <if test="dataSource != null" >
+        dataSource = #{dataSource,jdbcType=INTEGER},
+      </if>
+    </set>
+    where inhospitalId = #{inhospitalId,jdbcType=VARCHAR}
+  </update>
+</mapper>

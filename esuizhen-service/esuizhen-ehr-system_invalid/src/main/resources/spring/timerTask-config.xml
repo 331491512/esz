@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/task
+		http://www.springframework.org/schema/task/spring-task-3.1.xsd">
+	<context:component-scan base-package="com.esuizhen.cloudservice.followup"/>
+    <task:executor id="executor" pool-size="5" />  
+    <task:scheduler id="scheduler" pool-size="10" />  
+    <task:annotation-driven executor="executor" scheduler="scheduler" />
+	<context:annotation-config/>
+	
+	<!-- 轮询要推送检查/检验报告的患者13:30点执行 -->
+	<task:scheduled-tasks>
+       <task:scheduled ref="reportPushServiceTimerTask" method="scanAddReportBatchWait" cron="0 30 13 * * ?" />
+   </task:scheduled-tasks>
+   
+   <!-- 轮询要推送检查/检验报告的患者晚上20:30点执行 -->
+   <task:scheduled-tasks>
+       <task:scheduled ref="reportPushServiceTimerTask" method="scanAddReportBatchWait" cron="0 30 20 * * ?" />
+   </task:scheduled-tasks>
+   
+   
+   <!-- 推送检查/检验报告的患者14:00执行 -->
+	<task:scheduled-tasks>
+       <task:scheduled ref="reportPushServiceTimerTask" method="scanPushReportBatch" cron="0 0 14 * * ?" />
+   </task:scheduled-tasks>
+   
+   <!-- 推送检查/检验报告的患者下午21点 执行 -->
+   <task:scheduled-tasks>
+       <task:scheduled ref="reportPushServiceTimerTask" method="scanPushReportBatch" cron="0 0 21 * * ?" />
+   </task:scheduled-tasks>
+   
+</beans>

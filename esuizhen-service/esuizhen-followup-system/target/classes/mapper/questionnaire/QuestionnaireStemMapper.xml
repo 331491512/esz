@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.questionnaire.QuestionnaireStemDao">
+
+	<insert id="insertQuestionnaireStem" useGeneratedKeys="true" parameterType="com.esuizhen.cloudservice.followup.model.questionnaire.TFollowupQuestionnaireStem">
+		<selectKey resultType="long" keyProperty="id" order="AFTER" >
+			SELECTLAST_INSERT_ID() as id
+		</selectKey>
+        INSERT INTO questionnaire_stem (
+        	questionnaireStemId ,
+        	questionnaireId ,
+        	mandatoryFlag ,
+        	sectionId ,
+        	sectionTitle ,
+        	stemIndex ,
+        	stemCode ,
+        	content ,
+        	questionType ,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{questionnaireStemId} ,
+        	#{questionnaireId} ,
+        	#{mandatoryFlag} ,
+        	#{sectionId} ,
+        	#{sectionTitle} ,
+        	#{stemIndex} ,
+        	#{stemCode} ,
+        	#{content} ,
+        	#{questionType} ,
+        	#{createTime} ,
+        	#{updateTime} 
+        )
+	</insert>
+    
+	<update id="updateQuestionnaireStem" parameterType="com.esuizhen.cloudservice.followup.model.questionnaire.TFollowupQuestionnaireStem">
+        UPDATE questionnaire_stem 
+        <set>
+	        <if test="questionnaireId != null">
+                questionnaireId = #{questionnaireId} ,
+            </if>
+	        <if test="mandatoryFlag != null">
+                mandatoryFlag = #{mandatoryFlag} ,
+            </if>
+	        <if test="sectionId != null">
+                sectionId = #{sectionId} ,
+            </if>
+	        <if test="sectionTitle != null">
+                sectionTitle = #{sectionTitle} ,
+            </if>
+	        <if test="stemIndex != null">
+                stemIndex = #{stemIndex} ,
+            </if>
+	        <if test="stemCode != null">
+                stemCode = #{stemCode} ,
+            </if>
+	        <if test="content != null">
+                content = #{content} ,
+            </if>
+	        <if test="questionType != null">
+                questionType = #{questionType} ,
+            </if>
+	        <if test="createTime != null">
+                createTime = #{createTime} ,
+            </if>
+	        <if test="updateTime != null">
+                updateTime = #{updateTime} ,
+            </if>
+        </set>
+        WHERE 
+	        questionnaireStemId = #{questionnaireStemId} 
+	</update>
+
+    <delete id="deleteQuestionnaireStem">
+        DELETE FROM questionnaire_stem WHERE
+        questionnaireStemId = #{id} 
+    </delete>
+    
+    <select id="queryQuestionnaireStemById" resultType="com.esuizhen.cloudservice.followup.model.questionnaire.TFollowupQuestionnaireStem">
+		SELECT 
+        	questionnaireStemId,
+        	questionnaireId,
+        	mandatoryFlag,
+        	sectionId,
+        	sectionTitle,
+        	stemIndex,
+        	stemCode,
+        	content,
+        	questionType,
+        	createTime,
+        	updateTime
+		FROM questionnaire_stem 
+	    WHERE 
+	        questionnaireStemId = #{id} 
+	</select>
+	
+	<select id="queryStemByQuestionnaireId" resultType="com.esuizhen.cloudservice.followup.model.questionnaire.TFollowupQuestionnaireStem">
+		SELECT 
+        	questionnaireStemId,
+        	questionnaireId,
+        	mandatoryFlag,
+        	sectionId,
+        	sectionTitle,
+        	stemIndex,
+        	stemCode,
+        	content,
+        	questionType,
+        	createTime,
+        	updateTime
+		FROM questionnaire_stem 
+	    WHERE 
+	        questionnaireId = #{questionnaireId} 
+	    ORDER BY stemIndex 
+	</select>
+	
+	<select id="queryStemByAuthor" resultType="com.esuizhen.cloudservice.followup.model.questionnaire.TFollowupQuestionnaireStem">
+		SELECT 
+        	t1.questionnaireStemId,
+        	t1.questionnaireId,
+        	t1.mandatoryFlag,
+        	t1.sectionId,
+        	t1.sectionTitle,
+        	t1.stemIndex,
+        	t1.stemCode,
+        	t1.content,
+        	t1.questionType,
+        	(SELECT latestFollowupTime FROM followup_db.var_patient_followup WHERE patientId=#{patientId} LIMIT 1) latestFollowupTime ,
+        	(SELECT followupState FROM followup_db.var_patient_followup WHERE patientId=#{patientId} LIMIT 1) followupState,
+        	t1.createTime,
+        	t1.updateTime
+		FROM questionnaire_stem t1 , questionnaire t2
+	    WHERE 
+	        t1.questionnaireId = t2.questionnaireId
+	    AND t2.author=9
+	    ORDER BY stemIndex 
+	</select>
+	
+</mapper>
+

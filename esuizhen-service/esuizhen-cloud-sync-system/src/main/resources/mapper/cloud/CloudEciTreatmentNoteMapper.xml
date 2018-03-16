@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- ehr_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.CloudEciTreatmentNoteDao" >
+	<insert id="insert">
+		INSERT INTO ehr_db.eci_treatment_note(
+			treatmentId, 
+			emrId, 
+			inhospitalId, 
+			patientId,
+			patientNo, 
+			hospitalId,
+			treatmentTypeId, 
+			treatmentName, 
+			treatmentWay, 
+			treatmentDosage, 
+			dosageUnit,
+			treatmentCourse, 
+			treatmentProcessFlag, 
+			treatmentEffect, 
+			operationDoctor,
+			operationDoctorUuid,
+			opCode, 
+			treatmentBeginTime, 
+			treatmentEndTime,
+			createTime, 
+			updateTime,
+			syncTime,
+			rawCreateTime
+		)VALUES(
+			#{treatmentId}, 
+			#{emrId}, 
+			#{inhospitalId}, 
+			#{patientId},
+			#{patientNo}, 
+			#{hospitalId},
+			#{treatmentTypeId}, 
+			#{treatmentName}, 
+			#{treatmentWay}, 
+			#{treatmentDosage}, 
+			#{dosageUnit},
+			#{treatmentCourse}, 
+			#{treatmentProcessFlag}, 
+			#{treatmentEffect}, 
+			#{operationDoctor},
+			#{operationDoctorUuid},
+			#{opCode}, 
+			#{treatmentBeginTime}, 
+			#{treatmentEndTime},
+			#{createTime}, 
+			#{updateTime},
+			now(),
+			#{rawCreateTime}
+		)
+	</insert>
+</mapper>

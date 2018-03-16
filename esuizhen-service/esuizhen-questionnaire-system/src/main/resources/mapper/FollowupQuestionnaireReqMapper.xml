@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.esuizhen.cloudservice.questionnaire.dao.FollowupQuestionnaireReqDao">
+    
+    <!-- 新增下发请求 -->
+    <insert id="createFollowupQuestionnaireReq">
+    	<selectKey resultType="long" keyProperty="reqId" order="AFTER">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+    	INSERT INTO followup_db.followup_questionnaire_req (
+			templateId,
+			followupTaskId,
+			followupAssignId,
+			hospitalId,
+			patientId,
+			openId,
+			mobile,
+			messageId,
+			sendTime,
+			trueName,
+			signature,
+			content,
+			channel,
+			createTime,
+			updateTime
+		)
+		VALUES
+		(
+			#{templateId}, 
+			#{followupTaskId},
+			#{followupAssignId},
+			#{hospitalId},
+			#{patientId}, 
+			#{openId}, 
+			#{mobile},
+			#{messageId},
+		 	#{sendTime},
+		  	#{trueName},
+		  	#{signature},
+		  	#{content},
+		  	#{channel},
+		  	NOW(),
+		  	NOW()
+		)
+    </insert>
+    
+    <!-- 查看问卷随访下发信息 -->
+    <select id="queryFollowupQuestionnaireReq" resultType="com.esuizhen.cloudservice.questionnaire.model.TFollowupQuestionnaireReqInfo">
+    	SELECT
+			reqId,t1.state
+		FROM
+			followup_db.followup_questionnaire_req t1
+		WHERE
+			t1.patientId=#{patientId} and t1.followupTaskId=#{followupTaskId} AND t1.messageId=#{messageId}
+			<if test="followupAssignId != null">
+				and t1.followupAssignId=#{followupAssignId}
+			</if>
+			<if test="state != null">
+				and t1.state=#{state}
+			</if>
+    </select>
+    
+    <!-- 更改随访消息状态 -->
+    <update id="updateFollowupQuestionnaireReq">
+    	UPDATE followup_db.followup_questionnaire_req
+    	<set>
+    		<if test="state != null">
+    			state=#{state},
+    			sendTime=now(),
+    		</if>
+    		<if test="replyState!=null">
+    			replyState=#{replyState},
+    			replyTime=now(),
+    		</if>
+    		updateTime = NOW()
+    	</set>
+    	WHERE 
+    	<choose>
+    		<when test="reqId != null">
+    			reqId=#{reqId}
+    		</when>
+    		<otherwise>
+    			messageId=#{messageId} and followupTaskId=#{followupTaskId} and patientId=#{patientId}
+    		</otherwise>
+    	</choose>
+    </update>
+</mapper>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.conf.FollowupReplyParseRulesInfoDao">
+
+	<sql id="Base_Column_List">
+		ruleId, replyContent, followupResultValueId, followupResultValueName,createTime,updateTime
+	</sql>
+	
+	<select id="selectFollowupReplyParseRulesInfo" resultType="com.esuizhen.cloudservice.followup.model.conf.TFollowupReplyParseRulesInfo">
+		select
+			<include refid="Base_Column_List"/>
+		from conf_reply_parse_rules
+    </select>
+    <insert id="insertFollowupReplyParseRulesInfo" parameterType="com.esuizhen.cloudservice.followup.model.conf.TFollowupReplyParseRulesInfo" >
+	  insert into conf_reply_parse_rules (ruleId, replyContent, followupResultValueId, 
+	      followupResultValueName, createTime,updateTime) values  
+    	<foreach collection="list" item="item" index="index" separator="," >  
+	        (#{item.ruleId}, #{item.replyContent}, #{item.followupResultValueId}, 
+		      #{item.followupResultValueName}, now(), now())
+    	</foreach>  
+    </insert>
+    <delete id="deleteAllFollowupReplyParseRulesInfo">
+    	delete from conf_reply_parse_rules
+    </delete>
+    
+    <select id="queryTFollowupReplyByReplyContent" resultType="com.esuizhen.cloudservice.followup.model.conf.TFollowupReplyParseRulesInfo">
+		select
+			<include refid="Base_Column_List"/>
+		from conf_reply_parse_rules
+		<where>
+			replyContent=#{replyContent}
+		</where>
+    </select>
+    
+</mapper>

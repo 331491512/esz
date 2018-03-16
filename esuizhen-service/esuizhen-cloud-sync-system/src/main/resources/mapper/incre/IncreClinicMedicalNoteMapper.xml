@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_incre_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.incre.IncreClinicMedicalNoteDao" >
+	<insert id="insert">
+		INSERT INTO cloud_sync_incre_db.ec_clinic_medical_note(
+			clinicMedicalId,
+			emrId,
+			clinicNo,
+			patientId,
+			patientUuid,
+			patientNo,
+			healthCardNo,
+			patientName,
+			patientIdno,
+			patientAddress,
+			patientMobile,
+			patientSex,
+			patientBirth,
+			patientAge,
+			deptUuid,
+			deptName,
+			hospitalId,
+			symptomSummary,
+			diagnosis,
+			diseaseCode,
+			remark,
+			clinicDoctor,
+			clinicDoctorUuid,
+			attendingDoctorId,
+			attendingDoctoruuId,
+			visitTimes,
+			visitTime,
+			createTime,
+			updateTime,
+			syncFlag,
+			syncTime,
+			rawCreateTime
+		)VALUES(
+			#{clinicMedicalId},
+			#{emrId},
+			#{clinicNo},
+			#{patientId},
+			#{patientUuid},
+			#{patientNo},
+			#{healthCardNo},
+			#{patientName},
+			#{patientIdno},
+			#{patientAddress},
+			#{patientMobile},
+			#{patientSex,jdbcType=INTEGER},
+			#{patientBirth},
+			#{patientAge,jdbcType=INTEGER},
+			#{deptUuid},
+			#{deptName},
+			#{hospitalId},
+			#{symptomSummary},
+			#{diagnosis},
+			#{diseaseCode},
+			#{remark},
+			#{clinicDoctor},
+			#{clinicDoctorUuid},
+			#{attendingDoctorId},
+			#{attendingDoctoruuId},
+			#{visitTimes},
+			#{visitTime},
+			#{createTime},
+			#{updateTime},
+			#{syncFlag},
+			NOW(),
+			<!-- start by fanpanwei -->
+			#{rawCreateTime}
+			<!-- end by fanpanwei -->
+		)
+	</insert>
+</mapper>

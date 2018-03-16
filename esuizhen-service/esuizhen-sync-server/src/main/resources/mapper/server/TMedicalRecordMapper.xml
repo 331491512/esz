@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.server.TMedicalRecordDao" >
+
+  <insert id="insertSelective" parameterType="com.esuizhen.server.sync.model.server.TMedicalRecord" >
+    insert into ehr_db.e_medical_record
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="emrId != null" >
+        emrId,
+      </if>
+      <if test="emrNo != null" >
+        emrNo,
+      </if>
+      <if test="patientId != null" >
+        patientId,
+      </if>
+      <if test="patientNo != null" >
+        patientNo,
+      </if>
+      <if test="patientUuid != null" >
+        patientUuid,
+      </if>
+      <if test="uuid != null" >
+        uuid,
+      </if>
+      <if test="emrType != null" >
+        emrType,
+      </if>
+      <if test="emrSubType != null" >
+        emrSubType,
+      </if>
+      <if test="subdivision != null" >
+        subdivision,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="creatorId != null" >
+        creatorId,
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId,
+      </if>
+      <if test="sourceFlag != null" >
+        sourceFlag,
+      </if>
+      <if test="structFlag != null" >
+        structFlag,
+      </if>
+      <if test="plainContentType != null" >
+        plainContentType,
+      </if>
+      <if test="plainContent != null" >
+        plainContent,
+      </if>
+      <if test="visibleFlag != null" >
+        visibleFlag,
+      </if>
+      <if test="visitTime != null" >
+        visitTime,
+      </if>
+      <if test="syncFlag != null" >
+        syncFlag,
+      </if>
+      <if test="syncTime != null" >
+        syncTime,
+      </if>
+      <if test="creatorUuid != null" >
+        creatorUuid,
+      </if>
+        createTime,
+        updateTime
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="emrId != null" >
+        #{emrId,jdbcType=VARCHAR},
+      </if>
+      <if test="emrNo != null" >
+        #{emrNo,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="patientUuid != null" >
+        #{patientUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="uuid != null" >
+        #{uuid,jdbcType=VARCHAR},
+      </if>
+      <if test="emrType != null" >
+        #{emrType,jdbcType=INTEGER},
+      </if>
+      <if test="emrSubType != null" >
+        #{emrSubType,jdbcType=INTEGER},
+      </if>
+      <if test="subdivision != null" >
+        #{subdivision,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="creatorId != null" >
+        #{creatorId,jdbcType=BIGINT},
+      </if>
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="sourceFlag != null" >
+        #{sourceFlag,jdbcType=INTEGER},
+      </if>
+      <if test="structFlag != null" >
+        #{structFlag,jdbcType=INTEGER},
+      </if>
+      <if test="plainContentType != null" >
+        #{plainContentType,jdbcType=INTEGER},
+      </if>
+      <if test="plainContent != null" >
+        #{plainContent,jdbcType=VARCHAR},
+      </if>
+      <if test="visibleFlag != null" >
+        #{visibleFlag,jdbcType=INTEGER},
+      </if>
+      <if test="visitTime != null" >
+        #{visitTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncFlag != null" >
+        #{syncFlag,jdbcType=INTEGER},
+      </if>
+      <if test="syncTime != null" >
+        #{syncTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creatorUuid != null" >
+        #{creatorUuid,jdbcType=VARCHAR},
+      </if>
+      now(),now()
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.server.sync.model.server.TMedicalRecord" >
+    update ehr_db.e_medical_record
+    <set >
+      <if test="emrNo != null" >
+        emrNo = #{emrNo,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        patientId = #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        patientNo = #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="patientUuid != null" >
+        patientUuid = #{patientUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="uuid != null" >
+        uuid = #{uuid,jdbcType=VARCHAR},
+      </if>
+      <if test="emrType != null" >
+        emrType = #{emrType,jdbcType=INTEGER},
+      </if>
+      <if test="emrSubType != null" >
+        emrSubType = #{emrSubType,jdbcType=INTEGER},
+      </if>
+      <if test="subdivision != null" >
+        subdivision = #{subdivision,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="creatorId != null" >
+        creatorId = #{creatorId,jdbcType=BIGINT},
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="sourceFlag != null" >
+        sourceFlag = #{sourceFlag,jdbcType=INTEGER},
+      </if>
+      <if test="structFlag != null" >
+        structFlag = #{structFlag,jdbcType=INTEGER},
+      </if>
+      <if test="plainContentType != null" >
+        plainContentType = #{plainContentType,jdbcType=INTEGER},
+      </if>
+      <if test="plainContent != null" >
+        plainContent = #{plainContent,jdbcType=VARCHAR},
+      </if>
+      <if test="visibleFlag != null" >
+        visibleFlag = #{visibleFlag,jdbcType=INTEGER},
+      </if>
+      <if test="visitTime != null" >
+        visitTime = #{visitTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncFlag != null" >
+        syncFlag = #{syncFlag,jdbcType=INTEGER},
+      </if>
+      <if test="syncTime != null" >
+        syncTime = #{syncTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creatorUuid != null" >
+        creatorUuid = #{creatorUuid,jdbcType=VARCHAR},
+      </if>
+        updateTime = now()
+    </set>
+    where emrId = #{emrId,jdbcType=VARCHAR}
+  </update>
+</mapper>

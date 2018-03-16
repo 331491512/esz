@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- lichenghao -->
+<mapper namespace="com.esuizhen.cloudservice.business.dao.business.BusinessDao">
+	<!-- 医生公告信息 -->
+	<resultMap id="doctorAnnouncementInfoResultMap"
+		type="com.esuizhen.cloudservice.business.model.business.TDoctorAnnouncementInfo">
+		<result property="announcementId" column="announcementId" />
+		<result property="announcementContent" column="announcementContent" />
+		<result property="createTime" column="createTime" />
+	</resultMap>
+
+	<!-- 查看医生当前公告 -->
+	<select id="queryDoctorAnnouncementInfoByDoctorId"
+		parameterType="java.lang.Long" resultMap="doctorAnnouncementInfoResultMap">
+		SELECT announcementId ,
+		announcementContent , createTime
+		FROM s_doctor_announcement
+		WHERE
+		doctorId=#{doctorId}
+	</select>
+
+	<!-- 查看医生公告历史 -->
+	<select id="queryDoctorAnnouncementInfoListByDoctorId"
+		parameterType="java.lang.Long" resultType="java.util.List">
+		SELECT announcementId ,
+		announcementContent , createTime
+		FROM s_doctor_announcement
+		WHERE
+		doctorId=#{doctorId}
+	</select>
+	
+	<!-- 添加医生公告  -->
+	<insert id="createDoctorAnnouncement" parameterType="com.esuizhen.cloudservice.business.model.business.DoctorAnnouncement">
+		INSERT INTO s_doctor_announcement(doctorId,hospitalId,announcement,createTime) VALUES(#{},#{},#{},NOW())
+	</insert>
+	
+	<!-- 根据删除医生公告 -->
+	<delete id="deleteDoctorAnnouncement" parameterType="java.lang.String">
+		DELETE FROM s_doctor_announcement WHERE doctorId = #{doctorId}
+		<if test="announcements != null">
+			AND id IN 
+			<foreach collection="announcements" open="(" separator="," close=")" index="index" item="item">
+				#{item}
+			</foreach>
+		</if>
+	</delete>
+
+</mapper>

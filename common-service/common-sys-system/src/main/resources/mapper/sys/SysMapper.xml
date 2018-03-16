@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.westangel.commonservice.sys.dao.SysDao">
+	<!-- 版本更新返回 -->
+	<resultMap id="appVersionReq"
+		type="com.westangel.commonservice.sys.bean.TAppVersion">
+		<result property="update" column="updateFlag" />
+		<result property="version" column="appVersion" />
+		<result property="versionCode" column="appVersionCode" />
+		<result property="url" column="url" />
+		<result property="desc" column="description" />
+	</resultMap>
+	<!-- 活动 -->
+	<resultMap id="ActivityDetailInfoReq"
+		type="com.westangel.commonservice.sys.model.TActivityDetailInfo">
+		<result property="activityId" column="activityId" />
+		<result property="subject" column="subject" />
+		<result property="activityContent" column="activityContent" />
+		<result property="lecturer" column="lecturer" />
+		<result property="activityBeginTime" column="activityBeginTime" />
+		<result property="activityEndTime" column="activityEndTime" />
+		<result property="activityPlace" column="activityPlace" />
+		<result property="introductionUrl" column="introductionUrl" />
+		<result property="reportUrl" column="reportUrl" />
+		<result property="state" column="state" />
+		<result property="signupCounter" column="signupCounter" />
+		<result property="signupLimit" column="signupLimit" />
+		<result property="isPublish" column="isPublish" />
+	</resultMap>
+
+	<!-- banner -->
+	<resultMap id="BannerInfoReq"
+		type="com.westangel.commonservice.sys.model.TBannerInfo">
+		<result property="bannerId" column="contentId" />
+	</resultMap>
+	<resultMap id="BannerItemInfoReq"
+		type="com.westangel.commonservice.sys.model.TbannerItemInfo">
+		<result property="itemType" column="itemType" />
+		<result property="content" column="content" />
+	</resultMap>
+
+	<!-- banner -->
+	<select id="queryBannerList" resultMap="BannerInfoReq">
+	SELECT t1.contentId FROM operation_db.op_cms_content_publish t1
+	INNER JOIN operation_db.op_cms_content_publish_place t2 ON
+	t1.contentPublishPlaceId = t2.contentPublishPlaceId AND
+	t2.placeCode=#{placeCode} and t2.placeType =#{placeType}
+	INNER JOIN operation_db.r_publish_strategy t3 ON
+	t3.contentPublishId=t1.contentPublishId
+	INNER JOIN
+	(
+	SELECT t2.strategyId FROM
+	(SELECT userId,min(strategyLevel) strategyLevel FROM
+	operation_db.op_strategy_user WHERE userId = #{userId} GROUP BY
+	userId)t1,operation_db.op_strategy_user t2
+	WHERE t1.userId = t2.userId AND t1.strategyLevel=t2.strategyLevel
+	<if test="appVersion!=null">
+		UNION
+		SELECT strategyId FROM operation_db.op_strategy strategy WHERE
+		strategy.appVersion =#{appVersion}
+	</if>
+	)
+	t4 ON t4.strategyId = t3.strategyId
+	WHERE t1.isPublish=#{isPublish}
+	GROUP BY
+	t1.contentId
+	</select>
+	<!-- banner-item -->
+	<select id="queryBannerItems" resultMap="BannerItemInfoReq">
+		SELECT
+		content,
+		itemType
+		FROM
+		operation_db.op_cms_content_item
+		WHERE
+		contentId = #{contentId}
+	</select>
+
+	<!-- 意见反馈 -->
+	<insert id="createFeedBack">
+		INSERT INTO
+		com_sys_db.sys_feedback(userId,role,description,appVersion,createTime)
+		VALUES(#{userId},#{userRole},#{description},#{appVersion},NOW())
+	</insert>
+
+	<!-- 版本升级检查获取最新版本 -->
+	<select id="quertNewAppVersion" resultMap="appVersionReq">
+		SELECT
+		appVersion,appVersionCode,url,description,updateFlag
+		FROM
+		com_sys_db.sys_app_version
+		WHERE
+		appVersionCode > #{versionCode}
+		AND
+		deviceType = #{deviceType}
+		ORDER BY
+		updateFlag DESC,
+		appVersionCode DESC
+		LIMIT 1
+	</select>
+	<!-- 活动报名 -->
+	<insert id="createSignupActivity">
+		INSERT INTO
+		com_sys_db.sys_activity_signup(activityId,mobile,personName,personIdentity,userId,createTime,personAge,personSex,personHospitalName,personHospitalId,personPatientNo,personDiseaseType,personDiseaseTypeId,medicalInfo,address,addressCode,otherContact,others)
+		VALUES(#{activityId},#{mobile},#{personName},#{personIdentity},#{userId},NOW(),#{personAge},#{personSex},#{personHospitalName},#{personHospitalId},#{personPatientNo},#{personDiseaseType},#{personDiseaseTypeId},#{medicalInfo},#{address},#{addressCode},#{otherContact},#{others})
+	</insert>
+	
+	<!-- 报名用户 -->
+	<select id="queryActivityMobile" resultType="java.lang.String">
+		select mobile from com_sys_db.sys_activity_signup 
+		where mobile=#{mobile} AND activityId = #{activityId}
+		<!-- <if test="personIdentity!=null">
+			AND personIdentity=#{personIdentity}
+		</if> -->
+	</select>
+	<!-- 活动报名修改  -->
+	<update id="updateActivity">
+		UPDATE com_sys_db.sys_activity 
+		<set>
+			signupCounter=signupCounter+1
+		</set>
+		WHERE activityId=#{activityId}
+	</update>
+	
+	<select id="queryActivity" resultMap="ActivityDetailInfoReq">
+		SELECT
+			t1.activityId,
+			t1.activityType,
+			t1.subject,
+			t1.activityContent,
+			t1.lecturer,
+			t1.activityBeginTime,
+			t1.activityEndTime,
+			t1.activityPlace,
+			t1.introductionUrl,
+			t1.reportUrl,
+			t1.state,
+			t1.signupCounter,
+			t1.signupLimit,
+			t1.required,
+			t1.progressState,
+			t1.isPublish,
+			t1.activityIntroduction
+		FROM
+			com_sys_db.sys_activity t1
+		WHERE
+			1 = 1
+		<if test="cityCode!=null">
+			AND t1.cityCode = #{cityCode}
+		</if>
+		<if test="seate!=null">
+			AND t1.state IN
+			<foreach collection="seate" open="(" separator="," close=")"
+				index="index" item="item">
+				#{item}
+			</foreach>
+		</if>
+		<if test="isPublish!=null and isPublish != 2">
+			AND t1.isPublish = #{isPublish}
+		</if>
+		<if test="activityId!=null">
+			AND t1.activityId =#{activityId}
+		</if>
+		<if test="hospitalId!=null">
+			AND t1.hospitalId=#{hospitalId}
+		</if>
+		GROUP BY t1.activityId
+	</select>
+	
+	
+	<select id="quyerExamIsRTF" resultType="java.util.LinkedHashMap">
+		select examReportId,examConclusion from lis_db.eci_exam_report where LOCATE("\\rtf1",examConclusion)
+	</select>
+	
+	<update id="modifyExamRtfToText">
+		update lis_db.eci_exam_report
+		<set>
+			examConclusionRtf =examConclusion
+			,examConclusion = #{examConclusion}
+		</set>
+		where
+		examReportId = #{examReportId}
+	</update>
+
+	<update id="progessState" parameterType="java.util.Map">
+		UPDATE com_sys_db.sys_activity SET progressState = #{progressState} where activityId = #{id};
+	</update>
+
+	<select id="findActivityListByRule" resultType="com.westangel.commonservice.sys.model.TActivityDetailInfo">
+		SELECT
+			t1.activityId,
+			t1.activityType,
+			t1.subject,
+			t1.activityContent,
+			t1.lecturer,
+			t1.activityBeginTime,
+			t1.activityEndTime,
+			t1.activityPlace,
+			t1.introductionUrl,
+			t1.reportUrl,
+			t1.state,
+			t1.signupCounter,
+			t1.signupLimit,
+			t1.required,
+			t1.progressState,
+			t1.isPublish,
+			t1.activityIntroduction
+		FROM
+			com_sys_db.sys_activity t1
+		<if test="req.tagInfos!=null">
+			JOIN com_sys_db.sys_activity_tag t2 ON t1.activityId=t2.activityId AND t2.tagId IN
+			<foreach collection="req.tagInfos" item="item" open="(" close=")" separator=",">#{item.tagId}</foreach>
+		</if>
+		where t1.isPublish=1
+		<if test="activityTypes!=null">
+			AND t1.activityType IN
+			<foreach collection="activityTypes" item="item" open="(" close=")" separator=",">#{item}</foreach>
+		</if>
+		GROUP BY t1.activityId
+	</select>
+
+</mapper>

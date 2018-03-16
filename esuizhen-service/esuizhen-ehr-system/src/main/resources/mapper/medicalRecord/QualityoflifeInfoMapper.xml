@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.medicalRecord.QualityoflifeInfoDao">
+	
+	<select id="queryQualityoflifeInfo" parameterType="com.esuizhen.cloudservice.ehr.bean.AttendPatientReq" resultType="com.esuizhen.cloudservice.ehr.model.medicalRecord.QualityoflifeInfo">
+		select * from e_qualityoflife_info t1
+		<where>
+			<if test="patientId !=null">
+				and t1.patientId=#{patientId}
+			</if>
+			<if test="inhospitalId !=null">
+				and t1.inhospitalId=#{inhospitalId}
+			</if>
+			<if test="clinicMedicalId !=null">
+				and t1.clinicMedicalId=#{clinicMedicalId}
+			</if>
+		</where>
+	</select>
+	
+	<insert id="insertQualityoflifeInfo" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.QualityoflifeInfo" >
+        INSERT INTO e_qualityoflife_info (
+        	qolId,
+			emrId,
+			patientId,
+			patientNo,
+			inhospitalId,
+			clinicMedicalId,
+			kpsValue,
+			ecogValue,
+			otherValue,
+			remark,
+			visitTime,
+			deathDate,
+			isTumourDeath,
+			createTime,
+			updateTime
+        ) VALUES (
+        	#{qolId},
+			#{emrId},
+			#{patientId},
+			#{patientNo},
+			#{inhospitalId},
+			#{clinicMedicalId},
+			#{kpsValue},
+			#{ecogValue},
+			#{otherValue},
+			#{remark},
+			#{visitTime},
+			#{deathDate},
+			#{isTumourDeath},
+        	NOW() ,
+        	NOW() 
+        )
+	</insert>
+    
+	<update id="updateQualityoflifeInfoSelective" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.QualityoflifeInfo">
+        UPDATE e_qualityoflife_info 
+        <set>
+        	<if test="emrId !=null">
+        		emrId=#{emrId},
+        	</if>
+        	<if test="patientId !=null">
+        		patientId=#{patientId},
+        	</if>
+        	<if test="inhospitalId !=null">
+        		inhospitalId=#{inhospitalId},
+        	</if>
+        	<if test="clinicMedicalId !=null">
+        		clinicMedicalId=#{clinicMedicalId},
+        	</if>
+        	<if test="patientNo !=null">
+        		patientNo=#{patientNo},
+        	</if>
+        	<if test="kpsValue !=null">
+        		kpsValue=#{kpsValue},
+        	</if>
+        	<if test="ecogValue !=null">
+        		ecogValue=#{ecogValue},
+        	</if>
+        	<if test="otherValue !=null">
+        		otherValue=#{otherValue},
+        	</if>
+        	<if test="remark !=null">
+        		remark=#{remark},
+        	</if>
+        	<if test="visitTime !=null">
+        		visitTime=#{visitTime},
+        	</if>
+        	<if test="deathDate !=null">
+        		deathDate=#{deathDate},
+        	</if>
+        	<if test="isTumourDeath !=null">
+        		isTumourDeath=#{isTumourDeath},
+        	</if>
+	        <if test="1==1">
+                updateTime = NOW()
+            </if>
+        </set>
+        WHERE 
+	        qolId = #{qolId} 
+	</update>
+	
+	<update id="updateQualityoflifeInfo" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.QualityoflifeInfo">
+        UPDATE e_qualityoflife_info 
+        <set>
+       		emrId=#{emrId},
+       		patientId=#{patientId},
+       		inhospitalId=#{inhospitalId},
+       		clinicMedicalId=#{clinicMedicalId},
+       		patientNo=#{patientNo},
+       		kpsValue=#{kpsValue},
+       		ecogValue=#{ecogValue},
+       		otherValue=#{otherValue},
+       		remark=#{remark},
+       		visitTime=#{visitTime},
+       		deathDate=#{deathDate},
+       		isTumourDeath=#{isTumourDeath},
+            updateTime = NOW()
+        </set>
+        WHERE 
+	        qolId = #{qolId} 
+	</update>
+	
+	<delete id="deleteQualityoflifeInfo">
+        DELETE FROM e_qualityoflife_info WHERE
+        qolId = #{qolId} 
+    </delete>
+</mapper>
+

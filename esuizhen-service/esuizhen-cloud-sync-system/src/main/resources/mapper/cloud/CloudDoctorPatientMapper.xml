@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.CloudDoctorPatientDao" >
+	<resultMap id="baseResultMap" type="com.esuizhen.cloudservice.sync.model.DoctorPatient" >
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="patientId" property="patientId" jdbcType="BIGINT" />
+		<result column="patientUuid" property="patientUuid" jdbcType="VARCHAR" />
+		<result column="doctorId" property="doctorId" jdbcType="BIGINT" />
+		<result column="doctorUuid" property="doctorUuid" jdbcType="VARCHAR" />
+		<result column="hasMedicalRecord" property="hasMedicalRecord"  jdbcType="INTEGER"/>
+		<result column="vipFlag" property="vipFlag"  />
+		<result column="attentionTime" property="attentionTime" jdbcType="TIMESTAMP" />
+		<result column="firstVisitFlag" property="firstVisitFlag"/>
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="source_flag" property="sourceFlag" jdbcType="INTEGER" />
+	 </resultMap>
+  
+	<sql id="base_column_list">
+		id, patientId, doctorId, hasMedicalRecord, vipFlag,attentionTime,firstVisitFlag, createTime, sourceFlag source_flag
+	</sql>
+
+	<select id="findDoctorPatient" resultMap="baseResultMap">
+	  	SELECT
+	  		<include refid="base_column_list" />
+	  	FROM user_db.r_doctor_patient
+	  	WHERE patientId=#{patientId,jdbcType=BIGINT}
+	  		AND doctorId=#{doctorId,jdbcType=BIGINT}
+	</select>
+  
+	<insert id="insert">
+		INSERT INTO user_db.r_doctor_patient(
+			patientId, 
+			doctorId, 
+			sourceFlag,
+			sourceDiagnosisFlag,
+			firstVisitFlag,
+			attentionTime,
+			createTime,
+			hasMedicalRecord,
+			vipFlag,
+			syncTime
+		)values(
+			#{patientId,jdbcType=BIGINT},
+			#{doctorId,jdbcType=BIGINT},
+			#{sourceFlag},
+			#{sourceDiagnosisFlag},
+			#{firstVisitFlag},
+			#{attentionTime},
+			#{createTime},
+			#{hasMedicalRecord},
+			#{vipFlag},
+			now()
+		)
+  	</insert>
+  	
+  	<update id="update">
+  		UPDATE user_db.r_doctor_patient
+		<trim prefix="SET" suffixOverrides=",">
+  			<if test="patientId != null">
+  				patientId=#{patientId,jdbcType=BIGINT},
+  			</if>
+  			<if test="doctorId != null">
+  				doctorId=#{doctorId,jdbcType=BIGINT},
+  			</if>
+  			<if test="sourceFlag != null">
+  				sourceFlag=#{sourceFlag,jdbcType=INTEGER},
+  			</if>
+  			<if test="hasMedicalRecord != null">
+  				hasMedicalRecord=#{hasMedicalRecord},
+  			</if>
+  			<if test="vipFlag != null">
+				vipFlag=#{vipFlag},
+			</if>
+  			<if test="attentionTime != null">
+  				attentionTime=#{attentionTime,jdbcType=TIMESTAMP}
+  			</if>
+  			<if test="firstVisitFlag != null">
+  				firstVisitFlag=#{firstVisitFlag}
+  			</if>
+  		</trim>
+  		WHERE id=#{id,jdbcType=BIGINT}
+  	</update>
+  	
+</mapper>

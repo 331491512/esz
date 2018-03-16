@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.westangel.commonservice.push.dao.EventInfoHistoryDao">
+
+	<insert id="insertEventInfoHistory" useGeneratedKeys="true" parameterType="com.westangel.commonservice.push.model.EventInfoHistory">
+		<selectKey resultType="long" keyProperty="id" order="AFTER" >
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+        INSERT INTO event_info_history (
+        	eventId ,
+        	eventType ,
+        	eventInfo ,
+        	eventTip ,
+        	userId ,
+        	readFlag ,
+        	businessId ,
+        	productId ,
+        	appType ,
+        	sendTime ,
+        	readTime 
+        ) VALUES (
+        	#{eventId} ,
+        	#{eventType} ,
+        	#{eventInfo} ,
+        	#{eventTip} ,
+        	#{userId} ,
+        	#{readFlag} ,
+        	#{businessId} ,
+        	#{productId} ,
+        	#{appType} ,
+        	#{sendTime} ,
+        	#{readTime} 
+        )
+	</insert>
+    
+	<update id="updateEventInfoHistory" parameterType="com.westangel.commonservice.push.model.EventInfoHistory">
+        UPDATE event_info_history 
+        <set>
+	        <if test="eventId != null">
+                eventId = #{eventId} ,
+            </if>
+	        <if test="eventType != null">
+                eventType = #{eventType} ,
+            </if>
+	        <if test="eventInfo != null">
+                eventInfo = #{eventInfo} ,
+            </if>
+	        <if test="eventTip != null">
+                eventTip = #{eventTip} ,
+            </if>
+	        <if test="userId != null">
+                userId = #{userId} ,
+            </if>
+	        <if test="readFlag != null">
+                readFlag = #{readFlag} ,
+            </if>
+	        <if test="businessId != null">
+                businessId = #{businessId} ,
+            </if>
+	        <if test="productId != null">
+                productId = #{productId} ,
+            </if>
+	        <if test="appType != null">
+                appType = #{appType} ,
+            </if>
+	        <if test="sendTime != null">
+                sendTime = #{sendTime} ,
+            </if>
+	        <if test="readTime != null">
+                readTime = #{readTime} ,
+            </if>
+        </set>
+        WHERE 
+	        id = #{id} 
+	</update>
+
+    <delete id="deleteEventInfoHistory">
+        DELETE FROM event_info_history WHERE
+        id = #{id} 
+    </delete>
+    
+    <select id="queryEventInfoHistoryById" resultType="com.westangel.commonservice.push.model.EventInfoHistory">
+		SELECT 
+        	id,
+        	eventId,
+        	eventType,
+        	eventInfo,
+        	eventTip,
+        	userId,
+        	readFlag,
+        	businessId,
+        	productId,
+        	appType,
+        	sendTime,
+        	readTime
+		FROM event_info_history 
+	    WHERE 
+	        id = #{id} 
+	</select>
+	
+	<select id="selectEventInfoHistoryList" resultType="com.westangel.commonservice.push.model.EventInfoHistory">
+		SELECT 
+        	eventId,
+        	eventType,
+        	eventInfo,
+        	eventTip,
+        	userId,
+        	readFlag,
+        	businessId,
+        	productId,
+        	appType
+		FROM event_info_history 
+	    <where>     
+	        <if test="businessId!=null">     
+	            businessId = #{businessId}      
+	        </if>     
+	        <if test="productId!=null">     
+	            AND productId = #{productId}      
+	        </if>   
+	        <if test="1==1">     
+	            AND userId = #{userId}      
+	        </if> 
+	        <if test="1==1">     
+	            AND readFlag = 0      
+	        </if>    
+    	</where>  
+	</select>
+	
+	<update id="updateEventInfoHistoryByPushInfo" parameterType="com.westangel.commonservice.push.model.EventInfoHistory">
+        UPDATE event_info_history 
+        <set>
+	        <if test="1==1">
+                readFlag = 1 ,
+            </if>
+	        
+	        <if test="1==1">
+                readTime = NOW() ,
+            </if>
+        </set>
+        <where>     
+	        <if test="businessId!=null">     
+	            businessId = #{businessId}      
+	        </if>     
+	        <if test="productId!=null">     
+	            AND productId = #{productId}      
+	        </if>   
+	        <if test="1==1">     
+	            AND userId = #{userId}      
+	        </if> 
+	        <if test="1==1">     
+	            AND readFlag = 0      
+	        </if>    
+    	</where>
+	</update>
+</mapper>
+

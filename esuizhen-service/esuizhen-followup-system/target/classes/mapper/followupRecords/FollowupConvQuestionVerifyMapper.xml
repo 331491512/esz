@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followupRecords.FollowupConvQuestionVerifyDao">
+<!-- 检查检验Mapper -->
+	<select id="getVerifies" parameterType="java.lang.Long" resultType="com.esuizhen.cloudservice.followup.bean.VerifiesReq">
+		SELECT
+			v.mainQuestionItemId,
+			v.itemName,
+			v.verifyResult
+		FROM followup_db.followup_conv_question_verify v
+		INNER JOIN followup_db.followup_conv_main_question_item m ON m.questionType=2 AND m.followupConvQuestionId=#{followupConvQuestionId}
+				AND v.mainQuestionItemId=m.mainQuestionItemId ORDER BY v.createTime ASC
+	</select>
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.followup.bean.VerifiesReq">
+		INSERT INTO followup_db.followup_conv_question_verify (
+			<!-- convQuestionVerifyId, -->
+			mainQuestionItemId,
+			followupConvQuestionId,
+			itemName,
+			verifyResult,
+			createTime
+		) VALUES (
+			<!-- convQuestionVerifyId, -->
+			#{mainQuestionItemId},
+			#{followupConvQuestionId},
+			#{itemName},
+			#{verifyResult},
+			NOW()
+		)
+	</insert>
+	<delete id="deleteByMQIId" parameterType="java.lang.Long">
+		DELETE FROM followup_db.followup_conv_question_verify
+		WHERE mainQuestionItemId=#{mainQuestionItemId}
+	</delete>
+</mapper>

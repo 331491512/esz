@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_incre_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.CloudPatientPatientNoDao">
+
+	<insert id="insert">
+		INSERT INTO user_db.r_uuid_patientno (
+			uuid,
+			patientId,
+			patientNo,
+			newPatientNo,
+			hospitalId,
+			type,
+			flag,
+			syncFlag,
+			syncTime,
+			createTime,
+			updateTime
+		)
+		VALUES(
+			#{uuid},
+			#{patientId},
+			#{patientNo},
+			#{newPatientNo},
+			#{hospitalId},
+			#{type},
+			#{flag},
+			#{syncFlag},
+			now(),
+			#{createTime},
+			#{updateTime}		
+		)
+		ON DUPLICATE KEY UPDATE
+			uuid=VALUES(uuid),
+			patientId=VALUES(patientId),
+			patientNo=VALUES(patientNo),
+			newPatientNo=VALUES(newPatientNo),
+			hospitalId=VALUES(hospitalId),
+			type=VALUES(type),
+			flag=VALUES(flag),
+			syncFlag=VALUES(syncFlag),
+			syncTime=now(),
+			createTime=VALUES(createTime),
+			updateTime=VALUES(updateTime)
+	</insert>
+</mapper>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.meta.MetaInfoIcd9Cm3Dao">
+
+    
+    <select id="getMetaInfoIcd9Cm3List" resultType="com.esuizhen.cloudservice.ehr.bean.TMetaInfoIcd9Cm3">
+		SELECT 
+        	opId,
+        	opCode,
+        	opName,
+        	mnemonicCode
+		FROM meta_e_icd_9_cm3 
+		<where>
+			<if test="opCode!=null">
+				AND opCode LIKE CONCAT(#{opCode},'%')  
+			</if>
+			<if test="opName!=null">
+				AND opName LIKE CONCAT(#{opName},'%')  
+			</if>
+			<if test="mnemonicCode!=null">
+				AND mnemonicCode LIKE CONCAT(#{mnemonicCode},'%')  
+			</if>
+			<if test="key!=null">
+				AND opCode LIKE '${key}' OR opName LIKE '${key}' OR mnemonicCode LIKE '${key}' 
+			</if>
+		</where>
+		limit 0,200
+	</select>
+	
+</mapper>
+

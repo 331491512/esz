@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.esuizhen.cloudservice.statistics.dao.RetrievalParamentMouldDao">
+	<!-- 查询用户设置的高级查询模板列表数据 -->
+	<select id="findRetrievalParamentMouldList" resultType="com.esuizhen.cloudservice.statistics.model.TRetrievalParamentMould">
+		SELECT
+			<include refid="base_column_list"/>
+		FROM ods_db.retrieval_parameter_mould t1
+		WHERE 1=1
+		<if test="userId != null">
+			AND t1.userId = #{userId}
+		</if>
+		<if test="mouldName != null">
+			AND t1.mouldName = #{mouldName}
+		</if>
+		<if test="mouldType != null">
+			AND t1.mouldType = #{mouldType}
+		</if>
+	</select>
+	
+	<!-- 查询用户设置的高级查询模板详细数据 -->
+	<select id="findRetrievalParamentMouldDetail" resultType="com.esuizhen.cloudservice.statistics.model.TRetrievalParamentMould">
+		SELECT
+			<include refid="base_column_list"/>
+		FROM ods_db.retrieval_parameter_mould t1
+		WHERE t1.mouldId = #{mouldId}
+	</select>
+	
+	<sql id="base_column_list">
+		t1.mouldId,
+		t1.mouldName,
+		t1.paramentContent,
+		t1.compareContent,
+		t1.mouldType,
+		t1.userId,
+		t1.createTime
+	</sql>
+	
+	<!-- 新增用户设置的高级查询模板 -->
+	<insert id="insert">
+		INSERT INTO ods_db.retrieval_parameter_mould(
+			mouldId,
+			mouldName,
+			paramentContent,
+			compareContent,
+			mouldType,
+			userId,
+			createTime
+		)VALUES(
+			#{mouldId},
+			#{mouldName},
+			#{paramentContent},
+			#{compareContent},
+			#{mouldType},
+			#{userId},
+			NOW()
+		)
+	</insert>
+	
+	<!-- 修改用户设置的高级查询模板 -->
+	<update id="update">
+		UPDATE ods_db.retrieval_parameter_mould
+		<set>
+		<if test="paramentContent != null and paramentContent != ''">
+			paramentContent = #{paramentContent},
+		</if>
+		<if test="compareContent != null and compareContent != ''">
+			compareContent = #{compareContent},
+			mouldType = 1,
+		</if>
+			createTime = NOW()
+		</set>
+		<where>
+			mouldId = #{mouldId}
+		</where>
+	</update>
+	
+	<!-- 删除用户设置的高级查询模板数据 -->
+	<delete id="delete">
+		DELETE FROM ods_db.retrieval_parameter_mould
+		WHERE mouldId = #{mouldId}
+	</delete>
+</mapper>

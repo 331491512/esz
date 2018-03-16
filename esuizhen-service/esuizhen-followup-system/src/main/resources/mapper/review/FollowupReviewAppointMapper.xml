@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.review.FollowupReviewAppointDao" >
+  <resultMap id="BaseResultMap" type="com.esuizhen.cloudservice.followup.model.review.FollowupReviewAppoint" >
+    <id column="appointId" property="appointId" jdbcType="VARCHAR" />
+    <result column="patientId" property="patientId" jdbcType="BIGINT" />
+    <result column="hospitalId" property="hospitalId" jdbcType="INTEGER" />
+    <result column="followupTaskId" property="followupTaskId" jdbcType="INTEGER" />
+    <result column="followupAssignId" property="followupAssignId" jdbcType="INTEGER" />
+    <result column="applyTime" property="applyTime" jdbcType="TIMESTAMP" />
+    <result column="appointDeptId" property="appointDeptId" jdbcType="INTEGER" />
+    <result column="appointDeptName" property="appointDeptName" jdbcType="VARCHAR" />
+    <result column="appointDoctorId" property="appointDoctorId" jdbcType="VARCHAR" />
+    <result column="appointDoctorName" property="appointDoctorName" jdbcType="VARCHAR" />
+    <result column="appointDate" property="appointDate" jdbcType="TIMESTAMP" />
+    <result column="appointTimeRange" property="appointTimeRange" jdbcType="INTEGER" />
+    <result column="doctorReply" property="doctorReply" jdbcType="VARCHAR" />
+    <result column="appointResult" property="appointResult" jdbcType="VARCHAR" />
+    <result column="operatorId" property="operatorId" jdbcType="INTEGER" />
+    <result column="operatorName" property="operatorName" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="sourceFlag" property="sourceFlag"/>
+  </resultMap>
+  <sql id="Base_Column_List">
+  	t3.identification,
+  	t2.trueName,
+  	CASE WHEN t2.sex=1 THEN '男' WHEN t2.sex=2 THEN '女' END sex,
+  	(SELECT diseaseTypeName FROM ehr_db.meta_c_disease_type WHERE diseaseTypeId=t2.sourceDiseaseTypeId) diseaseTypeName,
+  	CASE WHEN DATE_FORMAT(t1.appointDate,'%Y-%m-%d') <![CDATA[<]]> DATE_FORMAT(NOW(),'%Y-%m-%d') THEN 0 ELSE 1 END callFlag,
+  	 t1.appointMobile mobile,t1.applyTime,t1.appointDeptName,t1.appointDoctorName,t1.appointDate,CASE t1.appointTimeRange WHEN 0 THEN '上午' ELSE '下午' END appointDate,t1.doctorReply,CASE t1.appointResult WHEN 1 THEN 3 ELSE appointResult END appointResult, t1.operatorName, t1.remark 
+  </sql>
+  <sql id="Where_Page_Condition">
+  	<where>
+  		<if test="patientName != null">
+  		AND t2.trueName LIKE '%${patientName}%'
+  		</if>
+  		<if test="mobile != null">
+  		AND t1.appointMobile LIKE '%${mobile}%'
+  		</if>
+  		<if test="appointDoctorName != null">
+  		AND t1.appointDoctorName LIKE '%${appointDoctorName}%'
+  		</if>
+  		<if test="beginDate != null">
+  		AND t1.appointDate <![CDATA[>=]]> CONCAT(DATE_FORMAT(#{beginDate},'%Y-%m-%d'),' 00:00:00')
+  		</if>
+  		<if test="endDate != null">
+  		AND t1.appointDate <![CDATA[<=]]> CONCAT(DATE_FORMAT(#{endDate},'%Y-%m-%d'),' 23:59:59')
+  		</if>
+  		<if test="appointResult != null">
+  		AND t1.appointResult=#{appointResult}
+  		</if>
+  	</where>
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from followup_review_appoint
+    where appointId = #{appointId,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectByFollowup" resultType="com.esuizhen.cloudservice.followup.model.review.FollowupReviewAppoint">
+  	select 
+    	*
+    from followup_review_appoint
+    <where>
+    	followupTaskId=#{followupTaskId,jdbcType=VARCHAR}
+    	and followupAssignId=#{followupAssignId,jdbcType=VARCHAR}
+    </where>
+  </select>
+  
+  <select id="queryReviewOrderSummary" resultType="java.util.HashMap">
+    select 
+    COUNT(0) total,
+	(SELECT COUNT(0) FROM followup_review_appoint WHERE appointResult=1 <if test="userId != null">AND operatorId =#{userId}</if>) orederingTotal,
+	(SELECT COUNT(0) FROM followup_review_appoint WHERE appointResult=2 <if test="userId != null">AND operatorId =#{userId}</if>) successOrderNum,
+	(SELECT COUNT(0) FROM followup_review_appoint WHERE appointResult=3 <if test="userId != null">AND operatorId =#{userId}</if>) failOrderNum
+    from followup_review_appoint
+    <where>
+    	<if test="userId != null">
+    	AND operatorId =#{userId}
+    	</if>
+    </where>
+  </select>
+  
+  <select id="queryByPage" resultType="com.esuizhen.cloudservice.followup.model.review.FollowupReviewAppoint" parameterType="com.esuizhen.cloudservice.followup.bean.ReviewRecordReq" >
+    select 
+    <include refid="Base_Column_List" />
+    FROM followup_db.followup_review_appoint t1 
+    INNER JOIN user_db.u_patient t2 ON t1.patientId=t2.patientId 
+    INNER JOIN user_db.u_user t3 ON t2.userId=t3.userId
+    <include refid="Where_Page_Condition"></include>
+    <if test="startRow != null">
+    LIMIT #{startRow},#{pageSize}
+    </if>
+  </select>
+  <!-- 导出预约复查 -->
+  <select id="getRecord" resultType="java.util.LinkedHashMap" parameterType="java.lang.String" >
+    ${sql}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from followup_review_appoint
+    where appointId = #{appointId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.esuizhen.cloudservice.followup.bean.ReBasiserReviewOrderReq" >
+    insert into followup_review_appoint (appointId,patientId, hospitalId, 
+      followupTaskId, followupAssignId, applyTime, 
+      appointDeptId, appointDeptName, appointDoctorId, 
+      appointDoctorName, appointDate, appointTimeRange, 
+      appointResult, operatorId, 
+      operatorName, remark, createTime, 
+      updateTime,sourceFlag,appointMobile)
+    values (#{appointId,jdbcType=VARCHAR},#{patientId,jdbcType=BIGINT}, #{hospitalId,jdbcType=INTEGER}, 
+      #{followupTaskId,jdbcType=INTEGER}, #{followupAssignId,jdbcType=INTEGER}, #{applyTime,jdbcType=TIMESTAMP}, 
+      #{appointDeptId,jdbcType=INTEGER}, #{appointDeptName,jdbcType=VARCHAR}, #{appointDoctorId,jdbcType=VARCHAR}, 
+      #{appointDoctorName,jdbcType=VARCHAR}, #{appointDate,jdbcType=TIMESTAMP}, #{appointTimeRange,jdbcType=INTEGER}, 
+      1, #{operatorId,jdbcType=INTEGER}, 
+      #{operatorName,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}, NOW(), 
+      NOW(),#{sourceFlag},#{appointMobile})
+  </insert>
+  <insert id="insertSelective" parameterType="com.esuizhen.cloudservice.followup.model.review.FollowupReviewAppoint" >
+    insert into followup_review_appoint
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="appointId != null" >
+        appointId,
+      </if>
+      <if test="patientId != null" >
+        patientId,
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId,
+      </if>
+      <if test="followupTaskId != null" >
+        followupTaskId,
+      </if>
+      <if test="followupAssignId != null" >
+        followupAssignId,
+      </if>
+      <if test="applyTime != null" >
+        applyTime,
+      </if>
+      <if test="appointDeptId != null" >
+        appointDeptId,
+      </if>
+      <if test="appointDeptName != null" >
+        appointDeptName,
+      </if>
+      <if test="appointDoctorId != null" >
+        appointDoctorId,
+      </if>
+      <if test="appointDoctorName != null" >
+        appointDoctorName,
+      </if>
+      <if test="appointDate != null" >
+        appointDate,
+      </if>
+      <if test="appointTimeRange != null" >
+        appointTimeRange,
+      </if>
+      <if test="doctorReply != null" >
+        doctorReply,
+      </if>
+      <if test="appointResult != null" >
+        appointResult,
+      </if>
+      <if test="operatorId != null" >
+        operatorId,
+      </if>
+      <if test="operatorName != null" >
+        operatorName,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+      <if test="updateTime != null" >
+        updateTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="appointId != null" >
+        #{appointId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="followupTaskId != null" >
+        #{followupTaskId,jdbcType=INTEGER},
+      </if>
+      <if test="followupAssignId != null" >
+        #{followupAssignId,jdbcType=INTEGER},
+      </if>
+      <if test="applyTime != null" >
+        #{applyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="appointDeptId != null" >
+        #{appointDeptId,jdbcType=INTEGER},
+      </if>
+      <if test="appointDeptName != null" >
+        #{appointDeptName,jdbcType=VARCHAR},
+      </if>
+      <if test="appointDoctorId != null" >
+        #{appointDoctorId,jdbcType=VARCHAR},
+      </if>
+      <if test="appointDoctorName != null" >
+        #{appointDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="appointDate != null" >
+        #{appointDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="appointTimeRange != null" >
+        #{appointTimeRange,jdbcType=INTEGER},
+      </if>
+      <if test="doctorReply != null" >
+        #{doctorReply,jdbcType=VARCHAR},
+      </if>
+      <if test="appointResult != null" >
+        #{appointResult,jdbcType=VARCHAR},
+      </if>
+      <if test="operatorId != null" >
+        #{operatorId,jdbcType=INTEGER},
+      </if>
+      <if test="operatorName != null" >
+        #{operatorName,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.cloudservice.followup.model.review.FollowupReviewAppoint" >
+    update followup_review_appoint
+    <set >
+      <if test="patientId != null" >
+        patientId = #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="followupTaskId != null" >
+        followupTaskId = #{followupTaskId,jdbcType=INTEGER},
+      </if>
+      <if test="followupAssignId != null" >
+        followupAssignId = #{followupAssignId,jdbcType=INTEGER},
+      </if>
+      <if test="applyTime != null" >
+        applyTime = #{applyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="appointDeptId != null" >
+        appointDeptId = #{appointDeptId,jdbcType=INTEGER},
+      </if>
+      <if test="appointDeptName != null" >
+        appointDeptName = #{appointDeptName,jdbcType=VARCHAR},
+      </if>
+      <if test="appointDoctorId != null" >
+        appointDoctorId = #{appointDoctorId,jdbcType=VARCHAR},
+      </if>
+      <if test="appointDoctorName != null" >
+        appointDoctorName = #{appointDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="appointDate != null" >
+        appointDate = #{appointDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="appointTimeRange != null" >
+        appointTimeRange = #{appointTimeRange,jdbcType=INTEGER},
+      </if>
+      <if test="doctorReply != null" >
+        doctorReply = #{doctorReply,jdbcType=VARCHAR},
+      </if>
+      <if test="appointResult != null" >
+        appointResult = #{appointResult,jdbcType=VARCHAR},
+      </if>
+      <if test="operatorId != null" >
+        operatorId = #{operatorId,jdbcType=INTEGER},
+      </if>
+      <if test="operatorName != null" >
+        operatorName = #{operatorName,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where appointId = #{appointId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.esuizhen.cloudservice.followup.model.review.FollowupReviewAppoint" >
+    update followup_review_appoint
+    set patientId = #{patientId,jdbcType=BIGINT},
+      hospitalId = #{hospitalId,jdbcType=INTEGER},
+      followupTaskId = #{followupTaskId,jdbcType=INTEGER},
+      followupAssignId = #{followupAssignId,jdbcType=INTEGER},
+      applyTime = #{applyTime,jdbcType=TIMESTAMP},
+      appointDeptId = #{appointDeptId,jdbcType=INTEGER},
+      appointDeptName = #{appointDeptName,jdbcType=VARCHAR},
+      appointDoctorId = #{appointDoctorId,jdbcType=VARCHAR},
+      appointDoctorName = #{appointDoctorName,jdbcType=VARCHAR},
+      appointDate = #{appointDate,jdbcType=TIMESTAMP},
+      appointTimeRange = #{appointTimeRange,jdbcType=INTEGER},
+      doctorReply = #{doctorReply,jdbcType=VARCHAR},
+      appointResult = #{appointResult,jdbcType=VARCHAR},
+      operatorId = #{operatorId,jdbcType=INTEGER},
+      operatorName = #{operatorName,jdbcType=VARCHAR},
+      remark = #{remark,jdbcType=VARCHAR},
+      createTime = #{createTime,jdbcType=TIMESTAMP},
+      updateTime = #{updateTime,jdbcType=TIMESTAMP}
+    where appointId = #{appointId,jdbcType=VARCHAR}
+  </update>
+</mapper>

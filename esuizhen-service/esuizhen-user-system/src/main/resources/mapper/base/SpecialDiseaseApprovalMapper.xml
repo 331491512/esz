@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.SpecialDiseaseApprovalDao">
+    <!-- Start By fanpanwei  -->
+	<insert id="insertAutiPatientApproveInfo" parameterType="com.esuizhen.cloudservice.user.bean.AutiPatientApproveInfo">
+		INSERT INTO followup_db.special_disease_approval (
+			patientId,diagnosisDescId,adviceId,specialistName,specialFollowupRecord,specializedFollowupRecord,
+			remark,createTime,updateTime,specialDiseaseRegisterId
+			)
+		VALUES
+			(
+			#{patientId, jdbcType=BIGINT},#{diagnosisDescId, jdbcType=BIGINT},#{adviceId},#{specialistName},
+			#{specialFollowupRecord},#{specializedFollowupRecord},#{remark},NOW(),NOW(),#{specialDiseaseRegisterId}
+			)
+	</insert>
+	<update id="updateAutiPatientApproveInfo" parameterType="com.esuizhen.cloudservice.user.bean.AutiPatientApproveInfo">
+		update followup_db.special_disease_approval
+		<set>
+			<if test="diagnosisDescId != null">
+				diagnosisDescId=#{diagnosisDescId, jdbcType=BIGINT},
+			</if>
+			<if test="adviceId != null">
+				adviceId=#{adviceId},
+			</if>
+			<if test="specialistName != null">
+				specialistName=#{specialistName},
+			</if>
+			<if test="specialFollowupRecord != null">
+				specialFollowupRecord=#{specialFollowupRecord},
+			</if>
+			<if test="specializedFollowupRecord != null">
+				specializedFollowupRecord=#{specializedFollowupRecord},
+			</if>
+			<if test="remark != null">
+				remark=#{remark},
+			</if>
+			<if test="specialDiseaseRegisterId != null">
+				specialDiseaseRegisterId=#{specialDiseaseRegisterId},
+			</if>
+			updateTime=now()
+		</set>
+		where approvalId=#{approvalId}
+	</update>
+	 <select id="getAutiPatientApproveInfo" resultType="com.esuizhen.cloudservice.user.bean.AutiPatientApproveInfo">
+    	SELECT
+			sda.approvalId,edi.clinicNo,
+			p.trueName patientName,p.sex,p.stafferType,
+			<![CDATA[ DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(u.birthDate, '%Y') - (DATE_FORMAT(NOW(), '00-%m-%d') < DATE_FORMAT(u.birthDate, '00-%m-%d')) ]]>  age,
+			u.mobile,p.medicalCarePlace,
+			u.birthDate,
+			epc.payChannelName payType,mc.cityName medicalCareArea,
+			edi.firstdiagnosisHospitalName,edi.firstdiagnosisTime,u.identification idNo,
+			sda.updateTime handleDate,p.medicareCardNo medicalCareCardNo,
+			sdd.specialDiseaseDiagnosisName,edi.diseaseBasis diagnosisBasis,edi.diagnosisDoctorName,
+			edi.outhospitalDiagnosis outHospitalDiagnosis,edi.diseaseCode,edi.outhospitalDiagnosisCode,
+			edi.surgeryFlag isSurgery,
+			sda.diagnosisDescId,
+			(SELECT a.sdtName FROM followup_db.meta_special_disease_treatment a where a.sdtId=sda.diagnosisDescId) diagnosisDesc,
+			sda.adviceId,
+			(SELECT b.sdtName FROM followup_db.meta_special_disease_treatment b where b.sdtId=sda.adviceId) advice,
+			sda.specialistName,sda.specialFollowupRecord,
+			sda.specializedFollowupRecord,sda.remark
+		FROM 
+			user_db.u_patient_special_disease_register p 
+			LEFT JOIN followup_db.special_disease_approval sda ON p.patientId=sda.patientId AND p.specialDiseaseRegisterId=sda.specialDiseaseRegisterId
+			LEFT JOIN user_db.u_user u ON u.userId=p.userId
+			LEFT JOIN ehr_db.e_diagnosis_info edi ON edi.patientId=p.patientId and edi.diagnosisTypeId=1  AND p.specialDiseaseRegisterId=edi.specialDiseaseRegisterId
+			LEFT JOIN ehr_db.meta_special_disease_diagnosis sdd ON sdd.specialDiseaseDiagnosisId=edi.specialDiseaseDiagnosisId
+			LEFT JOIN user_db.meta_city mc ON mc.cityCode=p.medicalCareAreaId
+			LEFT JOIN ehr_db.meta_e_pay_channel epc ON epc.payChannelId=p.medicalPayType
+		WHERE p.patientId = #{patientId}
+		<if test="specialDiseaseRegisterId!=null">
+			AND p.specialDiseaseRegisterId = #{specialDiseaseRegisterId}
+		</if>
+    </select>
+	
+    <!-- End By fanpanwei  -->
+</mapper>

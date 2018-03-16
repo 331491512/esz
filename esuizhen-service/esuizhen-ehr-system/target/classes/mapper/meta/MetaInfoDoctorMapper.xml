@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.meta.MetaInfoDoctorDao">
+
+    <select id="getMetaInfoDoctorList" resultType="com.esuizhen.cloudservice.ehr.model.meta.TMetaInfoDoctor">
+		<!-- 原始 modily by zhuguo
+		SELECT 
+        	doctorId,
+        	trueName
+		FROM user_db.u_doctor -->
+		
+		<!-- 第一版 所属科室位单个 add by zhuguo
+		SELECT
+			a.doctorId,
+			a.trueName,
+			b.professionalRankName,			
+			d.deptName
+		FROM
+			user_db.u_doctor a
+		LEFT JOIN user_db.meta_professional_rank b ON a.professionalRank = b.professionalRankId
+		LEFT JOIN user_db.r_hospital_doctor c ON a.doctorId = c.doctorId
+		LEFT JOIN user_db.u_department d ON c.deptId = d.deptId -->
+		
+		<!-- 第二版 所属科室为多个用逗号分割 add by zhuguo -->
+		SELECT
+			a.doctorId,
+			a.trueName,
+			b.professionalRankName,
+			(
+				SELECT
+					group_concat(d.deptName SEPARATOR ",")
+				FROM
+					user_db.r_hospital_doctor c
+				LEFT JOIN user_db.u_department d ON c.deptId = d.deptId
+				WHERE
+					a.doctorId = c.doctorId
+			) deptName
+		FROM
+			user_db.u_doctor a
+		LEFT JOIN user_db.meta_professional_rank b ON a.professionalRank = b.professionalRankId		
+		<where>
+			<if test="trueName !=null">
+				a.trueName LIKE CONCAT(#{trueName},'%')  
+			</if>
+		</where>
+	</select>
+	
+</mapper>
+

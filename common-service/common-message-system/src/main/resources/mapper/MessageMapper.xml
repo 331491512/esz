@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.westangel.commonservice.message.dao.MessageDao">
+
+<!-- 消息内容类型映射tipText -->
+<select id="getChatTipText" resultType="com.westangel.commonservice.message.model.ImChatTip">
+	SELECT 
+		id, contentType, tipText
+	FROM 
+		im_chat_tip 
+</select>
+
+<!-- 查询聊天 -->
+<select id="getChat" resultType="com.westangel.commonservice.message.bean.ImChatBriefInfo">
+	SELECT
+		chatId,chatType,count(*) as c
+	FROM 
+		im_chat_member
+	WHERE
+	(
+		<foreach collection="members" item="item" index="index" separator="or">
+		(
+		memberId=#{item.id} and memberRole=#{item.role} and chatType=#{chatType} and businessId=#{businessId} 
+		)
+		</foreach>
+	)
+	GROUP BY 
+		chatId,chatType,businessId
+	HAVING 
+		c=#{memberCount}
+</select>
+
+<!-- 生成私聊 -->
+<insert id="addPrivateChat" useGeneratedKeys="true" parameterType="com.westangel.commonservice.message.bean.ImChatCreateReq">
+	<selectKey resultType="long" keyProperty="chatId" order="AFTER" >
+			SELECT
+			LAST_INSERT_ID() as chatId
+	</selectKey>		
+	INSERT INTO 
+		im_chat_private(creatorId,creatorRole,businessId,createTime)
+	VALUES
+		(#{userId},#{userRole},#{businessId},NOW())
+</insert>
+
+<!-- 添加聊天成员 -->
+<insert id="addChatMember">
+	INSERT INTO im_chat_member(chatId,chatType,memberId,memberRole,peerId,peerRole,businessId,productId)
+	VALUES
+	<foreach collection="members" item="item" index="index" separator=",">
+	(#{chatId},#{chatType},#{item.id},#{item.role},#{item.peerId},#{item.peerRole},#{businessId},#{item.productId})
+	</foreach>
+</insert>
+
+<!-- 聊天列表 -->
+<resultMap id="chatListResultMap" type="com.westangel.commonservice.message.model.ImChatInfo">
+	<result property="chatId" column="chatId"/>
+	<result property="chatType" column="chatType"/>
+	<result property="chatTitle" column="chatTitle"/>
+	<result property="chatIconUrl" column="chatIconUrl"/>
+	<result property="speakerId" column="speakerId"/>
+	<result property="speakerRole" column="speakerRole"/>
+	<result property="audienceId" column="audienceId"/>
+	<result property="audienceRole" column="audienceRole"/>
+	<result property="tipText" column="tipText"/>
+	<result property="occurTime" column="occurTime"/>
+	<result property="cacheIndex" column="cacheIndex"/>
+	<result property="businessId" column="businessId"/>
+	<result property="serviceId" column="serviceId"/>
+	<result property="unreadAmount" column="unreadAmount"/>
+	<result property="outPatientFlag" column="outPatientFlag"/>
+	<result property="inhospitalState" column="inhospitalState"/>
+</resultMap>
+	
+<!-- 取聊天列表 -->
+<select id="getChatList" parameterType="com.westangel.commonservice.message.bean.ImChatListReq" resultMap="chatListResultMap">
+	SELECT 
+		c.chatId as chatId,
+		c.chatType as chatType,
+		c.speakerId as speakerId,
+		c.speakerRole as speakerRole,
+		c.audienceId as audienceId,
+		c.audienceRole as audienceRole,
+		c.tipText as tipText,
+		c.occurTime as occurTime,
+		c.id as cacheIndex,
+		c.businessId as businessId,
+		c.productId as productId,
+		c.serviceId as serviceId,
+		m.unreadAmount as unreadAmount,
+		IFNULL(p.trueName,u.trueName) as chatTitle,
+		IFNULL(u.userPictureUrl,"") as chatIconUrl,
+		p.outPatientFlag,
+		p.inhospitalState
+	FROM 
+		im_chat c
+		JOIN im_chat_member m ON c.chatId=m.chatId AND c.chatType=m.chatType AND m.removedFlag=0
+		JOIN user_db.u_user u ON u.userId=m.peerId
+		LEFT JOIN user_db.u_patient p ON u.userId = p.userId
+	WHERE 
+	(
+		<if test="beginAt!=0">
+		<choose>
+		<when test="pos==-1">c.id&lt;#{beginAt} and</when>
+		<when test="pos==1">c.id&gt;#{beginAt} and</when>
+		</choose>
+		</if>
+		m.memberId=#{userId} AND m.memberRole=#{userRole} AND m.businessId=#{businessId}
+	)
+	ORDER BY c.id desc
+	LIMIT 100
+</select>
+
+<!-- 增加未读条数 -->
+<update id="increaseChatUnreadAmount">
+	UPDATE 
+		im_chat_member
+	SET 
+		unreadAmount=(unreadAmount+1)
+	WHERE 
+		chatId=#{chatId} AND chatType=#{chatType} AND memberId=#{userId} AND memberRole=#{userRole}
+</update>
+
+<!-- 清除未读条数 -->
+<update id="clearChatUnreadAmount">
+	UPDATE 
+		im_chat_member
+	SET 
+		unreadAmount=0
+	WHERE 
+		chatId=#{chatId} and chatType=#{chatType} and memberId=#{userId} and memberRole=#{userRole}
+</update>
+
+<!-- 删除聊天信息 -->
+<delete id="deleteChatInfoViaChatId">
+	DELETE FROM im_chat
+	WHERE 
+		chatId=#{chatId} and chatType=#{chatType}
+</delete>
+	
+<!-- 添加聊天信息 -->
+<insert id="addChatInfo" parameterType="com.westangel.commonservice.message.model.ImChatInfo">
+	INSERT INTO im_chat
+	(
+		chatId,chatType,speakerId,speakerRole,audienceId,audienceRole,
+		tipText,
+		businessId,productId,serviceId,
+		occurTime
+	)
+	VALUES
+	(
+		#{chatId},#{chatType},#{speakerId},#{speakerRole},#{audienceId},#{audienceRole},
+		#{tipText},
+		#{businessId},#{productId},#{serviceId},
+		NOW()
+	)
+</insert>
+
+<!-- 设置聊天移除标记 -->
+<update id="setChatRemovedFlag">
+	UPDATE
+		im_chat_member
+	SET 
+		removedFlag=#{removeFlag}
+	WHERE 
+		(chatId=#{chatId} AND chatType=#{chatType} AND memberId=#{userId} AND memberRole=#{userRole})
+</update>
+
+<!-- 重置聊天成员productId -->
+<update id="reloadChatProductId">
+	UPDATE
+		im_chat_member
+	<set>
+		productId = 
+		<foreach collection="members" item="item" open="CASE " close=" END">
+			WHEN chatId=#{chatId} AND chatType=#{chatType} AND memberId=#{item.id} AND memberRole=#{item.role} THEN 
+			<choose>
+				<when test="item.productId!=null">#{item.productId}</when>
+				<otherwise>productId</otherwise>
+			</choose>
+		</foreach>
+	</set>
+</update>
+
+<!-- 添加消息记录 -->
+<insert id="addMessage" parameterType="com.westangel.common.bean.message.ImMessageInfo">
+	<selectKey resultType="long" keyProperty="msgId" order="AFTER" >
+			SELECT
+			LAST_INSERT_ID() as chatId
+	</selectKey>
+	INSERT INTO im_message
+	(
+		chatId,chatType,
+		fromSystem,
+		speakerId,speakerRole,audienceId,audienceRole,
+		contentType,content,
+		uniqueId,
+		businessId,productId,serviceId,
+		occurTime
+	)
+	VALUES
+	(
+		#{chatId},#{chatType},
+		#{fromSystem},
+		#{speakerId},#{speakerRole},#{audienceId},#{audienceRole},
+		#{contentType},#{content},
+		#{uniqueId},
+		#{businessId},#{productId},#{serviceId},
+		NOW()
+	)
+</insert>
+
+<!-- 消息列表 -->
+<resultMap id="messageListResultMap" type="com.westangel.common.bean.message.ImMessageInfo">
+	<result property="msgId" column="msgId"/>
+	<result property="chatId" column="chatId"/>
+	<result property="chatType" column="chatType"/>
+	<result property="speakerId" column="speakerId"/>
+	<result property="speakerRole" column="speakerRole"/>
+	<result property="audienceId" column="audienceId"/>
+	<result property="audienceRole" column="audienceRole"/>
+	<result property="contentType" column="contentType"/>
+	<result property="content" column="content"/>
+	<result property="occurTime" column="occurTime"/>
+	<result property="uniqueId" column="uniqueId"/>
+	<result property="cacheIndex" column="msgId"/>
+	<result property="businessId" column="businessId"/>
+	<result property="productId" column="productId"/>
+	<result property="serviceId" column="serviceId"/>
+	<association property="speaker" javaType="com.westangel.common.bean.message.ImSpeaker">
+			<result property="id" column="speakerId"/>
+			<result property="role" column="speakerRole"/>
+			<result property="name" column="speakerName"/>
+			<result property="headUrl" column="speakerHeadUrl"/>
+	</association>
+</resultMap>
+
+
+<!-- 消息列表 -->
+<select id="getMessageList" parameterType="com.westangel.commonservice.message.bean.ImMessageListReq" resultMap="messageListResultMap">
+	SELECT 
+		m.msgId as msgId,
+		m.chatId as chatId,
+		m.chatType as chatType,
+		m.speakerId as speakerId,
+		m.speakerRole as speakerRole,
+		m.audienceId as audienceId,
+		m.audienceRole as audienceRole,	
+		m.contentType as contentType,
+		m.content as content,
+		m.occurTime as occurTime,
+		m.uniqueId as uniqueId,
+		m.businessId as businessId,
+		m.productId as productId,
+		m.serviceId as serviceId,
+		u.trueName as speakerName,
+		u.userPictureUrl as speakerHeadUrl
+	FROM 
+		im_message m, user_db.u_user u
+	WHERE 
+	(
+		<if test="beginAt!=0">
+		<choose>
+		<when test="pos==-1">m.msgId&lt;#{beginAt} and</when>
+		<when test="pos==1">m.msgId&gt;#{beginAt} and</when>
+		</choose>
+		</if>
+		<if test="serviceId!=null">
+			m.serviceId = #{serviceId} and
+		</if>
+		m.chatId=#{chatId} and m.chatType=#{chatType} and (m.fromSystem=0 or (m.audienceId=#{userId} and m.audienceRole=#{userRole})) and m.speakerId=u.userId
+	)
+	<choose>
+	<when test="beginAt!=0">ORDER BY m.msgId asc</when>
+	<when test="beginAt==0">ORDER BY m.msgId desc</when>	
+	</choose>
+	<choose>
+		<when test="num!=null">
+			LIMIT #{num}
+		</when>
+		<otherwise>
+			LIMIT 100			
+		</otherwise>
+	</choose>
+</select>
+
+<!-- 通过删除唯一标识删除消息 -->
+<delete id="deleteMessageViaUniqueId">
+	DELETE FROM im_message
+	WHERE businessId=#{businessId} and uniqueId=#{uniqueId}
+</delete>
+
+<select id="queryWxMemberProductId" resultType="java.lang.Integer">
+	SELECT CASE WHEN productId IS NULL THEN 2 ELSE productId END productId 
+	FROM com_message_db.im_chat_member 
+	WHERE
+	chatId = #{chatId} 
+	AND memberId = #{memberId} 
+	AND memberRole=#{memberRole}
+</select>
+</mapper>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	  
+	<bean name="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${jdbc.driverClassName}" />
+		<property name="jdbcUrl" value="${jdbc.url}" />
+		<property name="user" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="maxPoolSize" value="${c3p0.max_size}" />
+		<property name="minPoolSize" value="${c3p0.min_size}" />
+		<property name="initialPoolSize" value="${c3p0.initial_poolsize}" />
+		<property name="maxIdleTime" value="${c3p0.max_idle_time}" />
+		<property name="acquireIncrement" value="${c3p0.acquire_increment}" />
+		<property name="maxStatements" value="${c3p0.jdbc.maxStatements}" />
+		<property name="idleConnectionTestPeriod" value="${c3p0.jdbc.idleConnectionTestPeriod}" />
+	</bean>
+	<!--
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean>
+	-->
+</beans>

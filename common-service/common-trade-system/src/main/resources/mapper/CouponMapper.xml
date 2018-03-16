@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.westangel.commonservice.trade.dao.CouponDao">
+	
+	<!-- 查询模版详情 -->
+	<select id="queryCouponTemplate" resultType="com.westangel.common.bean.trade.TCouponTemplateDetailInfo">
+		SELECT
+			couponTemplateId,
+			couponTemplateName,
+			couponType,
+			couponNumber/100 couponNumber,
+			isPayment,
+			validity,
+			cycle,
+			maxPrice/100 maxPrice,
+			backimage,
+			typeName,
+			minOrderPrice/100 minOrderPrice,
+			isCouponRed,
+			shareNum,
+			superpositionNum,
+			requirementType,
+			cityCodes,
+			hospitalIds,
+			diseaseCodes,
+			productTypes,
+			state,
+			remark
+		FROM
+			com_trade_db.coupon_template
+		WHERE
+			couponTemplateId = #{couponTemplateId}
+	</select>
+	<!-- 模版基本信息查询 -->
+	<select id="queryCouponTemplateInfo" resultType="com.westangel.common.bean.trade.TCouponTemplateInfo">
+		SELECT
+			couponTemplateId,
+			couponTemplateName,
+			couponType,
+			couponNumber/100 couponNumber
+		FROM
+			com_trade_db.coupon_template
+		WHERE
+			1
+			<if test="requirementType!=null">
+				AND requirementType = #{requirementType} 
+			</if>
+			<if test="reqFlag!=null and reqFlag!=0">
+				AND state = #{reqFlag}
+			</if>
+	</select>	
+	<!-- 插入模版 -->
+	<insert id="createCouponTemplet">
+		INSERT INTO com_trade_db.coupon_template
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			couponTemplateId,
+			couponTemplateName,
+			couponType,
+			couponNumber,
+			validity,
+			cycle,
+			<if test="isPayment!=null">
+				isPayment,
+			</if>
+			<if test="isCouponRed!=null">
+				isCouponRed,
+			</if>
+			<if test="state!=null">
+				state,
+			</if>
+			maxPrice,
+			backimage,
+			typeName,
+			minOrderPrice,
+			shareNum,
+			superpositionNum,
+			requirementType,
+			cityCodes,
+			hospitalIds,
+			diseaseCodes,
+			productTypes,
+			remark,
+			createTime
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			#{couponTemplateId},
+			#{couponTemplateName},
+			#{couponType},
+			#{couponNumber}*100,
+			#{validity},
+			#{cycle},
+			<if test="isPayment!=null">
+				#{isPayment},
+			</if>
+			<if test="isCouponRed!=null">
+				#{isCouponRed},
+			</if>
+			<if test="state!=null">
+				#{state},
+			</if>
+			#{maxPrice}*100,
+			#{backimage},
+			#{typeName},
+			#{minOrderPrice}*100,
+			#{shareNum},
+			#{superpositionNum},
+			#{requirementType},
+			#{cityCodes},
+			#{hospitalIds},
+			#{diseaseCodes},
+			#{productTypes},
+			#{remark},
+			now()
+		</trim>
+	</insert>
+	<!-- 修改抵用券模版 -->
+	<update id="modifyCouponTemplet">
+		update com_trade_db.coupon_template
+		<set>
+			<if test="couponTemplateName!=null">
+				couponTemplateName = #{couponTemplateName},
+			</if>
+			<if test="couponTemplateName!=null">
+				couponTemplateName = #{couponTemplateName},
+			</if>
+			<if test="couponType!=null">
+				couponType = #{couponType},
+			</if>
+			<if test="couponNumber!=null">
+				couponNumber = #{couponNumber}*100,
+			</if>
+			<if test="isPayment!=null">
+				isPayment = #{isPayment},
+			</if>
+			<if test="validity!=null">
+				validity = #{validity},
+			</if>
+			<if test="cycle!=null">
+				cycle = #{cycle},
+			</if>
+			<if test="maxPrice!=null">
+				maxPrice = #{maxPrice}*100,
+			</if>
+			<if test="backimage!=null">
+				backimage = #{backimage},
+			</if>
+			<if test="typeName!=null">
+				typeName = #{typeName},
+			</if>
+			<if test="minOrderPrice!=null">
+				minOrderPrice = #{minOrderPrice}*100,
+			</if>
+			<if test="isCouponRed!=null">
+				isCouponRed = #{isCouponRed},
+			</if>
+			<if test="shareNum!=null">
+				shareNum = #{shareNum},
+			</if>
+			<if test="superpositionNum!=null">
+				superpositionNum = #{superpositionNum},
+			</if>
+			<if test="requirementType!=null">
+				requirementType = #{requirementType},
+			</if>
+			<if test="cityCodes!=null">
+				cityCodes = #{cityCodes},
+			</if>
+			<if test="hospitalIds!=null">
+				hospitalIds = #{hospitalIds},
+			</if>
+			<if test="diseaseCodes!=null">
+				diseaseCodes = #{diseaseCodes},
+			</if>
+			<if test="productTypes!=null">
+				productTypes = #{productTypes},
+			</if>
+			<if test="state!=null">
+				state = #{state},
+			</if>
+			<if test="remark!=null">
+				remark = #{remark},
+			</if>
+			updateTime = now()
+		</set>
+		where couponTemplateId = #{couponTemplateId}
+	</update>
+	
+	<!-- 查询抵用券模版 通过编号 -->
+	<select id="queryCouponTemplateById" resultType="com.westangel.commonservice.trade.model.coupon.CouponTemplateInfo">
+		SELECT
+			t1.couponTemplateId,
+			t1.isPayment,
+			t1.validity,
+			t1.cycle
+		FROM
+			com_trade_db.coupon_template t1
+			<if test="couponId!=null">
+				JOIN com_trade_db.coupon t2 ON t1.couponTemplateId=t2.couponTemplateId
+			</if>
+		WHERE
+			t1.state = 1
+		<if test="couponTemplateId!=null">
+			AND t1.couponTemplateId = #{couponTemplateId}
+		</if>
+		<if test="couponId!=null">
+			AND t2.couponId = #{couponId}
+		</if>
+	</select>
+		 
+	<!-- 插入抵用券 -->
+	<insert id="createCoupon">
+		INSERT INTO com_trade_db.coupon (
+			couponId,
+			couponTemplateId,
+			couponState,
+			owner,
+			startDate,
+			endDate,
+			createTime
+		)
+		VALUES(
+			#{couponId},
+			#{couponTemplateId},
+			#{couponState},
+			#{owner},
+			#{startDate},
+			#{endDate},
+			NOW()
+		)
+	</insert>
+	
+	
+	<!-- 插入抵用券集合 -->
+	<insert id="createCouponList" parameterType="java.util.List">
+		INSERT INTO com_trade_db.coupon (
+			couponId,
+			couponTemplateId,
+			couponState,
+			owner,
+			startDate,
+			endDate,
+			createTime
+		)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+		(
+			#{item.couponId},
+			#{item.couponTemplateId},
+			#{item.couponState},
+			#{item.owner},
+			#{item.startDate},
+			#{item.endDate},
+			NOW()
+		)
+		</foreach>
+	</insert>
+	
+	
+	<!--修改抵用券信息 -->
+	<update id="modifyCoupon">
+		UPDATE com_trade_db.coupon
+		<set>
+		<if test="couponState!=null">
+			couponState = #{couponState},
+		</if>
+		<if test="startDate!=null">
+			startDate = #{startDate},
+		</if>
+		<if test="endDate!=null">
+			endDate = #{endDate},
+		</if>
+		<if test="price!=null">
+			price = #{price}*100,
+		</if>
+			updateTime = NOW()
+		</set>
+		WHERE couponId=#{couponId}
+		<if test="owner!=null">
+			AND owner=#{owner}
+		</if>
+	</update>
+	
+	<!-- 查询抵用券 -->
+	<select id="queryCouponList" resultType="com.westangel.commonservice.trade.bean.TCouponInfo">
+		SELECT
+			t1.couponId,
+			t1.couponState,
+			t1.startDate,
+			t1.endDate,
+			t2.couponTemplateName couponName,
+			t2.couponType,
+			CASE
+		WHEN t2.couponType = 1 THEN
+			t2.couponNumber/100
+		WHEN t2.couponType = 2 THEN
+			t2.couponNumber/10000
+		END couponNumber,
+		 t2.maxPrice/100 maxPrice,
+		 t2.minOrderPrice/100 minOrderPrice,
+		 t2.backimage,
+		 t2.typeName,
+		 t2.shareNum,
+		 t2.superpositionNum,
+		 t2.isCouponRed
+		FROM
+			com_trade_db.coupon t1
+		JOIN com_trade_db.coupon_template t2 ON t1.couponTemplateId = t2.couponTemplateId
+		WHERE
+			t1.owner = #{owner}
+			<choose>
+				<when test="reqFlag!=null and reqFlag==0">
+					AND t1.couponState=0
+				</when>
+				<when test="reqFlag!=null and reqFlag==1">
+					AND t1.couponState=1
+				</when>
+			</choose>
+			<if test="hospitalId!=null">
+				AND (t2.hospitalIds IS NULL OR FIND_IN_SET(#{hospitalId},t2.hospitalIds))
+			</if>
+			<if test="diseaseCode!=null">
+				AND (t2.diseaseCodes IS NULL OR FIND_IN_SET(#{diseaseCode},t2.diseaseCodes))
+			</if>
+			<if test="cityCode!=null">
+				AND (t2.cityCodes IS NULL OR FIND_IN_SET(#{cityCode},t2.cityCodes))
+			</if>
+			<if test="productType!=null">
+				AND (t2.productTypes IS NULL OR FIND_IN_SET(#{productType},t2.productTypes))
+			</if>
+			<if test="orderPrice!=null">
+				AND #{orderPrice}>t2.minOrderPrice/100
+			</if>
+			<if test="couponIds!=null">
+				AND t1.couponId IN
+				<foreach collection="couponIds" item="couponId" open="(" close=")" separator=",">
+					#{couponId}
+				</foreach>
+			</if>
+		ORDER BY
+			t1.couponState ASC,
+			t1.startDate ASC
+	</select>
+	
+	<update id="updateCoupon">
+		UPDATE com_trade_db.coupon
+		<set>
+			couponState = 3
+		</set>
+		WHERE
+			couponState = 1
+		AND endDate IS NOT NULL
+		<![CDATA[
+		AND endDate < DATE(now())
+		]]> 
+		AND OWNER = #{owner}
+	</update>
+</mapper>

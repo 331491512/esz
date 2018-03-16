@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.progressdiagnosis.TProgressDiagnosisInfoDao">
+    <sql id="base_column_list">
+       	issuedId,
+		diagnosisCardId,
+		patientId,
+		patientNo,
+		issuedDate,
+		diseaseCode,
+		diagnosis,
+		createTime,
+		updateTime
+    </sql>
+    
+    <insert id="createTProgressDiagnosisInfo" parameterType="com.esuizhen.cloudservice.ehr.model.progressdiagnosis.TProgressDiagnosisInfo" useGeneratedKeys="true" keyProperty="id">
+    	INSERT INTO e_issued_record
+    	<trim prefix="(" suffix=")" suffixOverrides=",">
+	    	<if test="issuedId != null">
+                issuedId ,
+            </if>
+	    	<if test="diagnosisCardId != null">
+                diagnosisCardId ,
+            </if>
+            <if test="patientId != null">
+                patientId ,
+            </if>
+	        <if test="patientNo != null">
+                patientNo ,
+            </if>
+	        <if test="issuedDate != null">
+                issuedDate ,
+            </if>
+	        <if test="diseaseCode != null">
+                diseaseCode ,
+            </if>
+	        <if test="diagnosis != null">
+                diagnosis ,
+            </if>
+            createTime ,
+            updateTime
+    	</trim> 
+    	<trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+			<if test="issuedId != null">
+                #{issuedId} ,
+            </if>
+			<if test="diagnosisCardId != null">
+                #{diagnosisCardId} ,
+            </if>
+            <if test="patientId != null">
+                #{patientId} ,
+            </if>
+	        <if test="patientNo != null">
+                #{patientNo} ,
+            </if>
+	        <if test="issuedDate != null">
+                #{issuedDate} ,
+            </if>
+	        <if test="diseaseCode != null">
+                #{diseaseCode} ,
+            </if>
+	        <if test="diagnosis != null">
+                #{diagnosis} ,
+            </if>
+            NOW() ,
+            NOW()
+    	</trim>
+    </insert>
+	
+	<update id="updateDiagnosisCardInfo" parameterType="com.esuizhen.cloudservice.ehr.model.progressdiagnosis.TProgressDiagnosisInfo">
+        UPDATE e_issued_record 
+        <set>
+	        <if test="diagnosisCardId != null">
+                diagnosisCardId = #{diagnosisCardId} ,
+            </if>
+            <if test="patientId != null">
+                patientId = #{patientId} ,
+            </if>
+	        <if test="patientNo != null">
+                patientNo = #{patientNo} ,
+            </if>
+	        <if test="issuedDate != null">
+                issuedDate = #{issuedDate} ,
+            </if>
+	        <if test="diseaseCode != null">
+                diseaseCode = #{diseaseCode} ,
+            </if>
+	        <if test="diagnosis != null">
+                diagnosis = #{diagnosis} ,
+            </if>
+            updateTime = NOW() 
+        </set>
+        WHERE 
+	        issuedId = #{issuedId}
+	</update>
+
+    <delete id="deleteTProgressDiagnosisInfoById" parameterType="java.lang.String">
+        DELETE FROM e_issued_record WHERE issuedId = #{issuedId} 
+    </delete>
+    
+    <delete id="deleteTProgressDiagnosisInfoByDiagnosisCardId" parameterType="java.lang.String">
+        DELETE FROM e_issued_record WHERE diagnosisCardId=#{diagnosisCardId}
+    </delete>
+    
+    <select id="queryTProgressDiagnosisInfoById" resultType="com.esuizhen.cloudservice.ehr.model.progressdiagnosis.TProgressDiagnosisInfo">
+		SELECT 
+        	<include refid="base_column_list"/>
+		FROM e_issued_record 
+	    WHERE 
+	        issuedId = #{issuedId} 
+	</select>
+	
+	<select id="queryTProgressDiagnosisInfoByDiagnosisCardId" resultType="com.esuizhen.cloudservice.ehr.model.progressdiagnosis.TProgressDiagnosisInfo">
+		SELECT <include refid="base_column_list"/>
+		FROM e_issued_record
+	    WHERE 
+		diagnosisCardId=#{diagnosisCardId}
+	</select>
+	
+	<select id="queryTProgressDiagnosisInfoBySelective" parameterType="java.util.HashMap" resultType="com.esuizhen.cloudservice.ehr.model.progressdiagnosis.TProgressDiagnosisInfo">
+		SELECT <include refid="base_column_list"/>
+		FROM e_issued_record
+	    <where>
+	    	<if test="diagnosisCardId != null">
+	    		diagnosisCardId=#{diagnosisCardId}
+	    	</if>
+	    	<if test="diagnosisCode != null">
+	    		AND diseaseCode=#{diagnosisCode}
+	    	</if>
+	    </where> 
+		
+	</select>
+</mapper>
+

@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followupresult.FollowupPhoneResultDao">
+	
+	<resultMap type="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupTaskPatient" id="followupTaskPatientMap">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="followupTaskId" property="followupTaskId"/>
+		<result column="followupAssignId" property="followupAssignId"/>
+		<result column="patientId" property="patientId"/>
+		<result column="state" property="state"/>
+		<result column="latestFollowupResultValue" property="latestFollowupResultValue"/>
+		<result column="latesFollowupTime" property="latesFollowupTime"/>
+		<result column="operator" property="operator"/>
+		<result column="followupResultValue" property="followupResultValue"/>
+		<result column="followupWay" property="followupWay"/>
+		<result column="followupResultType" property="followupResultType"/>
+		<association property="patient" javaType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultPatientInfo" >
+			<id column="patientId" property="patientId" jdbcType="BIGINT" />
+			<result column="userId" property="userId" jdbcType="BIGINT" />
+			<result column="age" property="age" jdbcType="BIGINT" />
+			<result column="identification" property="identification" jdbcType="VARCHAR" />
+			<result column="trueName" property="trueName" jdbcType="VARCHAR" />
+			<result column="patientNo" property="patientNo" jdbcType="VARCHAR" />
+			<result column="syncFlag" property="syncFlag" jdbcType="INTEGER" />
+			<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+			<result column="preTrueName" property="preTrueName" jdbcType="VARCHAR" />
+			<result column="nickName" property="nickName" jdbcType="VARCHAR" />
+			<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+			<result column="patientRelation" property="patientRelation" jdbcType="INTEGER" />
+			<result column="sex" property="sex" jdbcType="INTEGER" />
+			<result column="sexTxt" property="sexTxt" jdbcType="VARCHAR" />
+			<result column="birthDate" property="birthDate" jdbcType="TIMESTAMP" />
+			<result column="userPictureUrl" property="userPictureUrl" jdbcType="VARCHAR" />
+			<result column="familyName" property="familyName" jdbcType="VARCHAR" />
+			<result column="familyPhone" property="familyPhone" jdbcType="VARCHAR" />
+			<result column="liveStatus" property="liveStatus" jdbcType="INTEGER" />
+			<result column="deathDate" property="deathDate" jdbcType="TIMESTAMP" />
+			<result column="causeOfDeath" property="causeOfDeath" jdbcType="VARCHAR" />
+			<result column="bloodType" property="bloodType" jdbcType="VARCHAR" />
+			<result column="bloodTypeRH" property="bloodTypeRH" jdbcType="INTEGER" />
+			<result column="bodyHeight" property="bodyHeight" jdbcType="INTEGER" />
+			<result column="disabilityStatus" property="disabilityStatus" jdbcType="VARCHAR" />
+			<result column="geneticDiseaseHistory" property="geneticDiseaseHistory" jdbcType="VARCHAR" />
+			<result column="drugAllergyHistory" property="drugAllergyHistory" jdbcType="VARCHAR" />
+			<result column="medicalPayType" property="medicalPayType" jdbcType="INTEGER" />
+			<result column="sourceDiagnosis" property="sourceDiagnosis" jdbcType="VARCHAR" />
+			<result column="sourceDiseaseCode" property="sourceDiseaseCode" jdbcType="VARCHAR" />
+			<result column="sourcePathologyDiagnosis" property="sourcePathologyDiagnosis" jdbcType="VARCHAR" />
+			<result column="sourcePathologyDiseaseCode" property="sourcePathologyDiseaseCode" jdbcType="VARCHAR" />
+			<result column="attendingDoctor" property="attendingDoctor" jdbcType="INTEGER" />
+			<result column="confirmedDate" property="confirmedDate" jdbcType="TIMESTAMP" />
+			<result column="hasVisibleMedicalRecord" property="hasVisibleMedicalRecord" jdbcType="INTEGER" />
+			<result column="followupFlag" property="followupFlag" jdbcType="INTEGER" />
+		</association>
+	</resultMap>
+	
+    <sql id="conditionSql">
+    	and r.mergeFlag!=2
+    	<if test="patientNo !=null">
+    		and (
+  				exists(
+	  				select pn.patientId from user_db.r_uuid_patientno pn where pn.patientId=p.patientId 
+	  				and (
+	  					pn.patientNo LIKE concat('%',#{patientNo},'%')
+	  				) 
+  				) 
+  				or p.patientNo  LIKE concat('%',#{patientNo},'%')
+  			)
+    	</if>
+		<if test="trueName !=null">
+    		and p.trueName like concat('%',#{trueName},'%')
+    	</if>
+    	<!-- 
+		<if test="operator !=null">
+    		and r.operator=#{operator}
+    	</if>
+    	 -->
+		<if test="diseaseTypeId !=null">
+    		and p.sourceDiseaseTypeId=${diseaseTypeId}
+		</if>
+		<if test="cityId !=null">
+    		and u.cityId=${cityId}
+    	</if>
+		<if test="sourceDiagnosis !=null">
+    		and p.sourceDiagnosis like concat('%',#{sourceDiagnosis},'%')
+    	</if>
+		<if test="sourceDiseaseCode !=null">
+    		and p.sourceDiseaseCode like concat('%',#{sourceDiseaseCode},'%')
+    	</if>
+		<if test="sourcePathologyDiagnosis !=null">
+    		and p.sourcePathologyDiagnosis like concat('%',#{sourcePathologyDiagnosis},'%')
+    	</if>
+		<if test="sourcePathologyDiseaseCode !=null">
+    		and p.sourcePathologyDiseaseCode like concat('%',#{sourcePathologyDiseaseCode},'%')
+    	</if>
+		<if test="confirmedDateStart !=null">
+    		and p.confirmedDate &gt;=#{confirmedDateStart}
+    	</if>
+		<if test="confirmedDateEnd !=null">
+    		and p.confirmedDate &lt;=#{confirmedDateEnd}
+    	</if>
+		<if test="followupTimeStart !=null">
+    		and r.followupTime &gt;=#{followupTimeStart}
+		</if>
+		<if test="followupTimeEnd !=null">
+    		and r.followupTime &lt;=#{followupTimeEnd}
+    	</if>
+    	<if test="deptId !=null">
+	    	and EXISTS (
+				SELECT inhos.patientId from ehr_db.ei_inhospital_note inhos WHERE r.patientId=inhos.patientId and inhos.outhospitalDeptId=#{deptId}
+			)
+		</if>
+		<if test="treatmentSchemeIdArr !=null">
+			and EXISTS (
+				SELECT tn.patientId from ehr_db.eci_treatment_note tn WHERE r.patientId=tn.patientId
+				AND tn.treatmentTypeId IN
+				<foreach collection="treatmentSchemeIdArr" open="(" item="treatmentSchemeId" separator="," close=")">
+					#{treatmentSchemeId}
+				</foreach>
+			)
+		</if>
+    </sql>
+    
+    <!-- 电话随访结果统计 -->
+    <select id="queryFollowupPhoneResult" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultDetailInfo" parameterType="com.esuizhen.cloudservice.followup.bean.TFollowupPhoneResultSearchInfo">
+		SELECT
+			r.*,
+			metaF.followupResultValueName,
+			p.trueName,
+			CASE WHEN p.sex=1 THEN '男' WHEN p.sex=2 THEN '女' END 
+			sexTxt,
+			p.mobile,
+			p.sourceDiagnosis,
+			p.sourceDiseaseCode,
+			p.sourceDiseaseTypeId,
+			p.confirmedDate,
+			d.trueName as operatorName
+		FROM
+			followup_result r
+		LEFT JOIN user_db.u_patient p ON r.patientId = p.patientId
+		LEFT JOIN user_db.u_user u on u.userId=p.userId
+		LEFT JOIN user_db.u_doctor d on r.operator=d.doctorId
+		LEFT JOIN meta_followup_result_value metaF on metaF.followupResultValueId=r.followupResultValue
+		<if test="sql != null and sql != ''">
+			join 
+			(
+			${sql}
+			) s on s.doctorId = r.operator
+		</if>
+		<where>
+			<include refid="conditionSql"/>
+			and r.followupWay=2	
+		</where>
+		order by r.followupTime desc
+    </select>
+     
+    <!-- 电话随访结果统计 -->
+    <select id="statisFollowupPhoneResult" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultValueInfo" parameterType="com.esuizhen.cloudservice.followup.bean.TFollowupPhoneResultSearchInfo">
+    	SELECT
+			metaResult.*, count(1) count
+		FROM
+			followup_result r
+		LEFT JOIN user_db.u_patient p ON r.patientId = p.patientId
+		LEFT JOIN user_db.u_user u on u.userId=p.userId
+		LEFT JOIN meta_followup_result_value metaResult ON metaResult.followupResultValueId = r.followupResultValue
+		<where>
+			<include refid="conditionSql"/>
+			and r.followupWay=2	
+		</where>
+		GROUP BY r.followupResultValue
+    </select>
+    
+    <!-- 电话随访结果总数统计 -->
+    <select id="statisFollowupPhoneResultTotal" resultType="Long" parameterType="com.esuizhen.cloudservice.followup.bean.TFollowupPhoneResultSearchInfo">
+    	SELECT
+			count(1) count
+		FROM
+			followup_result r
+			LEFT JOIN user_db.u_patient p ON r.patientId = p.patientId
+			LEFT JOIN user_db.u_user u on u.userId=p.userId
+		<where>
+			<include refid="conditionSql"/>
+			and r.followupWay=2	
+		</where>
+    </select>
+    
+    <!-- 电话随访人员总数统计 -->
+    <select id="statisFollowupOperatorTotal" resultType="Integer" parameterType="com.esuizhen.cloudservice.followup.bean.TFollowupPhoneResultSearchInfo">
+    	SELECT
+			count(1) operatorCount
+		FROM
+			(
+				SELECT
+					COUNT(1)
+				FROM
+					followup_result r
+				LEFT JOIN user_db.u_patient p ON r.patientId = p.patientId
+				LEFT JOIN user_db.u_user u ON u.userId = p.userId
+				<where>
+					<include refid="conditionSql"/>
+					and r.followupWay=2	
+				</where>
+				GROUP BY
+					r.operator
+			) t
+    </select>
+    
+    <sql id="pageTurnSelectSql">
+   		select rftp.*,
+		patient.*,
+		r.followupWay,
+		r.followupResultValue,
+		metaResult.type followupResultType,
+		CASE WHEN patient.sex=1 THEN '男' WHEN patient.sex=2 THEN '女' END 
+			sexTxt,
+		CASE WHEN u.birthDate IS NULL THEN 0 ELSE  TIMESTAMPDIFF(YEAR, u.birthDate, now()) END age,
+		u.identification,
+		vpm.latestOutHospitalDate
+		from r_followup_task_patient rftp 
+		left join followup_result r on rftp.patientId=r.patientId and rftp.followupAssignId=r.followupAssignId and rftp.followupTaskId=r.followupTaskId
+		left join user_db.u_patient patient on rftp.patientId=patient.patientId
+		left join user_db.u_user u on patient.userId=u.userId
+		left join meta_followup_result_value metaResult on metaResult.followupResultValueId=r.followupResultValue
+		left join ehr_db.var_patient_medical vpm on vpm.patientId=patient.patientId
+    </sql>
+    
+    <sql id="pageRuleSql">
+    	exists
+			(
+				SELECT
+					0
+				FROM user_db.u_patient_family n1
+				WHERE n1.patientId = patient.patientId AND n1.isValid = 1
+			)
+		and (
+			rftp.state=1
+			or patient.FollowupFlag!=2
+		)
+		<if test="followupResultFlag !=null  and followupResultFlag==0">
+			and (
+				(r.followupWay=1 and r.followupResultValue=5)
+			<choose>
+				<when test="validResultControlFlag !=null and validResultControlFlag==0">
+					or r.followupResultValue is null
+				</when>
+				<when test="validResultControlFlag !=null and validResultControlFlag==1">
+					or (r.followupResultValue is null
+						or metaResult.type=2)
+				</when>
+			</choose>
+			)
+		</if>
+		<if test="followupResultFlag !=null  and followupResultFlag==1">
+			and (
+				r.followupWay!=2
+				or r.followupResultValue is null
+				<if test="validResultControlFlag !=null and validResultControlFlag==1">
+					or (
+						r.followupWay=2 and metaResult.type=2)
+				</if>
+			)
+		</if>
+    </sql>
+    
+     <sql id="pageAllRuleSql">
+    	and (
+    		r.state=1 or (
+    			<include refid="pageRuleSql"></include>
+    		)
+    	)
+    </sql>
+    
+    <sql id="turnToSql">
+    	<if test="patientNo !=null">
+					<bind name="patternPatientNo" value="'%' + patientNo + '%'" />
+				and (
+	  				exists(
+		  				select pn.patientId from user_db.r_uuid_patientno pn where pn.patientId=patient.patientId 
+		  				and (
+		  					pn.patientNo LIKE #{patternPatientNo}
+		  				) 
+	  				) 
+	  				or patient.patientNo LIKE #{patternPatientNo}
+	  			)
+		</if>
+    	<if test="patientTrueName !=null">
+    	<bind name="pattern" value="'%' + patientTrueName + '%'" />
+				AND patient.trueName LIKE #{pattern}
+		</if>
+    	<if test="sourceDiagnosis !=null">
+    	<bind name="pattern2" value="'%' + sourceDiagnosis + '%'" />
+				AND patient.sourceDiagnosis LIKE #{pattern2}
+		</if>
+    	<if test="phone !=null">
+			<bind name="patternPhone" value="'%' + phone + '%'" />
+			<!-- AND (f2.familyPhone LIKE #{patternPhone} OR r.phone LIKE #{patternPhone}) -->
+				AND r.phone LIKE #{patternPhone}
+		</if>
+    	<if test="followupResultValue !=null and followupResultValue.size() > 0">
+    	and r.followupResultValue in
+    	<foreach collection="followupResultValue" item="item"  open="(" separator="," close=")">
+					#{item}
+		</foreach>
+		</if>
+    	<if test="state !=null and state.size() > 0">
+		and rftp.state in
+    		<foreach collection="state" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+    </sql>
+    <select id="queryFollowupTaskPatient" resultMap="followupTaskPatientMap">
+		<include refid="pageTurnSelectSql"></include>
+		<where>
+			rftp.mergeFlag!=2
+			<if test="patientId !=null and pageTurn==null">
+				and rftp.patientId=#{patientId}
+			</if>
+			<if test="patientId !=null and pageTurn==1">
+				and rftp.patientId &lt; #{patientId}
+			</if>
+			<if test="patientId !=null and pageTurn==2">
+				and rftp.patientId &gt; #{patientId}
+			</if>
+			<if test="pageTurn==null">
+				and rftp.state in(0,1,2)
+			</if>
+			<if test="followupAssignId !=null and followupAssignId !=''">
+				and rftp.followupAssignId=#{followupAssignId}
+			</if>
+			<if test="followupTaskId !=null">
+				and rftp.followupTaskId=#{followupTaskId}
+			</if>
+			<if test="pageTurn!=null and (userRole==1 or userRole==3)">
+				<include refid="pageAllRuleSql"></include>
+	    	</if>
+	    	<if test="pageTurn != null">
+	    		<include refid="turnToSql"></include>
+	    	</if>
+		</where>
+		order by rftp.patientId 
+		<if test="patientId !=null and pageTurn==1">
+			desc
+		</if>
+		<if test="patientId !=null and pageTurn==2">
+			asc
+		</if>
+		limit 1
+	</select>
+	
+    <select id="queryFirstFollowupTaskPatient" resultMap="followupTaskPatientMap">
+		<include refid="pageTurnSelectSql"></include>
+		<where>
+			rftp.mergeFlag!=2
+			<if test="followupAssignId !=null and followupAssignId !=''">
+				and rftp.followupAssignId=#{followupAssignId}
+			</if>
+			<if test="followupTaskId !=null">
+				and rftp.followupTaskId=#{followupTaskId}
+			</if>
+			<if test="userRole==1 or userRole==3">
+	    		<include refid="pageAllRuleSql"></include>
+	    	</if>
+	    	<include refid="turnToSql"></include>
+		</where>
+		order by rftp.patientId asc
+		limit 1
+	</select>
+	
+	<select id="queryLastFollowupTaskPatient" resultMap="followupTaskPatientMap">
+		<include refid="pageTurnSelectSql"></include>
+		<where>
+			rftp.mergeFlag!=2
+			<if test="followupAssignId !=null and followupAssignId !=''">
+				and rftp.followupAssignId=#{followupAssignId}
+			</if>
+			<if test="followupTaskId !=null">
+				and rftp.followupTaskId=#{followupTaskId}
+			</if>
+			<if test="userRole==1 or userRole==3">
+	    		<include refid="pageAllRuleSql"></include>
+	    	</if>
+			<include refid="turnToSql"></include>	
+		</where>
+		order by rftp.patientId desc
+		limit 1
+	</select>
+    
+</mapper>

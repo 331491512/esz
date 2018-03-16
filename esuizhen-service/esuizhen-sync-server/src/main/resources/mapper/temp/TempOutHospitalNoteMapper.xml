@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.temp.TempOutHospitalNoteDao" >
+    <!-- 向temp表推送数据 -->
+    <insert id="insert">
+		INSERT INTO server_sync_temp_db.ei_outhospital_note (
+			outhospitalId,mainID,tempId,inhospitalId,inhospitalNo,inhospitalTimes,emrId,
+			patientId,patientUuid,patientNo,oldPatientNo,oldInhospitalTimes,hospitalId,
+			inhospitalDate,outhospitalDate,inhospitalDays,treatmentResult,symptomSummary,
+			inhospitalDiagnosis,treatmentSummary,outhospitalDiagnosis,outhospitalSummary,
+			outhospitalDoctorAdvice,summaryContent,rawContent,contentType,createTime,updateTime,
+			rawCreateTime,mergeFlag,mergeFrom,mergeFromUuid,mergeTarget,mergeTargetUuid,
+			mergeTime,batchId,sourceFlag
+		)
+		VALUES(
+			#{outhospitalId},#{mainID},#{tempId},#{inhospitalId},#{inhospitalNo},#{inhospitalTimes},#{emrId},
+			#{patientId},#{patientUuid},#{patientNo},#{oldPatientNo},#{oldInhospitalTimes},#{hospitalId},
+			#{inhospitalDate},#{outhospitalDate},#{inhospitalDays},#{treatmentResult},#{symptomSummary},
+			#{inhospitalDiagnosis},#{treatmentSummary},#{outhospitalDiagnosis},#{outhospitalSummary},
+			#{outhospitalDoctorAdvice},#{summaryContent},#{rawContent},#{contentType},#{createTime},#{updateTime},
+			#{rawCreateTime},#{mergeFlag},#{mergeFrom},#{mergeFromUuid},#{mergeTarget},#{mergeTargetUuid},
+			#{mergeTime},#{batchId},#{sourceFlag}
+		)
+	</insert>
+
+	<select id="getSyncOutHospitalNote" resultType="com.esuizhen.server.sync.bean.server.OuthospitalNoteRes" parameterType="com.esuizhen.server.sync.bean.TBatchDetailInfo">
+		SELECT
+		t1.outhospitalId,t1.mainID,t1.tempId,t1.inhospitalId,t1.inhospitalNo,t1.inhospitalTimes,t1.emrId,
+		IFNULL(t4.patientId,t41.patientId) patientId,
+		t1.patientUuid,t1.patientNo,t1.oldPatientNo,t1.oldInhospitalTimes,t1.hospitalId,t1.inhospitalDate,t1.outhospitalDate,
+		t1.inhospitalDays,t1.treatmentResult,t1.symptomSummary,t1.inhospitalDiagnosis,t1.treatmentSummary,t1.outhospitalDiagnosis,t1.outhospitalSummary,
+		t1.outhospitalDoctorAdvice,t1.summaryContent,t1.rawContent,t1.contentType,t1.createTime,t1.updateTime,
+		t1.rawCreateTime,t1.mergeFlag,
+		t1.mergeFromUuid,t1.mergeTargetUuid,t1.mergeTime,
+		if(t3.outhospitalId is null,1,2) opFlag,
+		t1.sourceFlag
+		FROM
+		server_sync_temp_db.ei_outhospital_note t1
+		LEFT JOIN ehr_db.ei_outhospital_note t3 ON t3.outhospitalId=t1.outhospitalId
+		LEFT JOIN user_db.u_patient t4 ON t4.uuid=t1.patientUuid
+		LEFT JOIN user_db.r_uuid_patient_relationship t41 ON t1.patientUuid=t41.uuid
+		WHERE t1.batchId=#{batchId}
+	</select>
+</mapper>

@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.treatment.TreatmentChemotherapyMedicationInfoDao" >
+  <resultMap id="BaseResultMap" type="com.esuizhen.cloudservice.ehr.model.treatment.TreatmentChemotherapyMedicationInfo" >
+    <id column="chemotherapyMedicationRecordId" property="chemotherapyMedicationRecordId" jdbcType="VARCHAR" />
+    <result column="treatmentId" property="treatmentId" jdbcType="VARCHAR" />
+    <result column="inhospitalId" property="inhospitalId" jdbcType="VARCHAR" />
+    <result column="clinicMedicalId" property="clinicMedicalId" jdbcType="VARCHAR" />
+    <result column="patientId" property="patientId" jdbcType="BIGINT" />
+    <result column="patientNo" property="patientNo" jdbcType="VARCHAR" />
+    <result column="hospitalId" property="hospitalId" jdbcType="INTEGER" />
+    <result column="schemeCategory" property="schemeCategory" jdbcType="VARCHAR" />
+    <result column="schemeCategoryDesc" property="schemeCategoryDesc" jdbcType="VARCHAR" />
+    <result column="chemotherapyType" property="chemotherapyType" jdbcType="INTEGER" />
+    <result column="chemotherapyTypeDesc" property="chemotherapyTypeDesc" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="beginTime" property="beginTime" jdbcType="TIMESTAMP" />
+    <result column="endTime" property="endTime" jdbcType="TIMESTAMP" />
+    <result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  
+  <resultMap id="DetailResultMap" type="com.esuizhen.cloudservice.ehr.model.treatment.TreatmentChemotherapyMedicationInfo" extends="BaseResultMap">
+    <collection property="chemotherapyMedicationDetailInfos" column="chemotherapyMedicationRecordId" select="com.esuizhen.cloudservice.ehr.dao.treatment.TreatmentChemotherapyMedicationDetailInfoDao.queryList"/>
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    chemotherapyMedicationRecordId, treatmentId, inhospitalId, clinicMedicalId,patientId, patientNo, 
+    hospitalId, schemeCategory,schemeCategoryDesc, chemotherapyType, chemotherapyTypeDesc, remark, beginTime, 
+    endTime, createTime, updateTime
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from eci_treatment_chemotherapy_medication
+    where chemotherapyMedicationRecordId = #{chemotherapyMedicationRecordId,jdbcType=VARCHAR}
+  </select>
+  <select id="queryList" resultMap="DetailResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from eci_treatment_chemotherapy_medication
+    where patientId=#{patientId}
+    <choose>
+    	<when test="clinicMedicalId != null">
+    		and clinicMedicalId=#{clinicMedicalId}
+    	</when>
+    	<otherwise>
+    		and inhospitalId=#{inhospitalId}
+    	</otherwise>
+    </choose>
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from eci_treatment_chemotherapy_medication
+    where chemotherapyMedicationRecordId = #{chemotherapyMedicationRecordId,jdbcType=VARCHAR}
+  </delete>
+  
+  <delete id="deleteChemotherapyMedicationInfo">
+    delete from eci_treatment_chemotherapy_medication
+    where treatmentId = #{treatmentId}
+    <if test="clinicMedicalId != null">
+   		and clinicMedicalId=#{clinicMedicalId}
+   	</if>
+   	<if test="inhospitalId != null">
+   		and inhospitalId=#{inhospitalId}
+   	</if>
+    <if test="chemotherapyMedicationRecordId != null">
+    	AND chemotherapyMedicationRecordId = #{chemotherapyMedicationRecordId}
+    </if>
+  </delete>
+  
+  <insert id="insert" parameterType="com.esuizhen.cloudservice.ehr.model.treatment.TreatmentChemotherapyMedicationInfo" >
+    insert into eci_treatment_chemotherapy_medication (chemotherapyMedicationRecordId, treatmentId, 
+      inhospitalId,clinicMedicalId, patientId, patientNo, 
+      hospitalId, schemeCategory, schemeCategoryDesc, chemotherapyType, 
+      chemotherapyTypeDesc, remark, beginTime, 
+      endTime, createTime, updateTime
+      )
+    values (#{chemotherapyMedicationRecordId,jdbcType=VARCHAR}, #{treatmentId,jdbcType=VARCHAR}, 
+      #{inhospitalId,jdbcType=VARCHAR}, #{clinicMedicalId,jdbcType=VARCHAR},#{patientId,jdbcType=BIGINT}, #{patientNo,jdbcType=VARCHAR}, 
+      #{hospitalId,jdbcType=INTEGER}, #{schemeCategory,jdbcType=VARCHAR},#{schemeCategoryDesc,jdbcType=VARCHAR}, #{chemotherapyType,jdbcType=INTEGER}, 
+      #{chemotherapyTypeDesc,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}, #{beginTime,jdbcType=TIMESTAMP}, 
+      #{endTime,jdbcType=TIMESTAMP}, NOW(), NOW()
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.esuizhen.cloudservice.ehr.model.treatment.TreatmentChemotherapyMedicationInfo" >
+    insert into eci_treatment_chemotherapy_medication
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="chemotherapyMedicationRecordId != null" >
+        chemotherapyMedicationRecordId,
+      </if>
+      <if test="treatmentId != null" >
+        treatmentId,
+      </if>
+      <if test="inhospitalId != null" >
+        inhospitalId,
+      </if>
+      <if test="clinicMedicalId != null" >
+        clinicMedicalId,
+      </if>
+      <if test="patientId != null" >
+        patientId,
+      </if>
+      <if test="patientNo != null" >
+        patientNo,
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId,
+      </if>
+      <if test="schemeCategory != null" >
+        schemeCategory,
+      </if>
+      <if test="schemeCategoryDesc != null" >
+        schemeCategoryDesc,
+      </if>
+      <if test="chemotherapyType != null" >
+        chemotherapyType,
+      </if>
+      <if test="chemotherapyTypeDesc != null" >
+        chemotherapyTypeDesc,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="beginTime != null" >
+        beginTime,
+      </if>
+      <if test="endTime != null" >
+        endTime,
+      </if>
+      createTime,
+      updateTime
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="chemotherapyMedicationRecordId != null" >
+        #{chemotherapyMedicationRecordId,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentId != null" >
+        #{treatmentId,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalId != null" >
+        #{inhospitalId,jdbcType=VARCHAR},
+      </if>
+      <if test="clinicMedicalId != null" >
+        #{clinicMedicalId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="schemeCategory != null" >
+        #{schemeCategory,jdbcType=VARCHAR},
+      </if>
+       <if test="schemeCategoryDesc != null" >
+        #{schemeCategoryDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="chemotherapyType != null" >
+        #{chemotherapyType,jdbcType=INTEGER},
+      </if>
+      <if test="chemotherapyTypeDesc != null" >
+        #{chemotherapyTypeDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="beginTime != null" >
+        #{beginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null" >
+        #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      NOW(),
+      NOW()
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.cloudservice.ehr.model.treatment.TreatmentChemotherapyMedicationInfo" >
+    update eci_treatment_chemotherapy_medication
+    <set >
+      <if test="treatmentId != null" >
+        treatmentId = #{treatmentId,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalId != null" >
+        inhospitalId = #{inhospitalId,jdbcType=VARCHAR},
+      </if>
+      <if test="clinicMedicalId != null" >
+        clinicMedicalId = #{clinicMedicalId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        patientId = #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        patientNo = #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="schemeCategory != null" >
+        schemeCategory = #{schemeCategory,jdbcType=VARCHAR},
+      </if>
+      <if test="schemeCategoryDesc != null" >
+        schemeCategoryDesc = #{schemeCategoryDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="chemotherapyType != null" >
+        chemotherapyType = #{chemotherapyType,jdbcType=INTEGER},
+      </if>
+      <if test="chemotherapyTypeDesc != null" >
+        chemotherapyTypeDesc = #{chemotherapyTypeDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="beginTime != null" >
+        beginTime = #{beginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null" >
+        endTime = #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      updateTime = NOW()
+    </set>
+    where chemotherapyMedicationRecordId = #{chemotherapyMedicationRecordId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.esuizhen.cloudservice.ehr.model.treatment.TreatmentChemotherapyMedicationInfo" >
+    update eci_treatment_chemotherapy_medication
+    set treatmentId = #{treatmentId,jdbcType=VARCHAR},
+      inhospitalId = #{inhospitalId,jdbcType=VARCHAR},
+      clinicMedicalId = #{clinicMedicalId,jdbcType=VARCHAR},
+      patientId = #{patientId,jdbcType=BIGINT},
+      patientNo = #{patientNo,jdbcType=VARCHAR},
+      hospitalId = #{hospitalId,jdbcType=INTEGER},
+      schemeCategory = #{schemeCategory,jdbcType=VARCHAR},
+      schemeCategoryDesc = #{schemeCategoryDesc,jdbcType=VARCHAR},
+      chemotherapyType = #{chemotherapyType,jdbcType=INTEGER},
+      chemotherapyTypeDesc = #{chemotherapyTypeDesc,jdbcType=VARCHAR},
+      remark = #{remark,jdbcType=VARCHAR},
+      beginTime = #{beginTime,jdbcType=TIMESTAMP},
+      endTime = #{endTime,jdbcType=TIMESTAMP},
+      updateTime = NOW()
+    where chemotherapyMedicationRecordId = #{chemotherapyMedicationRecordId,jdbcType=VARCHAR}
+  </update>
+</mapper>

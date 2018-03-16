@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TSubcenterDoctorRoleDao">
+	
+	<select id="findByDoctorId" resultType="com.esuizhen.cloudservice.research.bean.TProjectSubcenterRoleInfo">
+		SELECT
+			<include refid="base_column_list"/>,
+			t2.roleName
+		FROM pro_db.r_subcenter_doctor_role t1
+			INNER JOIN pro_db.meta_role t2 ON t2.roleId = t1.roleId
+		WHERE t1.projectId = #{projectId}
+			AND t1.doctorId = #{doctorId}
+	</select>
+	
+	<sql id="base_column_list">
+		t1.subcenterId,
+		t1.projectId,
+		t1.doctorId,
+		t1.roleId,
+		t1.createTime
+	</sql>
+
+	<insert id="insert">
+		INSERT INTO pro_db.r_subcenter_doctor_role(
+			subcenterId,
+			projectId,
+			doctorId,
+			roleId,
+			createTime
+		)VALUES(
+			#{subcenterId},
+			#{projectId},
+			#{doctorId},
+			#{roleId},
+			NOW()
+		)
+	</insert>
+	
+	<insert id="insertByBatch">
+		INSERT INTO pro_db.r_subcenter_doctor_role(
+			subcenterId,
+			projectId,
+			doctorId,
+			roleId,
+			createTime
+		)VALUES
+        <foreach collection="list" item="item" separator="," index="index">
+        (
+        	
+			#{item.subcenterId},
+			#{item.projectId},
+			#{item.doctorId},
+			#{item.roleId},
+			NOW()
+        )
+        </foreach>
+	</insert>
+	
+	<delete id="deleteBySubcenterIdAndDoctorId">
+		DELETE FROM pro_db.r_subcenter_doctor_role
+		WHERE subcenterId = #{subcenterId} AND doctorId = #{doctorId}
+	</delete>
+	
+	<delete id="deleteByProjectId">
+		DELETE FROM pro_db.r_subcenter_doctor_role
+		WHERE projectId = #{projectId}
+	</delete>
+	
+	<delete id="deleteBySubcenterId">
+		DELETE FROM
+			pro_db.r_subcenter_doctor_role
+		WHERE
+			subcenterId = #{subcenterId}
+	</delete>
+</mapper>

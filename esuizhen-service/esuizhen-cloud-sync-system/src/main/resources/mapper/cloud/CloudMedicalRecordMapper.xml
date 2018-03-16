@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- ehr_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.CloudMedicalRecordDao">
+
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.sync.model.MedicalRecord">
+		INSERT INTO ehr_db.e_medical_record(
+		emrId,
+		emrNo,
+		patientId,
+		patientNo,
+		patientUuid,
+		emrType,
+		emrSubType,
+		subdivision,
+		remark,
+		creatorId,
+		hospitalId,
+		sourceFlag,
+		structFlag,
+		visibleFlag,
+		visitTime,
+		createTime,
+		updateTime,
+		syncFlag,
+		syncTime
+		)VALUES(
+		#{emrId},
+		#{emrNo},
+		#{patientId},
+		#{patientNo},
+		#{patientUuid},
+		#{emrType},
+		#{emrSubType},
+		#{subdivision},
+		#{remark},
+		#{creatorId},
+		#{hospitalId},
+		#{sourceFlag},
+		#{structFlag},
+		#{visibleFlag},
+		#{visitTime},
+		IFNULL(#{createTime},now()),
+		NOW(),
+		#{syncFlag},
+		NOW()
+		)
+		ON DUPLICATE KEY UPDATE
+		creatorId = VALUES(creatorId),
+		emrType=VALUES(emrType),
+		emrSubType=VALUES(emrSubType),
+		syncFlag=VALUES(syncFlag),
+		updateTime = NOW(),
+		syncTime = NOW()
+	</insert>
+</mapper>

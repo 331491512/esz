@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.meta.MetaInfoDao">
+    <resultMap id="metaInfoQualityoflifeScaleResultMap" type="com.esuizhen.cloudservice.ehr.bean.TMetaInfoQualityoflifeScaleItem">
+    	<id column="scaleItemId" property="scaleItemId" />
+    	<result column="seqNo"   property="seqNo" />
+    	<result column="questionDescription"  property="questionDescription" />
+    	<collection column="scaleItemId" property="itemOptionsList" ofType="com.esuizhen.cloudservice.ehr.bean.TMetaInfoQualityoflifeScaleItemOptions" >
+    		<id column="scaleOptionsId" property="scaleOptionsId" />
+    		<result column="optionIndex" property="optionIndex" />
+    		<result column="content"     property="content" />
+    		<result column="indicateValue" property="indicateValue" />
+         </collection>
+    </resultMap>
+    <resultMap id="metaInfoDiseaseTypeIcdListResultMap" type="com.esuizhen.cloudservice.ehr.model.disease.TMetaInfoDiseaseTypeIcd">
+    	<id column="diseaseTypeId" property="diseaseTypeId" />
+    	<result column="diseaseTypeName"   property="diseaseTypeName" />
+    	<result column="creatorName"  property="creatorName" />
+    	<collection column="diseaseTypeId" property="icdDiseaseTypeList" ofType="com.esuizhen.cloudservice.ehr.model.icd10.IcdDiseaseType" >
+    		<result column="icdDiseaseTypeId" property="icdDiseaseTypeId" />
+    		<result column="icdDiseaseTypeName" property="icdDiseaseTypeName" />
+    		<result column="diseaseCodePrefix"     property="diseaseCodePrefix" />
+         </collection>
+    </resultMap>
+    
+    
+    <resultMap type="com.esuizhen.cloudservice.ehr.model.disease.MetaEIcdOParent" id="metaInfoIcdOResultMap">
+    	<id column="organId" property="organId"/>
+    	<result column="organCode" property="organCode"/>
+    	<result column="organName" property="organName"/>
+    	<result column="showName" property="showName"/>
+    	<result column="createTime" property="createTime"/>
+    	<collection property="childList" ofType="com.esuizhen.cloudservice.ehr.model.disease.MetaEIcdO">
+    		<id column="child_organId" property="organId"/>
+	    	<result column="child_organCode" property="organCode"/>
+	    	<result column="child_organName" property="organName"/>
+	    	<result column="child_createTime" property="createTime"/>
+    	</collection>
+    </resultMap>
+    
+    <!-- 获取器官元数据 -->
+    <select id="queryMetaInfoIcdOAll" resultMap="metaInfoIcdOResultMap">
+    	SELECT
+			t1.organId, t1.organCode, t1.organName, t1.createTime,t1.showName,
+			t2.organId child_organId, t2.organCode child_organCode, t2.organName child_organName, t2.createTime child_createTime
+		FROM ehr_db.meta_e_icd_o_parent t1
+			INNER JOIN ehr_db.meta_e_icd_o t2 ON POSITION(t1.organCode IN t2.organCode) = 1
+			<if test="reqFlag!=null">
+				AND t1.state=#{reqFlag}
+			</if>
+		ORDER BY t1.organId, t2.organId
+    </select>
+	
+	<!--查询体征元数据列表  -->
+    <select id="queryMetaInfoPhysicalSignsList" resultType="com.esuizhen.cloudservice.ehr.bean.TMetaInfoPhysicalSigns">
+		SELECT 
+        	t1.physicalSignsId,
+        	t1.physicalSignsName
+		FROM ehr_db.meta_e_physical_signs t1 
+		ORDER BY t1.physicalSignsId ASC 
+	</select>
+	
+	
+	<!--查询身体状况评分-Kps 元数据列表  -->
+    <select id="queryMetaInfoKps" resultType="com.esuizhen.cloudservice.ehr.bean.TMetaInfoKps">
+		SELECT 
+        	t1.kpsId,
+        	t1.score,
+        	t1.description
+		FROM ehr_db.meta_e_kps t1 
+		ORDER BY t1.kpsId ASC 
+	</select>
+	
+	<!--查询身体状况评分-Ecog 元数据列表  -->
+    <select id="queryMetaInfoEcog" resultType="com.esuizhen.cloudservice.ehr.bean.TMetaInfoEcog">
+		SELECT 
+		    t1.ecogId,
+        	t1.score,
+        	t1.kpsId,
+        	t1.description
+		FROM ehr_db.meta_e_ecog t1 
+		ORDER BY t1.ecogId ASC 
+	</select>
+	
+	
+	<!--查询检查类型元数据列表  -->
+    <select id="queryMetaInfoChildExamType" resultType="com.esuizhen.cloudservice.ehr.bean.TMetaInfoExamType">
+		SELECT 
+		    t1.parentId,
+        	t1.examTypeId,
+        	t1.examTypeName
+		FROM ehr_db.meta_e_exam_type t1 
+		<where>
+		<if test="parentId != null">
+			t1.parentId=#{parentId}
+		</if>
+		<if test="flag != null">
+			AND flag = #{flag}
+		</if>
+		</where>
+		ORDER BY t1.examTypeId ASC
+	</select>
+	
+	<!--查询检查项目明细元数据列表  -->
+    <select id="queryMetaInfoExamItemList" resultType="com.esuizhen.cloudservice.ehr.bean.TMetaInfoExamItem">
+		SELECT 
+		    t1.examItemId,
+        	t1.examTypeId,
+        	t1.examItemName,
+        	t1.examItemCode
+		FROM ehr_db.meta_e_exam_item t1 
+		WHERE t1.examTypeId=#{examTypeId}
+		ORDER BY t1.examItemId ASC 
+	</select>
+	
+	<!--查询检验类型元数据列表  -->
+    <select id="queryMetaInfoChildDetectionType" resultType="com.esuizhen.cloudservice.ehr.bean.TMetaInfoDetectionType">
+		SELECT 
+		    t1.parentId,
+        	t1.detectionTypeId,
+        	t1.detectionTypeName
+		FROM ehr_db.meta_e_detection_type t1 
+		WHERE t1.parentId=#{parentId}
+		ORDER BY t1.detectionTypeId ASC 
+	</select>
+	
+	<!--查询检验项目明细元数据列表  -->
+    <select id="queryMetaInfoDetectionItemList" resultType="com.esuizhen.cloudservice.ehr.bean.TMetaInfoDetectionItem">
+		SELECT 
+		    t1.detectionItemId,
+        	t1.detectionTypeId,
+        	t1.detectionItemName,
+        	t1.detectionItemEnglishName,
+        	t1.unit,
+        	t1.refrenceRangeMin,
+        	t1.refrenceRangeMax
+		FROM ehr_db.meta_e_detection_item t1 
+		WHERE 1=1
+			<if test="detectionTypeId != null">
+				AND t1.detectionTypeId=#{detectionTypeId}
+			</if>
+			<if test="flag != null">
+				AND flag=1
+			</if>
+		ORDER BY t1.detectionItemId ASC 
+	</select>
+	
+	
+	
+	<!--查询症状元数据列表  -->
+    <select id="queryMetaInfoSymptoms" resultType="com.esuizhen.cloudservice.ehr.bean.TMetaInfoSymptom">
+		SELECT 
+        	t1.symptomId,
+        	t1.symptomName,
+        	t1.slightDescription,
+        	t1.mediumDescription,
+        	t1.severeDescription
+		FROM ehr_db.meta_e_clinic_symptom t1 
+		ORDER BY t1.symptomId ASC 
+	</select>
+	
+    <!--查询中医症候元数据列表  -->
+    <select id="queryMetaInfoTcmSymptoms" resultType="com.esuizhen.cloudservice.ehr.bean.TMetaInfoTcmSymptom">
+		SELECT 
+        	t1.tcmSymptomId,
+        	t1.tcmSymptomName,
+        	t1.diseaseCode
+		FROM ehr_db.meta_e_tcm_symptom t1 
+		ORDER BY t1.tcmSymptomId ASC 
+	</select>
+	
+		
+	<!--查询生命质量评价量表-isUseGeneralOptions  -->
+	<select id="getUseGeneralOptions" resultType="java.lang.Integer">
+		SELECT 
+        	t1.isUseGeneralOptions
+		FROM ehr_db.meta_e_qualityoflife_scale t1 
+		where t1.scaleTypeId=#{scaleTypeId}
+
+	</select>
+	
+	<!--查询生命质量评价量表明细  -->
+	<select id="querytMetaInfoQualityoflifeScale" resultMap="metaInfoQualityoflifeScaleResultMap" >
+		SELECT 
+        	t1.scaleItemId,
+        	t1.seqNo,
+        	t1.questionDescription,
+        	t2.scaleOptionsId,
+        	t2.optionIndex,
+        	t2.content,
+        	t2.indicateValue
+		FROM ehr_db.meta_e_qualityoflife_scale_item t1
+		<if test="isUseGeneralOptions==0">
+			LEFT JOIN ehr_db.meta_e_qualityoflife_scale_item_options t2 on t1.scaleItemId=t2.scaleItemId 
+		</if>
+		<if test="isUseGeneralOptions==1">
+			, ehr_db.meta_e_qualityoflife_scale_general_options t2
+		</if>
+	
+		where t1.scaleTypeId=#{scaleTypeId}
+		ORDER BY t1.scaleItemId ASC ,t2.optionIndex ASC 
+	</select>
+	
+	<!--查询治疗方案元数据列表  -->
+    <select id="queryMetaInfoTreatmentSchemeList" resultType="com.esuizhen.cloudservice.ehr.bean.TMetaInfoTreatmentScheme">
+		SELECT 
+		    t1.treatmentSchemeId,
+        	t1.treatmentSchemeName,
+        	t1.treatmentPeriod,
+        	t1.treatmentTypeId,
+        	t1.metaDataType
+		FROM ehr_db.meta_e_treatment_scheme t1
+		<if test="treatmentTypeId!=null">
+			WHERE  t1.treatmentTypeId=#{treatmentTypeId}
+		</if> 
+		ORDER BY t1.treatmentSchemeId ASC 
+	</select>		
+		
+	
+		
+	<!--查询治疗方案对应药物明细元数据列表  -->
+    <select id="queryMetaInfoTreatmentSchemeItemList" resultType="com.esuizhen.cloudservice.ehr.bean.TMetaInfoMedicationItem">
+		SELECT 
+		    t1.medicationId,
+        	t1.medicationType,
+        	t1.medicationName,
+        	t1.medicationEnglishName,
+        	t1.commodityName,
+        	t1.computingMethod,
+        	t1.theoreticalDose,
+        	t1.measurementUnit,
+        	t1.drugUsage,
+        	t2.metaDataType as medicationMetaDataType,
+        	(case when t2.treatmentPeriod >0 then t2.treatmentPeriod else t3.treatmentPeriod end) as treatmentPeriod,
+        	t2.totalCourse
+		FROM ehr_db.meta_e_medication t1,
+		     ehr_db.meta_e_treatment_scheme_item_medication t2,
+		     ehr_db.meta_e_treatment_scheme t3 
+		WHERE t3.treatmentSchemeId=#{treatmentSchemeId}
+		      AND t2.treatmentSchemeId=t3.treatmentSchemeId
+		      AND t2.medicationId=t1.medicationId
+		ORDER BY t1.medicationId ASC 
+	</select>
+		
+	<!--查询化疗/靶向药物元数据列表  -->
+    <select id="queryMetaInfoMedicationItemList" resultType="com.esuizhen.cloudservice.ehr.bean.TMetaInfoMedicationItem">
+		SELECT 
+		    t1.medicationId,
+        	t1.medicationType,
+        	t1.medicationName,
+        	t1.commodityName,
+        	t1.computingMethod,
+        	t1.theoreticalDose,
+        	t1.measurementUnit,
+        	t1.drugUsage
+		FROM ehr_db.meta_e_medication t1
+		<if test="medicationType!=null and medicationType!=''">
+			WHERE t1.medicationType=#{medicationType}
+		</if>
+		ORDER BY t1.medicationId ASC 
+	</select>
+	
+		
+	<!--查询手术元数据列表(ICD-9-Cm3  -->
+    <select id="queryMetaInfoIcd9Cm3" resultType="com.esuizhen.cloudservice.ehr.bean.TMetaInfoIcd9Cm3">
+		SELECT 
+        	t1.opId,
+        	t1.opCode,
+        	t1.opName
+        	
+		FROM ehr_db.meta_e_icd_9_cm3 t1 
+		ORDER BY t1.opId ASC 
+	</select>
+	
+	
+	<!--查询不良反应元数据列表  -->
+    <select id="queryMetaInfoAdverseReaction" resultType="com.esuizhen.cloudservice.ehr.bean.TMetaInfoAdverseReaction">
+		SELECT 
+        	t1.adverseReactionId,
+        	t1.adverseReactionName,
+        	t1.grade1,
+        	t1.grade2,
+        	t1.grade3,
+        	t1.grade4,
+        	t1.grade5
+        	
+		FROM ehr_db.meta_e_adverse_reaction t1 
+		ORDER BY t1.adverseReactionId ASC 
+	</select>
+	
+	
+	<!-- 查询诊断分期接口 -->
+	<select id = "queryMetaInfoDiagnosisPeriodization" resultType="com.esuizhen.cloudservice.ehr.bean.TMetaDiagnosisPeriodization">
+		select * from ehr_db.meta_e_diagnosis_periodization
+		<if test="timeFlag!=null">
+			where createTime>timeFlag
+		</if>
+		order by phase ASC,'index' ASC
+	</select>
+	
+	
+	<!-- 查询病理诊断元数据接口 -->
+	<select id = "queryMetaInfoICDO3" resultType="com.esuizhen.cloudservice.ehr.bean.TMetaInfoICDO3">
+		select * from ehr_db.meta_e_icd_o_3
+		<if test="timeFlag!=null">
+			where createTime>#{timeFlag}
+		</if>
+	</select>
+	
+	
+	
+	<!-- 查询诊断分期元数据 -->
+	<select id="queryMetaInfoDiagnosisPeriodizationAll" resultType="com.esuizhen.cloudservice.ehr.model.disease.TDiagnosisPeriodizationInfo">
+		SELECT
+			t1.disagnosisPeriodizationId,
+			t1.disagnosisPeriodizationCode,
+			t1.disagnosisPeriodizationName,
+			t1.phase,
+			t1.`index`,
+			t1.createTime
+		FROM ehr_db.meta_e_diagnosis_periodization t1
+		ORDER BY t1.`index`
+	</select>
+	
+	<!-- 查询治疗类型元数据 -->
+	<select id="queryMetaInfoTreatmentTypeList" resultType="com.esuizhen.cloudservice.ehr.model.disease.TMetaInfoTreatmentType">
+		SELECT
+			t1.treatmentTypeId,
+			t1.treatmentTypeName,
+			t1.flag,
+			t1.createTime,
+			t1.creator
+		FROM ehr_db.meta_e_treatment t1
+		<where>
+		<if test="flag != null">
+			t1.flag = #{flag}
+		</if>
+		<if test="showFlag != null">
+			AND t1.showFlag = #{showFlag}
+		</if>
+		<if test="treatmentTypeName!=null">
+			AND t1.treatmentTypeName LIKE CONCAT(#{treatmentTypeName},'%')  
+		</if>
+		</where>
+	</select>
+	<!--查询病种元数据  -->
+	<select id="queryMetaInfoDiseaseTypeIcdList" resultType="com.esuizhen.cloudservice.ehr.model.disease.TMetaInfoDiseaseTypeIcd" >
+		SELECT 
+        	t1.diseaseTypeId,
+        	t1.diseaseTypeName
+		FROM ehr_db.meta_c_disease_type t1
+		where 1=1
+		<if test="name!=null">
+			AND t1.diseaseTypeName like '%${name}%'
+		</if>
+		order by t1.diseaseTypeId asc
+	</select>
+	
+	<!--查询病种分页信息  -->
+	<select id="queryMetaInfoDiseaseTypeIcdPageList" resultMap="metaInfoDiseaseTypeIcdListResultMap" >
+		SELECT 
+        	t1.diseaseTypeId,
+        	t1.diseaseTypeName,
+        	t3.trueName creatorName,
+        	t2.icdDiseaseTypeId,
+        	t2.icdDiseaseTypeName,
+        	t2.diseaseCodePrefix
+		FROM ehr_db.meta_c_disease_type t1
+		LEFT JOIN user_db.u_doctor t3 on t1.creator=t3.doctorId	
+		LEFT JOIN ehr_db.meta_c_disease_type_icd t2 on t1.diseaseTypeId=t2.diseaseTypeId
+		where 1=1
+		<if test="name!=null">
+			AND t1.diseaseTypeName like '%${name}%'
+		</if>
+		order by t1.diseaseTypeId asc
+	</select>
+	<!--查询ICD-10元数据  -->
+	<select id="searchMetaInfoIcd10" resultType="com.esuizhen.cloudservice.ehr.model.icd10.MetaEicd10" >
+		SELECT 
+        	t1.diseaseCode,
+        	t1.diseaseName,
+        	t1.sexLimit,
+        	t1.curativeEffect,
+        	t1.helpRememberCode
+		FROM ehr_db.meta_e_icd_10 t1
+		where 1=1	
+		<if test="diseaseName!=null">
+			and t1.diseaseName like '%${diseaseName}%'
+		</if>
+		<if test="diseaseCode!=null">
+		and t1.diseaseCode like '${diseaseCode}%'
+		</if>
+	</select>
+	
+	<select id="findMetaInfoDetectionUnit" resultType="com.esuizhen.cloudservice.ehr.model.meta.TMetaDetectionUnit">
+		SELECT
+			t1.id,
+			t1.unit,
+			t1.createTime
+		FROM ehr_db.meta_c_detection_unit t1
+	</select>
+</mapper>
+

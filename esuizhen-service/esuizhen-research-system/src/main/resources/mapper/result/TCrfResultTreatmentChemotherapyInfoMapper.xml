@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TCrfResultTreatmentChemotherapyInfoDao">
+
+	<resultMap id="crfResultTreatmentChemotherapyInfoMap" type="com.esuizhen.cloudservice.research.model.result.TCrfResultMainInfo" >
+		<result property="crfResultId" column="crfResultId" />
+		<result property="crfObserveId" column="crfObserveId" />
+		<result property="subjectElementId" column="subjectElementId" />
+		<result property="projectId" column="projectId" />
+		<result property="patientId" column="patientId" />
+		<result property="creatorId" column="creatorId" />
+		<result property="happenTime" column="happenTime"/>
+		<result property="crfCourseItemTime" column="crfCourseItemTime" />
+		
+		<collection property="crfResult" javaType="ArrayList" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentChemotherapyInfo">
+			<result property="crfTreatmentChemotherapyResultId" column="crfTreatmentChemotherapyResultId" />
+			<result property="crfResultId" column="crfResultId" />
+			<result property="schemeIndex" column="schemeIndex" />
+			<result property="schemeName" column="schemeName" />
+			<result property="schemeCategory" column="schemeCategory" />
+			<result property="schemeCategoryDesc" column="schemeCategoryDesc" />
+			<result property="chemotherapyType" column="chemotherapyType" />
+			<result property="chemotherapyTypeDesc" column="chemotherapyTypeDesc" />
+			<result property="index" column="index" />
+			<result property="beginTime" column="beginTime" />
+			<result property="endTime" column="endTime" />
+			
+			<collection property="crfResultTreatmentChemotherapyMedicationDetailList" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentChemotherapyMedicationDetail">
+				<result property="crfChemotherapyMedicationResultDetailId" column="crfChemotherapyMedicationResultDetailId"/>
+				<result property="crfResultId" column="crfResultId"/>
+				<result property="crfTreatmentChemotherapyResultId" column="crfTreatmentChemotherapyResultId"/>
+				<result property="medicationType" column="medicationType"/>
+				<result property="medicationId" column="medicationId"/>
+				<result property="medicationName" column="medicationName"/>
+				<result property="commodityName" column="commodityName"/>
+				<result property="computingMethod" column="computingMethod"/>
+				<result property="theoreticalDose" column="theoreticalDose"/>
+				<result property="measurementUnit" column="measurementUnit"/>
+				<result property="drugUsage" column="drugUsage"/>
+				<result property="actualDose" column="actualDose"/>
+				<result property="treatmentPeriod" column="treatmentPeriod"/>
+				<result property="totalCourse" column="totalCourse"/>
+				<result property="delay" column="delay"/>
+				<result property="decrement" column="decrement"/>
+				<result property="beginTime" column="beginTime"/>
+				<result property="endTime" column="endTime"/>
+			</collection>
+		</collection>
+	</resultMap>
+	
+	<insert id="insertCrfResultTreatmentChemotherapy" parameterType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentChemotherapyInfo">
+        INSERT INTO crf_result_treatment_chemotherapy 
+        (
+        	crfTreatmentChemotherapyResultId ,
+        	crfResultId ,
+        	schemeIndex ,
+        	schemeName ,
+        	schemeCategory ,
+        	schemeCategoryDesc ,
+        	chemotherapyType ,
+        	chemotherapyTypeDesc ,
+        	beginTime ,
+        	endTime ,
+        	`index`,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{crfTreatmentChemotherapyResultId} ,
+        	#{crfResultId} ,
+        	#{schemeIndex} ,
+        	#{schemeName} ,
+        	#{schemeCategory} ,
+        	#{schemeCategoryDesc} ,
+        	#{chemotherapyType} ,
+        	#{chemotherapyTypeDesc} ,
+        	#{beginTime} ,
+        	#{endTime} ,
+        	#{index} ,
+        	NOW() ,
+        	NOW()
+        )
+	</insert>
+    
+	<update id="updateCrfResultTreatmentChemotherapy" parameterType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentChemotherapyInfo">
+        UPDATE crf_result_treatment_chemotherapy 
+        <set>
+	        <if test="crfResultId != null">
+                crfResultId = #{crfResultId} ,
+            </if>
+	        <if test="schemeName != null">
+                schemeName = #{schemeName} ,
+            </if>
+	        <if test="schemeCategory != null">
+                schemeCategory = #{schemeCategory} ,
+            </if>
+	        <if test="schemeCategoryDesc != null">
+                schemeCategoryDesc = #{schemeCategoryDesc} ,
+            </if>
+	        <if test="chemotherapyType != null">
+                chemotherapyType = #{chemotherapyType} ,
+            </if>
+	        <if test="chemotherapyTypeDesc != null">
+                chemotherapyTypeDesc = #{chemotherapyTypeDesc} ,
+            </if>
+	        <if test="beginTime != null">
+                beginTime = #{beginTime} ,
+            </if>
+	        <if test="endTime != null">
+                endTime = #{endTime} ,
+            </if>
+            <if test="index != null">
+            	index = #{index},
+            </if>
+            updateTime = NOW()
+        </set>
+        WHERE 
+	        crfTreatmentChemotherapyResultId = #{crfTreatmentChemotherapyResultId} 
+	</update>
+
+    <delete id="deleteCrfResultTreatmentChemotherapy">
+        DELETE FROM crf_result_treatment_chemotherapy WHERE crfTreatmentChemotherapyResultId = #{crfTreatmentChemotherapyResultId} 
+    </delete>
+    
+    <delete id="deleteCrfResultTreatmentChemotherapyByCrfResultId">
+        DELETE FROM crf_result_treatment_chemotherapy WHERE crfResultId = #{crfResultId} 
+    </delete>
+    
+    <select id="queryCrfResultTreatmentChemotherapyById" resultType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentChemotherapyInfo">
+		SELECT 
+        	crfTreatmentChemotherapyResultId,
+        	crfResultId,
+        	schemeIndex,
+        	schemeName,
+        	schemeCategory,
+        	schemeCategoryDesc,
+        	chemotherapyType,
+        	chemotherapyTypeDesc,
+        	beginTime,
+        	endTime,
+        	index,
+        	createTime,
+        	updateTime
+		FROM crf_result_treatment_chemotherapy 
+	    WHERE 
+	        crfTreatmentChemotherapyResultId = #{crfTreatmentChemotherapyResultId} 
+	</select>
+	
+	<select id="queryCrfResultTreatmentChemotherapyByCrfObserveIdPatientId" resultMap="crfResultTreatmentChemotherapyInfoMap">
+		SELECT 
+			t1.crfResultId,
+	    	t1.crfObserveId,
+	    	t1.subjectElementId,
+	    	t1.projectId,
+	    	t1.patientId,
+	    	t1.creatorId,
+        	t2.crfTreatmentChemotherapyResultId,
+        	t2.schemeIndex,
+        	t2.schemeName,
+        	t2.schemeCategory,
+        	t2.schemeCategoryDesc,
+        	t2.chemotherapyType,
+        	t2.chemotherapyTypeDesc,
+        	t2.beginTime,
+        	t2.endTime,
+        	t2.index,
+        	t3.crfChemotherapyMedicationResultDetailId,
+        	t3.medicationType,
+        	t3.medicationId,
+        	t3.medicationName,
+        	t3.commodityName,
+        	t3.computingMethod,
+        	t3.theoreticalDose,
+        	t3.measurementUnit,
+        	t3.drugUsage,
+        	t3.actualDose,
+        	t3.treatmentPeriod,
+        	t3.totalCourse,
+        	t3.delay,
+        	t3.decrement,
+        	t3.beginTime,
+        	t3.endTime
+		FROM crf_result_main t1 , crf_result_treatment_chemotherapy t2 , crf_result_treatment_chemotherapy_medication_detail t3
+	    WHERE t1.crfResultId=t2.crfResultId
+		AND t2.crfTreatmentChemotherapyResultId=t3.crfTreatmentChemotherapyResultId
+	    AND t1.crfObserveId = #{crfObserveId} 
+	    AND t1.patientId = #{patientId}
+	    ORDER BY t2.index
+	</select>
+	
+	<delete id="deleteByProjectId">
+		DELETE
+			i6.*
+		FROM pro_db.crf_result_main i1,
+			pro_db.crf_observation_subject_element i2,
+			pro_db.crf_course_detail i3,
+			pro_db.crf_course i4,
+			pro_db.r_crftemplate_project i5,
+			pro_db.crf_result_treatment_chemotherapy i6
+		WHERE i1.crfObserveId = i2.crfObserveId
+			AND i2.crfCourseItemId = i3.crfCourseItemId
+			AND i3.crfCourseId = i4.crfCourseId
+			AND i4.crfTemplateId = i5.crfTemplateId
+			AND i5.projectId = #{projectId}
+	</delete>
+</mapper>
+

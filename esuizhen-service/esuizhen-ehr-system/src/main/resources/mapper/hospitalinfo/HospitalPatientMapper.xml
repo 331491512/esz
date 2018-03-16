@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.hospitalinfo.HospitalPatientDao">
+	<select id="hasRelationOfHospitalPatient" parameterType="com.westangel.common.bean.user.HospitalPatientBriefInfo" resultType="java.lang.Integer">
+		SELECT
+			count(1) 
+		FROM
+			user_db.r_hospital_patient 
+		WHERE
+		(
+			patientId=#{patientId} 
+			AND hospitalId=#{hospitalId}
+		)	
+	</select>
+	
+	<insert id="insertRelationOfHospitalPatient" parameterType="com.westangel.common.bean.user.HospitalPatientBriefInfo">
+		<selectKey resultType="long" keyProperty="id" order="AFTER">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO user_db.r_hospital_patient
+		(
+			hospitalId,
+			patientId,
+			patientNo,
+			syncFlag,
+			sourceFlag,
+			lastestFollowupResultSyncTime,
+			createTime
+		)
+		VALUES
+		(
+			#{hospitalId},
+			#{patientId},
+			#{patientNo},
+			#{syncFlag},
+			#{sourceFlag},
+			#{lastestFollowupResultSyncTime},
+			NOW()
+		)
+	</insert>
+	
+	<select id="queryHospital" resultType="com.westangel.common.bean.HospitalProfile">
+		SELECT
+			t1.useCount
+		FROM user_db.u_hospital t1
+		where hospitalId=#{hospitalId} and metaDataType=#{metaDataType} and creator=#{creator}
+	</select>
+	
+	<update id="updateHospital" parameterType="com.westangel.common.bean.HospitalProfile">
+		update user_db.u_hospital set useCount=#{useCount} where hospitalId=#{hospitalId}
+	</update>
+ </mapper>

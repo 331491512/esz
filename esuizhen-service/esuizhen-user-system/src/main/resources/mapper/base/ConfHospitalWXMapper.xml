@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.ConfHospitalWXDao">
+	<select id="findByHospitalId" resultType="com.westangel.common.bean.user.ConfHospitalWX">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM user_db.conf_hospital_wx t1
+		WHERE t1.hospitalId = #{hospitalId} LIMIT 1
+	</select>
+	
+	<select id="findByProductId" resultType="com.westangel.common.bean.user.ConfHospitalWX">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM user_db.conf_hospital_wx t1
+		WHERE t1.productId = #{productId} LIMIT 1
+	</select>
+	
+	<sql id="base_column_list">
+		t1.id, t1.hospitalId, t1.serviceName, t1.weixinName, t1.productId, t1.remark, t1.enableFlag, t1.createTime
+	</sql>
+</mapper>

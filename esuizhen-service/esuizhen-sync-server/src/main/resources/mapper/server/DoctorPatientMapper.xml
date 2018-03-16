@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.server.DoctorPatientDao">
+	<insert id="insert">
+		INSERT INTO user_db.r_doctor_patient (
+			patientId,patientUuid,doctorId,doctorUuid,hasMedicalRecord,vipFlag,
+			firstVisitFlag,attentionTime,createTime,updateTime,sourceFlag,sourceDiagnosisFlag,professionalRank,mergeFlag,
+			outDeptId,outDeptUuid,outDeptName,inDeptId,inDeptUuid,inDeptName,
+			mergeFromUuid,mergeTargetUuid,mergeTime
+		)
+		VALUES(
+			#{patientId},#{patientUuid},#{doctorId},#{doctorUuid},#{hasMedicalRecord},#{vipFlag},
+			#{firstVisitFlag},#{attentionTime},#{createTime},#{updateTime},#{sourceFlag},#{sourceDiagnosisFlag},#{professionalRank},#{mergeFlag},
+			#{outDeptId},#{outDeptUuid},#{outDeptName},#{inDeptId},#{inDeptUuid},#{inDeptName},
+			#{mergeFromUuid},#{mergeTargetUuid},#{mergeTime}
+		)
+		ON DUPLICATE KEY UPDATE
+			patientId=VALUES(patientId),
+			patientUuid=VALUES(patientUuid),
+			doctorId=VALUES(doctorId),
+			doctorUuid=VALUES(doctorUuid),
+			createTime=VALUES(createTime),
+			updateTime=VALUES(updateTime),
+			sourceDiagnosisFlag=VALUES(sourceDiagnosisFlag),
+			professionalRank=VALUES(professionalRank),
+			mergeFlag=VALUES(mergeFlag),
+			outDeptId=VALUES(outDeptId),
+			outDeptUuid=VALUES(outDeptUuid),
+			outDeptName=VALUES(outDeptName),
+			inDeptId=VALUES(inDeptId),
+			inDeptUuid=VALUES(inDeptUuid),
+			inDeptName=VALUES(inDeptName),
+			mergeFromUuid=VALUES(mergeFromUuid),
+			mergeTargetUuid=VALUES(mergeTargetUuid),
+			mergeTime=VALUES(mergeTime)
+	</insert>
+</mapper>

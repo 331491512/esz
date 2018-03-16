@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.meta.MetainfoOccupationDao">
+
+    <select id="getMetaInfoOccupationList" resultType="com.esuizhen.cloudservice.ehr.model.meta.TMetaInfoOccupation" >
+		SELECT 
+        	occupationId,
+        	occupationCode,
+        	parentCode,
+        	occupationName,
+        	description
+		FROM user_db.meta_occupation 
+	    <where>
+			<if test="occupationName!=null">
+				AND occupationName LIKE CONCAT(#{occupationName},'%')  
+			</if>
+		</where>
+	</select>
+	
+    <select id="getMetaInfoOccupationListByName" resultType="com.esuizhen.cloudservice.ehr.model.meta.TMetaInfoOccupation" >
+		SELECT 
+        	occupationId,
+        	occupationCode,
+        	parentCode,
+        	occupationName,
+        	description
+		FROM user_db.meta_occupation 
+	    <where>
+			<if test="occupationName!=null">
+				AND (occupationName =#{occupationName} or  occupationCode =#{occupationName})  
+			</if>
+		</where>
+	</select>
+	
+</mapper>
+

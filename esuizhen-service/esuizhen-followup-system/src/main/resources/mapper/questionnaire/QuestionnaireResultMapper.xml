@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.questionnaire.QuestionnaireResultDao">
+	<resultMap type="com.esuizhen.cloudservice.followup.model.questionnaire.TQuestionnaireResult" id="QuestionnaireResultMap">
+		<id column="questionnaireId" property="questionnaireId"/>
+		<result column="questionnaireResultId" property="questionnaireResultId"/>
+		<result column="creatorId" property="patientId"/>
+		<result column="creatorName" property="creatorName"/>
+		<result column="followupItemId" property="followupItemId"/>
+		<result column="subject" property="subject"/>
+		<result column="description" property="description"/>
+		<collection column="questionnaireId" property="stemList" ofType="com.esuizhen.cloudservice.followup.model.questionnaire.TQuestionnaireResultStem">
+			<id column="questionnaireStemId" property="questionnaireStemId"/>
+			<result column="squestionnaireId" property="questionnaireId"/>
+			<result column="questionnaireResultStemId" property="questionnaireResultStemId"/>
+			<result column="mandatoryFlag" property="mandatoryFlag"/>
+			<result column="sectionId" property="sectionId"/>
+			<result column="sectionTitle" property="sectionTitle"/>
+			<result column="stemIndex" property="stemIndex"/>
+			<result column="stemCode" property="stemCode"/>
+			<result column="content" property="content"/>
+			<result column="questionType" property="questionType"/>
+			<result column="answerFlag" property="answerFlag"/>
+			<result column="sectionTitle" property="sectionTitle"/>
+			<collection property="questionOptions" column="{questionnaireStemId=questionnaireStemId,questionnaireResultStemId=questionnaireResultStemId,stemIndex=stemIndex}" select="queryResultOptionsDetail"/>
+		</collection>
+	</resultMap>
+	<resultMap type="com.esuizhen.cloudservice.followup.model.questionnaire.TQuestionnaireResultOptionsDetail" id="QuestionnaireResultOpetionDetailMap">
+		<id column="questionnaireOptionId" property="questionnaireOptionId"/>
+		<result column="questionnaireStemId" property="questionnaireStemId"/>
+		<result column="questionnaireId" property="questionnaireId"/>
+		<result column="questionnaireResultStemId" property="questionnaireResultStemId"/>
+		<result column="questionnaireResultOptionId" property="questionnaireResultOptionId"/>
+		<result column="questionnaireResultId" property="questionnaireResultId"/>
+		<result column="optionIndex" property="optionIndex"/>
+		<result column="contentType" property="contentType"/>
+		<result column="content" property="content"/>
+		<result column="indicateValue" property="indicateValue"/>
+		<result column="stemCode" property="stemCode"/>
+		<result column="nextStemCode" property="nextStemCode"/>
+		<result column="level" property="level"/>
+		<result column="parentOptionId" property="parentOptionId"/>
+		<result column="title" property="title"/>
+		<result column="questionType" property="questionType"/>
+		<result column="fillFlag" property="fillFlag"/>
+		<result column="fillContent" property="fillContent"/>
+		<result column="fillContent2" property="fillContent2"/>
+		<result column="fillContentType" property="fillContentType"/>
+		<result column="fillContentType2" property="fillContentType2"/>
+		<result column="isChecked" property="isChecked"/>
+		<collection property="questionOptions" column="{parentOptionId=questionnaireOptionId,questionnaireResultStemId=questionnaireResultStemId}" select="queryResultOptionsDetail"/>
+	</resultMap>
+	<!-- 问卷结果项获取  -->
+	<select id="queryResultOptionsDetail" resultMap="QuestionnaireResultOpetionDetailMap" parameterType="java.util.Map">
+		SELECT 
+			r1.questionnaireResultOptionId,
+			r1.questionnaireResultStemId,
+			r1.questionnaireResultId,
+			r1.isChecked,
+			r1.fillContent,
+			r1.fillContent2,
+			q1.questionnaireId,
+			q1.questionnaireStemId,
+			q1.questionnaireOptionId,
+			q1.stemCode,
+			q1.content,
+			q1.optionIndex,
+			q1.contentType,
+			q1.indicateValue,
+			q1.nextStemCode,
+			q1.`level`,
+			q1.parentOptionId,
+			q1.title,
+			q1.questionType,
+			q1.fillFlag,
+			q1.fillContentType,
+			q1.fillContentType2
+		FROM 
+		questionnaire_options_detail q1
+		LEFT JOIN 
+		questionnaire_result_options_detail r1 
+		ON q1.questionnaireOptionId=r1.questionnaireOptionId
+			AND r1.questionnaireResultStemId=#{questionnaireResultStemId}
+		<where>
+			<if test="questionnaireStemId!=null">
+				AND q1.questionnaireStemId=#{questionnaireStemId}
+			</if>
+			<choose>
+				<when test="parentOptionId!=null">
+					AND q1.parentOptionId=#{parentOptionId}
+				</when>
+				<otherwise>
+					AND q1.level=0
+				</otherwise>
+			</choose>
+		</where>
+		ORDER BY optionIndex
+	</select>
+	<insert id="insertQuestionnaireResult"  parameterType="com.esuizhen.cloudservice.followup.model.questionnaire.TQuestionnaireResult">
+        INSERT INTO questionnaire_result (
+        	questionnaireResultId ,
+        	questionnaireId ,
+        	patientId ,
+        	followupItemId,
+        	creatorId ,
+        	creatorRole ,
+        	questionnaireResultUrl ,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{questionnaireResultId} ,
+        	#{questionnaireId} ,
+        	#{patientId},
+        	#{followupItemId},
+        	#{creatorId} ,
+        	#{creatorRole} ,
+        	#{questionnaireResultUrl} ,
+        	NOW() ,
+        	NOW() 
+        )
+	</insert>
+    
+	<update id="updateQuestionnaireResult" parameterType="com.esuizhen.cloudservice.followup.model.questionnaire.TQuestionnaireResult">
+        UPDATE questionnaire_result 
+        <set>
+	        <if test="questionnaireId != null">
+                questionnaireId = #{questionnaireId} ,
+            </if>
+	        <if test="creatorId != null">
+                creatorId = #{creatorId} ,
+            </if>
+	        <if test="creatorRole != null">
+                creatorRole = #{creatorRole} ,
+            </if>
+	        <if test="questionnaireResultUrl != null">
+                questionnaireResultUrl = #{questionnaireResultUrl} ,
+            </if>
+	        <if test="createTime != null">
+                createTime = #{createTime} ,
+            </if>
+	        <if test="updateTime != null">
+                updateTime = #{updateTime} ,
+            </if>
+        </set>
+        WHERE 
+	        questionnaireResultId = #{questionnaireResultId} 
+	</update>
+
+    <delete id="deleteQuestionnaireResult">
+        DELETE FROM questionnaire_result WHERE
+        questionnaireResultId = #{questionnaireResultId} 
+    </delete>
+    <delete id="deleteQuestionnaireStemResult">
+        DELETE FROM questionnaire_result_stem WHERE
+        questionnaireResultId = #{questionnaireResultId} 
+    </delete>
+    <delete id="deleteQuestionnaireOptionResult">
+        DELETE FROM questionnaire_result_options_detail WHERE
+        questionnaireResultId = #{questionnaireResultId} 
+    </delete>
+    
+    <select id="queryQuestionnaireResult" resultMap="QuestionnaireResultMap">
+		SELECT
+			r1.questionnaireResultId,r1.questionnaireId,r1.creatorId,r1.followupItemId,r1.creatorRole,r1.questionnaireResultUrl,r1.createTime,r1.updateTime,
+			CASE 
+			WHEN r1.creatorRole=1 THEN (SELECT trueName FROM user_db.u_doctor WHERE doctorId=r1.creatorId)
+			WHEN r1.creatorRole=2 THEN (SELECT trueName FROM user_db.u_patient WHERE patientId=r1.creatorId)
+			END
+			creatorName,
+			q1.`subject`,q1.description,
+			r2.questionnaireResultStemId,r2.answerFlag,
+			q2.questionnaireStemId,q2.stemIndex,q2.questionnaireId squestionnaireId,q2.sectionTitle,
+			q2.stemCode,q2.content,q2.questionType,q2.mandatoryFlag
+		FROM
+			questionnaire_result r1
+		LEFT JOIN user_db.u_patient p ON p.patientId = r1.creatorId
+		LEFT JOIN questionnaire q1 ON q1.questionnaireId = r1.questionnaireId
+		LEFT JOIN questionnaire_stem q2 ON q2.questionnaireId = q1.questionnaireId
+		LEFT JOIN questionnaire_result_stem r2 ON r2.questionnaireResultId = r1.questionnaireResultId AND r2.questionnaireStemId = q2.questionnaireStemId
+		<where>
+			<if test="questionnaireResultId!=null">
+				AND r1.questionnaireResultId = #{questionnaireResultId}
+			</if>
+			<if test="patientId!=null">
+				AND r1.patientId = #{patientId}
+			</if>
+			<if test="followupItemId!=null">
+				AND r1.followupItemId = #{followupItemId}
+			</if>
+			<if test="questionnaireId!=null">
+				AND r1.questionnaireId = #{questionnaireId}
+			</if>		
+		</where> 
+		ORDER BY q2.stemIndex
+	</select>
+	<!--患者随访问卷结果列表-->
+	<select id="selectFollowupQuestionnaireResult" parameterType="java.util.HashMap" resultType="com.esuizhen.cloudservice.followup.model.questionnaire.TQuestionnaireResult">
+		SELECT t1.questionnaireId , t1.subject , t1.description ,t1.contentTemplateId, 
+			 t2.createTime , t2.updateTime ,  
+			 CONCAT('${questionnaireResultUrl}' , t2.questionnaireResultId) questionnaireResultUrl ,t2.creatorId , t2.creatorRole ,
+			 (SELECT trueName FROM user_db.u_user WHERE userId=t2.creatorId) creatorName ,
+			 t2.questionnaireResultId 
+		FROM questionnaire t1 , questionnaire_result t2
+		WHERE t1.questionnaireId=t2.questionnaireId
+		AND t2.patientId=#{patientId}
+		<if test="subject!=null and subject!=''">
+			AND t1.subject LIKE "%"#{subject}"%" 
+		</if>
+		<if test="reqFlag==1">
+              AND author = 9
+        </if>
+        <if test="reqFlag==2">
+              AND author != 9
+        </if>
+        <if test="followupItemId!=null">
+              AND t2.followupItemId = #{followupItemId}
+        </if>
+		ORDER BY t2.updateTime DESC
+	</select>
+	
+	<select id="queryPatientFollowupItemId" resultType="java.util.HashMap">
+		SELECT
+			t1.followupId ,
+			t2.followupItemId
+		FROM
+			followup_plan t1 ,
+			followup_plan_detail t2
+		WHERE
+			t1.followupId = t2.followupId
+		AND DATEDIFF(NOW(), t2.followupDate) &lt;= 10
+		AND DATEDIFF(NOW(), t2.followupDate) >=-10
+		AND t2.actionType!=0
+		AND t1.patientId = #{patientId}
+		<if test="followupItemId!=null">
+              AND t2.followupItemId = #{followupItemId}
+        </if>
+		LIMIT 1
+	</select>
+</mapper>
+

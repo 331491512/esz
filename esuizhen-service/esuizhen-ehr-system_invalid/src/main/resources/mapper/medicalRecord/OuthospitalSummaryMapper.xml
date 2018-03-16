@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.medicalRecord.OuthospitalSummaryDao">
+	<!-- p.patientNo,
+			p.trueName,
+			CASE WHEN p.sex=1 THEN '男' WHEN p.sex=2 THEN '女' END sex,
+			((year(NOW())-year(p.birthDate)-1) + (DATE_FORMAT(p.birthDate,'%m%d') <![CDATA[<=]]> DATE_FORMAT(NOW(),'%m%d'))) as age,
+			t.inhospitalDate,
+			t.outhospitalDate,
+			t.inhospitalDays, -->
+	<select id="queryOuthospitalSummary" parameterType="java.lang.String" resultType="com.esuizhen.cloudservice.ehr.model.medicalRecord.TOuthospitalSummaryInfo">
+		SELECT
+			t.summaryContent
+		FROM
+			ei_outhospital_note t
+		INNER JOIN user_db.u_patient p ON p.patientId = t.patientId
+		WHERE
+			t.inhospitalId = #{inhospitalId}
+	</select>
+	
+	<select id="queryOuthospitalList" parameterType="java.util.HashMap" resultType="com.esuizhen.cloudservice.ehr.model.medicalRecord.TOuthospitalSummaryInfo">
+		SELECT
+			t.outhospitalId,t.inhospitalId,t.patientId,t.patientNo,t.inhospitalDate,t.inhospitalTimes,h.hospitalName
+		FROM
+			ei_outhospital_note t
+		JOIN user_db.u_patient p ON p.patientId = t.patientId
+		LEFT JOIN user_db.u_hospital h ON h.hospitalId = t.hospitalId
+		WHERE
+			t.patientId = #{patientId}
+		<if test="startRow != null">
+			LIMIT #{startRow},#{pageSize}
+		</if>
+	</select>
+</mapper>
+

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.meta.MetaDao">
+	
+	<select id="queryMetaEIcdOList" resultType="com.esuizhen.cloudservice.ehr.bean.TMetaEIcdO">
+		select organCode,organName from meta_e_icd_o order by organId ASC
+	</select>
+	
+	<select id="queryDiagnosisTypeList" resultType="com.esuizhen.cloudservice.ehr.model.disease.TDiagnosisTypeInfo">
+		select diagnosisTypeId,diagnosisTypeName from meta_e_diagnosis_type 
+		<where>
+			<if test="flag != null">
+				flag=#{flag}
+			</if>
+		</where>
+		order by diagnosisTypeId ASC
+	</select>
+	
+	<select id="queryDiagnosisBasisList" resultType="com.esuizhen.cloudservice.ehr.model.disease.TDiagnosisBasisInfo">
+		select diagnosisBasisId,diagnosisBasisCode,diagnosisBasisName from meta_e_diagnosis_basis order by diagnosisBasisId ASC
+	</select>
+	
+	<select id="queryAnesthesiaWayList" resultType="com.esuizhen.cloudservice.ehr.model.disease.TAnesthesiaWayInfo">
+		select anesthesiaId,anesthesiaCode,anesthesiaName from meta_e_anesthesia_way order by anesthesiaId ASC
+	</select>
+	<!-- add by fanpanwei -->
+	<select id="getMetaListByTableName" resultType="java.util.HashMap">
+		select * from ${tableName}
+		<if test="condition!=null and condition!=''">
+			${condition}
+		</if>
+	</select>
+</mapper>

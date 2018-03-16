@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<mapper namespace="com.esuizhen.server.sync.dao.sc.BatchDetailServerDao" >
+	<!-- 插入批次详情 -->
+    <insert id="insert">
+		INSERT INTO sc_db.sync_batch_detail_server(
+			batchId,tableId,createTime
+		)
+		VALUES(
+			#{batchId},#{tableId},now()
+		)
+	</insert>
+	<!-- 获取批次详情List -->
+	<select id="queryBatchDetailList" resultType="com.esuizhen.server.sync.bean.TBatchDetailInfo">
+		SELECT batchId,tableId,state,pushNum,handleNum,successNum,failNum FROM sc_db.sync_batch_detail_server WHERE 1
+		<if test="batchId!=null">
+			AND batchId=#{batchId}
+		</if>
+		<if test="tableId!=null">
+			AND tableId=#{tableId}
+		</if>
+		<if test="state!=null">
+			AND state=#{state}
+		</if>
+	</select>
+	
+	<!-- 获取批次详情 -->
+	<select id="queryBatchDetailInfo" resultType="com.esuizhen.server.sync.bean.TBatchDetailInfo">
+		SELECT batchId,tableId,state,pushNum,handleNum,successNum,failNum FROM sc_db.sync_batch_detail_server WHERE 1
+		<if test="batchId!=null">
+			AND batchId=#{batchId}
+		</if>
+		<if test="tableId!=null">
+			AND tableId=#{tableId}
+		</if>
+		<if test="state!=null">
+			AND state=#{state}
+		</if>
+	</select>
+	
+	<!-- 修改状态 -->
+	<update id="updateState">
+		UPDATE sc_db.sync_batch_detail_server
+		<set>
+			state=#{state},
+			<if test="pushTimes!=null">
+				pushTimes = #{pushTimes},
+			</if>
+			<if test="processTimes!=null">
+				processTimes = #{processTimes},
+			</if>
+			<if test="getTimes!=null">
+				getTimes = #{getTimes},
+			</if>
+			updateTime=now()
+		</set>
+		WHERE batchId=#{batchId} AND tableId=#{tableId}
+	</update>
+	<!-- 修改统计条数 -->
+	<update id="updateCountNum">
+		UPDATE sc_db.sync_batch_detail_server
+		<set>
+			<if test="pushNum!=null">
+				pushNum=#{pushNum},
+			</if>
+			<if test="handleNum!=null">
+				handleNum=#{handleNum},
+			</if>
+			<if test="successNum!=null">
+				successNum=#{successNum},
+			</if>
+			<if test="failNum!=null">
+				failNum=#{failNum},
+			</if>
+			updateTime=now()
+		</set>
+		WHERE batchId=#{batchId} AND tableId=#{tableId}
+	</update>
+</mapper>

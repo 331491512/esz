@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.CloudHospitalPatientDao" >
+
+	<resultMap id="baseResultMap" type="com.esuizhen.cloudservice.sync.model.HospitalPatient" >
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="doctorId" property="doctorId" jdbcType="BIGINT" />
+		<result column="hospitalId" property="hospitalId" jdbcType="BIGINT" />
+		<result column="deptId" property="deptId" jdbcType="INTEGER" />
+		<result column="positionTitle" property="positionTitle" jdbcType="INTEGER" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<select id="findPatientNo" resultType="java.lang.String">
+		SELECT
+			(CASE WHEN tab.patientNo1 IS NOT NULL THEN tab.patientNo1
+				WHEN tab.patientNo2 IS NOT NULL THEN tab.patientNo2
+				ELSE tab.patientNo3 END) patientNo
+		FROM (SELECT (SELECT t1.patientNo FROM ehr_db.ei_inhospital_note t1 WHERE t1.patientNo IS NOT NULL AND t1.patientId=#{patientId} AND t1.hospitalId=#{hospitalId} LIMIT 1) patientNo1,
+		(SELECT t2.patientNo FROM ehr_db.eci_surgery_note t2 WHERE t2.patientNo IS NOT NULL AND t2.patientId=#{patientId} AND t2.hospitalId=#{hospitalId} LIMIT 1) patientNo2,
+		(SELECT t3.patientNo FROM ehr_db.e_diagnosis_info t3
+			INNER JOIN ehr_db.e_medical_record t4 ON t3.emrId=t4.emrId
+		WHERE t3.patientNo IS NOT NULL AND t3.patientId=#{patientId} AND t4.hospitalId=#{hospitalId} LIMIT 1) patientNo3) tab
+	</select>
+	
+	<select id="findNoPatientNoes" resultType="com.esuizhen.cloudservice.sync.model.HospitalPatient">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM user_db.r_hospital_patient t1
+		WHERE (t1.patientNo IS NULL OR TRIM(t1.patientNo)='') AND t1.patientId=#{patientId}
+	</select>
+	
+	<sql id="base_column_list">
+		t1.id, t1.hospitalId, t1.patientId, t1.patientNo, t1.createTime
+	</sql>
+	
+	<select id="find" resultMap="baseResultMap">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM user_db.r_hospital_patient t1
+		WHERE 1=1
+			<if test="hospitalId != null">
+				AND t1.hospitalId=#{hospitalId,jdbcType=INTEGER}
+			</if>
+			<if test="patientId != null">
+				AND t1.patientId=#{patientId,jdbcType=BIGINT}
+			</if>
+	</select>
+	
+	<select id="findByHospitalUuidAndPatientUuid" resultMap="baseResultMap">
+		SELECT
+			t1.id, t1.hospitalId, t1.patientId, t1.patientNo, t1.createTime
+		FROM user_db.r_hospital_patient t1
+			INNER JOIN user_db.u_hospital t2 ON t1.hospitalId=t2.hospitalId
+			INNER JOIN user_db.u_patient t3 ON t1.patientId=t3.patientId
+			INNER JOIN user_db.u_user t4 ON t3.userId=t4.userId
+		WHERE 1=1
+			<if test="hospitalUuid != null">
+				AND t2.uuid=#{hospitalUuid,jdbcType=VARCHAR}
+			</if>
+			<if test="patientUuid != null">
+				AND t4.uuid=#{patientUuid,jdbcType=VARCHAR}
+			</if>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO user_db.r_hospital_patient(
+			hospitalId,
+			patientId,
+			patientNo,
+			sourceFlag,
+			inhospitalDate,
+			createTime
+		)VALUES(
+			#{hospitalId,jdbcType=BIGINT},
+			#{patientId,jdbcType=BIGINT},
+			#{patientNo,jdbcType=VARCHAR},
+			#{sourceFlag},
+			#{inhospitalDate},
+			NOW()
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.esuizhen.cloudservice.sync.model.HospitalPatient">
+		UPDATE user_db.r_hospital_patient
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="hospitalId != null">
+				hospitalId=#{hospitalId,jdbcType=BIGINT},
+			</if>
+			<if test="patientId != null">
+				patientId=#{patientId,jdbcType=BIGINT},
+			</if>
+			<if test="patientNo != null">
+				patientNo=#{patientNo,jdbcType=VARCHAR},
+			</if>
+			<if test="sourceFlag != null">
+				sourceFlag = #{sourceFlag},
+			</if>
+			
+			<if test="createTime != null">
+				createTime=#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="syncTime != null">
+				syncTime=#{syncTime}
+			</if>
+		</trim>
+		WHERE id=#{id,jdbcType=BIGINT}
+	</update>
+	
+  	<!-- 设为已同步标志 -->
+	<update id="setWeixinSyncedFlag4Uuids">
+		UPDATE user_db.r_hospital_patient
+		<set>
+			syncFlag=1,syncTime=now()
+		</set>
+		WHERE id IN
+		(
+			<foreach collection="uuids" item="uuid" index="index" separator=",">
+				#{uuid.id}
+			</foreach>
+		)
+	</update>
+
+	<!-- 设为已同步标志 -->
+	<update id="setSyncedTime4Uuids">
+		UPDATE user_db.r_hospital_patient
+		SET lastestFollowupResultSyncTime=NOW()
+		WHERE id IN
+		(
+			<foreach collection="uuids" item="uuid" index="index" separator=",">
+				#{uuid.id}
+			</foreach>
+		)
+	</update>
+	
+</mapper>

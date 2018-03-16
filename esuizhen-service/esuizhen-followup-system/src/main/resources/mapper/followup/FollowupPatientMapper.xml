@@ -1,0 +1,1149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followup.FollowupPatientDao">
+		<sql id="data_privilege_where_condition">
+	  	<choose>
+			<!-- 数据权限1全院查询 -->
+			<when test="dataId!=null and dataId==1 and operator!=null">
+				and exists (
+					select 1 from user_db.r_doctor_patient dp where dp.doctorId=#{operator} and t.patientId=dp.patientId
+					UNION
+					select 1 from user_db.r_hospital_doctor hd join user_db.r_hospital_patient hp on hd.hospitalId=hp.hospitalId where hd.doctorId=#{operator} and t.patientId=hp.patientId
+				)
+			</when>
+			<!-- 数据权限4查询本医生 -->
+			<when test="dataId!=null and dataId==4 and operator!=null">
+				and exists (
+					select 1 from user_db.r_doctor_patient dp where dp.doctorId=#{operator} and t.patientId=dp.patientId
+				)
+			</when>
+			<!-- 云端默认查询本医生 -->
+			<when test="deployLocation==2 and operator!=null">
+				and exists (
+					select 1 from user_db.r_doctor_patient dp where dp.doctorId=#{operator} and t.patientId=dp.patientId
+				)
+			</when>
+		</choose>
+	  </sql>
+	<!-- 患者筛选结果 -->
+	<resultMap id="FollowupPatientMap" type="com.esuizhen.cloudservice.followup.bean.TFollowupPatientStatisInfo">
+		<result column="searchId" property="searchId"/>
+		<result column="totalNum" property="totalNum"/>
+		<result column="notInTaskNum" property="notInTaskNum"/>
+		<collection property="items" ofType="com.esuizhen.cloudservice.followup.bean.TFollowupPatientStatisItemInfo">
+			<result column="name" property="name"/>
+			<result column="num" property="num"/>
+			<result column="conditionId" property="conditionId"/>
+		</collection>
+	</resultMap>
+  
+	<!-- 插入查询中间表 -->
+	<update id="insertSearchFollowupPatient">
+		<!-- INSERT INTO 
+		<choose>
+			<when test="searchTableName!=null">
+				${searchTableName}
+			</when>
+			<otherwise>
+				var_search_patient
+			</otherwise>
+		</choose>
+		(searchId,patientId,conditionId) -->
+		UPDATE ${searchTableName} search,
+		(
+		SELECT 
+		t1.patientId,
+		CASE 
+			WHEN (SELECT 0 from user_db.uuid_patient_merge t11 WHERE t11.patientId = t1.patientId 	AND t11.repeatflag = 1 limit 1) IS NOT NULL THEN 7
+			WHEN t1.liveStatus=0 THEN 1
+			WHEN t1.followupFlag=2 THEN 2
+			WHEN t1.followupFlag=3 THEN 3
+			WHEN MAX(t6.followupTaskId) IS NOT NULL THEN 4
+			WHEN (
+				SELECT MAX(followupTime) followupTime 
+				FROM followup_db.followup_result r
+				WHERE 
+				t1.patientId = r.patientId
+			)>=DATE_ADD(NOW(),INTERVAL -#{followupCycle} DAY) 
+				OR t4.latestOutHospitalDate <![CDATA[>=]]> DATE_ADD(NOW(),INTERVAL -#{followupCycle} DAY)
+				OR t4.latestClinicDate <![CDATA[>=]]> DATE_ADD(NOW(),INTERVAL -#{followupCycle} DAY) THEN 5
+			<if test="needContactFlag==1">
+				WHEN (SELECT 0 from user_db.u_patient_family t7 WHERE t7.patientId = t1.patientId AND t7.isValid = 1 limit 1) IS NULL THEN 6
+			</if>
+			ELSE 0
+		END state
+		FROM user_db.u_patient t1 
+		<if test="sql!=null">
+			JOIN (${sql}) t ON t1.patientId = t.patientId
+		</if>
+		<if test="privilegeSql != null and privilegeSql != ''">
+			join
+			(
+				${privilegeSql} 
+			)ps on ps.patientId = t1.patientId
+		</if>
+		JOIN user_db.u_user t2 ON t1.userId=t2.userId
+		LEFT JOIN followup_db.var_patient_followup t3 ON t1.patientId=t3.patientId 
+		LEFT JOIN ehr_db.var_patient_medical t4 ON t1.patientId = t4.patientId 
+		LEFT JOIN followup_db.r_followup_task_patient t5 ON t1.patientId = t5.patientId and t5.mergeFlag!=2
+		LEFT JOIN followup_db.followup_task t6 ON t6.followupTaskId = t5.followupTaskId AND (t6.state=0 OR t6.state=1)
+		<!-- LEFT JOIN user_db.u_patient_family t7 ON t7.patientId = t1.patientId AND t7.isValid = 1 -->
+		<if test="treatmentTypeIds!=null and treatmentTypeIds.size()>0">
+		LEFT JOIN ehr_db.eci_treatment_note t8 ON t8.patientId = t1.patientId
+		</if> 
+		<if test="(latestOperator!=null and latestOperator.size()>0) or (followupResultValue != null and followupResultValue.size()>0) or followupTimeStart != null or followupTimeEnd != null">
+			LEFT JOIN followup_db.followup_result t10 ON t1.patientId = t10.patientId 
+		</if>
+		WHERE t1.outPatientFlag=2 AND t1.patientType=1
+		<if test="followupRangeFlag==0">
+			AND t1.sourceTumorFlag = 1
+		</if>
+		<if test="followupRangeFlag==1 and sourceTumorFlags!=null">
+			AND t1.sourceTumorFlag IN (${sourceTumorFlags})
+		</if>
+		<if test="followupRangeFlag==2">
+			AND exists(select diseaseTypeId from followup_db.conf_followup_range_disease_type where t1.sourceDiseaseTypeId=diseaseTypeId)
+		</if>
+		<if test="followupRangeFlag==3">
+			AND (
+				 exists (select icdDiseaseTypeId from followup_db.conf_followup_range_icd where flag=1 and t1.icdDiseaseTypeId=icdDiseaseTypeId)
+				OR exists (select diseaseCode from followup_db.conf_followup_range_icd_code where flag=1 and t1.sourceDiseaseCode=diseaseCode)
+			)
+		</if>
+		<if test="diseaseTypeId!=null">
+			AND t1.sourceDiseaseTypeId=#{diseaseTypeId}
+		</if>
+		<if test="diseaseTypeIds!=null and diseaseTypeIds.size>0">
+			<foreach collection="diseaseTypeIds" open="AND t1.sourceDiseaseTypeId IN (" close=")" separator="," item="item">
+				#{item}
+			</foreach>
+		</if>
+		<if test="confirmedDateStart!=null">
+			AND t1.confirmedDate>=#{confirmedDateStart}
+		</if>
+		<if test="confirmedDateEnd!=null">
+			AND #{confirmedDateEnd}>=t1.confirmedDate
+		</if>
+		<if test="patientNos!=null">
+			AND (
+				t1.patientNo IN
+				<foreach collection="patientNos" item="item" open="(" close=")" separator=",">
+					#{item}
+				</foreach>
+				<!-- add by fanpanwei -->
+				OR EXISTS (SELECT 1 FROM user_db.r_uuid_patientno pn 
+					WHERE pn.patientId = t1.patientId AND pn.patientNo IN 
+					<foreach collection="patientNos" item="item" open="(" close=")" separator=",">
+					#{item}
+					</foreach>
+				)
+				<!-- or t1.patientNo IN
+				<foreach collection="originalPatientNos" item="item" open="(" close=")" separator=",">
+					#{item}
+				</foreach> -->
+	  		)
+		</if>
+		<if test="sex!=null and sex.size()>0">
+			AND t1.sex IN
+			<foreach collection="sex" item="item" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="cityCode!=null and cityCode.size()>0">
+			AND EXISTS(
+	  			SELECT userId FROM user_db.u_user WHERE userId=t1.userId AND birthPlaceCode IN
+	  			<foreach
+	                collection="cityCode"
+	                item="item"
+	                open="("
+	                separator=","
+	                close=")">
+	                #{item}
+	            </foreach>
+	  		)
+		</if>
+		<if test="treatmentTypeIds!=null and treatmentTypeIds.size()>0">
+			AND EXISTS (
+			SELECT 0 FROM ehr_db.eci_treatment_note t8 WHERE t8.patientId = t1.patientId 
+			AND t8.treatmentTypeId IN
+			<foreach collection="treatmentTypeIds" item="item" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+			)
+		</if>
+		<if test="diagnosisNames!=null">
+			<choose>
+				<when test="diagnosisNames.size() == 1">
+					AND t1.sourceDiagnosis LIKE
+					<foreach collection="diagnosisNames" item="item" open="(" close=")" separator=",">
+						CONCAT('%',#{item},'%')
+					</foreach>
+				</when>
+				<otherwise>
+					AND t1.sourceDiagnosis IN
+					<foreach collection="diagnosisNames" item="item" open="(" close=")" separator=",">
+						#{item}
+					</foreach>
+				</otherwise>
+			</choose>
+		</if>
+		<if test="diagnosisCodes!=null">
+			<choose>
+				<when test="diagnosisCodes.size() == 1">
+					AND t1.sourceDiseaseCode LIKE
+					<foreach collection="diagnosisCodes" item="item" open="(" close=")" separator=",">
+						CONCAT('%',#{item},'%')
+					</foreach>
+				</when>
+				<otherwise>
+					AND t1.sourceDiseaseCode IN
+					<foreach collection="diagnosisCodes" item="item" open="(" close=")" separator=",">
+						#{item}
+					</foreach>
+				</otherwise>
+			</choose>
+		</if>
+		<if test="pathologyDiagnosisNames!=null or pathologyDiagnosisCodes!=null">
+			AND EXISTS (
+			SELECT 0 FROM ehr_db.e_diagnosis_info t9 WHERE 
+			t9.patientId = t1.patientId 
+			AND t9.pathologyDiagnosis IS NOT NULL 
+			AND t9.pathologyDiagnosisCode IS NOT NULL
+			<if test="pathologyDiagnosisNames!=null">
+				<choose>
+					<when test="pathologyDiagnosisNames.size() == 1">
+						AND t9.pathologyDiagnosis LIKE
+						<foreach collection="pathologyDiagnosisNames" item="item" open="(" close=")" separator=",">
+							CONCAT('%',#{item},'%')
+						</foreach>
+					</when>
+					<otherwise>
+						AND t9.pathologyDiagnosis IN
+						<foreach collection="pathologyDiagnosisNames" item="item" open="(" close=")" separator=",">
+							#{item}
+						</foreach>
+					</otherwise>
+				</choose>
+			</if>
+			<if test="pathologyDiagnosisCodes!=null">
+				<choose>
+					<when test="pathologyDiagnosisCodes.size() == 1">
+						AND t9.pathologyDiagnosisCode LIKE
+						<foreach collection="pathologyDiagnosisCodes" item="item" open="(" close=")" separator=",">
+							CONCAT('%',#{item},'%')
+						</foreach>
+					</when>
+					<otherwise>
+						AND t9.pathologyDiagnosisCode IN
+						<foreach collection="pathologyDiagnosisCodes" item="item" open="(" close=")" separator=",">
+							#{item}
+						</foreach>
+					</otherwise>
+				</choose>
+			</if>
+			)
+		</if>
+		<if test="confirmeAgeStart!=null">
+			AND t1.confirmedAge >=#{confirmeAgeStart}
+		</if>
+		<if test="confirmeAgeEnd!=null">
+			AND #{confirmeAgeEnd}>=t1.confirmedAge
+		</if>
+		
+		<if test="birthDateStart!=null">
+			<![CDATA[
+			AND t1.birthDate >=DATE_FORMAT(#{birthDateStart},'%Y-%m-%d')
+			]]>
+		</if>
+		<if test="birthDateEnd!=null">
+			<![CDATA[
+			AND DATE_FORMAT(#{birthDateEnd},'%Y-%m-%d')>=t1.birthDate
+			]]>
+		</if>
+		<!-- 随访次数为空 -->
+		<if test="followupTimes == null">
+			<if test="(latestOperator!=null and latestOperator.size()>0) or (followupResultValue != null and followupResultValue.size()>0) or followupTimeStart != null or followupTimeEnd != null">
+				<if test="latestOperator!=null and latestOperator.size()>0">
+					AND t10.operator IN
+					<foreach collection="latestOperator" item="item" open="(" separator="," close=")">
+		                #{item}
+		            </foreach>
+				</if>
+				<if test="followupResultValue != null and followupResultValue.size()>0">
+					AND t10.followupResultValue IN
+					<foreach collection="followupResultValue" item="item" open="(" separator="," close=")">
+		                #{item}
+		            </foreach>
+				</if>
+				<if test="followupTimeStart != null">
+					<![CDATA[
+					AND DATE_FORMAT(t10.followupTime,'%Y-%m-%d') >= DATE_FORMAT(#{followupTimeStart},'%Y-%m-%d')
+					]]>
+				</if>
+				<if test="followupTimeEnd != null">
+					<![CDATA[
+					AND DATE_FORMAT(t10.followupTime,'%Y-%m-%d') <= DATE_FORMAT(#{followupTimeEnd},'%Y-%m-%d')
+					]]>
+				</if>
+			</if>
+		</if>
+		<!-- 首次随访 -->
+		<if test="followupTimes != null and followupTimes==1">
+			<if test="(latestOperator!=null and latestOperator.size()>0) or (followupResultValue != null and followupResultValue.size()>0) or followupTimeStart != null or followupTimeEnd != null">
+				AND t10.followupTime = (
+					SELECT MIN(followupTime) followupTime 
+					FROM followup_db.followup_result t 
+					WHERE t1.patientId = t.patientId AND t.followupWay NOT IN (7, 8) AND operator IS NOT NULL
+				)
+				<if test="latestOperator!=null and latestOperator.size()>0">
+					AND t10.operator IN
+					<foreach collection="latestOperator" item="item" open="(" separator="," close=")">
+		                #{item}
+		            </foreach>
+				</if>
+				<if test="followupResultValue != null and followupResultValue.size()>0">
+					AND t10.followupResultValue IN
+					<foreach collection="followupResultValue" item="item" open="(" separator="," close=")">
+		                #{item}
+		            </foreach>
+				</if>
+				<if test="followupTimeStart != null">
+					<![CDATA[
+					AND DATE_FORMAT(t10.followupTime,'%Y-%m-%d') >= DATE_FORMAT(#{followupTimeStart},'%Y-%m-%d')
+					]]>
+				</if>
+				<if test="followupTimeEnd != null">
+					<![CDATA[
+					AND DATE_FORMAT(t10.followupTime,'%Y-%m-%d') <= DATE_FORMAT(#{followupTimeEnd},'%Y-%m-%d')
+					]]>
+				</if>
+			</if>
+		</if>
+		<!-- 末次随访 -->
+		<if test="followupTimes != null and followupTimes==-1">
+			<if test="(latestOperator!=null and latestOperator.size()>0) or (followupResultValue != null and followupResultValue.size()>0) or followupTimeStart != null or followupTimeEnd != null">
+				<if test="latestOperator!=null and latestOperator.size()>0">
+					AND t3.followupOperator IN
+					<foreach collection="latestOperator" item="item" open="(" separator="," close=")">
+		                #{item}
+		            </foreach>
+				</if>
+				<if test="followupResultValue != null and followupResultValue.size()>0">
+					AND t3.followupResultValue IN
+					<foreach collection="followupResultValue" item="item" open="(" separator="," close=")">
+		                #{item}
+		            </foreach>
+				</if>
+				<if test="followupTimeStart != null">
+					<![CDATA[
+					AND DATE_FORMAT(t3.latestFollowupTime,'%Y-%m-%d') >= DATE_FORMAT(#{followupTimeStart},'%Y-%m-%d')
+					]]>
+				</if>
+				<if test="followupTimeEnd != null">
+					<![CDATA[
+					AND DATE_FORMAT(t3.latestFollowupTime,'%Y-%m-%d') <= DATE_FORMAT(#{followupTimeEnd},'%Y-%m-%d')
+					]]>
+				</if>
+			</if>
+		</if>
+		
+		
+		<if test="trueName != null">
+			AND t1.trueName LIKE '%${trueName}%'
+		</if>
+		<if test="mobile != null">
+			AND t1.patientId IN(SELECT patientId FROM user_db.u_patient_family WHERE familyPhone LIKE '%${mobile}%')
+		</if>
+		<if test="patientNo != null">
+		<!-- modify by fanpanwei -->
+			AND (t1.patientNo LIKE '%${patientNo}%' OR
+				EXISTS (SELECT 1 FROM user_db.r_uuid_patientno pn 
+					WHERE pn.patientId = t1.patientId AND pn.patientNo LIKE '%${patientNo}%')
+			)
+		</if>
+		<!-- 住院信息条件 -->
+  		<!-- 入院时间 -->
+  		<if test="inHospitalDateStart != null or inHospitalDateEnd != null or inHospitalTimes != null">
+  			AND EXISTS(SELECT 1 FROM ehr_db.ei_inhospital_note note 
+  			<if test="inHospitalTimes != null and inHospitalTimes == 9">
+  				JOIN user_db.u_patient v1 ON note.patientId=v1.patientId AND note.inhospitalId=v1.inhospitalId
+  			</if>
+  			where note.patientId=t1.patientId
+  			<if test="inHospitalTimes != null">
+  				<if test="inHospitalTimes == 1">
+  					AND note.inhospitalTimes = 1
+  				</if>
+  				<if test="inHospitalTimes == -1">
+  					AND note.inhospitalLastTime = 1
+  				</if>
+  			</if>
+  			<if test="inHospitalDateStart != null">
+  				AND DATE_FORMAT(note.inhospitalDate,'%Y-%m-%d') <![CDATA[>=]]> DATE_FORMAT(#{inHospitalDateStart},'%Y-%m-%d')
+  			</if>
+  			<if test="inHospitalDateEnd != null">
+  				AND DATE_FORMAT(note.inhospitalDate,'%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(#{inHospitalDateEnd},'%Y-%m-%d')
+  			</if>
+  			)
+  		</if>
+  		<!-- 出院时间 -->
+  		<if test="outHospitalDateStart != null or outHospitalDateEnd != null or outHospitalTimes != null">
+  			AND EXISTS(SELECT 1 FROM ehr_db.ei_inhospital_note note 
+  			<if test="outHospitalTimes != null and outHospitalTimes == 9">
+  				JOIN user_db.u_patient v1 ON note.patientId=v1.patientId AND note.inhospitalId=v1.inhospitalId
+  			</if>
+  			where note.patientId=t1.patientId
+  			<if test="outHospitalTimes != null">
+  				<if test="outHospitalTimes == 1">
+  					AND note.inhospitalTimes = 1
+  				</if>
+  				<if test="outHospitalTimes == -1">
+  					AND note.inhospitalLastTime = 1
+  				</if>
+  			</if>
+  			<if test="outHospitalDateStart != null">
+  				AND DATE_FORMAT(note.outhospitalDate,'%Y-%m-%d') <![CDATA[>=]]> DATE_FORMAT(#{outHospitalDateStart},'%Y-%m-%d')
+  			</if>
+  			<if test="outHospitalDateEnd != null">
+  				AND DATE_FORMAT(note.outhospitalDate,'%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(#{outHospitalDateEnd},'%Y-%m-%d')
+  			</if>
+  			)
+  		</if>
+  		<!-- 入院科室 -->
+  		<if test="(inhospitalDeptId != null and inhospitalDeptId.size() > 0) or inhospitalDeptTimes != null">
+  			AND EXISTS(SELECT 1 FROM ehr_db.ei_inhospital_note note 
+  			<if test="inhospitalDeptTimes != null and inhospitalDeptTimes == 9">
+  				JOIN user_db.u_patient v1 ON note.patientId=v1.patientId AND note.inhospitalId=v1.inhospitalId
+  			</if>
+  			where note.patientId=t1.patientId
+  			<if test="inhospitalDeptTimes != null">
+  				<if test="inhospitalDeptTimes == 1">
+  					AND note.inhospitalTimes = 1
+  				</if>
+  				<if test="inhospitalDeptTimes == -1">
+  					AND note.inhospitalLastTime = 1
+  				</if>
+  			</if>
+  			<if test="inhospitalDeptId != null and inhospitalDeptId.size() > 0">
+ 				AND note.inhospitalDeptId IN
+  				<foreach collection="inhospitalDeptId" item="inhospitalDeptIdItem"  open="(" separator="," close=")">
+	                #{inhospitalDeptIdItem}
+	            </foreach>
+ 			</if>
+  			)
+  		</if>
+  		<!-- 出院院科室 -->
+  		<if test="(outHospitalDept != null and outHospitalDept.size() > 0) or outHospitalDeptTimes != null">
+  			AND EXISTS(SELECT 1 FROM ehr_db.ei_inhospital_note note 
+  			<if test="outHospitalDeptTimes != null and outHospitalDeptTimes == 9">
+  				JOIN user_db.u_patient v1 ON note.patientId=v1.patientId AND note.inhospitalId=v1.inhospitalId
+  			</if>
+  			where note.patientId=t1.patientId
+  			<if test="outHospitalDeptTimes != null">
+  				<if test="outHospitalDeptTimes == 1">
+  					AND note.inhospitalTimes = 1
+  				</if>
+  				<if test="outHospitalDeptTimes == -1">
+  					AND note.inhospitalLastTime = 1
+  				</if>
+  			</if>
+  			<if test="outHospitalDept != null and outHospitalDept.size() > 0">
+ 				AND note.outhospitalDeptId IN
+  				<foreach collection="outHospitalDept"  item="item"   open="(" separator="," close=")">
+	                #{item}
+	            </foreach>
+ 			</if>
+  			)
+  		</if>
+		GROUP BY patientId
+		)t SET search.${searchColumn}=t.state WHERE search.patientId = t.patientId
+	</update>
+	
+	<!-- 更新查询中间表 -->
+	<update id="updateSearchFollowupPatient">
+		UPDATE ${searchTableName} search,
+		(
+		SELECT 
+		t.patientId,
+		CASE 
+			WHEN (SELECT 0 from user_db.uuid_patient_merge t11 WHERE t11.patientId = t.patientId 	AND t11.repeatflag = 1 limit 1) IS NOT NULL THEN 7
+			WHEN t.liveStatus=0 THEN 1
+			WHEN t.followupFlag=2 THEN 2
+			WHEN t.followupFlag=3 THEN 3
+			WHEN  (
+					SELECT
+						1
+					FROM
+						followup_db.r_followup_task_patient m1 
+						 JOIN followup_db.r_followup_task_assign assign on m1.followupAssignId=assign.followupAssignId
+						 JOIN followup_db.followup_task m2 ON m2.followupTaskId = assign.followupTaskId
+						AND (m2.state = 0 OR m2.state = 1) 
+					WHERE t.patientId = m1.patientId and assign.operator=${operator} and m1.followupTaskId is not null Limit 1
+				)  THEN 4
+			<if test="needContactFlag==1">
+				WHEN (SELECT 0 from user_db.u_patient_family t7 WHERE t7.patientId = t.patientId AND t7.isValid = 1 limit 1) IS NULL THEN 6
+			</if>
+			ELSE 0
+		END state
+		FROM user_db.u_patient t 
+		<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+			<choose>
+				<when test="operator!=null and (deployLocation != null and deployLocation==2)">
+					<choose>
+						<when test="userRole != null and userRole == 55"></when>
+						<otherwise>
+							JOIN (<include refid="join_data_privilege"></include>) t2 ON t.patientId=t2.patientId
+						</otherwise>
+					</choose>
+				</when>
+				<otherwise>
+					JOIN (<include refid="join_data_privilege"></include>) t2 ON t.patientId=t2.patientId
+				</otherwise>
+			</choose>
+		</if>
+		JOIN user_db.u_user u ON u.userId=t.userId
+		LEFT JOIN followup_db.var_patient_followup f ON f.patientId=t.patientId 
+		<include refid="Patient_Where_Condition"></include>
+		)t SET search.${searchColumn}=t.state WHERE search.patientId = t.patientId
+	</update>
+	
+	<!-- 患者查询结果返回 -->
+	<select id="queryFollowupPatientStatis" resultMap="FollowupPatientMap">
+		SELECT  ${searchId} searchId,
+			CASE 
+				WHEN ${searchColumn}=0 THEN "waitFollowupNum"
+				WHEN ${searchColumn}=1 THEN "deathNum"
+				WHEN ${searchColumn}=2 THEN "lostFollowupNum"
+				WHEN ${searchColumn}=3 THEN "notFollowupNum"
+				WHEN ${searchColumn}=4 THEN "otherTaskNum"
+				WHEN ${searchColumn}=5 THEN "hasCycleNum"
+				WHEN ${searchColumn}=6 THEN "notHasContactNum"
+				WHEN ${searchColumn}=7 THEN "similarNum"
+			END 'name',
+		${searchColumn} conditionId,
+		COUNT(0) num,
+		t2.*
+		from 
+			${searchTableName} t1,
+		(
+			SELECT	
+				COUNT(0) totalNum,
+			SUM(
+				CASE
+					WHEN ${searchColumn} != 0 THEN
+						1
+					ELSE 0
+					END
+				) notInTaskNum
+				FROM
+					${searchTableName}
+				WHERE
+					${searchColumn} IS NOT NULL
+					<!-- AND patientId NOT IN(
+						SELECT t11.patientId FROM user_db.uuid_patient_merge t11 WHERE t11.repeatflag=1
+					) -->
+		) t2
+		WHERE t1.${searchColumn} IS NOT NULL 
+		<!-- AND t1.patientId NOT IN(
+			SELECT t11.patientId FROM user_db.uuid_patient_merge t11 WHERE t11.repeatflag=1
+		) -->
+		GROUP BY t1.${searchColumn};
+	</select>
+	
+	<!-- 复制用户系统全部患者查询的SQL语句（后面还和随访查询做到一致） -->
+	<sql id="inhospital_Join_user">
+  	<!-- 根据条件连接住院信息 -->
+	<if test="outhospitalDateStart != null or outhospitalDateEnd or inhospitalDateStart != null or inhospitalDateEnd != null or (inhospitalDeptId != null and inhospitalDeptId.size() > 0) or (outhospitalDeptId != null and outhospitalDeptId.size() > 0)">
+		JOIN (SELECT patientId FROM ehr_db.ei_inhospital_note  
+		<where>
+			<!-- 入院次数 -->
+			<if test="(inhospitalTimes != null and inhospitalTimes==1) or (outhospitalTimes != null and outhospitalTimes==1) or (inhospitalDeptTimes != null and inhospitalDeptTimes==1) or (outHospitalDeptTimes != null and outHospitalDeptTimes==1)">
+  				AND inhospitalTimes = 1
+  			</if>
+  			<if test="(inhospitalTimes != null and inhospitalTimes==-1) or (outhospitalTimes != null and outhospitalTimes==2) or (inhospitalDeptTimes != null and inhospitalDeptTimes==-1) or (outHospitalDeptTimes != null and outHospitalDeptTimes==2)">
+  				AND inhospitalLastTime = 1
+  			</if>
+  			<!-- 入院时间 -->
+  			<if test="inhospitalDateStart != null">
+  				AND DATE_FORMAT(inhospitalDate,'%Y-%m-%d') <![CDATA[>=]]> DATE_FORMAT(#{inhospitalDateStart},'%Y-%m-%d')
+  			</if>
+  			<if test="inhospitalDateEnd != null">
+  				AND DATE_FORMAT(inhospitalDate,'%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(#{inhospitalDateEnd},'%Y-%m-%d')
+  			</if>
+  			<!-- 出院时间次数
+  			<if test="outhospitalTimes==1">
+  				AND inhospitalTimes = 1
+  			</if>
+  			<if test="outhospitalTimes==2">
+  				AND inhospitalLastTime = 1
+  			</if> -->
+  			<!-- 出院时间 -->
+  			<if test="outhospitalDateStart != null">
+  				AND DATE_FORMAT(outhospitalDate,'%Y-%m-%d') <![CDATA[>=]]> DATE_FORMAT(#{outhospitalDateStart},'%Y-%m-%d')
+  			</if>
+  			<if test="outhospitalDateEnd != null">
+  				AND DATE_FORMAT(outhospitalDate,'%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(#{outhospitalDateEnd},'%Y-%m-%d')
+  			</if>
+  			<!-- 入院科室次数 -->
+  			<!-- <if test="inhospitalDeptTimes==1">
+  				AND inhospitalTimes = 1
+  			</if>
+  			<if test="inhospitalDeptTimes==-1">
+  				AND inhospitalLastTime = 1
+  			</if> -->
+  			<!-- 入院科室 -->
+ 			<if test="inhospitalDeptId != null and inhospitalDeptId.size() > 0">
+ 				AND inhospitalDeptId IN
+  				<foreach collection="inhospitalDeptId" item="inhospitalDeptIdItem"  open="(" separator="," close=")">
+	                #{inhospitalDeptIdItem}
+	            </foreach>
+ 			</if>
+	  		<!-- 出院院科室次数 -->
+	  		<!-- <if test="outHospitalDeptTimes==1">
+  				AND inhospitalTimes = 1
+  			</if>
+  			<if test="outHospitalDeptTimes==2">
+  				AND inhospitalLastTime = 1
+  			</if> -->
+ 			<if test="outhospitalDeptId != null and outhospitalDeptId.size() > 0">
+ 				AND outhospitalDeptId IN
+  				<foreach collection="outhospitalDeptId"  item="outhospitalDeptIdItem"   open="(" separator="," close=")">
+	                #{outhospitalDeptIdItem}
+	            </foreach>
+ 			</if>
+	  		<!-- 出院院科室 -->
+		</where>
+		 GROUP BY patientId) note ON t.patientId=note.patientId
+	</if>
+  </sql>
+  
+  <!-- 复制用户系统全部患者查询的SQL语句（后面还和随访查询做到一致） -->
+    <sql id="Patient_Where_Condition">
+  	<where>
+  		t.patientType=1 AND t.mergeFlag!=2
+  		
+  		<!-- add by zhuguo -->
+			<!-- 院内外患者 -->
+			<if test="sourceFlag != null">
+				AND u.tobFlag=#{sourceFlag}
+			</if>
+			
+			<!-- 在院、离院、门诊患者 -->
+			<if test="treatmentPlaceState==2">
+				AND t.outPatientFlag=1
+			</if>
+			<if test="treatmentPlaceState==0 || treatmentPlaceState==1">
+				AND t.inhospitalState=#{treatmentPlaceState}
+			</if>
+  		<!-- end -->
+  		
+  		<if test="outPatientFlag != null">
+  			AND t.outPatientFlag=#{outPatientFlag}
+  		</if>
+  		<if test="patientId != null">
+  			AND t.patientId=#{patientId}
+  		</if>
+  		<if test="patientRangeFlag!=null">
+  			<if test="followupRangeFlag==0">
+  				AND t.sourceTumorFlag
+  				<choose><when test="patientRangeFlag==1"> in </when><otherwise> not in </otherwise></choose>
+  				(1)
+  			</if>
+  			<if test="followupRangeFlag==1 and notMalignantTumorFlag!=null">
+				AND t.sourceTumorFlag <choose><when test="patientRangeFlag==1"> in</when><otherwise> not in</otherwise></choose> (${notMalignantTumorFlag})
+			</if>
+			<if test="followupRangeFlag==2">
+				AND t.sourceDiseaseTypeId<choose><when test="patientRangeFlag==1"> in</when><otherwise> not in</otherwise></choose>
+				(select diseaseTypeId from followup_db.conf_followup_range_disease_type)
+			</if>
+  			<if test="followupRangeFlag==3">
+  				AND 
+  				(
+  					<choose>
+	  					<when test="patientRangeFlag==1">
+		  					t.icdDiseaseTypeId in (select icdDiseaseTypeId from followup_db.conf_followup_range_icd where flag=1)
+		  					OR
+		  					t.sourceDiseaseCode in (select diseaseCode from followup_db.conf_followup_range_icd_code where flag=1)
+	  					</when>
+	  					<otherwise>
+	  						t.icdDiseaseTypeId not in (select icdDiseaseTypeId from followup_db.conf_followup_range_icd where flag=1)
+	  						and
+	  						t.sourceDiseaseCode not in (select diseaseCode from followup_db.conf_followup_range_icd_code where flag=1)
+	  					</otherwise>
+  					</choose>
+  				)
+  			</if>
+
+  		</if>
+  		<if test="patientNo != null">
+  			and (
+  				exists(
+	  				select pn.patientId from user_db.r_uuid_patientno pn where pn.patientId=t.patientId 
+	  				and (
+	  					pn.patientNo LIKE '%${patientNo}%'
+	  				) 
+  				) or 
+  				t.patientNo LIKE '%${patientNo}%'
+  			)
+  		</if>
+  		<if test="batchPatientNo != null">
+  			and (
+	  			exists(
+	  				select pn.patientId from user_db.r_uuid_patientno pn where pn.patientId=t.patientId 
+	  				and (
+	  					pn.patientNo IN(${batchPatientNo}) 
+	  					<if test="originalBatchPatientNo != null">
+	  						or pn.patientNo IN(${originalBatchPatientNo}) 
+	  					</if>
+	  				)
+	  			)
+	  			or t.patientNo IN(${batchPatientNo}) 
+	  			or t.patientNo IN(${originalBatchPatientNo}) 
+	  		)
+  		</if>
+  		<if test="mobile != null">
+  			AND t.patientId IN(SELECT patientId FROM user_db.u_patient_family WHERE familyPhone LIKE '%${mobile}%')
+  		</if>
+  		<if test="trueName != null">
+  			AND t.trueName LIKE '%${trueName}%'
+  		</if>
+  		<if test="sourceDiagnosis != null">
+  			AND t.sourceDiagnosis LIKE '%${sourceDiagnosis}%'
+  		</if>
+  		<if test="sourceDiseaseCode != null">
+  			AND t.sourceDiseaseCode LIKE '%${sourceDiseaseCode}%'
+  		</if>
+  		<if test="sourceDiseaseTypeId != null">
+  			AND t.sourceDiseaseTypeId=#{sourceDiseaseTypeId}
+  		</if>
+  		<if test="sourceDiseaseTypeIds != null and sourceDiseaseTypeIds.size>0">
+  			<foreach collection="sourceDiseaseTypeIds" open="AND t.sourceDiseaseTypeId IN (" close=")" item="item" separator=",">
+  				#{item}
+  			</foreach>
+  		</if>
+  		<if test="confirmedDateStart != null">
+  			AND t.confirmedDate <![CDATA[>=]]> DATE_FORMAT(#{confirmedDateStart},'%Y-%m-%d')
+  		</if>
+  		<if test="confirmedDateEnd != null">
+  			AND t.confirmedDate <![CDATA[<=]]>DATE_FORMAT(#{confirmedDateEnd},'%Y-%m-%d')
+  		</if>
+  		<if test="sourcePathologyDiagnosis != null">
+  			AND t.sourcePathologyDiagnosis LIKE '%${sourcePathologyDiagnosis}%'
+  		</if>
+  		<if test="sourcePathologyDiseaseCode != null">
+  			AND t.sourcePathologyDiseaseCode LIKE '%${sourcePathologyDiseaseCode}%'
+  		</if>
+  		
+		<if test="faultType != null">
+			<!-- AND (
+				(t.patientNoDataFlag=0 
+				OR t.contactDataFlag IN(0,-1) 
+				OR t.diagnosisDataFlag=0 
+				OR t.diseaseCodeDataFlag IN(0,-1) 
+				OR t.IdentificationDataFlag IN(0,-1) 
+				OR t.trueNameDataFlag=-1 
+				OR diseaseTypeDataFlag=0 
+				OR t.treatmentTypeDataFlag=0
+				OR t.tumourPeriodizationDataFlag=0
+				OR t.pathologyDiseaseDataFlag=0
+				OR t.pathologyDiseaseCodeDataFlag=0)
+				OR EXISTS(SELECT COUNT(*) FROM followup_db.followup_result w1 WHERE w1.patientId=t.patientId AND w1.followupResultValue=4 GROUP BY w1.patientId HAVING COUNT(*)>1)
+				OR (t.liveStatus=0	AND EXISTS(SELECT 1 FROM followup_db.followup_result w1 WHERE w1.patientId=t.patientId AND w1.followupResultValue=4 AND w1.deathDate IS NULL))
+				OR EXISTS(SELECT 1 FROM followup_db.followup_result w1 WHERE w1.patientId=t.patientId AND w1.followupResultValue IN(1,2,3,15,16) AND EXISTS (SELECT 1 FROM followup_db.followup_result w2 WHERE w1.patientId=w2.patientId AND w1.followupTime>w2.deathDate))
+				OR EXISTS(
+					SELECT 1 FROM ehr_db.ec_clinic_medical_note w1 WHERE w1.patientId=t.patientId AND w1.visitTimes>1 AND NOT EXISTS (SELECT 1 FROM followup_db.followup_result w2 WHERE w1.patientId=w2.patientId AND w2.followupResultValue=15 AND w1.visitTime=w2.followupTime)
+					UNION
+					SELECT 1 FROM ehr_db.ei_inhospital_note w1 WHERE w1.patientId=t.patientId AND w1.inhospitalTimes>1 AND NOT EXISTS (SELECT 1 FROM followup_db.followup_result w2 WHERE w1.patientId=w2.patientId AND w2.followupResultValue=16 AND (w1.outhospitalDate=w2.followupTime OR w1.inhospitalDate=w2.followupTime))
+				)
+				OR (t.liveStatus=0 AND EXISTS(SELECT 1 FROM followup_db.followup_task w1 JOIN followup_db.r_followup_task_patient w2 ON w1.followupTaskId=w2.followupTaskId AND w1.state IN(0,1) AND w2.state=0 AND w1.finishTime IS NULL WHERE w2.patientId=t.patientId))
+				OR (t.followupFlag=2 AND EXISTS(SELECT 1 FROM followup_db.followup_task w1 JOIN followup_db.r_followup_task_patient w2 ON w1.followupTaskId=w2.followupTaskId AND w1.state IN(0,1) AND w2.state=0 AND w1.finishTime IS NULL WHERE w2.patientId=t.patientId))
+			) -->
+  		</if>
+  		<if test="missingType != null">
+			<if test="missingType == 4">
+				AND t.patientNoDataFlag=0
+			</if>
+			<if test="missingType == 3">
+				AND t.contactDataFlag=0
+			</if>
+			<if test="missingType == 1">
+				AND t.diagnosisDataFlag=0
+			</if>
+			<if test="missingType == 2">
+				AND diseaseCodeDataFlag=0
+			</if>
+			<if test="missingType == 5">
+				AND t.IdentificationDataFlag=0
+			</if>
+			<if test="missingType == 6">
+				AND t.diseaseTypeDataFlag=0
+			</if>
+			<!-- 263新增缺失标示 add by yuanwenming start -->
+			<if test="missingType == 7">
+				AND t.treatmentTypeDataFlag=0
+			</if>
+			<if test="missingType == 8">
+				AND t.tumourPeriodizationDataFlag=0
+			</if>
+			<if test="missingType == 9">
+				AND t.pathologyDiseaseDataFlag=0
+			</if>
+			<if test="missingType == 10">
+				AND t.pathologyDiseaseCodeDataFlag=0
+			</if>
+			<if test="missingType == 99">
+				AND (t.patientNoDataFlag=0 
+				OR t.contactDataFlag=0 
+				OR t.diagnosisDataFlag=0 
+				OR t.diseaseCodeDataFlag=0 
+				OR t.IdentificationDataFlag=0 
+				OR t.diseaseTypeDataFlag=0
+				OR t.treatmentTypeDataFlag=0
+				OR t.tumourPeriodizationDataFlag=0
+				OR t.pathologyDiseaseDataFlag=0
+				OR t.pathologyDiseaseCodeDataFlag=0
+				)
+			</if>
+			<!-- 263新增缺失标示 add by yuanwenming end -->
+  		</if>
+  		<if test="invalidType != null">
+			<if test="invalidType == 4">
+				AND t.trueNameDataFlag=-1
+			</if>
+			<if test="invalidType == 2">
+				AND t.contactDataFlag=-1
+			</if>
+			<if test="invalidType == 3">
+				AND t.IdentificationDataFlag=-1
+			</if>
+			<if test="invalidType == 1">
+				AND t.diseaseCodeDataFlag=-1
+			</if>
+			<if test="invalidType == 99">
+				AND (t.trueNameDataFlag =- 1 
+				OR t.contactDataFlag =- 1 
+				OR t.IdentificationDataFlag =- 1 
+				OR t.diseaseCodeDataFlag =- 1 
+				)
+			</if>
+  		</if>
+  		<if test="followupFlag != null and followupFlag==2">
+			AND t.followupFlag=#{followupFlag}
+			<if test="lostFollowupCauseResultValue != null and lostFollowupCauseResultValue.size()>0">
+				AND t.lostFollowupCauseResultValue IN
+	  			<foreach
+	                collection="lostFollowupCauseResultValue"
+	                item="item"
+	                open="("
+	                separator=","
+	                close=")">
+	                #{item}
+	            </foreach>
+			</if>
+  		</if>
+  		
+  		<!-- <if test="userRole !=null and userRole==1  and (clickType==1 or clickType==4)">
+  			AND (t.patientId IN(
+  				SELECT ftp.patientId FROM followup_db.r_followup_task_assign fta,followup_db.r_followup_task_patient ftp WHERE fta.followupAssignId=ftp.followupAssignId AND fta.followupTaskId=ftp.followupTaskId AND fta.operator=#{operator}
+  			) OR t.patientId IN(SELECT dp.patientId FROM r_doctor_patient dp WHERE dp.doctorId=#{operator}))
+  		</if>
+  		<if test="userRole !=null and userRole==3  and (clickType==1 or clickType==4)">
+  			AND t.patientId IN(
+  				SELECT ftp.patientId FROM followup_db.r_followup_task_assign fta,followup_db.r_followup_task_patient ftp WHERE fta.followupAssignId=ftp.followupAssignId AND fta.followupTaskId=ftp.followupTaskId AND fta.operator=#{operator}
+  			)
+  		</if> -->
+  		<if test="sourceTumorFlag != null">
+  			<choose>
+  				<when test="sourceTumorFlag==-2">
+  				AND (t.sourceTumorFlag=#{sourceTumorFlag} OR t.sourceDiseaseTypeId is null)
+  				</when>
+  				<otherwise>
+  				AND t.sourceTumorFlag=#{sourceTumorFlag}
+  				</otherwise>
+  			</choose>
+  		</if>
+  		<if test="followupTimes==null">
+  			<if test="(followupOperator!=null and followupOperator.size()>0) or followupTimeStart!=null or followupTimeEnd!=null or followupResultValue != null">
+  				AND EXISTS (SELECT 1 FROM followup_db.followup_result fr WHERE fr.patientId=t.patientId
+  				 <if test="followupOperator!=null and followupOperator.size()>0">
+  				 	AND fr.operator IN
+		  			<foreach
+		                collection="followupOperator"
+		                item="item"
+		                open="("
+		                separator=","
+		                close=")">
+		                #{item}
+		            </foreach>
+  				 </if>
+  				 <if test="followupTimeStart!=null">
+  				 	AND fr.followupTime <![CDATA[>=]]> #{followupTimeStart}
+  				 </if>
+  				 <if test="followupTimeEnd!=null">
+  				 	AND fr.followupTime <![CDATA[<=]]> #{followupTimeEnd}
+  				 </if>
+  				 <if test="followupResultValue != null">
+  					AND fr.followupResultValue IN
+  					<foreach collection="followupResultValue" item="item" open="(" separator="," close=")">
+		                #{item}
+		            </foreach>
+  				</if>
+  				)
+  			</if>
+  		</if>
+  		<if test="followupTimes != null and followupTimes == 1">
+  			<if test="(followupOperator!=null and followupOperator.size()>0) or followupTimeStart!=null or followupTimeEnd!=null or followupResultValue != null">
+  				AND EXISTS (
+  					SELECT 1 FROM followup_db.followup_result v1
+  					JOIN (SELECT patientId,MIN(followupTime) maxFollowupTime FROM followup_db.followup_result GROUP BY patientId) v2 ON v1.patientId=v2.patientId AND v1.followupTime=v2.maxFollowupTime
+  					WHERE v1.patientId=t.patientId
+  				 <if test="followupOperator!=null and followupOperator.size()>0">
+  				 	AND v1.operator IN
+		  			<foreach
+		                collection="followupOperator"
+		                item="item"
+		                open="("
+		                separator=","
+		                close=")">
+		                #{item}
+		            </foreach>
+  				 </if>
+  				 <if test="followupTimeStart!=null">
+  				 	AND v1.followupTime <![CDATA[>=]]> #{followupTimeStart}
+  				 </if>
+  				 <if test="followupTimeEnd!=null">
+  				 	AND v1.followupTime <![CDATA[<=]]> #{followupTimeEnd}
+  				 </if>
+  				 <if test="followupResultValue != null">
+  					AND v1.followupResultValue IN
+  					<foreach collection="followupResultValue" item="item" open="(" separator="," close=")">
+		                #{item}
+		            </foreach>
+  				</if>
+  				)
+  			</if>
+  		</if>
+  		<if test="followupTimes != null and followupTimes==-1">
+  			<if test="(followupOperator!=null and followupOperator.size()>0) or followupTimeStart!=null or followupTimeEnd!=null or followupResultValue != null">
+  				<if test="followupOperator!=null and followupOperator.size()>0">
+  					 AND f.followupOperator IN
+		  			<foreach  collection="followupOperator" item="item" open="(" separator="," close=")">
+		                #{item}
+		            </foreach>
+  				</if>
+  				<if test="followupTimeStart!=null">
+  					 AND f.latestFollowupTime  <![CDATA[>=]]> #{followupTimeStart}
+  				</if>
+  				<if test="followupTimeEnd!=null">
+  					 AND f.latestFollowupTime  <![CDATA[<=]]> #{followupTimeEnd}
+  				</if>
+  				<if test="followupResultValue != null">
+  					AND f.followupResultValue IN
+  					<foreach collection="followupResultValue" item="item" open="(" separator="," close=")">
+		                #{item}
+		            </foreach>
+  				</if>
+  			</if>
+  		</if>
+  		
+  		<if test="sex != null and sex.size() > 0">
+  			AND t.sex IN
+  			<foreach
+                collection="sex"
+                item="sexItem"
+                open="("
+                separator=","
+                close=")">
+                #{sexItem}
+            </foreach>
+  		</if>
+  		<if test="birthDateStart != null">
+  			<![CDATA[
+  				AND DATE_FORMAT(t.birthDate,'%Y-%m-%d')>=DATE_FORMAT(#{birthDateStart},'%Y-%m-%d')
+  			]]>
+  		</if>
+  		<if test="birthDateEnd != null">
+  			<![CDATA[
+  				AND DATE_FORMAT(t.birthDate,'%Y-%m-%d')<=DATE_FORMAT(#{birthDateEnd},'%Y-%m-%d')
+  			]]>
+  		</if>
+  		<if test="cityCode != null and cityCode.size() > 0">
+	  		AND EXISTS(
+	  			SELECT userId FROM user_db.u_user WHERE userId=t.userId AND birthPlaceCode IN
+	  			<foreach
+	                collection="cityCode"
+	                item="item"
+	                open="("
+	                separator=","
+	                close=")">
+	                #{item}
+	            </foreach>
+	  		)
+  		</if>
+  		<if test="treatmentTypeIds != null and treatmentTypeIds.size() > 0">
+  			AND EXISTS(
+  				SELECT patientId FROM ehr_db.eci_treatment_note WHERE patientId=t.patientId AND treatmentTypeId IN
+  				<foreach
+                collection="treatmentTypeIds"
+                item="treatmentTypeId"
+                open="("
+                separator=","
+                close=")">
+                #{treatmentTypeId}
+            </foreach>
+  			)
+  		</if>
+  		<if test="confirmedAgeStart != null">
+  			<![CDATA[
+  				AND t.confirmedAge>=#{confirmedAgeStart}
+  			]]>
+  		</if>
+  		<if test="confirmedAgeEnd != null">
+  			<![CDATA[
+  				AND t.confirmedAge<=#{confirmedAgeEnd}
+  			]]>
+  		</if>
+  		
+  		<if test="lostPatientChange != null">
+  			<if test="lostPatientChange == 1">
+  				AND EXISTS(SELECT patientId FROM followup_db.var_patient_followup WHERE patientId=t.patientId AND newVisitFlag=1)
+  			</if>
+  			<if test="lostPatientChange == 2">
+  				AND EXISTS(SELECT patientId FROM followup_db.var_patient_followup WHERE patientId=t.patientId AND newContactFlag=1)
+  			</if>
+  			<if test="lostPatientChange == 3">
+  				AND EXISTS(SELECT patientId FROM followup_db.var_patient_followup WHERE patientId=t.patientId AND newVisitFlag=1 AND newContactFlag=1)
+  			</if>
+  		</if>
+  		<!-- 263新增 随访数据错误 add by yuanwenming start -->
+  		<if test="followupInvliadType != null">
+  			<if test="followupInvliadType==1">
+  				AND t.moreDeathFollowupResultFlag = -1
+  			</if>
+  			<if test="followupInvliadType==2">
+  				AND t.deathNotFollowupResultFlag = -1
+  			</if>
+  			<if test="followupInvliadType==3">
+  				AND t.deathNotFollowupTimeFlag = -1
+  			</if>
+  			<if test="followupInvliadType==4">
+  				AND t.deathAfterHasFollowupResultFlag = -1
+  			</if>
+  			<if test="followupInvliadType==5">
+  				AND t.medicalRecordNotFollowupResultFlag = -1
+  			</if>
+  			<if test="followupInvliadType==6">
+  				AND t.deathPatientIntoTask = -1
+  			</if>
+  			<if test="followupInvliadType==7">
+  				AND t.lostPatientIntoTask = -1
+  			</if>
+  			<if test="followupInvliadType == 99">
+				AND (t.moreDeathFollowupResultFlag =- 1 
+				OR t.deathNotFollowupResultFlag =- 1 
+				OR t.deathNotFollowupTimeFlag =- 1 
+				OR t.deathAfterHasFollowupResultFlag =- 1 
+				OR t.medicalRecordNotFollowupResultFlag =- 1 
+				OR t.deathPatientIntoTask =- 1 
+				OR t.lostPatientIntoTask =- 1 
+				)
+			</if>
+  		</if>
+  		<!-- 263新增 随访数据错误 add by yuanwenming end -->
+  		<if test="hospitalId != null">
+  			AND t.patientId IN(
+				SELECT t2.patientId FROM user_db.r_hospital_patient t2 WHERE t2.hospitalId=#{hospitalId}
+			)
+  		</if>
+  		<if test="catalogState != null">
+  			AND t.catalogState=#{catalogState}
+  		</if>
+  		<if test="catalogWithUpdate != null">
+  			<choose>
+  				<when test="catalogWithUpdate == 0">
+  					<![CDATA[
+  					AND NOT EXISTS(
+  						(SELECT 1 FROM ehr_db.ec_clinic_medical_note WHERE patientId=t.patientId and t.catalogState=3 AND t.catalogDate < createTime )
+						UNION
+						(SELECT 1 FROM ehr_db.ei_inhospital_note WHERE patientId=t.patientId and t.catalogState=3 AND t.catalogDate < createTime )
+  					)
+  					]]>
+  				</when>
+  				<otherwise>
+  					<![CDATA[
+  					and t.catalogState=3 
+  					AND EXISTS(
+  						(SELECT 1 FROM ehr_db.ec_clinic_medical_note WHERE patientId=t.patientId AND t.catalogDate < createTime )
+						UNION
+						(SELECT 1 FROM ehr_db.ei_inhospital_note WHERE patientId=t.patientId AND t.catalogDate < createTime )
+  					)
+  					]]>
+  				</otherwise>
+  			</choose>
+  		</if>
+  	</where>
+  </sql>
+  
+  <sql id="join_data_privilege">
+  	<choose>
+		<!-- 数据权限1全院查询 -->
+		<when test="dataId!=null and dataId==1 and operator!=null">
+			select dp.patientId from user_db.r_doctor_patient dp where dp.doctorId=#{operator}
+			UNION
+			select hp.patientId from user_db.r_hospital_doctor hd join r_hospital_patient hp on hd.doctorId=#{operator} AND hd.hospitalId=hp.hospitalId
+		</when>
+		<!-- 数据权限4查询本医生 -->
+		<when test="dataId!=null and dataId==4 and operator!=null">
+			select t1.patientId from user_db.r_doctor_patient t1 where t1.doctorId=#{operator}
+		</when>
+		<!-- 云端默认查询本医生 -->
+		<when test="deployLocation != null and deployLocation==2 and operator!=null">
+			select t1.patientId from user_db.r_doctor_patient t1 
+			LEFT JOIN user_db.r_doctor t2 ON t1.doctorId = t2.doctorId AND t2.state = 1
+			where 1
+			<choose>
+				<when test="doctorLevel != null and doctorLevel==1">
+					AND t2.deanDoctorId=#{operator}
+				</when>
+				<when test="doctorLevel != null and doctorLevel==2">
+					AND t2.deptDoctorId=#{operator}
+				</when>
+				<when test="doctorLevel != null and doctorLevel==21">
+					AND t2.deptSecDoctorId=#{operator}
+				</when>
+				<when test="doctorLevel != null and doctorLevel==3">
+					AND t2.directorDoctorId=#{operator}
+				</when>
+				<when test="doctorLevel != null and doctorLevel==4">
+					AND t2.inchargeDoctorId=#{operator}
+				</when>
+				<otherwise>
+					AND t1.doctorId=#{operator}
+				</otherwise>
+			</choose>
+			<if test="sourceFlag != null">
+				<choose>
+	  				<when test="sourceFlag == 1">
+	  					 AND t1.sourceFlag=3
+	  				</when>
+	  				<otherwise>
+	  					AND t1.sourceFlag != 3
+	  				</otherwise>
+	  			</choose>
+			</if>
+			<if test="doctorLevel != null and doctorLevel==1">
+			UNION
+				SELECT
+					t1.patientId
+				FROM
+					user_db.r_hospital_patient t1
+				JOIN user_db.r_hospital_doctor t2 ON t1.hospitalId = t2.hospitalId
+				WHERE
+					t2.doctorId = #{operator}
+			</if>
+		</when>
+	</choose>
+  </sql>
+</mapper>

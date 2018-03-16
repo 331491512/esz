@@ -1,0 +1,935 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.esuizhen.cloudservice.followup.dao.followuptask.FollowupTaskDao">
+
+    <!-- 因为分页问题，查询任务列表时不使用resultMap，因为存在Collection时，分页会出错 -->
+    <resultMap id="followupTaskInfoResultMap" type="com.esuizhen.cloudservice.followup.model.followuptask.TFollowupTaskSimpleInfo">
+    	<id column="followupTaskId" property="followupTaskId" />
+    	<result column="followupTaskName"   property="followupTaskName" />
+    	<result column="followupType"  property="followupType" />
+    	<result column="planFinishTime"  property="planFinishTime" />
+    	<result column="finishTime"  property="finishTime" />
+    	<result column="beginTime"  property="beginTime" />
+ 	  	<result column="creator"  property="creator" />
+   		<result column="state"  property="state" />
+ 	 	<result column="diseaseTypeId"  property="diseaseTypeId" />
+ 	 	<result column="totalPatientNum"  property="totalPatientNum" />
+ 	 	<result column="operatorNum"  property="operatorNum" />
+   		<collection column="followupTaskId" property="operatorList" ofType="com.esuizhen.cloudservice.followup.model.followuptask.FollowupTaskOperatorInfo" >
+	   		<result column="operator" property="operator" />
+    		<result column="trueName"     property="operatorName" />
+        </collection>
+    </resultMap>
+
+    <resultMap id="followupTaskDetailInfoResultMap" type="com.esuizhen.cloudservice.followup.model.followuptask.TFollowupTaskDetailInfo">
+    	<id column="followupTaskId" property="followupTaskId" />
+    	<result column="followupTaskName"   property="followupTaskName" />
+    	<result column="followupType"  property="followupType" />
+    	<result column="planFinishTime"  property="planFinishTime" />
+    	<result column="finishTime"  property="finishTime" />
+    	<result column="beginTime"  property="beginTime" />
+ 	  	<result column="creator"  property="creator" />
+   		<result column="state"  property="state" />
+ 	 	<result column="diseaseTypeId"  property="diseaseTypeId" />
+ 	 	<result column="totalPatientNum"  property="totalPatientNum" />
+ 	 	<result column="operatorNum"  property="operatorNum" />
+ 	 	<result column="followupTaskCycle"  property="followupTaskCycle" />
+ 	 	<result column="outPatientNum"  property="outPatientNum" />
+ 	 	<result column="thisTaskOutPatientNum"  property="thisTaskOutPatientNum" />
+   		<collection column="followupTaskId" property="followupTaskAssignList" ofType="com.esuizhen.cloudservice.followup.model.followuptask.TFollowupTaskAssign" >
+	  		<id column="followupAssignId"     property="followupAssignId" />
+      		<result column="followupTaskId"     property="followupTaskId" />
+    		<result column="operator" property="operator" />
+    		<result column="trueName" property="operatorName" />
+   			<result column="state2" property="state" />
+    	 	<result column="totalPatientNum2"  property="totalPatientNum" />
+ 	    </collection>
+ 	    <collection column="followupTaskId" property="contentTemplateList" ofType="com.esuizhen.cloudservice.followup.model.followuptask.TFollowupTaskContentTemplateRelation" >
+      		<result column="followupTaskId"     property="followupTaskId" />
+    		<result column="contentTemplateId" property="contentTemplateId" />
+    		<result column="contentTemplateName" property="contentTemplateName" />
+   			<result column="contentTemplateType" property="contentTemplateType" />
+ 	    </collection>
+    </resultMap>
+    
+    <!--  查询随访任务列表-随访主任  -->
+	<select id="queryFollowupTaskListByLeader"
+		parameterType="com.esuizhen.cloudservice.followup.bean.TFollowupTaskListByLeaderQueryReq"
+		resultType="com.esuizhen.cloudservice.followup.model.followuptask.TFollowupTaskSimpleInfo">
+	   SELECT
+			t1.followupTaskId,
+			t1.followupTaskName,
+			t1.followupType,
+			t1.planFinishTime,
+			t1.finishTime,
+			t1.beginTime,
+			t1.creator,
+			t1.state,
+			t1.diseaseTypeId,
+			t1.totalPatientNum,
+			t1.operatorNum
+	   FROM followup_db.followup_task t1
+			 LEFT JOIN followup_db.r_followup_task_assign t2 on t2.followupTaskId=t1.followupTaskId 
+			 LEFT JOIN user_db.u_doctor t5 on t5.doctorId=t2.operator
+			 
+			<!-- 权限控制 add by zhuguo -->
+			<if test="sql!=null">
+				JOIN (
+					${sql}
+				) s ON s.doctorId = t5.doctorId
+			</if>
+			 
+			<if test="patientTrueName!=null or patientPhone!=null or patientNo!=null">
+			 LEFT JOIN followup_db.r_followup_task_patient t4 on t4.followupTaskId=t1.followupTaskId AND t4.followupAssignId=t2.followupAssignId
+			 LEFT JOIN user_db.u_patient t3 on t4.patientId=t3.patientId
+			</if>
+			<if test="patientPhone!=null">
+				INNER JOIN user_db.u_patient_family t6 ON t6.patientId = t3.patientId
+				INNER JOIN followup_db.followup_result t7 ON t7.patientId = t3.patientId
+			</if>
+			     
+	   WHERE 1=1
+	   <if test="patientTrueName!=null or patientPhone!=null or patientNo!=null">
+	   	and t4.mergeFlag!=2
+	   	</if>
+		<choose>
+			<when test="states != null and states.size() > 0">
+				AND t1.state in
+				<foreach collection="states" item="state" open="(" close=")" separator=",">
+					#{state}
+				</foreach>
+			</when>
+			<otherwise>
+				<choose>
+					<when test="reqFlag!=null and reqFlag==0">
+						AND 1 >= t1.state
+					</when>
+					<when test="reqFlag!=null and reqFlag==2">
+						AND t1.state>=2
+					</when>
+				</choose>
+			</otherwise>
+		</choose>
+		<if test="taskName!=null">
+			<bind name="pattern" value="'%' + taskName + '%'" />
+			AND t1.followupTaskName like #{pattern}
+		</if>
+		<if test="operatorName!=null">
+			<bind name="pattern2" value="'%' + operatorName + '%'" />
+			AND t5.trueName LIKE #{pattern2}
+		</if>
+		<if test="patientTrueName!=null">
+			<bind name="patternPatientTrueName" value="'%' + patientTrueName + '%'" />
+			AND t3.trueName like #{patternPatientTrueName}
+		</if>
+		<if test="patientNo!=null">
+			<bind name="patternPatientNo" value="'%' + patientNo + '%'" />
+			and (
+  				exists(
+	  				select pn.patientId from user_db.r_uuid_patientno pn where pn.patientId=t3.patientId 
+	  				and (
+	  					pn.patientNo LIKE #{patternPatientNo}
+	  				) 
+  				) 
+  				or t3.patientNo LIKE #{patternPatientNo}
+  			)
+			
+		</if>
+		<if test="patientPhone != null">
+			<bind name="patternPatientPhone" value="'%' + patientPhone + '%'" />
+			AND (t6.familyPhone LIKE #{patternPatientPhone} OR t7.followupResultPhone LIKE #{patternPatientPhone})
+		</if>
+		GROUP BY t1.followupTaskId
+		ORDER BY t1.createTime DESC
+
+	</select>
+	
+	<!--  查询随访任务进度-->
+	<select id="queryFollowupTaskProgress"  resultType="com.esuizhen.cloudservice.followup.model.followuptask.TFollowupTaskSimpleInfo">
+		SELECT
+		t1.followupTaskId,
+		CONVERT(count(t2.patientId)/t1.totalPatientNum, DECIMAL(5, 4)) as progress
+		FROM
+			followup_db.followup_task t1
+			LEFT JOIN  	followup_db.followup_result t2 on  t1.followupTaskId=t2.followupTaskId
+			LEFT JOIN    followup_db.meta_followup_result_value t3 on t2.followupResultValue=t3.followupResultValueId 
+	
+		WHERE
+	      t1.followupTaskId IN
+			<foreach collection="list" item="ids" open="(" close=")" separator=",">
+				#{ids}
+			</foreach>
+			and t2.state=2
+			and t2.mergeFlag!=2
+		GROUP BY t1.followupTaskId
+	</select>
+	
+	<!--  查询随访任务有效率-->
+	<select id="queryFollowupTaskEffectiveRate"  resultType="com.esuizhen.cloudservice.followup.model.followuptask.TFollowupTaskSimpleInfo">
+		SELECT
+		t1.followupTaskId,
+		CONVERT ((
+			SELECT
+				COUNT(DISTINCT m1.patientId)
+			FROM followup_db.followup_result m1
+				INNER JOIN followup_db.meta_followup_result_value m2 ON m1.followupResultValue = m2.followupResultValueId
+			WHERE m1.followupTaskId = t1.followupTaskId AND m2.type = 1 and m1.state=2 and m1.mergeFlag!=2
+		) / COUNT(DISTINCT t2.patientId), DECIMAL (5, 4)) AS effectiveRate
+		FROM
+			followup_db.followup_task t1
+			LEFT JOIN  	followup_db.followup_result t2 on  t1.followupTaskId=t2.followupTaskId
+	
+		WHERE
+	      t1.followupTaskId IN
+			<foreach collection="list" item="ids" open="(" close=")" separator=",">
+				#{ids}
+			</foreach>
+			and t2.state=2
+		GROUP BY t1.followupTaskId
+	</select>
+
+
+	<!--  查询随访任务列表-随访人员  -->
+	<select id="queryFollowupTaskListByOperator"
+		parameterType="com.esuizhen.cloudservice.followup.bean.TFollowupTaskListByOperatorQueryReq"
+		resultType="com.esuizhen.cloudservice.followup.model.followuptask.TFollowupTaskSimpleInfo">
+		SELECT
+			t1.followupTaskId,
+			t2.followupAssignId,
+			t1.followupTaskName,
+			t1.followupType,
+			t1.planFinishTime,
+			t1.finishTime,
+			t1.beginTime,
+			t1.creator,
+			t1.state,
+			t1.diseaseTypeId,
+			t2.totalPatientNum,
+			t1.operatorNum
+		FROM followup_db.followup_task t1
+			 LEFT JOIN followup_db.r_followup_task_assign t2 on t2.followupTaskId=t1.followupTaskId 
+			 LEFT JOIN user_db.u_doctor t5 on t5.doctorId=t2.operator
+			 
+ 			<!-- 权限控制 add by zhuguo
+			<if test="sql!=null">
+				JOIN (
+					${sql}
+				) s ON s.doctorId = t5.doctorId
+			</if> -->
+			 
+			<if test="patientTrueName!=null or patientPhone!=null or patientNo!=null">
+			 LEFT JOIN followup_db.r_followup_task_patient t4 on t4.followupTaskId=t1.followupTaskId AND t4.followupAssignId=t2.followupAssignId
+			 LEFT JOIN user_db.u_patient t3 on t4.patientId=t3.patientId
+			</if>
+			<if test="patientPhone!=null">
+				INNER JOIN user_db.u_patient_family t6 ON t6.patientId = t3.patientId
+				INNER JOIN followup_db.followup_result t7 ON t7.patientId = t3.patientId
+			</if>
+		WHERE 1=1
+		<if test="patientTrueName!=null or patientPhone!=null or patientNo!=null">
+		and t4.mergeFlag!=2
+		</if>
+		<choose>
+			<when test="states != null">
+				AND t1.state in
+				<foreach collection="states" item="state" open="(" close=")" separator=",">
+					#{state}
+				</foreach>
+			</when>
+			<otherwise>
+				<choose>
+					<when test="reqFlag!=null and reqFlag==0">
+						AND 1 >= t1.state
+					</when>
+					<when test="reqFlag!=null and reqFlag==2">
+						AND t1.state>=2
+					</when>
+				</choose>
+			</otherwise>
+		</choose>
+		<if test="taskName!=null">
+			<bind name="patternTaskName" value="'%' + taskName + '%'" />
+			AND t1.followupTaskName like #{patternTaskName}
+		</if>
+		<if test="patientTrueName!=null">
+			<bind name="patternPatientTrueName" value="'%' + patientTrueName + '%'" />
+			AND t3.trueName like #{patternPatientTrueName}
+		</if>
+		<if test="patientNo!=null">
+			<bind name="patternPatientNo" value="'%' + patientNo + '%'" />
+			and (
+  				exists(
+	  				select pn.patientId from user_db.r_uuid_patientno pn where pn.patientId=t3.patientId 
+	  				and (
+	  					pn.patientNo LIKE #{patternPatientNo}
+	  				) 
+  				) 
+  				or t3.patientNo LIKE #{patternPatientNo}
+  			)
+		</if>
+		<if test="patientPhone != null">
+			<bind name="patternPatientPhone" value="'%' + patientPhone + '%'" />
+			AND (t6.familyPhone LIKE #{patternPatientPhone} OR t7.followupResultPhone LIKE #{patternPatientPhone})
+		</if>
+		
+		<!-- 权限控制 add by zhuguo
+		<if test="role == 3">
+		</if> -->
+		AND t5.doctorId=#{operator}
+		
+	    GROUP BY t1.followupTaskId   
+ 		ORDER BY t1.createTime DESC
+	</select>
+	
+	 <!--  查询随访人员列表 -->
+	<select id="queryFollowupTaskAssignList"
+		resultType="com.esuizhen.cloudservice.followup.model.followuptask.TFollowupTaskSimpleInfo"
+		resultMap="followupTaskInfoResultMap"
+		>
+	   SELECT
+		t1.followupTaskId,
+		t2.operator,
+		t3.trueName
+	   FROM followup_db.followup_task t1
+	        LEFT JOIN followup_db.r_followup_task_assign t2 on t1.followupTaskId=t2.followupTaskId
+	        LEFT JOIN user_db.u_doctor t3 	on t2.operator=t3.doctorId
+	   WHERE 
+		   t1.followupTaskId IN
+			<foreach collection="list" item="ids" open="(" close=")" separator=",">
+				#{ids}
+			</foreach>
+		
+
+	</select>
+	
+	<select id="queryFollowupTaskByPrimaryKey" resultType="com.esuizhen.cloudservice.followup.model.followuptask.TFollowupTaskDetailInfo">
+		SELECT
+			t1.followupTaskId,
+			t1.followupTaskName,
+			t1.followupType,
+			t1.planFinishTime,
+			t1.finishTime,
+			t1.beginTime,
+			t1.creator,
+			t1.state,
+			t1.diseaseTypeId,
+			t1.totalPatientNum,
+			t1.operatorNum
+		FROM followup_db.followup_task t1
+		WHERE t1.followupTaskId=#{followupTaskId}
+	</select>
+	
+	<!-- 查询随访任务详情：随访主任 -->
+	<select id="queryFollowupTaskDetail"
+		resultType="com.esuizhen.cloudservice.followup.model.followuptask.TFollowupTaskDetailInfo"
+		resultMap="followupTaskDetailInfoResultMap">
+		SELECT
+			t1.followupTaskId,
+			t1.followupTaskName,
+			t1.followupType,
+			t1.planFinishTime,
+			t1.finishTime,
+			t1.beginTime,
+			t1.creator,
+			t1.state,
+			t1.diseaseTypeId,
+			t1.totalPatientNum,
+			t1.operatorNum,
+			t2.followupAssignId,
+			t2.followupTaskId,
+			t2.operator,
+			t3.trueName,
+			t2.state state2,
+			t2.totalPatientNum totalPatientNum2,
+			t6.contentTemplateId,<!-- add by fanpanwei 新增模板返回 -->
+			t7.contentTemplateName,
+			t6.contentTemplateType,<!--  -->
+			t5.followupCycle followupTaskCycle,
+			(
+				SELECT
+					COUNT(DISTINCT m1.patientId)
+				FROM followup_db.followup_result m1
+				WHERE m1.followupResultValue IN(15, 16)
+				and m1.mergeFlag!=2
+			)outPatientNum,
+			(
+				SELECT
+					COUNT(DISTINCT m1.patientId)
+				FROM followup_db.followup_result m1
+				WHERE m1.followupResultValue IN(15, 16)
+				AND m1.followupTaskId = t1.followupTaskId
+				and m1.mergeFlag!=2
+			)thisTaskOutPatientNum
+		FROM followup_db.followup_task t1
+			LEFT JOIN followup_db.r_followup_task_assign t2 ON t1.followupTaskId=t2.followupTaskId
+			LEFT JOIN user_db.u_doctor t3 on t2.operator=t3.doctorId
+			LEFT JOIN user_db.r_hospital_doctor t4 ON t2.operator = t4.doctorId
+			LEFT JOIN followup_db.conf_global t5 ON t4.hospitalId = t5.hospitalId
+			LEFT JOIN  followup_db.r_followup_task_content_template t6 ON t6.followupTaskId=t1.followupTaskId
+			LEFT JOIN  followup_db.followup_content_template t7 ON t7.contentTemplateId=t6.contentTemplateId
+		WHERE t1.followupTaskId=#{taskId}
+	</select>
+
+	<!-- 查询随访任务详情：随访人员 -->
+	<select id="queryFollowupTaskAssignDetail"
+		resultType="com.esuizhen.cloudservice.followup.model.followuptask.TFollowupTaskDetailInfo"
+		resultMap="followupTaskDetailInfoResultMap">
+		SELECT
+			t1.followupTaskId,
+			t1.followupTaskName,
+			t1.followupType,
+			t1.planFinishTime,
+			t1.finishTime,
+			t1.beginTime,
+			t1.creator,
+			t1.state,
+			t1.diseaseTypeId,
+			t2.totalPatientNum,
+			1 as operatorNum,
+		    t2.followupAssignId,
+			t2.followupTaskId,
+			t2.operator,
+			t3.trueName,
+			t2.state as state2,
+			t2.totalPatientNum as totalPatientNum2,
+			t5.followupCycle followupTaskCycle,
+			(
+				SELECT
+					COUNT(DISTINCT m1.patientId)
+				FROM followup_db.followup_result m1
+				WHERE m1.followupResultValue IN(15, 16)
+			)outPatientNum,
+			(
+				SELECT
+					COUNT(DISTINCT m1.patientId)
+				FROM followup_db.followup_result m1
+				WHERE m1.followupResultValue IN(15, 16)
+					AND m1.followupTaskId = t1.followupTaskId
+					AND m1.followupAssignId = t2.followupAssignId
+			)thisTaskOutPatientNum
+		FROM followup_db.followup_task t1
+			LEFT JOIN followup_db.r_followup_task_assign t2 on t1.followupTaskId=t2.followupTaskId 
+			LEFT JOIN user_db.u_doctor t3 on t2.operator=t3.doctorId
+			LEFT JOIN user_db.r_hospital_doctor t4 ON t2.operator = t4.doctorId
+			LEFT JOIN followup_db.conf_global t5 ON t4.hospitalId = t5.hospitalId
+		WHERE
+		    t2.followupAssignId=#{assignId}
+		    AND t1.followupTaskId=#{taskId}
+	</select>
+
+    <!-- 查询随访任务详情-患者列表 -->
+	<select id="queryFollowupTaskPatientList"
+		parameterType="com.esuizhen.cloudservice.followup.bean.TFollowupTaskPatientListQueryReq"
+		resultType="com.esuizhen.cloudservice.followup.model.followuptask.TFollowupPatientInfo">
+		SELECT
+			w1.*
+		FROM(
+			SELECT
+				f1.*,
+				(
+					SELECT
+						IF(COUNT(1) > 0, 1, 0)
+					FROM user_db.u_thirdparty n1
+					WHERE n1.userId = f1.userId
+				) wxFlag,
+				(
+					SELECT
+						IF(SUM(IF(POSITION('1' IN n1.familyPhone) = 1, 1, 0)) > 0, 1, 0)
+					FROM user_db.u_patient_family n1
+					WHERE n1.patientId = f1.patientId AND n1.isValid = 1
+				)mobileFlag,
+				(
+					SELECT
+						IF(COUNT(1) > 0, 1, 0)
+					FROM user_db.u_patient_family n1
+					WHERE n1.patientId = f1.patientId AND n1.isValid = 1
+				)phoneFlag
+			FROM(
+				SELECT
+					t1.state,
+					t1.followupTaskId,
+					t1.followupAssignId,
+					t2.userId,
+					t2.patientId,
+					t2.patientNo,
+					t2.trueName,
+					t2.inhospitalState,
+					(SELECT mn.nationName FROM user_db.meta_nation mn WHERE mn.nationId=u.nationId LIMIT 1)nationName,
+					t2.sourceDiagnosis,
+					t2.followupFlag,
+					t2.liveStatus,
+					t3.diseaseTypeName as sourceDiseaseTypeName,
+					t4.trueName as chargeDoctorName,
+					inhos.inhospitalDoctorName,
+					t5.followupTime,
+					t5.followupResultValue,
+					t6.followupResultValueName,
+					t6.type followupResultType,
+					t1.state followupState,
+					(case when t1.state=0 then '未完成'
+					when t1.state=1 then '暂存'
+					when t1.state=2 then '已完成' else '未知' end) as followupStateName,
+					t5.followupWay,
+					t7.followupWayName,
+					t1.wxState wxStateId,
+					(case when t1.wxState=0 then '未发送'
+					when t1.wxState=1 then '已发送未反馈'
+					when t1.wxState=2 then '发送失败'
+					when t1.wxState=3 then '已反馈' else '未知' end) as wxState,
+					t1.smsState smsStateId,
+					(case when t1.smsState=0 then '未发送'
+					when t1.smsState=1 then '已发送未反馈'
+					when t1.smsState=2 then '发送失败'
+					when t1.smsState=3 then '已反馈' else '未知' end) as smsState,
+					t8.replyTime as smsReplyTime,
+					t8.replyContent as smsReplyContent,
+					t5.followupResultPhone,
+					t5.sourceFlag,
+					<!-- add by xueyongyan 20170525 -->
+					case when (select count(0) from followup_phone_call_record r where r.patientId = t1.patientId
+					AND t1.followupTaskId = r.followupTaskId )> 0 then 1 else 0 end phoneRecording,
+					
+					case when (select count(0) from followup_phone_call_record r where r.patientId = t1.patientId
+					AND t1.followupTaskId = r.followupTaskId and r.readFlag=1 )> 0 then 1 else 0 end readFlag
+					<!-- add by xueyongyan 20170525 -->
+				FROM followup_db.r_followup_task_patient t1
+					JOIN user_db.u_patient t2 on t1.patientId=t2.patientId
+					JOIN user_db.u_user u ON u.userId=t2.userId
+					LEFT JOIN ehr_db.ei_inhospital_note inhos on inhos.inhospitalId=t2.inhospitalId
+					LEFT JOIN ehr_db.meta_c_disease_type t3 on t2.sourceDiseaseTypeId=t3.diseaseTypeId
+					LEFT JOIN user_db.u_doctor t4 on t2.inchargeDoctor=t4.doctorId
+					LEFT JOIN followup_db.followup_result t5 on t5.patientId=t1.patientId AND t1.followupTaskId=t5.followupTaskId
+					LEFT JOIN followup_db.meta_followup_result_value t6 on t5.followupResultValue=t6.followupResultValueId
+					LEFT JOIN followup_db.meta_followup_way t7 on t7.followupWayId=t5.followupWay
+					LEFT JOIN followup_db.followup_sms_req t8 on t8.reqId=t1.smsReqId
+				WHERE
+					t1.followupTaskId=#{taskId}
+					and t1.mergeFlag!=2
+				<if test="nationIdStr != null">
+					AND u.nationId IN (${nationIdStr})
+				</if>
+				<if test="sourceDiseaseTypeIdStr != null">
+					AND t2.sourceDiseaseTypeId IN (${sourceDiseaseTypeIdStr})
+				</if>
+				<if test="assignId != null">
+					AND t1.followupAssignId=#{assignId}
+				</if>
+
+			) f1
+			<if test="phone != null">
+				LEFT JOIN user_db.u_patient_family f2 ON f2.patientId=f1.patientId
+			</if>
+			WHERE 1 = 1
+			<if test="patientNo != null">
+				<bind name="patternPatientNo" value="'%' + patientNo + '%'" />
+				and (
+	  				exists(
+		  				select pn.patientId from user_db.r_uuid_patientno pn where pn.patientId=f1.patientId 
+		  				and (
+		  					pn.patientNo LIKE #{patternPatientNo}
+		  				) 
+	  				) 
+	  				or f1.patientNo LIKE #{patternPatientNo}
+	  			)
+				
+			</if>
+			<if test="patientTrueName!=null">
+				<bind name="pattern" value="'%' + patientTrueName + '%'" />
+				AND f1.trueName LIKE #{pattern}
+			</if>
+			<if test="sourceDiagnosis!=null">
+				<bind name="pattern2" value="'%' + sourceDiagnosis + '%'" />
+				AND f1.sourceDiagnosis LIKE #{pattern2}
+			</if>
+			<if test="followupResultValue != null and followupResultValue.size() > 0">
+			and f1.followupResultValue in
+    		<foreach collection="followupResultValue" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+			
+			<!-- AND f1.followupResultValue = #{followupResultValue}  -->	
+			</if>
+			<if test="state != null and state.size() > 0">
+			and f1.state in
+    		<foreach collection="state" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+			
+				<!-- AND f1.state=#{state} -->
+			</if>
+			<if test="phone != null">
+				<bind name="patternPhone" value="'%' + phone + '%'" />
+				AND (f2.familyPhone LIKE #{patternPhone} OR f1.followupResultPhone LIKE #{patternPhone})
+			</if>
+			ORDER BY f1.state DESC, f1.followupTime DESC
+		) w1
+		GROUP BY w1.patientId
+	</select>
+	
+	<!-- 创建随访任务 -->
+	<insert id="createFollowupTask" parameterType="com.esuizhen.cloudservice.followup.model.followuptask.TFollowupTaskSimpleInfo">
+		INSERT INTO followup_task
+		(followupTaskId , followupTaskName , planFinishTime , beginTime , creator , diseaseTypeId,totalPatientNum, operatorNum,createTime,state)
+		VALUES
+		(#{followupTaskId} , #{followupTaskName} , #{planFinishTime} , now(),#{creator}, #{diseaseTypeId} ,#{totalPatientNum} ,#{operatorNum}, NOW(),0)
+	</insert>  
+	
+	<!-- 生成任务分配表数据 -->
+	<insert id="createFollowupTaskAssign" parameterType="java.util.List">
+		INSERT INTO r_followup_task_assign
+		(followupAssignId, followupTaskId , operator ,state, totalPatientNum, createTime)
+		VALUES
+			<foreach collection="list" item="item" index="index" separator=",">
+			 (#{item.followupAssignId},#{item.followupTaskId},#{item.operator},0,#{item.totalPatientNum},NOW())
+		    </foreach>
+		
+	</insert>  
+	
+	<!-- 生成随访任务和内容模板关系表数据-->
+	<insert id="createFollowupTaskContentTemplate" parameterType="java.util.List">
+		INSERT INTO r_followup_task_content_template
+		(followupTaskId , contentTemplateId ,contentTemplateType, createTime)
+		VALUES
+			<foreach collection="list" item="item" index="index" separator=",">
+			 (
+			 	#{item.followupTaskId},
+			 	#{item.contentTemplateId},
+			 	#{item.contentTemplateType},
+			 	NOW()
+			 )
+		    </foreach>
+		
+	</insert>  
+	
+	<!-- 分配患者到任务：根据患者列表，一次性插入随访任务和患者关系表 -->
+	<insert id="createFollowupTaskAssignPatient" parameterType="java.util.List">
+		INSERT INTO r_followup_task_patient
+		(followupAssignId, followupTaskId , patientId , state, createTime, updateTime)
+		VALUES
+			<foreach collection="list" item="item" index="index" separator=",">
+			 (#{item.followupAssignId},#{item.followupTaskId},#{item.patientId},0,NOW(),NOW())
+		    </foreach>
+		
+	</insert>  
+	
+	<!-- 分配患者到任务：根据searchId，插入随访任务和患者关系表 -->
+	<insert id="createFollowupTaskAssignPatientBySearchId" parameterType="com.esuizhen.cloudservice.followup.model.followuptask.TFollowupTaskAssignPatientSearchId">
+		INSERT INTO r_followup_task_patient(
+			followupAssignId,
+			followupTaskId,
+			patientId,
+			state,
+			createTime,
+			updateTime
+		)
+		SELECT 
+			#{followupAssignId},
+			#{followupTaskId},
+			t1.patientId,
+			0,
+			NOW(),
+			NOW()
+		FROM 
+			<choose>
+				<when test="searchTableName != null">
+					${searchTableName}
+				</when>
+				<otherwise>
+					ods_db.var_search_patient
+				</otherwise>
+			</choose>
+			t1
+		WHERE
+			t1.${searchColumnName} = 0
+		LIMIT #{patientNum}
+	</insert>
+	
+
+	<!-- 获取末次随访患者ID -->
+	<select id="getLastFollowupPatientBySearchId" resultType="Long">
+		SELECT 
+			t1.patientId
+		FROM 
+			<choose>
+				<when test="searchTableName != null">
+					${searchTableName}
+				</when>
+				<otherwise>
+					ods_db.var_search_patient
+				</otherwise>
+			</choose>
+			t1
+		<where>
+			t1.${searchColumnName} = 0
+			and exists(
+				select 0 from followup_db.followup_result ti1 
+				where ti1.patientId=t1.patientId 
+				and ti1.followupWay not in (7,8) 
+				<if test="operator !=null">
+					and ti1.operator=#{operator}
+				</if>
+				order by ti1.followupTime desc limit 1
+			)
+		</where>	
+		LIMIT #{patientNum}
+	</select>
+	
+	<!-- 分配患者到任务：根据searchId，插入随访任务和患者关系表 -->
+	<insert id="createLastFollowupPatientBySearchId" parameterType="com.esuizhen.cloudservice.followup.model.followuptask.TFollowupTaskAssignPatientSearchId">
+		INSERT INTO r_followup_task_patient(
+			followupAssignId,
+			followupTaskId,
+			patientId,
+			state,
+			createTime,
+			updateTime
+		)
+		SELECT 
+			#{followupAssignId},
+			#{followupTaskId},
+			t1.patientId,
+			0,
+			NOW(),
+			NOW()
+		FROM 
+			<choose>
+				<when test="searchTableName != null">
+					${searchTableName}
+				</when>
+				<otherwise>
+					ods_db.var_search_patient
+				</otherwise>
+			</choose>
+			t1
+		<where>
+			t1.${searchColumnName} = 0
+			and exists(
+				select 0 from followup_db.followup_result ti1 
+				where ti1.patientId=t1.patientId 
+				and ti1.followupWay not in (7,8) 
+				<if test="operator !=null">
+					and ti1.operator=#{operator}
+				</if>
+				order by ti1.followupTime desc limit 1
+			)
+		</where>	
+		LIMIT #{patientNum}
+	</insert>
+	
+	<update id="recoveryLastFollowupPatientSearchTable">
+		UPDATE ${searchTableName}
+		<set>
+			${searchColumnName} = NULL
+		</set>
+		WHERE ${searchColumnName} = 0 and patientId IN
+			<foreach collection="patientIds" item="patientId" open="(" close=")" separator=",">
+				#{patientId}
+			</foreach>
+		LIMIT #{patientNum}
+	</update>
+	
+
+	<update id="recoverySearchTable">
+		UPDATE ${searchTableName}
+		<set>
+			${searchColumnName} = NULL
+		</set>
+		WHERE ${searchColumnName} = 0
+		LIMIT #{patientNum}
+	</update>
+	
+	<update id="setSearchPatientFlag" parameterType="com.esuizhen.cloudservice.followup.model.followuptask.TFollowupTaskAssignPatientSearchId">
+	    UPDATE 
+	    	<choose>
+				<when test="searchTableName!=null">
+					${searchTableName} t1
+				</when>
+				<otherwise>
+					ods_db.var_search_patient t1
+				</otherwise>
+			</choose>
+	    
+	     SET
+	    	t1.flag=1
+	    WHERE
+	    	t1.searchId=#{searchId}
+	    	AND t1.conditionId=#{conditionId}
+	    	AND t1.patientId IN 
+	    	  (SELECT patientId FROM r_followup_task_patient 
+	    	    WHERE followupAssignId=#{followupAssignId}
+	    	  	      AND  followupTaskId=#{followupTaskId}
+	    	  )
+	    
+	</update>
+	
+	<select id="queryFollowupTaskCreator" resultType="Integer">
+		select count(1) from 
+		  followup_db.followup_task t1,
+		  user_db.u_doctor t2
+		<where>
+		    t2.userId=#{userId}
+			and t1.creator=t2.userId
+			and t1.followupTaskId=#{taskId}
+		</where>
+	</select>
+	
+	<update id="stopFollowupTask" parameterType="java.util.List">
+	  	UPDATE followup_task
+	  	SET
+	  		state = 3,
+	  		finishTime = NOW(),
+	  		updateTime = NOW()
+	    WHERE followupTaskId IN
+			<foreach collection="list" item="taskId" open="(" close=")" separator=",">
+				#{taskId}
+			</foreach>
+	</update>
+	
+	<update id="updateFollowupTask" parameterType="com.esuizhen.cloudservice.followup.model.followuptask.TFollowupTaskSimpleInfo">
+	  	UPDATE followup_task
+	  	<set>
+	  		<if test="followupTaskName !=null">
+	  			followupTaskName=#{followupTaskName},
+	  		</if>
+	  		<if test="state !=null">
+	  			state=#{state},
+	  		</if>
+	  		<if test="finishTime !=null">
+	  			finishTime=#{finishTime}
+	  		</if>
+	  	</set>
+	  	<where>
+	  		followupTaskId=#{followupTaskId}
+	  	</where>
+	</update>
+	
+	<update id="updateFollowupTaskAssign" parameterType="com.esuizhen.cloudservice.followup.model.followuptask.TFollowupTaskAssign">
+	  	UPDATE r_followup_task_assign
+	  	<set>
+	  		<if test="state !=null">
+	  			state=#{state}
+	  		</if>
+	  	</set>
+	  	<where>
+	  		followupAssignId=#{followupAssignId}
+	  	</where>
+	</update>
+	
+	
+
+
+	<select id="queryUnfinishedFollowupTaskCount" resultType="Integer">
+		select count(1) from r_followup_task_assign taskAssign
+		<where>
+			taskAssign.followupTaskId=#{followupTaskId}
+			and taskAssign.state &lt;2
+		</where>
+	</select>
+	
+	<select id="queryUnfinishedFollowupTaskAssignCount" resultType="Integer">
+		select count(1) from r_followup_task_patient taskPatient
+		<where>
+			taskPatient.followupAssignId=#{followupAssignId}
+			and taskPatient.mergeFlag!=2
+			and taskPatient.state&lt;2
+		</where>
+	</select>
+	
+	<!-- 随访计划元数据查询 -->
+	<select id="queryMetaFollowupTaskList" resultType="com.esuizhen.cloudservice.followup.bean.FollowupTask">
+		select followupTaskId,followupTaskName from followup_task
+	</select>
+	
+	
+		<!-- add by fanpanwei 获取关联患者追随随访医生的追随信息 -->
+	<select id="queryEpigoneInfoByDOrP" resultType="java.util.HashMap" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupTaskOperatorAlloPatientReq">
+		SELECT
+		<if test="operators!=null and operators.size != 0">
+		d.doctorId operatorId,
+		</if>
+		<if test="operators==null or operators.size == 0">
+		t1.operator operatorId,
+		</if>
+		d.trueName operatorName,
+		CASE WHEN t1.followupResultId IS NULL THEN 0 ELSE COUNT(1) END patientCount,
+		CASE WHEN t1.followupResultId IS NULL THEN 0 ELSE 1 END isLastFollowup,
+		CASE WHEN d.userRole IS NULL THEN 0 ELSE 1 END  isValidOperator 
+		FROM (
+				SELECT f1.patientId,f1.operator,f1.followupTime,f1.followupResultId FROM  followup_db.followup_result f1
+				INNER JOIN (
+						SELECT f0.patientId,MAX(f0.followupTime) maxTime FROM followup_db.followup_result f0
+						<if test="patientIdList==null or patientIdList.size == 0">
+							INNER JOIN (
+								SELECT 
+									t1.patientId
+								FROM 
+									<choose>
+										<when test="searchTableName != null">
+											${searchTableName}
+										</when>
+										<otherwise>
+											ods_db.var_search_patient
+										</otherwise>
+									</choose>
+									t1
+								WHERE
+								t1.${searchColumnName} = 0
+						) p0 ON p0.patientId=f0.patientId
+						</if>
+						LEFT JOIN user_db.u_doctor d0 ON d0.doctorId=f0.operator
+						WHERE f0.followupWay NOT IN (7,8)
+						<!--  AND f0.patientid IN ('385150','385152') -->
+						<if test="patientIdList!=null and patientIdList.size != 0">
+							AND f0.patientid IN
+							<foreach collection="patientIdList" item="pId" open="(" close=")" separator=",">
+								#{pId}
+							</foreach>
+						</if>
+						<!-- AND f0.operator IN () -->
+						<if test="operators!=null and operators.size != 0">
+							AND f0.operator IN
+							<foreach collection="operators" item="dId" open="(" close=")" separator=",">
+								#{dId}
+							</foreach>
+						</if>
+						GROUP BY f0.patientId
+				) t0 ON t0.patientId=f1.patientId AND t0.maxTime=f1.followupTime
+				WHERE f1.followupWay NOT IN (7,8)
+				<!-- AND f1.operator IN () -->
+				<if test="operators!=null and operators.size != 0">
+					AND f1.operator IN
+					<foreach collection="operators" item="dId" open="(" close=")" separator=",">
+						#{dId}
+					</foreach>
+				</if>
+				GROUP BY f1.patientId
+		)t1
+		<if test="operators!=null and operators.size != 0">
+		RIGHT JOIN (
+		</if>
+		<if test="operators==null or operators.size == 0">
+		LEFT JOIN (
+		</if>
+				SELECT 
+					 d1.doctorId,
+					 d1.trueName,
+					 d3.userRole
+				FROM 
+					 user_db.u_doctor d1
+				LEFT JOIN user_db.r_user_role d2 ON d2.userId=d1.userId
+				LEFT JOIN user_db.meta_role d3 ON d3.userRole=d2.userRole
+				<if test="operators!=null and operators.size != 0">
+					WHERE d1.doctorId IN
+					<foreach collection="operators" item="ddId" open="(" close=")" separator=",">
+						#{ddId}
+					</foreach>
+				</if>
+		) d ON d.doctorId=t1.operator
+		GROUP BY operatorId
+	</select>
+	
+</mapper>

@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.crf.TCrfSchemeDao">
+
+	<resultMap id="CrfObservationTreatmentSchemeRadiotherapyMap" type="com.esuizhen.cloudservice.research.model.crf.TCrfScheme" >
+    	<result property="crfObserveSchemeId" column="crfObserveSchemeId"/>
+    	<result property="subjectElementId" column="subjectElementId"/>
+    	<result property="crfObserveId" column="crfObserveId"/>
+    	<result property="schemeName" column="schemeName"/>
+    	<result property="treatmentSchemeId" column="treatmentSchemeId"/>
+    	
+  		<collection property="bodyPartList" ofType="com.esuizhen.cloudservice.research.model.crf.TCrfRadiotherapyPartInfo">
+    		<result property="crfObserveItemId" column="crfObserveItemId"/>
+    		<result property="crfObserveSchemeId" column="crfObserveSchemeId"/>
+    		<result property="radiotherapyPartId" column="radiotherapyPartId"/>
+    		<result property="radiotherapyPartName" column="radiotherapyPartName"/>
+    	</collection>
+	</resultMap>
+	
+	<resultMap id="CrfObservationTreatmentSchemeMedicationMap" type="com.esuizhen.cloudservice.research.model.crf.TCrfScheme" >
+    	<result property="crfObserveSchemeId" column="crfObserveSchemeId"/>
+    	<result property="subjectElementId" column="subjectElementId"/>
+    	<result property="crfObserveId" column="crfObserveId"/>
+    	<result property="schemeName" column="schemeName"/>
+    	<result property="treatmentSchemeId" column="treatmentSchemeId"/>
+    	
+  		<collection property="medicationList" ofType="com.esuizhen.cloudservice.research.model.crf.TCrfMedicationInfo">
+    		<result property="crfObserveItemId" column="crfObserveItemId"/>
+    		<result property="crfObserveSchemeId" column="crfObserveSchemeId"/>
+    		<result property="medicationType" column="medicationType"/>
+    		<result property="medicationId" column="medicationId"/>
+    		<result property="medicationName" column="medicationName"/>
+    		<result property="commodityName" column="commodityName"/>
+    		<result property="computingMethod" column="computingMethod"/>
+    		<result property="theoreticalDose" column="theoreticalDose"/>
+    		<result property="drugUsage" column="drugUsage"/>
+    		<result property="measurementUnit" column="measurementUnit"/>
+    		<result property="treatmentPeriod" column="treatmentPeriod"/>
+    		<result property="totalCourse" column="totalCourse"/>
+    	</collection>
+	</resultMap>
+	
+	<insert id="insertCrfObservationTreatmentSchemeOptions" parameterType="com.esuizhen.cloudservice.research.model.crf.TCrfScheme">
+        INSERT INTO crf_observation_treatment_scheme_options 
+        (
+        	crfObserveSchemeId ,
+        	crfObserveId ,
+        	subjectElementId ,
+        	schemeName ,
+        	treatmentSchemeId ,
+        	`index`,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{crfObserveSchemeId} ,
+        	#{crfObserveId} ,
+        	#{subjectElementId} ,
+        	#{schemeName} ,
+        	#{treatmentSchemeId} ,
+        	#{index} ,
+        	NOW() ,
+        	NOW()  
+        )
+	</insert>
+    
+    <insert id="insertCrfObservationTreatmentSchemeOptionsList">
+        INSERT INTO crf_observation_treatment_scheme_options 
+        (
+        	crfObserveSchemeId ,
+        	crfObserveId ,
+        	subjectElementId ,
+        	schemeName ,
+        	treatmentSchemeId ,
+        	`index`,
+        	createTime ,
+        	updateTime 
+        ) VALUES 
+        <foreach collection="list" index="index" item="item" separator=",">
+        (
+        	#{item.crfObserveSchemeId} ,
+        	#{item.crfObserveId} ,
+        	#{item.subjectElementId} ,
+        	#{item.schemeName} ,
+        	#{item.treatmentSchemeId} ,
+        	#{item.index} ,
+        	NOW() ,
+        	NOW() 
+        )
+        </foreach>
+        
+	</insert>
+	
+	<update id="updateCrfObservationTreatmentSchemeOptions" parameterType="com.esuizhen.cloudservice.research.model.crf.TCrfScheme">
+        UPDATE crf_observation_treatment_scheme_options 
+        <set>
+	        <if test="crfObserveId != null">
+                crfObserveId = #{crfObserveId} ,
+            </if>
+	        <if test="subjectElementId != null">
+                subjectElementId = #{subjectElementId} ,
+            </if>
+	        <if test="schemeName != null">
+                schemeName = #{schemeName} ,
+            </if>
+	        <if test="1==1">
+                updateTime = NOW() ,
+            </if>
+        </set>
+        WHERE 
+	        crfObserveSchemeId = #{crfObserveSchemeId} 
+	</update>
+
+    <delete id="deleteCrfObservationTreatmentSchemeOptions">
+        DELETE FROM crf_observation_treatment_scheme_options WHERE crfObserveSchemeId = #{crfObserveSchemeId} 
+    </delete>
+    
+    <delete id="deleteCrfObservationTreatmentSchemeOptionsByCrfObserveId">
+        DELETE FROM crf_observation_treatment_scheme_options WHERE crfObserveId = #{crfObserveId} 
+    </delete>
+    
+    <select id="queryCrfObservationTreatmentSchemeOptionsById" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfScheme">
+		SELECT 
+        	crfObserveSchemeId,
+        	crfObserveId,
+        	subjectElementId,
+        	schemeName,
+        	treatmentSchemeId,
+        	createTime,
+        	updateTime
+		FROM crf_observation_treatment_scheme_options 
+	    WHERE 
+	        crfObserveSchemeId = #{crfObserveSchemeId} 
+	</select>
+    
+    <select id="queryCrfObservationTreatmentSchemeByCrfObserveId" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfSchemeOtherInfo">
+		SELECT 
+			t2.treatmentSchemeId,
+        	t2.crfObserveSchemeId,
+        	t2.subjectElementId,
+        	t2.crfObserveId,
+        	t2.schemeName,
+        	t2.createTime,
+        	t2.updateTime
+		FROM crf_observation_treatment_scheme_options t2
+	    WHERE t2.crfObserveId = #{crfObserveId}
+	    ORDER BY t2.`index` ASC
+	</select>
+	
+	<select id="queryCrfObservationTreatmentSchemeRadiotherapyByCrfObserveId" resultMap="CrfObservationTreatmentSchemeRadiotherapyMap">
+		SELECT 
+        	t1.crfObserveItemId,
+        	t1.crfObserveSchemeId,
+        	t1.radiotherapyPartId,
+        	t1.radiotherapyPartName,
+        	t1.createTime,
+        	t1.updateTime,
+        	t2.crfObserveSchemeId,
+        	t2.subjectElementId,
+        	t2.crfObserveId,
+        	t2.schemeName,
+        	t2.treatmentSchemeId
+		FROM crf_observation_radiotherapy_detail_options t1, crf_observation_treatment_scheme_options t2
+	    WHERE t1.crfObserveSchemeId=t2.crfObserveSchemeId 
+	    AND  t2.crfObserveId = #{crfObserveId}
+	    ORDER BY t1.`index` ASC, t2.`index` ASC
+	</select>
+	
+	<select id="queryCrfObservationTreatmentSchemeMedicationByCrfObserveId" resultMap="CrfObservationTreatmentSchemeMedicationMap">
+		SELECT 
+        	t1.crfObserveItemId,
+        	t1.crfObserveSchemeId,
+        	t1.medicationType,
+        	t1.medicationId,
+        	t1.medicationName,
+        	t1.commodityName,
+        	t1.computingMethod,
+        	t1.createTime,
+        	t1.updateTime,
+        	t1.theoreticalDose,
+        	t1.measurementUnit,
+        	t1.drugUsage,
+        	t1.treatmentPeriod,
+        	t1.totalCourse,
+        	t2.crfObserveSchemeId,
+        	t2.treatmentSchemeId,
+        	t2.subjectElementId,
+        	t2.crfObserveId,
+        	t2.schemeName
+		FROM crf_observation_chemotherapy_medication_detail_options t1 , crf_observation_treatment_scheme_options t2
+	    WHERE t1.crfObserveSchemeId=t2.crfObserveSchemeId 
+	    AND t2.crfObserveId=#{crfObserveId} 
+	    ORDER BY t1.`index` ASC, t2.`index` ASC
+	</select>
+</mapper>
+

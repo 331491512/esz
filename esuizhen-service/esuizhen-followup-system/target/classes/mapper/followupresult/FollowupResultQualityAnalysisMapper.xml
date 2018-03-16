@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followupresult.FollowupResultQualityAnalysisDao">
+	<update id="updateMoreDeathFollowupResultFlag">
+		UPDATE user_db.u_patient t1
+		INNER JOIN (
+			SELECT
+				t1.patientId
+			FROM
+				followup_db.followup_result t1
+			WHERE
+				t1.followupResultValue = 4
+			AND t1.mergeFlag != 2
+			GROUP BY
+				t1.patientId
+			HAVING
+				COUNT(*) > 1
+		) t2 ON t1.patientId = t2.patientId
+		SET t1.moreDeathFollowupResultFlag =- 1
+		where t1.moreDeathFollowupResultFlag !=- 1;
+	</update>
+	
+	<update id="updateDeathNotFollowupResultFlag">
+		UPDATE user_db.u_patient t1
+		SET t1.deathNotFollowupResultFlag =- 1
+		WHERE
+			deathNotFollowupResultFlag !=- 1
+		AND t1.liveStatus = 0
+		AND NOT EXISTS (
+			SELECT
+				1
+			FROM
+				followup_db.followup_result w1
+			WHERE
+				w1.patientId = t1.patientId
+			AND w1.followupResultValue = 4
+			AND w1.mergeFlag != 2
+		)
+	</update>
+	
+	<update id="updateDeathNotFollowupTimeFlag">
+		UPDATE user_db.u_patient t1
+		SET t1.deathNotFollowupTimeFlag =- 1
+		WHERE
+			t1.deathNotFollowupTimeFlag !=- 1
+		AND t1.liveStatus = 0
+		AND EXISTS (
+			SELECT
+				1
+			FROM
+				followup_db.followup_result w1
+			WHERE
+				w1.patientId = t1.patientId
+			AND w1.followupResultValue = 4
+			AND w1.deathDate IS NULL
+			AND w1.mergeFlag != 2
+		)
+	</update>
+	
+	<update id="updateDeathAfterHasFollowupResultFlag">
+		UPDATE user_db.u_patient t1
+		SET t1.deathAfterHasFollowupResultFlag =- 1
+		WHERE
+		EXISTS (
+			SELECT
+				1
+			FROM
+				followup_db.followup_result w1
+			JOIN followup_db.meta_followup_result_value m1 ON w1.followupResultValue = m1.followupResultValueId
+			WHERE
+				w1.patientId = t1.patientId
+			AND m1.type = 1 AND w1.mergeFlag!=2
+			AND EXISTS (
+				SELECT
+					1
+				FROM
+					followup_db.followup_result w2
+				WHERE
+					w1.patientId = w2.patientId
+				AND w1.followupTime > w2.deathDate
+				AND w1.followupResultId!=w2.followupResultId
+				AND w2.mergeFlag!=2
+			)
+		) and t1.deathAfterHasFollowupResultFlag !=- 1
+	</update>
+	
+	<update id="updateDeathBeforeHasFollowupResultFlag">
+		UPDATE user_db.u_patient t1
+		SET t1.deathAfterHasFollowupResultFlag =0
+		WHERE
+		EXISTS (
+			SELECT
+				1
+			FROM
+				followup_db.followup_result w1
+			JOIN followup_db.meta_followup_result_value m1 ON w1.followupResultValue = m1.followupResultValueId
+			WHERE
+				w1.patientId = t1.patientId
+			AND m1.type = 1 AND w1.mergeFlag!=2
+			AND NOT EXISTS (
+				SELECT
+					1
+				FROM
+					followup_db.followup_result w2
+				WHERE
+					w1.patientId = w2.patientId
+				AND w1.followupTime > w2.deathDate
+				AND w1.followupResultId!=w2.followupResultId
+				AND w2.mergeFlag!=2
+			)
+		) and t1.deathAfterHasFollowupResultFlag =-1
+	</update>
+	
+	<update id="updateMedicalRecordNotFollowupResultFlag">
+		UPDATE user_db.u_patient t1
+		SET t1.medicalRecordNotFollowupResultFlag =- 1
+		WHERE
+			t1.medicalRecordNotFollowupResultFlag !=- 1
+			and (
+				SELECT COUNT(1) FROM ehr_db.ec_clinic_medical_note w1 where t1.patientId=w1.patientId and w1.visitTimes>1
+			)>(
+				SELECT COUNT(1) FROM followup_db.followup_result w2 where t1.patientId = w2.patientId
+								AND w2.followupResultValue = 15
+			)
+			or (
+				SELECT COUNT(1) FROM ehr_db.ei_inhospital_note w1 where t1.patientId=w1.patientId and w1.inhospitalTimes>1
+			)>(
+				SELECT COUNT(1) FROM followup_db.followup_result w2 where t1.patientId = w2.patientId
+								AND w2.followupResultValue = 16
+			)
+	</update>
+	
+	<update id="updateDeathPatientIntoTask">
+		UPDATE user_db.u_patient t1
+		SET t1.deathPatientIntoTask =- 1
+		WHERE
+			t1.deathPatientIntoTask !=- 1
+		AND t1.liveStatus = 0
+		AND EXISTS (
+			SELECT
+				1
+			FROM
+				followup_db.followup_task w1
+			JOIN followup_db.r_followup_task_patient w2 ON w1.followupTaskId = w2.followupTaskId
+			AND w1.state IN (0, 1)
+			AND w2.state = 0
+			WHERE
+				w2.patientId = t1.patientId
+		)
+	</update>
+	
+	<update id="updateLostPatientIntoTask">
+		UPDATE user_db.u_patient t1
+		SET t1.lostPatientIntoTask =- 1
+		WHERE
+			t1.lostPatientIntoTask !=- 1
+		AND t1.followupFlag = 2
+		AND EXISTS (
+			SELECT
+				1
+			FROM
+				followup_db.followup_task w1
+			JOIN followup_db.r_followup_task_patient w2 ON w1.followupTaskId = w2.followupTaskId
+			AND w1.state IN (0, 1)
+			AND w2.state = 0
+			AND w1.finishTime IS NULL
+			WHERE
+				w2.patientId = t1.patientId
+		)
+	</update>
+</mapper>

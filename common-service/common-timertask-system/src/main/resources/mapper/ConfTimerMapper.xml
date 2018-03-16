@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.westangel.timertask.dao.ConfTimerDao">
+
+	<insert id="insertConfTimer" useGeneratedKeys="true" parameterType="com.westangel.timertask.model.ConfTimer">
+		<selectKey resultType="long" keyProperty="id" order="AFTER" >
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+        INSERT INTO conf_timer (
+        	serviceType ,
+        	periodType ,
+        	actionTime 
+        ) VALUES (
+        	#{serviceType} ,
+        	#{periodType} ,
+        	#{actionTime} 
+        )
+	</insert>
+    
+	<update id="updateConfTimer" parameterType="com.westangel.timertask.model.ConfTimer">
+        UPDATE conf_timer 
+        <set>
+	        <if test="serviceType != null">
+                serviceType = #{serviceType} ,
+            </if>
+	        <if test="periodType != null">
+                periodType = #{periodType} ,
+            </if>
+	        <if test="actionTime != null">
+                actionTime = #{actionTime} ,
+            </if>
+        </set>
+        WHERE 
+	        id = #{id} 
+	</update>
+
+    <delete id="deleteConfTimer">
+        DELETE FROM conf_timer WHERE
+        id = #{id} 
+    </delete>
+    
+    <select id="queryConfTimerById" resultType="com.westangel.timertask.model.ConfTimer">
+		SELECT 
+        	id,
+        	serviceType,
+        	periodType,
+        	actionTime
+		FROM conf_timer 
+	    WHERE 
+	        id = #{id} 
+	</select>
+	
+</mapper>
+

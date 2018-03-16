@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TRSubcenterDoctorDao">
+	<resultMap type="com.esuizhen.cloudservice.research.model.result.TRSubcenterDoctor" id="baseResultMap">
+		<id column="id" property="id"/>
+		<result column="subcenterId" property="subcenterId"/>
+		<result column="projectId" property="projectId"/>
+		<result column="doctorId" property="doctorId"/>
+		<result column="createTime" property="createTime"/>
+		<result column="doctorName" property="doctorName"/>
+	</resultMap>
+	
+	<resultMap type="com.esuizhen.cloudservice.research.bean.TProjectSubcenterDetailInfo" id="baseSubcenterDoctorResultMap">
+		<id column="doctorId" property="doctorId"/>
+		<result column="subcenterId" property="subcenterId"/>
+		<result column="projectId" property="projectId"/>
+		<result column="subcenterNo" property="subcenterNo"/>
+		<result column="subcenterName" property="subcenterName"/>
+		<result column="doctorId" property="doctorId"/>
+		<result column="trueName" property="trueName"/>
+		<result column="mobile" property="mobile"/>
+		<result column="professionalRankName" property="professionalRankName"/>
+		<result column="deptName" property="deptName"/>
+		<result column="deleteFlag" property="deleteFlag"/>
+		<result column="presideFlag" property="presideFlag"/>
+
+		<collection property="subcenterRoleList" javaType="ArrayList" ofType="com.esuizhen.cloudservice.research.bean.TProjectSubcenterRoleInfo">
+			<id column="roleId" property="roleId" />
+			<result column="roleName" property="roleName"/>
+		</collection>		
+	</resultMap>
+	
+	<select id="findProjectSubcenterDoctorsBySubcenterId" resultMap="baseSubcenterDoctorResultMap">
+		SELECT
+			t1.subcenterId,
+			t1.subcenterName,
+			t1.subcenterDirector doctorId,
+			t2.trueName,
+			t2.mobile,
+			t4.deptName,
+			t5.professionalRankName,
+			t6.roleId,
+			t7.roleName,
+			IF(t1.subcenterDirector = t8.projectDirector, 0, 1) deleteFlag,
+			1 presideFlag
+		FROM pro_db.project_subcenter t1
+			INNER JOIN user_db.u_doctor t2 ON t2.doctorId = t1.subcenterDirector
+			LEFT JOIN user_db.r_hospital_doctor t3 ON t3.doctorId = t1.subcenterDirector
+			LEFT JOIN user_db.u_department t4 ON t4.deptId = t3.deptId
+			LEFT JOIN user_db.meta_professional_rank t5 ON t5.professionalRankId = t2.professionalRank
+			LEFT JOIN pro_db.r_subcenter_doctor_role t6 ON t6.subcenterid = t1.subcenterId AND t6.doctorId = t1.subcenterDirector
+			LEFT JOIN pro_db.meta_role t7 ON t7.roleId = t6.roleId
+			LEFT JOIN pro_db.project t8 ON t8.projectId = t1.projectId
+		WHERE t1.projectId = #{projectId}
+			<if test="subcenterId != null">
+				AND t1.subcenterId = #{subcenterId}
+			</if>
+		
+		UNION ALL
+		
+		SELECT
+			t1.subcenterId,
+			t1.subcenterName,
+			t2.doctorId,
+			t3.trueName,
+			t3.mobile,
+			t5.deptName,
+			t6.professionalRankName,
+			t7.roleId,
+			t8.roleName,
+			1 deleteFlag,
+			0 presideFlag
+		FROM pro_db.project_subcenter t1
+			INNER JOIN pro_db.r_subcenter_doctor t2 ON t2.subcenterId = t1.subcenterId
+			INNER JOIN user_db.u_doctor t3 ON t3.doctorId = t2.doctorId
+			LEFT JOIN user_db.r_hospital_doctor t4 ON t4.doctorId = t3.doctorId
+			LEFT JOIN user_db.u_department t5 ON t5.deptId = t4.deptId
+			LEFT JOIN user_db.meta_professional_rank t6 ON t6.professionalRankId = t3.professionalRank
+			LEFT JOIN pro_db.r_subcenter_doctor_role t7 ON t7.subcenterId = t1.subcenterId AND t7.doctorId = t2.doctorId
+			LEFT JOIN pro_db.meta_role t8 ON t8.roleId = t7.roleId
+		WHERE t1.projectId = #{projectId}
+			<if test="subcenterId != null">
+				AND t1.subcenterId = #{subcenterId}
+			</if>
+	</select>
+
+	<select id="querySubcenterDoctorList" resultMap="baseResultMap">
+		SELECT
+			<include refid="base_column_list"/>,
+			t2.trueName doctorName
+		FROM pro_db.r_subcenter_doctor t1
+			INNER JOIN user_db.u_doctor t2 ON t1.doctorId = t2.doctorId
+		WHERE t1.projectId = #{projectId}
+		<if test="allFlag != 1">
+			GROUP BY t1.doctorId
+		</if>
+	</select>
+	
+	<select id="findCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(1)
+		FROM pro_db.r_subcenter_doctor t1
+		WHERE t1.subcenterId = #{subcenterId}
+	</select>
+	
+	<sql id="base_column_list">
+		t1.id,
+		t1.subcenterId,
+		t1.projectId,
+		t1.doctorId,
+		t1.createTime
+	</sql>
+	
+	<insert id="insert">
+		INSERT INTO pro_db.r_subcenter_doctor(
+			projectId,
+			subcenterId,
+			doctorId,
+			createTime
+		)VALUES(
+			#{projectId},
+			#{subcenterId},
+			#{subcenterDirector},
+			NOW()
+		)
+	</insert>
+	
+	<delete id="deleteBySubcenterIdAndDoctorId">
+		DELETE FROM pro_db.r_subcenter_doctor
+		WHERE subcenterId = #{subcenterId} AND doctorId = #{doctorId}
+	</delete>
+	
+	<delete id="deleteBySubcenterId">
+		DELETE FROM pro_db.r_subcenter_doctor
+		WHERE subcenterId = #{subcenterId}
+	</delete>
+	
+	<delete id="deleteByProjectId">
+		DELETE FROM pro_db.r_subcenter_doctor
+		WHERE projectId = #{projectId}
+	</delete>
+</mapper>

@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.westangel.commonservice.sms.dao.SmsDao">
+
+<!-- 通道（带验证码）管理 -->
+
+<select id="getChannelList" resultType="com.westangel.commonservice.sms.model.SmsChannelInfo">
+	SELECT 
+	id as id,
+	businessId as businessId,
+	productId as productId,
+	accessType as accessType,
+	channelName as channelName,
+	templateText as templateText,
+	weight as weight
+	FROM sms_channel
+</select>
+
+<!-- 验证码 -->
+<!-- 保存验证码 -->
+<insert id="saveCaptcha">
+	REPLACE INTO sms_captcha_record
+	(businessId,productId,mobile,captcha,occurTime)
+	VALUES
+	(#{businessId},#{productId},#{mobile},#{captcha},NOW())
+</insert>
+
+<!-- 查询验证码 -->
+<select id="getCaptcha" resultType="com.westangel.commonservice.sms.model.SmsCaptchaRecordInfo">
+	SELECT 
+		id as id,
+		businessId as businessId,
+		productId as productId,
+		mobile as mobile,
+		captcha as captcha,
+		occurTime as occurTime
+		FROM sms_captcha_record
+	WHERE 
+		businessId=#{businessId} and productId=#{productId} and mobile=#{mobile}
+		<if test="captcha != null">		
+			 and captcha=#{captcha}
+		</if>
+</select>
+
+<!-- 模版通道 -->
+<select id="getTemplateList" resultType="com.westangel.commonservice.sms.model.SmsTemplateInfo">
+	SELECT
+	id as id,
+	name as name,
+	expression as expression,
+	channelName as channelName,
+	remark as remark
+	FROM sms_template
+</select>
+
+<!-- 易信通通道管理 -->
+<resultMap id="yixintongChannelResultMap" type="com.westangel.commonservice.sms.model.yixintong.YixintongChannelInfo">
+	<result property="id" column="id"/>
+	<result property="businessId" column="businessId"/>
+	<result property="productId" column="productId"/>
+	<result property="enterpriseID" column="enterpriseID"/>
+	<result property="loginName" column="loginName"/>
+	<result property="password" column="password"/>
+	<result property="subPort" column="subPort"/>
+</resultMap>
+
+<select id="getYixintongChannelList" resultMap="yixintongChannelResultMap">
+	SELECT
+	id as id,
+	businessId as businessId,
+	productId as productId,
+	enterpriseID as enterpriseID,
+	loginName as loginName,
+	password as password,
+	subPort as subPort
+	FROM sms_yxt_channel
+</select>
+
+<!-- 北京移动通道管理 -->
+<select id="getBJMobileChannelList" resultType="com.westangel.commonservice.sms.model.BJMobile.BJMobileChannelInfo">
+	SELECT 
+		id,businessId,productId,accessNumber,serviceId
+	FROM
+		sms_bjmobile_channel
+</select>
+
+<!-- 电话通道管理 -->
+<select id="getCallChannelList" resultType="com.westangel.commonservice.sms.model.CallChannelInfo">
+	SELECT
+	id as id,
+	businessId as businessId,
+	productId as productId,
+	channelName as channelName
+	FROM call_channel	
+</select>
+
+<!-- 云通讯通道管理 -->
+<select id="getYuntongxunCallChannelList" resultType="com.westangel.commonservice.sms.model.yuntongxun.YuntongxunCallChannelInfo">
+	SELECT 
+	id as id,
+	businessId as businessId,
+	productId as productId,
+	subAccountSid as subAccountSid,
+	subToken as subToken,
+	voipAccount as voipAccount
+	FROM call_ytx_channel
+</select>
+<!-- 沃动科技通短信通道 -->
+<select id="getWodongChannelList" resultType="com.westangel.commonservice.sms.model.wodong.WodongChannelInfo">
+	SELECT
+		id,
+		businessId,
+		productId,
+		userId,
+		account,
+		password,
+		ext
+	from com_smscall_db.sms_wd_channel
+</select>
+
+<!-- 云通讯通话记录管理 -->
+<insert id="addYuntongxunCallRecord" useGeneratedKeys="true" parameterType="com.westangel.commonservice.sms.model.yuntongxun.YuntongxunCallRecord">
+	<selectKey resultType="long" keyProperty="id" order="AFTER" >
+			SELECT
+			LAST_INSERT_ID() as id
+	</selectKey>		
+	INSERT INTO call_ytx_record(userData,callbackUrl,callSid,request,result,occurTime)
+	VALUES(#{userData},#{callbackUrl},#{callSid},#{request},100,NOW())
+</insert>
+
+<update id="saveYuntongxunCallRecordViaId">
+	UPDATE call_ytx_record
+	SET callSid=#{callSid},response1=#{response1},updateTime=NOW()
+	WHERE id=#{id}
+</update>
+
+<update id="saveYuntongxunCallRecordViaSid">
+	UPDATE call_ytx_record
+	SET response2=#{response2},result=#{result},updateTime=NOW()
+	WHERE callSid=#{callSid}
+</update>
+
+<select id="queryYuntongxunCallRecordViaSid" resultType="com.westangel.commonservice.sms.model.yuntongxun.YuntongxunCallRecord">
+	SELECT 
+		id as id,
+		userData as userData,
+		callbackUrl as callbackUrl
+	FROM 
+		call_ytx_record
+	WHERE 
+		callSid=#{callSid}
+</select>
+
+<!-- 操作日志 -->
+<insert id="addOperateRecord" parameterType="com.westangel.commonservice.sms.model.OperateRecord">
+	INSERT INTO sms_operate_record(operateName,operateContent,backUrl,exeResult,failedCause,occurTime)
+	VALUES(#{operateName},#{operateContent},#{backUrl},#{exeResult},#{failedCause},NOW())
+</insert>
+
+<!-- 发送状态报告 -->
+<insert id="addSendReport" parameterType="java.util.List">
+	INSERT INTO sms_send_report(mobile,state,remark,reportTime,flag,fromChannelName)
+	VALUES
+	<foreach collection="reports" item="item" index="index" separator=",">
+		(
+			#{item.mobile},#{item.status},#{item.desc},#{item.reportTime},#{item.flag},#{item.channelName}
+		)
+	</foreach>
+</insert>
+
+<!-- 查询短信最后一次回执链接  -->
+<select id="queryBackUrl" resultType="java.lang.String">
+	SELECT backUrl FROM com_smscall_db.sms_operate_record WHERE backUrl IS NOT NULL ORDER BY occurTime desc LIMIT 1
+</select>
+
+<select id="getFromClientByMobile" parameterType="java.lang.String" resultType="java.lang.String">
+	SELECT fromClient FROM user_db.u_doctor WHERE mobile=#{mobile} LIMIT 1
+</select>
+<update id="updateFromClientByMobile">
+	UPDATE user_db.u_doctor set fromClient =#{fromClient} WHERE mobile=#{mobile}
+</update>
+</mapper>

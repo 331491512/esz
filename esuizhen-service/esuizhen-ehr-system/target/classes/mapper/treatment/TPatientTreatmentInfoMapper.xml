@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.treatment.PatientTreatmentDao">
+
+	<insert id="insertPatientTreatmentInfo" parameterType="com.esuizhen.cloudservice.ehr.model.treatment.TPatientTreatmentInfo">
+        INSERT INTO eci_treatment_note (
+        	treatmentId,
+        	emrId,
+        	patientId,
+        	treatmentTypeId,
+        	treatmentName,
+        	treatmentSchemeId,
+        	inhospitalId,
+        	clinicMedicalId,
+        	treatmentDesc,
+        	treatmentBeginTime,
+        	treatmentEndTime,
+        	treatmentProcessFlag,
+        	treatmentCourse,
+        	totalCourse,
+        	treatmentEffect,
+        	createTime,
+        	updateTime,
+        	sourceFlag,
+        	treatmentTypeName,
+        	specialDiseaseRegisterId
+        ) VALUES (
+        	#{treatmentId},
+        	#{emrId},
+        	#{patientId},
+        	#{treatmentTypeId},
+        	#{treatmentName},
+        	#{treatmentSchemeId},
+        	#{inhospitalId},
+        	#{clinicMedicalId},
+        	#{treatmentDesc},
+        	#{treatmentBeginTime},
+        	#{treatmentEndTime},
+        	#{treatmentProcessFlag},
+        	#{treatmentCourse},
+        	#{totalCourse},
+        	#{treatmentEffect},
+        	now(),
+        	now(),
+        	#{sourceFlag},
+        	#{treatmentTypeName},
+        	#{specialDiseaseRegisterId}
+        )
+	</insert>
+	
+	<update id="updatePatientTreatmentInfo" parameterType="com.esuizhen.cloudservice.ehr.model.treatment.TPatientTreatmentInfo">
+        update eci_treatment_note set
+        	treatmentTypeId=#{treatmentTypeId},
+        	treatmentName=#{treatmentName},
+        	treatmentSchemeId=#{treatmentSchemeId},
+        	treatmentDesc=#{treatmentDesc},
+        	treatmentBeginTime=#{treatmentBeginTime},
+        	treatmentEndTime=#{treatmentEndTime},
+        	treatmentProcessFlag=#{treatmentProcessFlag},
+        	treatmentCourse=#{treatmentCourse},
+        	totalCourse=#{totalCourse},
+        	treatmentEffect=#{treatmentEffect},
+        	updateTime=now(),
+        	sourceFlag=#{sourceFlag},
+        	treatmentTypeName=#{treatmentTypeName}
+        where treatmentId=#{treatmentId}
+	</update>
+    
+
+    <delete id="deletePatientTreatmentInfo">
+        DELETE FROM eci_treatment_note WHERE treatmentId = #{treatmentId}
+    </delete>
+    
+    <select id="queryPatientTreatmentInfoByInHospitalId" resultType="com.esuizhen.cloudservice.ehr.model.treatment.TPatientTreatmentInfo">
+		SELECT 
+        	t1.*,t2.metaDataType
+		FROM eci_treatment_note t1 left join meta_e_treatment_scheme t2
+		on
+		<choose>
+            <when test="treatmentSchemeId != null">
+                   t1.treatmentSchemeId = t2.treatmentSchemeId
+            </when>
+            <otherwise>
+				t1.treatmentName = t2.treatmentSchemeName and t1.treatmentTypeId = t2.treatmentTypeId
+             </otherwise>
+         </choose>
+	    WHERE patientId=#{patientId}
+	    <if test="treatmentTypeId != null">
+	    	AND t1.treatmentTypeId=#{treatmentTypeId}
+	    </if>
+	    <choose>
+	    	<when test="clinicMedicalId != null">
+	    		and clinicMedicalId=#{clinicMedicalId}
+	    	</when>
+	    	<otherwise>
+	    		and inhospitalId=#{inhospitalId}
+	    	</otherwise>
+	    </choose>
+	    <if test="treatmentSchemeId == null or treatmentSchemeId == ''">
+		    group by t1.treatmentId,t1.treatmentName
+	    </if>
+	</select>
+	<!-- 查询患者治疗信息 -->
+	<select id="queryPatientTreatmentInfo" resultType="com.esuizhen.cloudservice.ehr.model.treatment.TPatientTreatmentInfo">
+		SELECT 
+        	t1.*
+		FROM eci_treatment_note t1
+	    WHERE 
+	        t1.patientId = #{patientId}
+	        <if test="specialDiseaseRegisterId != null">
+	        	AND t1.specialDiseaseRegisterId = #{specialDiseaseRegisterId}
+	        </if>
+	        <if test="patientType != null">
+	        	AND EXISTS(
+	        		SELECT 1 FROM user_db.u_patient t2 WHERE t1.patientId=t2.patientId AND t2.patientType=#{patientType}
+	        	)
+	        </if>
+	</select>
+</mapper>
+

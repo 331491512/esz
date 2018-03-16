@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.medicalRecord.EmedicalRecordDao">
+	
+	<!-- 病例明细返回结果 -->
+	<resultMap id="queryEmedicalRecordResultMap" type="com.esuizhen.cloudservice.ehr.model.medicalRecord.EmedicalRecord" >
+		<result property="emrId" column="emrId"/>
+		<result property="emrNo" column="emrNo"/>
+		<result property="patientId" column="patientId"/>
+		<result property="patientNo" column="patientNo"/>
+		<result property="uuid" column="uuid"/>
+		<result property="emrType" column="emrType"/>
+		<result property="emrSubType" column="emrSubType"/>
+		<result property="emrSubTypeName" column="emrSubTypeName"/>
+		<result property="subdivision" column="subdivision"/>
+		<result property="remark" column="remark"/>
+		<result property="creatorId" column="creatorId"/>
+		<result property="creatorName" column="creatorName"/>
+		<result property="hospitalId" column="hospitalId"/>
+		<result property="sourceFlag" column="sourceFlag"/>
+		<result property="structFlag" column="structFlag"/>
+		<result property="plainContentType" column="plainContentType"/>
+		<result property="plainContent" column="plainContent"/>
+		<result property="visibleFlag" column="visibleFlag"/>
+		<result property="visitTime" column="visitTime"/>
+		<result property="createTime" column="createTime"/>
+		<result property="updateTime" column="updateTime"/>
+		<collection property="medicalPicInfoList" ofType="com.esuizhen.cloudservice.ehr.model.medicalRecord.EmedicalPhotoOcrs">
+			<result property="emrId" column="emrId2"/>
+			<result property="emrPhotoId" column="emrPhotoId"/>
+			<result property="ocrApply" column="ocrApply"/>
+			<result property="ocrFlag" column="ocrFlag"/>
+			<result property="picFileUrl" column="picFileUrl"/>
+			<result property="plainContentType" column="plainContentType2"/>
+			<result property="plainContent" column="plainContent2"/>
+		</collection>
+	</resultMap>
+	<!--  -->
+	<select id="queryMedicalPhotoOcrsByEmrId" resultType="com.esuizhen.cloudservice.ehr.model.medicalRecord.EmedicalPhotoOcrs">
+		SELECT
+			t2.emrId,
+        	t2.emrPhotoId,
+        	t2.ocrApply,
+        	t2.ocrFlag,
+        	t2.picFileUrl,
+        	t2.plainContentType,
+        	t2.plainContent
+		FROM e_medical_photo_ocrs t2
+	    WHERE t2.emrId=#{emrId}
+	    ORDER BY
+		updateTime ASC
+	</select>
+	
+	<!-- 电子病例明细查看 -->
+	<select id="queryEmedicalRecordById" resultMap="queryEmedicalRecordResultMap">
+		SELECT 
+        	t1.emrId,
+        	t1.emrNo,
+        	t1.patientId,
+        	t1.patientNo,
+        	t1.uuid,
+        	t1.emrType,
+        	t1.emrSubType,
+        	CONCAT( (SELECT emrTypeName FROM ehr_db.meta_e_emr_type WHERE emrType = t1.emrType),'-' ,(SELECT emrSubTypeName FROM ehr_db.meta_e_emr_subtype WHERE emrSubType=t1.emrSubType)) emrSubTypeName ,
+        	t1.subdivision,
+        	t1.remark,
+        	t1.creatorId,
+        	(SELECT trueName FROM user_db.u_doctor WHERE doctorId=t1.creatorId) creatorName ,
+        	t1.hospitalId,
+        	t1.sourceFlag,
+        	t1.structFlag,
+        	t1.plainContentType,
+        	t1.plainContent,
+        	t1.visibleFlag,
+        	t1.visitTime,
+        	t1.createTime,
+        	t1.updateTime,
+        	t2.emrPhotoId,
+        	t2.ocrApply,
+        	t2.ocrFlag,
+        	t2.picFileUrl,
+        	t2.plainContentType plainContentType2,
+        	t2.plainContent plainContent2
+		FROM e_medical_record t1
+		LEFT JOIN (SELECT * FROM e_medical_photo_ocrs ORDER BY updateTime ASC) t2 ON t1.emrId = t2.emrId
+	    WHERE t1.emrId=#{emrId}
+	</select>
+	
+	<!-- 电子病例明细查看 -->
+	<select id="queryEmedicalRecordCountByParam" resultType="java.lang.Integer">
+		SELECT 
+        	COUNT(*)
+		FROM e_medical_record t1
+	   	<where>
+	   		<if test="patientId!=null">
+	   			patientId=#{patientId}
+	   		</if>
+	   		<if test="creatorId!=null and creatorId!=4">
+	   			AND creatorId=#{creatorId}
+	   		</if>
+	   		<if test="visibleFlag!=null">
+	   			AND visibleFlag=#{visibleFlag}
+	   		</if>
+	   		<if test="sourceFlag!=null">
+	   			AND sourceFlag IN (${sourceFlag})
+	   		</if>
+	   		<if test="visibleFlag==4">
+	   			AND EXISTS (SELECT hospitalId FROM user_db.r_hospital_doctor  WHERE doctorId =#{creatorId} LIMIT 1 )
+	   		</if>
+	   	</where>
+	</select>
+	
+	<!-- 电子病例明细查看（患者） -->
+	<select id="selectEmedicalRecordListByPatientId" resultType="com.esuizhen.cloudservice.ehr.model.medicalRecord.EmedicalRecord">
+		SELECT 
+        	t1.emrId,
+        	t1.emrNo,
+        	t1.patientId,
+        	t1.patientNo,
+        	t1.uuid,
+        	t1.emrType,
+        	t1.emrSubType,
+        	CONCAT( (SELECT emrTypeName FROM ehr_db.meta_e_emr_type WHERE emrType = t1.emrType),'-' ,(SELECT emrSubTypeName FROM ehr_db.meta_e_emr_subtype WHERE emrSubType=t1.emrSubType)) emrSubTypeName ,
+        	t1.subdivision,
+        	t1.remark,
+        	t1.creatorId,
+        	(CASE WHEN t1.patientId=t1.creatorId 
+        		  THEN (SELECT trueName FROM user_db.u_patient WHERE patientId=t1.creatorId)
+        		  ELSE (SELECT trueName FROM user_db.u_doctor WHERE doctorId=t1.creatorId) 
+        		  END
+            ) creatorName ,
+        	t1.hospitalId,
+        	t1.sourceFlag,
+        	t1.structFlag,
+        	t1.plainContentType,
+        	t1.plainContent,
+        	t1.visibleFlag,
+        	t1.visitTime,
+        	t1.createTime,
+        	t1.updateTime
+		FROM e_medical_record t1
+	    WHERE visibleFlag!=0
+	    AND t1.sourceFlag=1
+	    AND t1.patientId=#{patientId}
+	    UNION
+	    SELECT 
+        	t1.emrId,
+        	t1.emrNo,
+        	t1.patientId,
+        	t1.patientNo,
+        	t1.uuid,
+        	t1.emrType,
+        	t1.emrSubType,
+        	CONCAT( (SELECT emrTypeName FROM ehr_db.meta_e_emr_type WHERE emrType = t1.emrType),'-' ,(SELECT emrSubTypeName FROM ehr_db.meta_e_emr_subtype WHERE emrSubType=t1.emrSubType)) emrSubTypeName ,
+        	t1.subdivision,
+        	t1.remark,
+        	t1.creatorId,
+        	(CASE WHEN t1.patientId=t1.creatorId 
+        		  THEN (SELECT trueName FROM user_db.u_patient WHERE patientId=t1.creatorId)
+        		  ELSE (SELECT trueName FROM user_db.u_doctor WHERE doctorId=t1.creatorId) 
+        		  END
+            ) creatorName ,
+        	t1.hospitalId,
+        	t1.sourceFlag,
+        	t1.structFlag,
+        	t1.plainContentType,
+        	t1.plainContent,
+        	t1.visibleFlag,
+        	t1.visitTime,
+        	t1.createTime,
+        	t1.updateTime
+		FROM e_medical_record t1
+	    WHERE visibleFlag!=0
+	    AND t1.sourceFlag=2
+	    AND t1.visibleFlag!=3
+	    AND t1.patientId=#{patientId}
+	    ORDER BY visitTime DESC
+	</select>
+	
+	<!-- 电子病例明细查看（医生）第一条sql查询医生自己上传的病历，第二条患者自己上传，其他医生上传设置为所有人可见，第三条本院医生可见 -->
+	<select id="selectEmedicalRecordListByUserId" resultType="com.esuizhen.cloudservice.ehr.model.medicalRecord.EmedicalRecord">
+		 SELECT 
+        	t1.emrId,
+        	t1.emrNo,
+        	t1.patientId,
+        	t1.patientNo,
+        	t1.uuid,
+        	t1.emrType,
+        	t1.emrSubType,
+        	CONCAT( (SELECT emrTypeName FROM ehr_db.meta_e_emr_type WHERE emrType = t1.emrType),'-' ,(SELECT emrSubTypeName FROM ehr_db.meta_e_emr_subtype WHERE emrSubType=t1.emrSubType)) emrSubTypeName ,
+        	t1.subdivision,
+        	t1.remark,
+        	t1.creatorId,
+        	doctor.trueName creatorName ,
+        	t1.hospitalId,
+        	t1.sourceFlag,
+        	t1.structFlag,
+        	t1.plainContentType,
+        	t1.plainContent,
+        	t1.visibleFlag,
+        	t1.visitTime,
+        	t1.createTime,
+        	t1.updateTime
+		FROM e_medical_record t1 INNER JOIN user_db.u_doctor doctor ON t1.creatorId= doctor.doctorId
+	    WHERE visibleFlag!=0
+	    <if test="patientId != null">
+           AND t1.patientId = #{patientId}
+        </if>
+	    AND doctor.userId=#{userId}
+	    UNION 
+	    SELECT 
+        	t1.emrId,
+        	t1.emrNo,
+        	t1.patientId,
+        	t1.patientNo,
+        	t1.uuid,
+        	t1.emrType,
+        	t1.emrSubType,
+        	CONCAT( (SELECT emrTypeName FROM ehr_db.meta_e_emr_type WHERE emrType = t1.emrType),'-' ,(SELECT emrSubTypeName FROM ehr_db.meta_e_emr_subtype WHERE emrSubType=t1.emrSubType)) emrSubTypeName ,
+        	t1.subdivision,
+        	t1.remark,
+        	t1.creatorId,
+        	(CASE WHEN t1.patientId=t1.creatorId 
+        		  THEN (SELECT trueName FROM user_db.u_patient WHERE patientId=t1.creatorId)
+        		  ELSE (SELECT trueName FROM user_db.u_doctor WHERE doctorId=t1.creatorId) 
+        		  END
+            ) creatorName ,
+        	t1.hospitalId,
+        	t1.sourceFlag,
+        	t1.structFlag,
+        	t1.plainContentType,
+        	t1.plainContent,
+        	t1.visibleFlag,
+        	t1.visitTime,
+        	t1.createTime,
+        	t1.updateTime
+		FROM e_medical_record t1
+		INNER JOIN user_db.r_doctor_patient r
+		ON t1.patientId=r.patientId
+		INNER JOIN user_db.u_doctor doctor
+		ON r.doctorId = doctor.doctorId AND doctor.userId=#{userId}
+		WHERE t1.visibleFlag=1
+		<if test="patientId != null">
+			AND t1.patientId = #{patientId}
+		</if>
+	    UNION 
+	    SELECT 
+        	t1.emrId,
+        	t1.emrNo,
+        	t1.patientId,
+        	t1.patientNo,
+        	t1.uuid,
+        	t1.emrType,
+        	t1.emrSubType,
+        	CONCAT( (SELECT emrTypeName FROM ehr_db.meta_e_emr_type WHERE emrType = t1.emrType),'-' ,(SELECT emrSubTypeName FROM ehr_db.meta_e_emr_subtype WHERE emrSubType=t1.emrSubType)) emrSubTypeName ,
+        	t1.subdivision,
+        	t1.remark,
+        	t1.creatorId,
+        	(CASE WHEN t1.patientId=t1.creatorId 
+        		  THEN (SELECT trueName FROM user_db.u_patient WHERE patientId=t1.creatorId)
+        		  ELSE (SELECT trueName FROM user_db.u_doctor WHERE doctorId=t1.creatorId) 
+        		  END
+            ) creatorName ,
+        	t1.hospitalId,
+        	t1.sourceFlag,
+        	t1.structFlag,
+        	t1.plainContentType,
+        	t1.plainContent,
+        	t1.visibleFlag,
+        	t1.visitTime,
+        	t1.createTime,
+        	t1.updateTime
+		FROM e_medical_record t1 
+		INNER JOIN user_db.r_doctor_patient rdp  ON t1.patientId= rdp.patientId
+		INNER JOIN user_db.u_doctor doctor ON rdp.doctorId=doctor.doctorId
+		INNER JOIN user_db.r_hospital_doctor rhos ON rhos.doctorId=doctor.doctorId AND t1.hospitalId=rhos.hospitalId
+	    WHERE visibleFlag=4
+	    AND t1.sourceFlag=2
+	    AND doctor.doctorId!=t1.creatorId 
+	    <if test="patientId != null">
+        	AND t1.patientId = #{patientId}
+        </if>
+	    AND doctor.userId=#{userId}
+	    ORDER BY visitTime DESC
+	</select>
+	<insert id="insertEmedicalRecord" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.EmedicalRecord">
+        INSERT INTO e_medical_record (
+        	emrId ,
+        	emrNo ,
+        	patientId ,
+        	patientNo ,
+        	uuid ,
+        	emrType ,
+        	emrSubType ,
+        	subdivision ,
+        	remark ,
+        	creatorId ,
+        	hospitalId ,
+        	sourceFlag ,
+        	structFlag ,
+        	plainContentType ,
+        	plainContent ,
+        	visibleFlag ,
+        	visitTime ,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{emrId} ,
+        	#{emrNo} ,
+        	#{patientId} ,
+        	#{patientNo} ,
+        	#{uuid} ,
+        	#{emrType} ,
+        	#{emrSubType} ,
+        	#{subdivision} ,
+        	#{remark} ,
+        	#{creatorId} ,
+        	#{hospitalId} ,
+        	#{sourceFlag} ,
+        	#{structFlag} ,
+        	#{plainContentType} ,
+        	#{plainContent} ,
+        	#{visibleFlag} ,
+        	#{visitTime} ,
+        	NOW() ,
+        	NOW() 
+        )
+	</insert>
+    
+	<update id="updateEmedicalRecord" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.EmedicalRecord">
+        UPDATE e_medical_record 
+        <set>
+	        <if test="emrNo != null">
+                emrNo = #{emrNo} ,
+            </if>
+	        <if test="patientId != null">
+                patientId = #{patientId} ,
+            </if>
+	        <if test="patientNo != null">
+                patientNo = #{patientNo} ,
+            </if>
+	        <if test="uuid != null">
+                uuid = #{uuid} ,
+            </if>
+	        <if test="emrType != null">
+                emrType = #{emrType} ,
+            </if>
+	        <if test="emrSubType != null">
+                emrSubType = #{emrSubType} ,
+            </if>
+	        <if test="subdivision != null">
+                subdivision = #{subdivision} ,
+            </if>
+	        <if test="remark != null">
+                remark = #{remark} ,
+            </if>
+	        <if test="hospitalId != null">
+                hospitalId = #{hospitalId} ,
+            </if>
+	        <if test="sourceFlag != null">
+                sourceFlag = #{sourceFlag} ,
+            </if>
+	        <if test="structFlag != null">
+                structFlag = #{structFlag} ,
+            </if>
+	        <if test="plainContentType != null">
+                plainContentType = #{plainContentType} ,
+            </if>
+	        <if test="plainContent != null">
+                plainContent = #{plainContent} ,
+            </if>
+	        <if test="visibleFlag != null">
+                visibleFlag = #{visibleFlag} ,
+            </if>
+	        <if test="visitTime != null">
+                visitTime = #{visitTime} ,
+            </if>
+	      
+	        <if test="1==1">
+                updateTime = NOW() ,
+            </if>
+        </set>
+        WHERE 
+	        emrId = #{emrId} 
+	</update>
+
+    <delete id="deleteEmedicalRecord">
+        DELETE FROM e_medical_record WHERE
+        emrId = #{emrId} 
+    </delete>
+	
+	<select id="queryPatientById" resultType="java.util.LinkedHashMap">
+		SELECT
+			t1.doctorId ,
+			t1.trueName ,
+			t3.trueName patientName,
+			t3.userId , 
+			(SELECT MAX(productId) FROM user_db.u_thirdparty WHERE userId=t3.userId AND state=1) productId
+		FROM user_db.u_doctor t1 ,  user_db.r_doctor_patient t2 , user_db.u_patient t3
+	    WHERE t1.doctorId=t2.doctorId
+	    AND t2.patientId = t3.patientId
+	    AND t3.patientId =#{patientId} 
+	    AND t1.doctorId =#{doctorId} 
+	    LIMIT 1
+	</select>
+		
+	<select id="queryPatientMdtById" resultType="java.util.LinkedHashMap">
+		SELECT
+			t1.doctorId ,
+			t1.userId doctorUserId,
+			t1.trueName ,
+			t3.trueName patientName,
+			t3.userId , 
+			(SELECT it4.id FROM com_trade_db.product_group it1, com_trade_db.mdt_expert_group it2, hds_db.s_product_service_apply it3, hds_db.s_mdt_apply it4 WHERE it1.groupId = it2.groupId AND it1.productId = it3.productId AND it3.productApplyId = it4.productApplyId AND it4.productApplyId = #{productApplyId} LIMIT 1) id ,
+			(SELECT it4.goal FROM com_trade_db.product_group it1, com_trade_db.mdt_expert_group it2, hds_db.s_product_service_apply it3, hds_db.s_mdt_apply it4 WHERE it1.groupId = it2.groupId AND it1.productId = it3.productId AND it3.productApplyId = it4.productApplyId AND it4.productApplyId = #{productApplyId} LIMIT 1) goal ,
+			(SELECT orderTitle FROM hds_db.s_product_service_apply it4 WHERE it4.productApplyId =  #{productApplyId} LIMIT 1) groupName ,
+			(SELECT MAX(productId) FROM user_db.u_thirdparty WHERE userId=t3.userId AND state=1) productId
+		FROM user_db.u_doctor t1 ,  user_db.r_doctor_patient t2 , user_db.u_patient t3
+	    WHERE t1.doctorId=t2.doctorId
+	    AND t2.patientId = t3.patientId
+	    AND t3.patientId =#{patientId} 
+	    AND t1.doctorId =#{doctorId} 
+	    LIMIT 1
+	</select>
+	<select id="queryEmrIdOfPateint" resultType="java.lang.String">
+		SELECT 
+			emrId 
+		FROM
+			e_medical_record
+		WHERE 
+			(patientId=#{patientId} AND patientNo=#{patientNo} AND hospitalId=#{hospitalId})
+	</select>
+	
+	<!-- 转发MDT会诊资料给患者 -->
+	<update id="forwardMDTMedicalRecord">
+		UPDATE ehr_db.e_medical_record
+			SET visibleFlag = #{visibleFlag}
+		WHERE emrId IN(
+			SELECT
+				i1.emrId
+			FROM hds_db.s_mdt_emr i1
+			WHERE i1.productApplyId = #{productApplyId}
+			<if test="reportTypeList != null">
+				AND i1.mdtReportType IN(
+					<foreach collection="reportTypeList" item="item" separator=",">
+						#{item.mdtReportType}
+					</foreach>
+				)
+			</if>
+		)
+		AND patientId = #{patientId}
+	</update>
+</mapper>
+

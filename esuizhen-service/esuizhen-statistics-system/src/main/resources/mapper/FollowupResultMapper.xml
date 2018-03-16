@@ -1,0 +1,2336 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.esuizhen.cloudservice.statistics.dao.FollowupResultDao">
+
+	<resultMap type="com.esuizhen.cloudservice.statistics.bean.FollowupScheduleStatisticsResult" id="followupScheduleStatisticsResult">
+		<result column="shouldFollowupCount" property="shouldFollowupCount"/>
+	    <result column="alreadyFollowupCount" property="alreadyFollowupCount"/>
+	    <result column="notFollowupCount" property="notFollowupCount" />
+	    <result column="tempSaveCount" property="tempSaveCount" />
+	    <association property="survivalState" javaType="com.esuizhen.cloudservice.statistics.bean.SurvivalStateSpread">
+	    	<result column="deathFollowupCount" property="deathFollowupCount" />
+	    	<result column="surviveFollowupCount" property="surviveFollowupCount" />
+	    	<result column="invalidFollowupCount" property="invalidFollowupCount" />
+	    	<result column="lostFollowupCount" property="lostFollowupCount" />
+	    	<result column="everLostFollowupCount" property="everLostFollowupCount" />
+	    	<result column="everDeathCount" property="everDeathCount" />
+	    	<result column="alreadyAllotTask" property="alreadyAllotTask" />
+	    	<result column="notAllotTask" property="notAllotTask" />
+	    </association>
+	    <association property="followupWay" javaType="com.esuizhen.cloudservice.statistics.bean.FollowupWaySpread">
+	    	<result column="phoneFollowupCount" property="phoneFollowupCount" />
+	    	<result column="wexinFollowupCount" property="wexinFollowupCount" />
+	    	<result column="smsFollowupCount" property="smsFollowupCount" />
+	    	<result column="outpatientFollowupCount" property="outpatientFollowupCount" />
+	    	<result column="otherFollowupCount" property="otherFollowupCount" />
+	    </association>
+	    <association property="invalidFollowupReasons" javaType="com.esuizhen.cloudservice.statistics.bean.InvalidFollowupReasonsSpread">
+	    	<result column="noOneHeardCount" property="noOneHeardCount" />
+	    	<result column="refusedFollowupCount" property="refusedFollowupCount" />
+	    	<result column="rejectPhoneCount" property="rejectPhoneCount" />
+	    	<result column="shutdownCount" property="shutdownCount" />
+	    	<result column="spaceNumCount" property="spaceNumCount" />
+	    	<result column="suspendedCount" property="suspendedCount" />
+	    	<result column="notAvailableCount" property="notAvailableCount" />
+	    	<result column="wrongNumCount" property="wrongNumCount" />
+	    	<result column="notAvailableCount" property="notAvailableCount" />
+	    	<result column="unKnowCount" property="unKnowCount" />
+	    </association>
+	</resultMap>
+	
+	<!-- 随访人员的随访结果统计 -->
+	<select id="findFollowupResultStatistics" resultType="com.esuizhen.cloudservice.statistics.bean.TFollowupResultStatistics">
+		SELECT
+			f1.*,
+			COUNT(DISTINCT f1.patientId) quantity,
+			(COUNT(DISTINCT f1.patientId) / 3) percentage,
+			(COUNT(DISTINCT f1.patientId) / 3) showPercentage
+		FROM(
+			SELECT
+				t3.followupResultValueId,
+				t3.followupResultValueName,
+				t3.type,
+				t2.patientId
+			FROM followup_db.r_followup_task_patient t1
+				INNER JOIN followup_db.followup_result t2 ON t1.followupAssignId = t2.followupAssignId AND t1.followupTaskId = t2.followupTaskId
+				INNER JOIN followup_db.meta_followup_result_value t3 ON t2.followupResultValue = t3.followupResultValueId
+				INNER JOIN user_db.u_doctor t4 ON t2.operator = t4.doctorId
+			WHERE t1.state = 2 and t1.mergeFlag!=2
+			<if test="followupTaskId != null">
+				AND t1.followupTaskId = #{followupTaskId}
+			</if>
+			<if test="followupAssignId != null">
+				AND t1.followupAssignId = #{followupAssignId}
+			</if>
+			<if test="userId != null">
+				AND t4.userId = #{userId}
+			</if>
+			ORDER BY t2.followupTime DESC
+		) f1
+		WHERE f1.type = #{type}
+		GROUP BY f1.followupResultValueId
+	</select>
+	
+	<!-- 查询随访结果类型总数 -->
+	<select id="findFollowupResultTypeTotal" resultType="java.lang.Integer">
+		SELECT
+			COUNT(1)
+		FROM(
+			SELECT
+				w1.*
+			FROM(
+				SELECT
+					t1.patientId,
+					t2.followupResultValueId,
+					t2.followupResultValueName,
+					t2.type
+				FROM followup_db.followup_result t1
+					INNER JOIN followup_db.meta_followup_result_value t2 ON t2.followupResultValueId = t1.followupResultValue
+				<where>
+					t1.state=2 and t1.mergeFlag!=2
+					<if test="followupTaskId != null">
+						AND t1.followupTaskId = #{followupTaskId}
+					</if>
+					<if test="followupAssignId != null">
+						AND t1.followupAssignId = #{followupAssignId}
+					</if>
+				</where>
+				ORDER BY t1.followupTime DESC
+			) w1
+			GROUP BY w1.patientId
+		) f1
+		<where>
+			<if test="type != null">
+				AND f1.type = #{type}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findLastFollowupResultTypeTotal" resultType="java.lang.Integer">
+		SELECT
+			COUNT(DISTINCT f1.patientId)
+		FROM(
+			SELECT
+				t1.patientId
+			FROM followup_db.followup_result t1
+			INNER JOIN followup_db.meta_followup_result_value t2 ON t1.followupResultValue = t2.followupResultValueId
+			<where>
+			 t1.state=2 and t1.mergeFlag!=2
+			<if test="type != null">
+				and t2.type = #{type}
+			</if>
+					
+			</where>
+			ORDER BY t1.followupTime DESC
+		) f1
+	</select>
+	
+	<select id="findLastFollowupResultStatistics" resultType="com.esuizhen.cloudservice.statistics.bean.TFollowupResultStatistics">
+		SELECT
+			f2.followupResultValueId,
+			f2.followupResultValueName,
+			COUNT(1) quantity,
+			(COUNT(1) / #{ratio}) percentage,
+			(COUNT(1) / #{ratio}) showPercentage,
+			f2.type
+		FROM(
+			SELECT
+				w1.patientId,
+				w1.followupResultValue
+			FROM(
+				SELECT
+					t1.*
+				FROM followup_db.followup_result t1
+				where t1.mergeFlag!=2
+				ORDER BY t1.followupTime DESC
+			) w1
+			GROUP BY w1.patientId
+		) f1
+			INNER JOIN followup_db.meta_followup_result_value f2 ON f2.followupResultValueId = f1.followupResultValue
+		WHERE f2.type = #{type} and f1.state=2
+		GROUP BY f2.followupResultValueId
+	</select>
+	
+	<!-- 统计微信随访方式的随访量 -->
+	<select id="findFollowupResult" resultType="com.esuizhen.cloudservice.statistics.bean.TFollowupResultStatistics">
+		SELECT
+			t1.followupResultValueId,
+			t1.followupResultValueName,
+			t1.type
+		FROM followup_db.meta_followup_result_value t1
+		WHERE t1.followupResultValueId = #{followupResultValueId}
+	</select>
+	
+	<!-- 按病种统计随访工作量 -->
+	<select id="statisticsFollowupWorkload" resultType="java.util.Map">
+		SELECT
+			IF(SUM(w1.followupCount) > 0, '合计', NULL) diseaseTypeName,
+			SUM(w1.finishedQuantity) finishedQuantity,
+			SUM(w1.followupCount) followupCount,
+			SUM(w1.effectiveFollowup) effectiveFollowup,
+			<!-- 识别是自动统计还是其他统计方式 6-自动统计 -->
+			<choose>
+			<when test="sourceFlag != null and sourceFlag == 6">
+			SUM(w1.treatmentOutpatient) treatmentOutpatient,
+			SUM(w1.treatmentInhospital) treatmentInhospital,
+			SUM(w1.effectiveDeath) effectiveDeath,
+			CONCAT(CONVERT(SUM(w1.effectiveFollowup)/SUM(w1.followupCount) * 100, DECIMAL(5, 2)), '%') effectiveFollowupRate
+			</when>
+			<otherwise>
+			SUM(w1.invalidFollowup) invalidFollowup,
+			SUM(w1.effectiveQuantity) effectiveQuantity,
+			SUM(w1.effectiveStable) effectiveStable,
+			SUM(w1.effectiveRecrudescence) effectiveRecrudescence,
+			SUM(w1.effectiveTransfer) effectiveTransfer,
+			SUM(w1.effectiveDeath) effectiveDeath,
+			SUM(w1.invalidOther) invalidOther,
+			SUM(w1.treatmentQuantity) treatmentQuantity,
+			SUM(w1.treatmentOutpatient) treatmentOutpatient,
+			SUM(w1.treatmentInhospital) treatmentInhospital,
+			SUM(w1.invalidQuantity) invalidQuantity,
+			SUM(w1.invalidNoanswer) invalidNoanswer,
+			SUM(w1.invalidRefuse) invalidRefuse,
+			SUM(w1.invalidEmpty) invalidEmpty,
+			SUM(w1.invalidWrong) invalidWrong,
+			SUM(w1.invalidActiveRefuse) invalidActiveRefuse,
+			SUM(w1.invalidOff) invalidOff,
+			SUM(w1.invalidNotservice) invalidNotservice,
+			SUM(w1.invalidDisconnected) invalidDisconnected,
+			(
+				SELECT
+					IF(COUNT(0) = 0, NULL, COUNT(0))
+				FROM(
+					SELECT
+						*
+					FROM(
+						SELECT
+							n1.patientId,
+							n1.followupTaskId,
+							n1.operator,
+							n1.sourceFlag,
+							n1.followupTime
+						FROM followup_db.followup_result n1
+							LEFT JOIN user_db.u_patient n3 ON n3.patientId = n1.patientId
+							
+							<!-- 权限控制 add by zhuguo
+							<if test="sql!=null">
+								JOIN (
+									${sql}
+								) a ON a.patientId = n3.patientId
+							</if> -->						
+							
+						WHERE n1.lostFollowupFlag = 1
+							AND n3.outPatientFlag = 2  AND n3.patientType=1 and n1.mergeFlag!=2
+						ORDER BY n1.followupTime DESC
+					) n2
+					GROUP BY n2.patientId
+				) n3
+				INNER JOIN user_db.u_patient n4 ON n4.patientId = n3.patientId
+				
+				<!-- 权限控制 add by zhuguo -->
+				<if test="sql!=null">
+					JOIN (
+						${sql}
+					) s ON s.doctorId = n3.operator
+				</if>
+				
+				<!-- 权限控制 add by zhuguo
+				<if test="sql!=null">
+					JOIN (
+						${sql}
+					) a ON a.patientId = n4.patientId
+				</if> -->
+				
+				WHERE n4.outPatientFlag = 2 AND n4.patientType=1 and n4.mergeFlag!=2
+				<if test="beginDate != null">
+					<![CDATA[
+					AND DATE_FORMAT(n3.followupTime, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(#{beginDate}, '%Y-%m-%d %H:%i:%s')
+					]]>
+				</if>
+				<if test="endDate != null">
+					<![CDATA[
+						AND DATE_FORMAT(n3.followupTime, '%Y-%m-%d %H:%i:%s') <= DATE_FORMAT(#{endDate}, '%Y-%m-%d %H:%i:%s')
+					]]>
+				</if>
+				<if test="operator != null">
+					AND n3.operator = #{operator}
+				</if>
+				<choose>
+					<when test="sourceFlag != null">
+						AND n3.sourceFlag=#{sourceFlag}
+					</when>
+					<!-- 
+					<otherwise>
+						AND EXISTS(SELECT 1 FROM followup_db.followup_task w_v1 WHERE w_v1.followupTaskId=n3.followupTaskId AND w_v1.followupTaskId IS NOT NULL)
+					</otherwise>
+					 -->
+				</choose>
+			) loseQuantity,
+			CONCAT(CONVERT(SUM(w1.effectiveFollowup)/SUM(w1.followupCount) * 100, DECIMAL(5, 2)), '%') effectiveFollowupRate,
+			CONCAT(CONVERT(SUM(w1.invalidFollowup)/SUM(w1.followupCount) * 100, DECIMAL(5, 2)), '%') invalidFollowupRate
+			</otherwise>
+			</choose>
+			
+		FROM(
+			<include refid="sql_statisticsFollowupWorkload_select"/>
+		) w1
+			
+		UNION ALL
+		
+		<include refid="sql_statisticsFollowupWorkload_select"/>
+	</select>
+	<sql id="sql_statisticsFollowupWorkload_select">
+		SELECT
+			f1.*,
+			<!-- 识别是自动统计还是其他统计方式 6-自动统计 -->
+			<choose>
+			<when test="sourceFlag != null and sourceFlag == 6">
+			CONCAT(CONVERT(f1.effectiveFollowup/f1.followupCount * 100, DECIMAL(5, 2)), '%') effectiveFollowupRate
+			</when>
+			<otherwise>
+			CONCAT(CONVERT(f1.effectiveFollowup/f1.followupCount * 100, DECIMAL(5, 2)), '%') effectiveFollowupRate,
+			CONCAT(CONVERT(f1.invalidFollowup/f1.followupCount * 100, DECIMAL(5, 2)), '%') invalidFollowupRate
+			</otherwise>
+			</choose>
+			
+		FROM(
+			SELECT
+				IF(t3.diseaseTypeName IS NULL, '未知', t3.diseaseTypeName),
+				(
+					SELECT
+						COUNT(DISTINCT i1.patientId)
+					FROM followup_db.followup_result i1
+						
+						<!-- 权限控制 add by zhuguo -->
+						<if test="sql!=null">
+							JOIN (
+								${sql}
+							) s ON s.doctorId = i1.operator
+						</if>
+						
+						INNER JOIN user_db.u_patient i2 ON i1.patientId = i2.patientId
+						
+						<!-- 权限控制 add by zhuguo
+						<if test="sql!=null">
+							JOIN (
+								${sql}
+							) a ON a.patientId = i2.patientId
+						</if> -->
+						
+					WHERE i2.outPatientFlag = 2  AND i2.patientType=1 and i1.mergeFlag!=2 and i2.mergeFlag!=2
+						AND IF(t3.diseaseTypeId IS NULL, i2.sourceDiseaseTypeId IS NULL, i2.sourceDiseaseTypeId = t3.diseaseTypeId)
+					<if test="beginDate != null">
+						AND DATE_FORMAT(i1.followupTime, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(#{beginDate}, '%Y-%m-%d %H:%i:%s')
+					</if>
+					<if test="endDate != null">
+						<![CDATA[
+							AND DATE_FORMAT(i1.followupTime, '%Y-%m-%d %H:%i:%s') <= DATE_FORMAT(#{endDate}, '%Y-%m-%d %H:%i:%s')
+						]]>
+					</if>
+					<if test="operator != null">
+						AND i1.operator = #{operator}
+					</if>
+					<choose>
+						<when test="sourceFlag != null">
+							AND i1.sourceFlag=#{sourceFlag}
+						</when>
+						<!-- 
+						<otherwise>
+							AND EXISTS(SELECT 1 FROM followup_db.followup_task w_v1 WHERE w_v1.followupTaskId=i1.followupTaskId AND w_v1.followupTaskId IS NOT NULL)
+						</otherwise>
+						 -->
+					</choose>
+				) finishedQuantity,
+				COUNT(1) followupCount,
+				SUM(IF(t4.type = 1, 1, 0)) effectiveFollowup,
+				<!-- 识别是自动统计还是其他统计方式 6-自动统计 -->
+				<choose>
+				<when test="sourceFlag != null and sourceFlag == 6">
+				SUM(IF(t1.followupResultValue = 15, 1, 0))treatmentOutpatient,
+				SUM(IF(t1.followupResultValue = 16, 1, 0))treatmentInhospital,
+				SUM(IF(t1.followupResultValue = 4, 1, 0))effectiveDeath
+				</when>
+				<otherwise>
+				SUM(IF(t4.type = 2, 1, 0)) invalidFollowup,
+				SUM(IF(t1.followupResultValue BETWEEN 1 AND
+				<choose>
+					<when test="otherFollowupResultType == 2">
+						4
+					</when>
+					<otherwise>
+						5
+					</otherwise>
+				</choose>
+				, 1, 0))effectiveQuantity,
+				SUM(IF(t1.followupResultValue = 1, 1, 0))effectiveStable,
+				SUM(IF(t1.followupResultValue = 2, 1, 0))effectiveRecrudescence,
+				SUM(IF(t1.followupResultValue = 3, 1, 0))effectiveTransfer,
+				SUM(IF(t1.followupResultValue = 4, 1, 0))effectiveDeath,
+				SUM(IF(t1.followupResultValue = 5, 1, 0))invalidOther,
+				SUM(IF(t1.followupResultValue BETWEEN 15 AND 16, 1, 0))treatmentQuantity,
+				SUM(IF(t1.followupResultValue = 15, 1, 0))treatmentOutpatient,
+				SUM(IF(t1.followupResultValue = 16, 1, 0))treatmentInhospital,
+				SUM(IF(t1.followupResultValue BETWEEN
+				<choose>
+					<when test="otherFollowupResultType == 2">
+						5
+					</when>
+					<otherwise>
+						6
+					</otherwise>
+				</choose>
+				AND 14, 1, 0))invalidQuantity,
+				SUM(IF(t1.followupResultValue = 7, 1, 0))invalidNoanswer,
+				SUM(IF(t1.followupResultValue = 10, 1, 0))invalidRefuse,
+				SUM(IF(t1.followupResultValue = 8, 1, 0))invalidEmpty,
+				SUM(IF(t1.followupResultValue = 9, 1, 0))invalidWrong,
+				SUM(IF(t1.followupResultValue = 11, 1, 0))invalidActiveRefuse,
+				SUM(IF(t1.followupResultValue = 12, 1, 0))invalidOff,
+				SUM(IF(t1.followupResultValue = 13, 1, 0))invalidNotservice,
+				SUM(IF(t1.followupResultValue = 14, 1, 0))invalidDisconnected,
+				(
+					SELECT
+						COUNT(0)
+					FROM(
+						SELECT
+							*
+						FROM(
+							SELECT
+								n1.patientId,
+								n1.followupTaskId,
+								n1.operator,
+								n1.sourceFlag,
+								n1.followupTime
+							FROM followup_db.followup_result n1
+								LEFT JOIN user_db.u_patient n3 ON n3.patientId = n1.patientId
+								
+								<!-- 权限控制 add by zhuguo
+								<if test="sql!=null">
+									JOIN (
+										${sql}
+									) a ON a.patientId = n3.patientId
+								</if> -->
+								
+							WHERE n1.lostFollowupFlag = 1
+								AND n3.outPatientFlag = 2  AND n3.patientType=1 and n1.mergeFlag!=2 and n3.mergeFlag!=2
+							ORDER BY n1.followupTime DESC
+						) n2
+						GROUP BY n2.patientId
+					) n3
+					INNER JOIN user_db.u_patient n4 ON n4.patientId = n3.patientId
+					
+					<!-- 权限控制 add by zhuguo -->
+					<if test="sql!=null">
+						JOIN (
+							${sql}
+						) s ON s.doctorId = n3.operator
+					</if>
+					
+					<!-- 权限控制 add by zhuguo
+					<if test="sql!=null">
+						JOIN (
+							${sql}
+						) a ON a.patientId = n4.patientId
+					</if> -->
+					
+					WHERE n4.outPatientFlag = 2  AND n4.patientType=1 and n4.mergeFlag!=2
+						AND IF(t3.diseaseTypeId IS NULL, n4.sourceDiseaseTypeId IS NULL, n4.sourceDiseaseTypeId = t3.diseaseTypeId)
+					<if test="beginDate != null">
+						<![CDATA[
+						AND DATE_FORMAT(n3.followupTime, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(#{beginDate}, '%Y-%m-%d %H:%i:%s')
+						]]>
+					</if>
+					<if test="endDate != null">
+						<![CDATA[
+							AND DATE_FORMAT(n3.followupTime, '%Y-%m-%d %H:%i:%s') <= DATE_FORMAT(#{endDate}, '%Y-%m-%d %H:%i:%s')
+						]]>
+					</if>
+					<if test="operator != null">
+						AND n3.operator = #{operator}
+					</if>
+					<choose>
+						<when test="sourceFlag != null">
+							AND n3.sourceFlag=#{sourceFlag}
+						</when>
+						<!-- 
+						<otherwise>
+							AND EXISTS(SELECT 1 FROM followup_db.followup_task w_v1 WHERE w_v1.followupTaskId=n3.followupTaskId AND w_v1.followupTaskId IS NOT NULL)
+						</otherwise>
+						 -->
+					</choose>
+				)loseQuantity
+				</otherwise>
+				</choose>
+				
+			FROM followup_db.followup_result_buff t1
+			
+				<!-- 权限控制 add by zhuguo -->
+				<if test="sql!=null">
+					JOIN (
+						${sql}
+					) s ON s.doctorId = t1.operator
+				</if>
+			
+				LEFT JOIN user_db.u_patient t2 ON t1.patientId = t2.patientId
+				
+				<!-- 权限控制 add by zhuguo
+				<if test="sql!=null">
+					JOIN (
+						${sql}
+					) a ON a.patientId = t2.patientId
+				</if> -->
+				
+				LEFT JOIN ehr_db.meta_c_disease_type t3 ON t2.sourceDiseaseTypeId = t3.diseaseTypeId
+				LEFT JOIN followup_db.meta_followup_result_value t4 ON t4.followupResultValueId = t1.followupResultValue
+			WHERE t2.outPatientFlag = 2 AND t2.patientType=1 and t1.mergeFlag!=2 and t2.mergeFlag!=2
+				<if test="beginDate != null">
+					AND DATE_FORMAT(t1.followupTime, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(#{beginDate}, '%Y-%m-%d %H:%i:%s')
+				</if>
+				<if test="endDate != null">
+					<![CDATA[
+						AND DATE_FORMAT(t1.followupTime, '%Y-%m-%d %H:%i:%s') <= DATE_FORMAT(#{endDate}, '%Y-%m-%d %H:%i:%s')
+					]]>
+				</if>
+				<if test="operator != null">
+					AND t1.operator = #{operator}
+				</if>
+				<choose>
+					<when test="sourceFlag != null">
+						AND t1.sourceFlag=#{sourceFlag}
+					</when>
+					<!-- 
+					<otherwise>
+						AND EXISTS(SELECT 1 FROM followup_db.followup_task w_v1 WHERE w_v1.followupTaskId=t1.followupTaskId AND w_v1.followupTaskId IS NOT NULL)
+					</otherwise>
+					 -->
+				</choose>
+
+				<if test="patientRangeFlag!=null">
+		  			<if test="followupRangeFlag==0">
+		  				AND t2.sourceTumorFlag <choose><when test="patientRangeFlag==1">in</when><otherwise>not in</otherwise></choose>
+		  				(1)
+		  			</if>
+		  			<if test="followupRangeFlag==1 and sourceTumorFlags!=null">
+						AND t2.sourceTumorFlag <choose><when test="patientRangeFlag==1">in</when><otherwise>not in</otherwise></choose> (${sourceTumorFlags})
+					</if>
+					<if test="followupRangeFlag==2">
+						AND <choose><when test="patientRangeFlag==1">exists</when><otherwise>not exists</otherwise></choose>(select diseaseTypeId from followup_db.conf_followup_range_disease_type where t2.sourceDiseaseTypeId=diseaseTypeId)
+					</if>
+		  			<if test="followupRangeFlag==3">
+		  				AND 
+		  				(
+		  					<choose>
+			  					<when test="patientRangeFlag==1">
+				  					t2.icdDiseaseTypeId in (select icdDiseaseTypeId from followup_db.conf_followup_range_icd where flag=1)
+				  					OR
+				  					t2.sourceDiseaseCode in (select diseaseCode from followup_db.conf_followup_range_icd_code where flag=1)
+			  					</when>
+			  					<otherwise>
+			  						t2.icdDiseaseTypeId not in (select icdDiseaseTypeId from followup_db.conf_followup_range_icd where flag=1)
+			  						and
+			  						t2.sourceDiseaseCode not in (select diseaseCode from followup_db.conf_followup_range_icd_code where flag=1)
+			  					</otherwise>
+		  					</choose>
+		  				)
+		  			</if>
+		  		</if>
+
+			GROUP BY t3.diseaseTypeId
+		) f1
+	</sql>
+	
+	<!-- 按随访人员统计随访工作量 -->
+	<select id="statisticsOperatorFollowupWorkload" resultType="java.util.Map">
+		SELECT
+			NULL operator,
+			IF(SUM(w1.followupCount) > 0, '合计', NULL) operatorName,
+			<!-- 
+			SUM(w1.finishedQuantity),
+			 -->
+			(
+				SELECT
+					count(0)
+				FROM(
+					SELECT
+						IF(COUNT(0) = 0, NULL, COUNT(0))
+						FROM
+							followup_db.followup_result n3
+							INNER JOIN user_db.u_patient n4 ON n4.patientId = n3.patientId
+							
+							<!-- 权限控制 add by zhuguo
+							<if test="sql!=null">
+								JOIN (
+									${sql}
+								) a ON a.patientId = n4.patientId
+							</if> -->
+							
+				WHERE n4.outPatientFlag = 2  AND n4.patientType=1 and n3.mergeFlag!=2 and n4.mergeFlag!=2
+						<if test="operator != null">
+							AND n3.operator = #{operator}
+						</if>
+						<if test="beginDate != null">
+							AND DATE_FORMAT(n3.followupTime, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(#{beginDate}, '%Y-%m-%d %H:%i:%s')
+						</if>
+						<if test="endDate != null">
+							AND DATE_FORMAT(#{endDate}, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(n3.followupTime, '%Y-%m-%d %H:%i:%s')
+						</if>
+						GROUP BY n3.patientId
+				)temp1
+			) finishedQuantity,
+			SUM(w1.followupCount) followupCount,
+			SUM(w1.effectiveFollowup) effectiveFollowup,
+			SUM(w1.invalidFollowup) invalidFollowup,
+			SUM(w1.effectiveStable) effectiveStable,
+			SUM(w1.effectiveRecrudescence) effectiveRecrudescence,
+			SUM(w1.effectiveTransfer) effectiveTransfer,
+			SUM(w1.treatmentInhospital) treatmentInhospital,
+			SUM(w1.treatmentOutpatient) treatmentOutpatient,
+			SUM(w1.effectiveDeath) effectiveDeath,
+			SUM(w1.invalidNoanswer) invalidNoanswer,
+			SUM(w1.invalidActiveRefuse) invalidActiveRefuse,
+			SUM(w1.invalidDisconnected) invalidDisconnected,
+			SUM(w1.invalidWrong) invalidWrong,
+			SUM(w1.invalidEmpty) invalidEmpty,
+			SUM(w1.invalidOff) invalidOff,
+			SUM(w1.invalidNotservice) invalidNotservice,
+			SUM(w1.invalidRefuse) invalidRefuse,
+			SUM(w1.invalidOther) invalidOther,
+			SUM(w1.loseQuantity) loseQuantity,
+			CONCAT(CONVERT(SUM(w1.effectiveFollowup)/SUM(w1.followupCount) * 100, DECIMAL(5, 2)), '%') effectiveFollowupRate,
+			CONCAT(CONVERT(SUM(w1.invalidFollowup)/SUM(w1.followupCount) * 100, DECIMAL(5, 2)), '%') invalidFollowupRate
+		FROM(
+			<include refid="sql_statisticsOperatorFollowupWorkload_select"/>
+		) w1
+	
+		UNION ALL
+	
+		<include refid="sql_statisticsOperatorFollowupWorkload_select"/>
+	</select>
+	<sql id="sql_statisticsOperatorFollowupWorkload_select">
+		SELECT
+			f1.*,
+			CONCAT(CONVERT(f1.effectiveFollowup/f1.followupCount * 100, DECIMAL(5, 2)), '%') effectiveFollowupRate,
+			CONCAT(CONVERT(f1.invalidFollowup/f1.followupCount * 100, DECIMAL(5, 2)), '%') invalidFollowupRate
+		FROM(
+			SELECT
+				t1.operator,
+				IF(t2.trueName IS NULL, '', t2.trueName)operatorName,
+				(
+					SELECT
+						COUNT(DISTINCT i1.patientId)
+					FROM followup_db.followup_result i1
+						INNER JOIN user_db.u_patient i2 ON i2.patientId = i1.patientId
+						
+					<!-- 权限控制 add by zhuguo
+					<if test="sql!=null">
+						JOIN (
+							${sql}
+						) a ON a.patientId = i2.patientId
+					</if> -->
+						
+					WHERE i1.operator = t1.operator
+						AND i2.outPatientFlag = 2  AND i2.patientType=1 and i1.mergeFlag!=2 and i2.mergeFlag!=2
+					<if test="beginDate != null">
+						AND DATE_FORMAT(i1.followupTime, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(#{beginDate}, '%Y-%m-%d %H:%i:%s')
+					</if>
+					<if test="endDate != null">
+						AND DATE_FORMAT(#{endDate}, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(i1.followupTime, '%Y-%m-%d %H:%i:%s')
+					</if>
+				) finishedQuantity,
+				COUNT(t1.patientId) followupCount,
+				SUM(IF(t3.type = 1, 1, 0)) effectiveFollowup,
+				SUM(IF(t3.type = 2, 1, 0)) invalidFollowup,
+				SUM(IF(t1.followupResultValue = 1, 1, 0)) effectiveStable,
+				SUM(IF(t1.followupResultValue = 2, 1, 0)) effectiveRecrudescence,
+				SUM(IF(t1.followupResultValue = 3, 1, 0)) effectiveTransfer,
+				SUM(IF(t1.followupResultValue = 16, 1, 0)) treatmentInhospital,
+				SUM(IF(t1.followupResultValue = 15, 1, 0)) treatmentOutpatient,
+				SUM(IF(t1.followupResultValue = 4, 1, 0)) effectiveDeath,
+				SUM(IF(t1.followupResultValue = 7, 1, 0)) invalidNoanswer,
+				SUM(IF(t1.followupResultValue = 11, 1, 0)) invalidActiveRefuse,
+				SUM(IF(t1.followupResultValue = 14, 1, 0)) invalidDisconnected,
+				SUM(IF(t1.followupResultValue = 9, 1, 0)) invalidWrong,
+				SUM(IF(t1.followupResultValue = 8, 1, 0)) invalidEmpty,
+				SUM(IF(t1.followupResultValue = 12, 1, 0)) invalidOff,
+				SUM(IF(t1.followupResultValue = 13, 1, 0)) invalidNotservice,
+				SUM(IF(t1.followupResultValue = 10, 1, 0)) invalidRefuse,
+				SUM(IF(t1.followupResultValue = 5, 1, 0)) invalidOther,
+				(
+					SELECT
+						COUNT(0)
+					FROM followup_db.followup_result i1
+					WHERE i1.lostFollowupFlag = 1 and i1.mergeFlag!=2
+						AND i1.operator = t1.operator
+					<if test="beginDate != null">
+						AND DATE_FORMAT(i1.followupTime, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(#{beginDate}, '%Y-%m-%d %H:%i:%s')
+					</if>
+					<if test="endDate != null">
+						AND DATE_FORMAT(#{endDate}, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(i1.followupTime, '%Y-%m-%d %H:%i:%s')
+					</if>
+				) loseQuantity
+			FROM followup_db.followup_result_buff t1
+				LEFT JOIN user_db.u_doctor t2 ON t2.doctorId = t1.operator
+				
+				<!-- 权限控制 add by zhuguo -->
+				<if test="sql!=null">
+					JOIN (
+						${sql}
+					) s ON s.doctorId = t2.doctorId
+				</if>
+					
+				LEFT JOIN followup_db.meta_followup_result_value t3 ON t3.followupResultValueId = t1.followupResultValue
+				LEFT JOIN user_db.u_patient t4 ON t4.patientId = t1.patientId
+				
+				<!-- 权限控制 add by zhuguo
+				<if test="sql!=null">
+					JOIN (
+						${sql}
+					) a ON a.patientId = t4.patientId
+				</if> -->
+				
+			WHERE t4.outPatientFlag = 2  AND t4.patientType=1 and t1.mergeFlag!=2 and t4.mergeFlag!=2
+			<if test="operator != null">
+				AND t1.operator = #{operator}
+			</if>
+			<if test="beginDate != null">
+				AND DATE_FORMAT(t1.followupTime, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(#{beginDate}, '%Y-%m-%d %H:%i:%s')
+			</if>
+			<if test="endDate != null">
+				AND DATE_FORMAT(#{endDate}, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(t1.followupTime, '%Y-%m-%d %H:%i:%s')
+			</if>
+
+			<if test="patientRangeFlag!=null">
+	  			<if test="followupRangeFlag==0">
+	  				AND t4.sourceTumorFlag <choose><when test="patientRangeFlag==1">in</when><otherwise>not in</otherwise></choose>
+	  				(1)
+	  			</if>
+	  			<if test="followupRangeFlag==1 and sourceTumorFlags!=null">
+					AND t4.sourceTumorFlag <choose><when test="patientRangeFlag==1">in</when><otherwise>not in</otherwise></choose> (${sourceTumorFlags})
+				</if>
+				<if test="followupRangeFlag==2">
+					AND <choose><when test="patientRangeFlag==1">exists</when><otherwise>not exists</otherwise></choose>(select diseaseTypeId from followup_db.conf_followup_range_disease_type where t4.sourceDiseaseTypeId=diseaseTypeId)
+				</if>
+	  			<if test="followupRangeFlag==3">
+	  				AND 
+	  				(
+	  					<choose>
+		  					<when test="patientRangeFlag==1">
+			  					t4.icdDiseaseTypeId in (select icdDiseaseTypeId from followup_db.conf_followup_range_icd where flag=1)
+			  					OR
+			  					t4.sourceDiseaseCode in (select diseaseCode from followup_db.conf_followup_range_icd_code where flag=1)
+		  					</when>
+		  					<otherwise>
+		  						t4.icdDiseaseTypeId not in (select icdDiseaseTypeId from followup_db.conf_followup_range_icd where flag=1)
+		  						and
+		  						t4.sourceDiseaseCode not in (select diseaseCode from followup_db.conf_followup_range_icd_code where flag=1)
+		  					</otherwise>
+	  					</choose>
+	  				)
+	  			</if>
+	  		</if>
+
+			GROUP BY t1.operator
+		) f1
+	</sql>
+
+	<!-- 按任务统计随访工作量 -->
+	<select id="statisticsTaskFollowupWorkload" resultType="java.util.Map">
+		SELECT
+			NULL followupTaskId,
+			IF(SUM(s1.taskNum) IS NOT NULL OR SUM(s1.taskNum) > 0, '合计', NULL) followupTaskName,
+			<choose>
+				<when test="operator != null">
+					s1.operatorName
+				</when>
+				<otherwise>NULL</otherwise>
+			</choose>operatorName,
+			NULL operator,
+			SUM(s1.taskNum) taskNum,
+			SUM(s1.completedQuantity) completedQuantity,
+			SUM(s1.effectiveFollowup) effectiveFollowup,
+			SUM(s1.invalidFollowup) invalidFollowup,
+			SUM(s1.effectiveStable) effectiveStable,
+			SUM(s1.effectiveRecrudescence) effectiveRecrudescence,
+			SUM(s1.effectiveTransfer) effectiveTransfer,
+			SUM(s1.treatmentInhospital) treatmentInhospital,
+			SUM(s1.treatmentOutpatient) treatmentOutpatient,
+			SUM(s1.effectiveDeath) effectiveDeath,
+			SUM(s1.invalidNoanswer) invalidNoanswer,
+			SUM(s1.invalidActiveRefuse) invalidActiveRefuse,
+			SUM(s1.invalidDisconnected) invalidDisconnected,
+			SUM(s1.invalidWrong) invalidWrong,
+			SUM(s1.invalidEmpty) invalidEmpty,
+			SUM(s1.invalidOff) invalidOff,
+			SUM(s1.invalidNotservice) invalidNotservice,
+			SUM(s1.invalidRefuse) invalidRefuse,
+			SUM(s1.invalidOther) invalidOther,
+			SUM(s1.loseQuantity) loseQuantity,
+			IF(SUM(s1.completedQuantity) = 0, '', CONCAT(CONVERT(SUM(s1.completedQuantity)/SUM(s1.taskNum) * 100, DECIMAL(5, 2)), '%')) completedQuantityRate,
+			IF(SUM(s1.effectiveFollowup) = 0, '', CONCAT(CONVERT(SUM(s1.effectiveFollowup)/SUM(s1.completedQuantity) * 100, DECIMAL(5, 2)), '%')) effectiveFollowupRate,
+			IF(SUM(s1.invalidFollowup) = 0, '', CONCAT(CONVERT(SUM(s1.invalidFollowup)/SUM(s1.completedQuantity) * 100, DECIMAL(5, 2)), '%')) invalidFollowupRate
+		FROM(
+			<include refid="followup_workload_statistics_sql"/>
+		) s1
+		WHERE s1.operatorName IS NOT NULL
+		
+		UNION ALL
+		
+		SELECT
+			s1.*,
+			IF(s1.completedQuantity = 0, '', CONCAT(CONVERT(s1.completedQuantity/s1.taskNum * 100, DECIMAL(5, 2)), '%')) completedQuantityRate,
+			IF(s1.effectiveFollowup = 0, '', CONCAT(CONVERT(s1.effectiveFollowup/s1.completedQuantity * 100, DECIMAL(5, 2)), '%')) effectiveFollowupRate,
+			IF(s1.invalidFollowup = 0, '', CONCAT(CONVERT(s1.invalidFollowup/s1.completedQuantity * 100, DECIMAL(5, 2)), '%')) invalidFollowupRate
+		FROM(
+			<include refid="followup_workload_statistics_sql"/>
+		) s1
+		WHERE s1.followupTaskName IS NOT NULL
+	</select>
+	<sql id="followup_workload_statistics_sql">
+		SELECT
+			w1.followupTaskId,
+			w1.followupTaskName,
+			IF(w1.operatorName IS NULL, '', w1.operatorName) operatorName,
+			w1.operator,
+			w1.taskNum,
+			SUM(w1.completedQuantity) completedQuantity,
+			SUM(w1.effectiveFollowup) effectiveFollowup,
+			SUM(w1.invalidFollowup) invalidFollowup,
+			SUM(w1.effectiveStable) effectiveStable,
+			SUM(w1.effectiveRecrudescence) effectiveRecrudescence,
+			SUM(w1.effectiveTransfer) effectiveTransfer,
+			SUM(w1.treatmentInhospital) treatmentInhospital,
+			SUM(w1.treatmentOutpatient) treatmentOutpatient,
+			SUM(w1.effectiveDeath) effectiveDeath,
+			SUM(w1.invalidNoanswer) invalidNoanswer,
+			SUM(w1.invalidActiveRefuse) invalidActiveRefuse,
+			SUM(w1.invalidDisconnected) invalidDisconnected,
+			SUM(w1.invalidWrong) invalidWrong,
+			SUM(w1.invalidEmpty) invalidEmpty,
+			SUM(w1.invalidOff) invalidOff,
+			SUM(w1.invalidNotservice) invalidNotservice,
+			SUM(w1.invalidRefuse) invalidRefuse,
+			SUM(w1.invalidOther) invalidOther,
+			SUM(w1.loseQuantity) loseQuantity
+		FROM(
+			SELECT
+				t1.followupTaskId,
+				t2.followupTaskName,
+				IF(t4.trueName IS NULL, '', t4.trueName) operatorName,
+				t1.operator,
+				t1.totalPatientNum taskNum,
+				COUNT(DISTINCT t3.patientId) completedQuantity,
+				SUM(IF(t5.type = 1, 1, 0)) effectiveFollowup,
+				SUM(IF(t5.type = 2, 1, 0)) invalidFollowup,
+				SUM(IF(t3.followupResultValue = 1, 1, 0)) effectiveStable,
+				SUM(IF(t3.followupResultValue = 2, 1, 0)) effectiveRecrudescence,
+				SUM(IF(t3.followupResultValue = 3, 1, 0)) effectiveTransfer,
+				SUM(IF(t3.followupResultValue = 16, 1, 0)) treatmentInhospital,
+				SUM(IF(t3.followupResultValue = 15, 1, 0)) treatmentOutpatient,
+				SUM(IF(t3.followupResultValue = 4, 1, 0)) effectiveDeath,
+				SUM(IF(t3.followupResultValue = 7, 1, 0)) invalidNoanswer,
+				SUM(IF(t3.followupResultValue = 11, 1, 0)) invalidActiveRefuse,
+				SUM(IF(t3.followupResultValue = 14, 1, 0)) invalidDisconnected,
+				SUM(IF(t3.followupResultValue = 9, 1, 0)) invalidWrong,
+				SUM(IF(t3.followupResultValue = 8, 1, 0)) invalidEmpty,
+				SUM(IF(t3.followupResultValue = 12, 1, 0)) invalidOff,
+				SUM(IF(t3.followupResultValue = 13, 1, 0)) invalidNotservice,
+				SUM(IF(t3.followupResultValue = 10, 1, 0)) invalidRefuse,
+				SUM(IF(t3.followupResultValue = 5, 1, 0)) invalidOther,
+				SUM(IF(t3.lostFollowupFlag = 1, 1, 0)) loseQuantity
+			FROM followup_db.r_followup_task_assign t1
+				INNER JOIN followup_db.followup_task t2 ON t2.followupTaskId = t1.followupTaskId
+				LEFT JOIN followup_db.followup_result t3 ON t3.followupAssignId = t1.followupAssignId AND t3.operator = t1.operator
+				LEFT JOIN user_db.u_doctor t4 ON t4.doctorId = t1.operator
+				
+				<!-- 权限控制 add by zhuguo -->
+				<if test="sql!=null">
+					JOIN (
+						${sql}
+					) s ON s.doctorId = t4.doctorId
+				</if>
+				
+				LEFT JOIN followup_db.meta_followup_result_value t5 ON t5.followupResultValueId = t3.followupResultValue
+				LEFT JOIN user_db.u_patient t6 ON t6.patientId = t3.patientId
+				
+				<!-- 权限控制 add by zhuguo
+				<if test="sql!=null">
+					JOIN (
+						${sql}
+					) a ON a.patientId = t6.patientId
+				</if> -->			
+				
+			<where>
+				t6.outPatientFlag = 2  AND t6.patientType=1 and t3.mergeFlag!=2 and t6.mergeFlag!=2
+				<if test="operator != null">
+					AND t1.operator = #{operator}
+				</if>
+				<if test="beginDate != null">
+					AND DATE_FORMAT(t2.createTime, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(#{beginDate}, '%Y-%m-%d %H:%i:%s')
+				</if>
+				<if test="endDate != null">
+					AND DATE_FORMAT(#{endDate}, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(t2.createTime, '%Y-%m-%d %H:%i:%s')
+				</if>
+				<if test="followupTaskName != null">
+					AND t2.followupTaskName LIKE CONCAT('%', #{followupTaskName},'%')
+				</if>
+				<if test="state != null">
+					AND t2.state = #{state}
+				</if>
+
+				<if test="patientRangeFlag!=null">
+		  			<if test="followupRangeFlag==0">
+		  				AND t6.sourceTumorFlag <choose><when test="patientRangeFlag==1">in</when><otherwise>not in</otherwise></choose>
+		  				(1)
+		  			</if>
+		  			<if test="followupRangeFlag==1 and sourceTumorFlags !=null">
+						AND t6.sourceTumorFlag <choose><when test="patientRangeFlag==1">in</when><otherwise>not in</otherwise></choose> (${sourceTumorFlags})
+					</if>
+					<if test="followupRangeFlag==2">
+						AND <choose><when test="patientRangeFlag==1">exists</when><otherwise>not exists</otherwise></choose>(select diseaseTypeId from followup_db.conf_followup_range_disease_type where t6.sourceDiseaseTypeId=diseaseTypeId)
+					</if>
+		  			<if test="followupRangeFlag==3">
+		  				AND 
+		  				(
+		  					<choose>
+			  					<when test="patientRangeFlag==1">
+				  					t6.icdDiseaseTypeId in (select icdDiseaseTypeId from followup_db.conf_followup_range_icd where flag=1)
+				  					OR
+				  					t6.sourceDiseaseCode in (select diseaseCode from followup_db.conf_followup_range_icd_code where flag=1)
+			  					</when>
+			  					<otherwise>
+			  						t6.icdDiseaseTypeId not in (select icdDiseaseTypeId from followup_db.conf_followup_range_icd where flag=1)
+			  						and
+			  						t6.sourceDiseaseCode not in (select diseaseCode from followup_db.conf_followup_range_icd_code where flag=1)
+			  					</otherwise>
+		  					</choose>
+		  				)
+		  			</if>
+		  		</if>
+
+			</where>
+			GROUP BY t1.followupTaskId, t1.operator
+		) w1
+		GROUP BY w1.followupTaskId, w1.operator
+	</sql>
+	
+	<select id="statisticsFollowupWorkloadNumber" resultType="java.util.Map" parameterType="com.esuizhen.cloudservice.statistics.bean.TCommonParam">
+		SELECT
+			'合计' diseaseTypeName,
+			COUNT(DISTINCT f1.patientId) finishedQuantity,
+			<!-- COUNT(1) followupCount, -->
+			SUM(IF(f1.followupResultValue BETWEEN 1 AND
+			<choose>
+				<when test="otherFollowupResultType == 2">
+					4
+				</when>
+				<otherwise>
+					5
+				</otherwise>
+			</choose>
+			, 1, 0))effectiveQuantity,
+			SUM(IF(f1.followupResultValue = 1, 1, 0))effectiveStable,
+			SUM(IF(f1.followupResultValue = 2, 1, 0))effectiveRecrudescence,
+			SUM(IF(f1.followupResultValue = 3, 1, 0))effectiveTransfer,
+			SUM(IF(f1.followupResultValue = 4, 1, 0))effectiveDeath,
+			SUM(IF(f1.followupResultValue = 5, 1, 0))invalidOther,
+			SUM(IF(f1.followupResultValue BETWEEN 15 AND 16, 1, 0))treatmentQuantity,
+			SUM(IF(f1.followupResultValue = 15, 1, 0))treatmentOutpatient,
+			SUM(IF(f1.followupResultValue = 16, 1, 0))treatmentInhospital,
+			SUM(IF(f1.followupResultValue BETWEEN
+			<choose>
+				<when test="otherFollowupResultType == 2">
+					5
+				</when>
+				<otherwise>
+					6
+				</otherwise>
+			</choose>
+			AND 14, 1, 0))invalidQuantity,
+			SUM(IF(f1.followupResultValue = 7, 1, 0))invalidNoanswer,
+			SUM(IF(f1.followupResultValue = 10, 1, 0))invalidRefuse,
+			SUM(IF(f1.followupResultValue = 8, 1, 0))invalidEmpty,
+			SUM(IF(f1.followupResultValue = 9, 1, 0))invalidWrong,
+			SUM(IF(f1.followupResultValue = 11, 1, 0))invalidActiveRefuse,
+			SUM(IF(f1.followupResultValue = 12, 1, 0))invalidOff,
+			SUM(IF(f1.followupResultValue = 13, 1, 0))invalidNotservice,
+			SUM(IF(f1.followupResultValue = 14, 1, 0))invalidDisconnected,
+			SUM(IF(f1.lostFollowupFlag = 1, 1, 0))loseQuantity
+		FROM(
+			SELECT
+				c1.*
+			FROM(
+				SELECT
+					t1.patientId,
+					t1.followupResultValue,
+					t1.lostFollowupFlag
+				FROM followup_db.followup_result t1
+					INNER JOIN user_db.u_patient t2 ON t1.patientId = t2.patientId
+					INNER JOIN ehr_db.meta_c_disease_type t3 ON t2.sourceDiseaseTypeId = t3.diseaseTypeId
+				WHERE t2.outPatientFlag = 2  AND t2.patientType=1 and t1.mergeFlag!=2 and t2.mergeFlag!=2
+					<if test="beginDate != null">
+						AND DATE_FORMAT(t1.followupTime, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(#{beginDate}, '%Y-%m-%d %H:%i:%s')
+					</if>
+					<if test="endDate != null">
+						<![CDATA[
+							AND DATE_FORMAT(t1.followupTime, '%Y-%m-%d %H:%i:%s') <= DATE_FORMAT(#{endDate}, '%Y-%m-%d %H:%i:%s')
+						]]>
+					</if>
+					<if test="operator != null">
+						AND t1.operator = #{operator}
+					</if>
+				ORDER BY t1.followupTime DESC
+			) c1
+			GROUP BY c1.patientId
+		) f1
+		
+		UNION ALL
+		
+		SELECT
+			f1.diseaseTypeName,
+			COUNT(DISTINCT f1.patientId) finishedQuantity,
+			<!-- COUNT(1) followupCount, -->
+			SUM(IF(f1.followupResultValue BETWEEN 1 AND
+			<choose>
+				<when test="otherFollowupResultType == 2">
+					4
+				</when>
+				<otherwise>
+					5
+				</otherwise>
+			</choose>
+			, 1, 0))effectiveQuantity,
+			SUM(IF(f1.followupResultValue = 1, 1, 0))effectiveStable,
+			SUM(IF(f1.followupResultValue = 2, 1, 0))effectiveRecrudescence,
+			SUM(IF(f1.followupResultValue = 3, 1, 0))effectiveTransfer,
+			SUM(IF(f1.followupResultValue = 4, 1, 0))effectiveDeath,
+			SUM(IF(f1.followupResultValue = 5, 1, 0))invalidOther,
+			SUM(IF(f1.followupResultValue BETWEEN 15 AND 16, 1, 0))treatmentQuantity,
+			SUM(IF(f1.followupResultValue = 15, 1, 0))treatmentOutpatient,
+			SUM(IF(f1.followupResultValue = 16, 1, 0))treatmentInhospital,
+			SUM(IF(f1.followupResultValue BETWEEN
+			<choose>
+				<when test="otherFollowupResultType == 2">
+					5
+				</when>
+				<otherwise>
+					6
+				</otherwise>
+			</choose>
+			AND 14, 1, 0))invalidQuantity,
+			SUM(IF(f1.followupResultValue = 7, 1, 0))invalidNoanswer,
+			SUM(IF(f1.followupResultValue = 10, 1, 0))invalidRefuse,
+			SUM(IF(f1.followupResultValue = 8, 1, 0))invalidEmpty,
+			SUM(IF(f1.followupResultValue = 9, 1, 0))invalidWrong,
+			SUM(IF(f1.followupResultValue = 11, 1, 0))invalidActiveRefuse,
+			SUM(IF(f1.followupResultValue = 12, 1, 0))invalidOff,
+			SUM(IF(f1.followupResultValue = 13, 1, 0))invalidNotservice,
+			SUM(IF(f1.followupResultValue = 14, 1, 0))invalidDisconnected,
+			SUM(IF(f1.lostFollowupFlag = 1, 1, 0))loseQuantity
+		FROM(
+			SELECT
+				c1.*
+			FROM(
+				SELECT
+				t1.patientId,
+				t1.followupResultValue,
+				t1.lostFollowupFlag,
+				t3.diseaseTypeId,
+				t3.diseaseTypeName
+			FROM followup_db.followup_result t1
+				INNER JOIN user_db.u_patient t2 ON t1.patientId = t2.patientId
+				INNER JOIN ehr_db.meta_c_disease_type t3 ON t2.sourceDiseaseTypeId = t3.diseaseTypeId
+			WHERE t2.outPatientFlag = 2  AND t2.patientType=1  and t1.mergeFlag!=2 and t2.mergeFlag!=2
+				<if test="beginDate != null">
+					AND DATE_FORMAT(t1.followupTime, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(#{beginDate}, '%Y-%m-%d %H:%i:%s')
+				</if>
+				<if test="endDate != null">
+					<![CDATA[
+						AND DATE_FORMAT(t1.followupTime, '%Y-%m-%d %H:%i:%s') <= DATE_FORMAT(#{endDate}, '%Y-%m-%d %H:%i:%s')
+					]]>
+				</if>
+				<if test="operator != null">
+					AND t1.operator = #{operator}
+				</if>
+			) c1
+			GROUP BY c1.patientId
+		) f1
+		GROUP BY f1.diseaseTypeId
+	</select>
+	
+	<select id="statisticsFollowupTelephoneConnRateForDept" resultType="java.util.Map">
+		SELECT
+			CONVERT(@rowNum:=@rowNum+1, DECIMAL) no,
+			f1.*,
+			(
+				CASE WHEN f1.finishedQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.finishedQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)finishedRate,
+			(
+				CASE WHEN f1.noanswerQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.noanswerQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)noanswerRate,
+			(
+				CASE WHEN f1.wrongQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.wrongQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)wrongRate,
+			(
+				CASE WHEN f1.refuseQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.refuseQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)refuseRate,
+			(
+				CASE WHEN f1.activeRefuseQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.activeRefuseQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)activeRefuseRate,
+			(
+				CASE WHEN f1.notAvailableQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.notAvailableQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)notAvailableRate,
+			(
+				CASE WHEN f1.disconnectedQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.disconnectedQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)disconnectedRate,
+			(
+				CASE WHEN f1.offQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.offQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)offRate
+			<if test="commonParam.otherFollowupResultType == 2">
+				,(
+					CASE WHEN f1.otherQuantity = 0 THEN '-'
+					ELSE CONCAT(CONVERT(CONVERT(f1.otherQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+				)otherRate
+			</if>
+		FROM(
+			SELECT
+				t3.deptId,
+				t3.deptName,
+				(
+				SELECT COUNT(DISTINCT v1.patientId) FROM followup_db.followup_result v1,ehr_db.ei_inhospital_note v2
+				<!-- <if test="sql != null and sql != ''">
+					join 
+					(
+					${sql}
+					) s1 on s1.doctorId = v1.operator
+				</if> -->
+				WHERE 
+				v1.patientId=v2.patientId AND v2.inhospitalTimes=1 AND v2.inhospitalDeptId=t3.deptId  and v1.mergeFlag!=2
+					<if test="commonParam.beginDate != null">
+						AND DATE_FORMAT(v1.followupTime, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d %H:%i:%s')
+					</if>
+					<if test="commonParam.endDate != null">
+						<![CDATA[
+							AND DATE_FORMAT(v1.followupTime, '%Y-%m-%d %H:%i:%s') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d %H:%i:%s')
+						]]>
+					</if>
+				) followupQuantity,
+				COUNT(1) totalCount,
+				SUM(IF(t1.followupWay = 2 AND (t1.followupResultValue=10 OR t4.type = 1), 1, 0)) finishedQuantity,
+				SUM(IF(t1.followupWay = 2 AND t1.followupResultValue = 7, 1, 0)) noanswerQuantity,
+				SUM(IF(t1.followupWay = 2 AND t1.followupResultValue IN(8, 9), 1, 0)) wrongQuantity,
+				SUM(IF(t1.followupWay = 2 AND t1.followupResultValue = 10, 1, 0)) refuseQuantity,
+				SUM(IF(t1.followupWay = 2 AND t1.followupResultValue = 11, 1, 0)) activeRefuseQuantity,
+				SUM(IF(t1.followupWay = 2 AND t1.followupResultValue = 14, 1, 0)) notAvailableQuantity,
+				SUM(IF(t1.followupWay = 2 AND t1.followupResultValue = 13, 1, 0)) disconnectedQuantity,
+				SUM(IF(t1.followupWay = 2 AND t1.followupResultValue = 12, 1, 0)) offQuantity
+				<if test="commonParam.otherFollowupResultType == 2">
+					,SUM(IF(t1.followupWay = 2 AND t1.followupResultValue = 5, 1, 0)) otherQuantity
+				</if>
+			FROM followup_db.followup_result t1
+				INNER JOIN ehr_db.ei_inhospital_note t2 ON t1.patientId = t2.patientId AND t2.inhospitalTimes = 1
+				INNER JOIN user_db.u_department t3 ON t3.deptId = t2.inhospitalDeptId
+				INNER JOIN followup_db.meta_followup_result_value t4 ON t1.followupResultValue = t4.followupResultValueId
+				<!-- <if test="sql != null and sql != ''">
+					join 
+					(
+					${sql}
+					) s on s.doctorId = t1.operator
+				</if> -->
+			WHERE 1 = 1
+				<if test="commonParam.beginDate != null">
+					AND DATE_FORMAT(t1.followupTime, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d %H:%i:%s')
+				</if>
+				<if test="commonParam.endDate != null">
+					<![CDATA[
+						AND DATE_FORMAT(t1.followupTime, '%Y-%m-%d %H:%i:%s') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d %H:%i:%s')
+					]]>
+				</if>
+			GROUP BY t3.deptId
+		) f1, (SELECT @rowNum := 0) n1
+		ORDER BY no
+	</select>
+	
+	<select id="statisticsFollowupTelephoneConnRateForOperator" resultType="java.util.Map">
+		SELECT
+			f1.*,
+			(
+				CASE WHEN f1.finishedQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.finishedQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)finishedRate,
+			(
+				CASE WHEN f1.noanswerQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.noanswerQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)noanswerRate,
+			(
+				CASE WHEN f1.wrongQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.wrongQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)wrongRate,
+			(
+				CASE WHEN f1.refuseQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.refuseQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)refuseRate,
+			(
+				CASE WHEN f1.activeRefuseQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.activeRefuseQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)activeRefuseRate,
+			(
+				CASE WHEN f1.notAvailableQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.notAvailableQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)notAvailableRate,
+			(
+				CASE WHEN f1.disconnectedQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.disconnectedQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)disconnectedRate,
+			(
+				CASE WHEN f1.offQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.offQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)offRate
+			<if test="commonParam.otherFollowupResultType == 2">
+				,(
+					CASE WHEN f1.otherQuantity = 0 THEN '-'
+					ELSE CONCAT(CONVERT(CONVERT(f1.otherQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+				)otherRate
+			</if>
+		FROM(
+			SELECT
+				CONVERT(@rowNum:=@rowNum+1, DECIMAL) no,
+				t1.operator,
+				t2.trueName operatorName,
+				(
+					SELECT COUNT(DISTINCT v1.patientId) FROM followup_db.followup_result v1 
+					<!-- <if test="sql != null and sql != ''">
+					join 
+					(
+					${sql}
+					) s1 on s1.doctorId = v1.operator
+				</if> -->
+					WHERE t1.operator=v1.operator and v1.mergeFlag!=2
+						<if test="commonParam.beginDate != null">
+							AND DATE_FORMAT(v1.followupTime, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d %H:%i:%s')
+						</if>
+						<if test="commonParam.endDate != null">
+							<![CDATA[
+								AND DATE_FORMAT(v1.followupTime, '%Y-%m-%d %H:%i:%s') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d %H:%i:%s')
+							]]>
+						</if>
+				) followupQuantity,
+				(
+					SELECT
+						COUNT(1)
+					FROM followup_db.followup_result m1
+					<!-- <if test="sql != null and sql != ''">
+					join 
+					(
+					${sql}
+					) s2 on s2.doctorId = m1.operator
+				</if> -->
+					WHERE m1.operator = t1.operator and m1.mergeFlag!=2
+					<if test="commonParam.beginDate != null">
+							AND DATE_FORMAT(m1.followupTime, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d %H:%i:%s')
+					</if>
+					<if test="commonParam.endDate != null">
+						<![CDATA[
+							AND DATE_FORMAT(m1.followupTime, '%Y-%m-%d %H:%i:%s') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d %H:%i:%s')
+						]]>
+					</if>
+				)totalCount,
+				SUM(IF(t1.followupWay = 2 AND (t1.followupResultValue=10 OR t3.type = 1), 1, 0)) finishedQuantity,
+				SUM(IF(t1.followupResultValue = 7, 1, 0)) noanswerQuantity,
+				SUM(IF(t1.followupResultValue IN(8, 9), 1, 0)) wrongQuantity,
+				SUM(IF(t1.followupResultValue = 10, 1, 0)) refuseQuantity,
+				SUM(IF(t1.followupResultValue = 11, 1, 0)) activeRefuseQuantity,
+				SUM(IF(t1.followupResultValue = 14, 1, 0)) notAvailableQuantity,
+				SUM(IF(t1.followupResultValue = 13, 1, 0)) disconnectedQuantity,
+				SUM(IF(t1.followupResultValue = 12, 1, 0)) offQuantity
+				<if test="commonParam.otherFollowupResultType == 2">
+					,SUM(IF(t1.followupResultValue = 5, 1, 0)) otherQuantity
+				</if>
+			FROM followup_db.followup_result t1, user_db.u_doctor t2, followup_db.meta_followup_result_value t3, (SELECT @rowNum := 0) n1
+			<!-- <if test="sql != null and sql != ''">
+					join 
+					(
+					${sql}
+					) s on s.doctorId = t1.operator
+				</if> -->
+			WHERE
+				t1.operator = t2.doctorId
+				AND t1.followupResultValue = t3.followupResultValueId
+				AND t1.followupWay = 2 and t1.mergeFlag!=2
+				<if test="commonParam.beginDate != null">
+					AND DATE_FORMAT(t1.followupTime, '%Y-%m-%d 00:00:00') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d 00:00:00')
+				</if>
+				<if test="commonParam.endDate != null">
+					<![CDATA[
+						AND DATE_FORMAT(t1.followupTime, '%Y-%m-%d 00:00:00') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d 00:00:00')
+					]]>
+				</if>
+			GROUP BY t1.operator
+		) f1
+		ORDER BY f1.no
+	</select>
+	
+	<select id="statisticsFollowupTelephoneConnRateForDiseaseType" resultType="java.util.Map">
+		SELECT
+			f1.*,
+			(
+				CASE WHEN f1.finishedQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.finishedQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)finishedRate,
+			(
+				CASE WHEN f1.noanswerQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.noanswerQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)noanswerRate,
+			(
+				CASE WHEN f1.wrongQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.wrongQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)wrongRate,
+			(
+				CASE WHEN f1.refuseQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.refuseQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)refuseRate,
+			(
+				CASE WHEN f1.activeRefuseQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.activeRefuseQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)activeRefuseRate,
+			(
+				CASE WHEN f1.notAvailableQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.notAvailableQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)notAvailableRate,
+			(
+				CASE WHEN f1.disconnectedQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.disconnectedQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)disconnectedRate,
+			(
+				CASE WHEN f1.offQuantity = 0 THEN '-'
+				ELSE CONCAT(CONVERT(CONVERT(f1.offQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+			)offRate
+			<if test="commonParam.otherFollowupResultType == 2">
+				,(
+					CASE WHEN f1.otherQuantity = 0 THEN '-'
+					ELSE CONCAT(CONVERT(CONVERT(f1.otherQuantity/f1.totalCount, DECIMAL(5, 4)) * 100, DECIMAL(5, 2)), '%') END
+				)otherRate
+			</if>
+		FROM(
+			SELECT
+				CONVERT(@rowNum:=@rowNum+1, DECIMAL) no,
+				w1.*,
+				(
+					SELECT
+						COUNT(1)
+					FROM followup_db.followup_result m1
+						INNER JOIN user_db.u_patient m2 ON m1.patientId = m2.patientId
+						<!-- <if test="sql != null and sql != ''">
+							join 
+							(
+							${sql}
+							) s on s.doctorId = m1.operator
+						</if> -->
+					WHERE m2.sourceDiseaseTypeId = w1.diseaseTypeId AND m2.outPatientFlag = 2 and m1.mergeFlag!=2 and m2.mergeFlag!=2
+					<if test="commonParam.beginDate != null">
+						AND DATE_FORMAT(m1.followupTime, '%Y-%m-%d 00:00:00') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d 00:00:00')
+					</if>
+					<if test="commonParam.endDate != null">
+						<![CDATA[
+							AND DATE_FORMAT(m1.followupTime, '%Y-%m-%d 00:00:00') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d 00:00:00')
+						]]>
+					</if>
+				) totalCount
+			FROM(
+				SELECT
+					t3.diseaseTypeId,
+					t3.diseaseTypeName,
+					(
+						SELECT COUNT(DISTINCT v1.patientId) 
+						FROM followup_db.followup_result v1,user_db.u_patient v2 
+						<!-- <if test="sql != null and sql != ''">
+							join 
+							(
+							${sql}
+							) s1 on s1.doctorId = v1.operator
+						</if> -->
+						WHERE v1.patientId=v2.patientId AND v2.sourceDiseaseTypeId=t3.diseaseTypeId and v1.mergeFlag!=2 and v2.outPatientFlag=2 AND v2.patientType=1 AND v2.mergeFlag!=2
+						<if test="commonParam.beginDate != null">
+							AND DATE_FORMAT(v1.followupTime, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d %H:%i:%s')
+						</if>
+						<if test="commonParam.endDate != null">
+							<![CDATA[
+								AND DATE_FORMAT(v1.followupTime, '%Y-%m-%d %H:%i:%s') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d %H:%i:%s')
+							]]>
+						</if>
+					) followupQuantity,
+					SUM(IF(t1.followupWay = 2 AND (t1.followupResultValue=10 OR t4.type = 1), 1, 0)) finishedQuantity,
+					SUM(IF(t1.followupResultValue = 7, 1, 0)) noanswerQuantity,
+					SUM(IF(t1.followupResultValue IN(8, 9), 1, 0)) wrongQuantity,
+					SUM(IF(t1.followupResultValue = 10, 1, 0)) refuseQuantity,
+					SUM(IF(t1.followupResultValue = 11, 1, 0)) activeRefuseQuantity,
+					SUM(IF(t1.followupResultValue = 14, 1, 0)) notAvailableQuantity,
+					SUM(IF(t1.followupResultValue = 13, 1, 0)) disconnectedQuantity,
+					SUM(IF(t1.followupResultValue = 12, 1, 0)) offQuantity
+					<if test="commonParam.otherFollowupResultType == 2">
+						,SUM(IF(t1.followupResultValue = 5, 1, 0)) otherQuantity
+					</if>
+				FROM followup_db.followup_result t1, user_db.u_patient t2, ehr_db.meta_c_disease_type t3, followup_db.meta_followup_result_value t4
+				<!-- <if test="sql != null and sql != ''">
+							join 
+							(
+							${sql}
+							) s2 on s2.doctorId = t1.operator
+						</if> -->
+				WHERE t1.patientId = t2.patientId
+					AND t2.sourceDiseaseTypeId = t3.diseaseTypeId
+					AND t1.followupResultValue = t4.followupResultValueId
+					AND t1.followupWay = 2
+					AND t2.outPatientFlag = 2  AND t2.patientType=1 and t1.mergeFlag!=2 and t2.mergeFlag!=2
+					<if test="commonParam.beginDate != null">
+						AND DATE_FORMAT(t1.followupTime, '%Y-%m-%d 00:00:00') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d 00:00:00')
+					</if>
+					<if test="commonParam.endDate != null">
+						<![CDATA[
+							AND DATE_FORMAT(t1.followupTime, '%Y-%m-%d 00:00:00') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d 00:00:00')
+						]]>
+					</if>
+				GROUP BY t3.diseaseTypeId
+			) w1, (SELECT @rowNum := 0) b1
+			ORDER BY no
+		) f1
+	</select>
+	
+	<select id="statisticsDailyGainPatientList" resultType="com.esuizhen.cloudservice.statistics.bean.TDailyGainPatient">
+		SELECT
+			f1.date date,
+			SUM(f1.addTotalNum) addTotalNum,
+			SUM(f1.updateTotalNum) updateTotalNum,
+			SUM(f1.addInhospitalTotalNum) addInhospitalTotalNum,
+			SUM(f1.addOutpatientTotalNum) addOutpatientTotalNum,
+			SUM(f1.addHasPhoneNoTotalNum) addHasPhoneNoTotalNum,
+			SUM(f1.addDiagnosisTotalNum) addDiagnosisTotalNum,
+			SUM(f1.addSurgeryTotalNum) addSurgeryTotalNum,
+			SUM(f1.addOuthospitalTotalNum) addOuthospitalTotalNum
+		FROM(
+			SELECT
+				DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') date,
+				COUNT(1) addTotalNum,
+				0 updateTotalNum,
+				0 addInhospitalTotalNum,
+				0 addOutpatientTotalNum,
+				SUM(CASE WHEN mobile is null then 0 else 1 end) addHasPhoneNoTotalNum,
+				0 addDiagnosisTotalNum,
+				0 addSurgeryTotalNum,
+				0 addOuthospitalTotalNum
+			FROM user_db.u_patient t1
+			WHERE t1.outPatientFlag = 2  AND t1.patientType=1 and t1.mergeFlag!=2
+				<if test="commonParam.beginDate == null and commonParam.endDate == null">
+					AND t1.createTime IS NOT NULL
+				</if>
+				<if test="commonParam.beginDate != null">
+					AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d 00:00:00')
+				</if>
+				<if test="commonParam.endDate != null">
+					<![CDATA[
+						AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d 00:00:00')
+					]]>
+				</if>
+			GROUP BY DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00')
+		
+			UNION ALL
+		
+			SELECT
+				DATE_FORMAT(t1.updateTime, '%Y-%m-%d 00:00:00') date,
+				0 addTotalNum,
+				COUNT(1) updateTotalNum,
+				0 addInhospitalTotalNum,
+				0 addOutpatientTotalNum,
+				0 addHasPhoneNoTotalNum,
+				0 addDiagnosisTotalNum,
+				0 addSurgeryTotalNum,
+				0 addOuthospitalTotalNum
+			FROM user_db.u_patient t1
+			WHERE t1.outPatientFlag = 2  AND t1.patientType=1 and t1.mergeFlag!=2
+				<if test="commonParam.beginDate == null and commonParam.endDate == null">
+					AND t1.updateTime IS NOT NULL
+				</if>
+				<if test="commonParam.beginDate != null">
+					AND DATE_FORMAT(t1.updateTime, '%Y-%m-%d 00:00:00') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d 00:00:00')
+				</if>
+				<if test="commonParam.endDate != null">
+					<![CDATA[
+						AND DATE_FORMAT(t1.updateTime, '%Y-%m-%d 00:00:00') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d 00:00:00')
+					]]>
+				</if>
+			GROUP BY DATE_FORMAT(t1.updateTime, '%Y-%m-%d 00:00:00')
+		
+			UNION ALL
+		
+			SELECT
+				DATE_FORMAT(n1.createTime, '%Y-%m-%d 00:00:00') date,
+				0 addTotalNum,
+				0 updateTotalNum,
+				COUNT(1) addInhospitalTotalNum,
+				0 addOutpatientTotalNum,
+				0 addHasPhoneNoTotalNum,
+				0 addDiagnosisTotalNum,
+				0 addSurgeryTotalNum,
+				0 addOuthospitalTotalNum
+			FROM(
+				SELECT
+					t1.createTime createTime
+				FROM ehr_db.ei_inhospital_note t1
+				WHERE 1=1
+				<!-- <if test="commonParam.beginDate == null and commonParam.endDate == null">
+					AND t1.inhospitalDate IS NOT NULL
+				</if> -->
+				<if test="commonParam.beginDate != null">
+					AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d 00:00:00')
+				</if>
+				<if test="commonParam.endDate != null">
+					<![CDATA[
+						AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d 00:00:00')
+					]]>
+				</if>
+			) n1
+			GROUP BY DATE_FORMAT(n1.createTime, '%Y-%m-%d 00:00:00')
+			UNION ALL
+		
+			SELECT
+				DATE_FORMAT(n1.createTime, '%Y-%m-%d 00:00:00') date,
+				0 addTotalNum,
+				0 updateTotalNum,
+				0 addInhospitalTotalNum,
+				COUNT(1) addOutpatientTotalNum,
+				0 addHasPhoneNoTotalNum,
+				0 addDiagnosisTotalNum,
+				0 addSurgeryTotalNum,
+				0 addOuthospitalTotalNum
+			FROM(
+				SELECT
+					t1.createTime
+				FROM ehr_db.ec_clinic_medical_note t1
+				WHERE 1=1
+				<!-- <if test="commonParam.beginDate == null and commonParam.endDate == null">
+					AND t1.visitTime IS NOT NULL
+				</if> -->
+				<if test="commonParam.beginDate != null">
+					AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d 00:00:00')
+				</if>
+				<if test="commonParam.endDate != null">
+					<![CDATA[
+						AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d 00:00:00')
+					]]>
+				</if>
+			) n1
+			GROUP BY DATE_FORMAT(n1.createTime, '%Y-%m-%d 00:00:00')
+
+			UNION ALL
+		
+			SELECT
+				DATE_FORMAT(n1.createTime, '%Y-%m-%d 00:00:00') date,
+				0 addTotalNum,
+				0 updateTotalNum,
+				0 addInhospitalTotalNum,
+				0 addOutpatientTotalNum,
+				0 addHasPhoneNoTotalNum,
+				COUNT(0) addDiagnosisTotalNum,
+				0 addSurgeryTotalNum,
+				0 addOuthospitalTotalNum
+			FROM(
+				SELECT
+					t1.createTime
+				FROM ehr_db.e_diagnosis_info t1
+				WHERE 1=1
+				<if test="commonParam.beginDate != null">
+					AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d 00:00:00')
+				</if>
+				<if test="commonParam.endDate != null">
+					<![CDATA[
+						AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d 00:00:00')
+					]]>
+				</if>
+			) n1
+			GROUP BY DATE_FORMAT(n1.createTime, '%Y-%m-%d 00:00:00')
+		
+			UNION ALL
+		
+			SELECT
+				DATE_FORMAT(n1.createTime, '%Y-%m-%d 00:00:00') date,
+				0 addTotalNum,
+				0 updateTotalNum,
+				0 addInhospitalTotalNum,
+				0 addOutpatientTotalNum,
+				0 addHasPhoneNoTotalNum,
+				0 addDiagnosisTotalNum,
+				COUNT(0) addSurgeryTotalNum,
+				0 addOuthospitalTotalNum
+			FROM(
+				SELECT
+					t1.createTime
+				FROM ehr_db.eci_surgery_note t1
+				WHERE 1=1
+				<if test="commonParam.beginDate != null">
+					AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d 00:00:00')
+				</if>
+				<if test="commonParam.endDate != null">
+					<![CDATA[
+						AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d 00:00:00')
+					]]>
+				</if>
+			) n1
+			GROUP BY DATE_FORMAT(n1.createTime, '%Y-%m-%d 00:00:00')
+		
+			UNION ALL
+		
+			SELECT
+				DATE_FORMAT(n1.createTime, '%Y-%m-%d 00:00:00') date,
+				0 addTotalNum,
+				0 updateTotalNum,
+				0 addInhospitalTotalNum,
+				0 addOutpatientTotalNum,
+				0 addHasPhoneNoTotalNum,
+				0 addDiagnosisTotalNum,
+				0 addSurgeryTotalNum,
+				COUNT(0) addOuthospitalTotalNum
+			FROM(
+				SELECT
+					t1.createTime
+				FROM ehr_db.ei_outhospital_note t1
+				WHERE 1=1
+				<if test="commonParam.beginDate != null">
+					AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d 00:00:00')
+				</if>
+				<if test="commonParam.endDate != null">
+					<![CDATA[
+						AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d 00:00:00')
+					]]>
+				</if>
+			) n1
+			GROUP BY DATE_FORMAT(n1.createTime, '%Y-%m-%d 00:00:00')
+		) f1
+		GROUP BY f1.date
+		ORDER BY f1.date DESC
+	</select>
+	
+	<select id="statisticsDailyGainPatientListSum" resultType="com.esuizhen.cloudservice.statistics.bean.TDailyGainPatient">
+		SELECT
+			SUM(w1.addTotalNum) addTotalNum,
+			SUM(w1.updateTotalNum) updateTotalNum,
+			SUM(w1.addInhospitalTotalNum) addInhospitalTotalNum,
+			SUM(w1.addOutpatientTotalNum) addOutpatientTotalNum,
+			SUM(w1.addHasPhoneNoTotalNum) addHasPhoneNoTotalNum,
+			SUM(w1.addDiagnosisTotalNum) addDiagnosisTotalNum,
+			SUM(w1.addSurgeryTotalNum) addSurgeryTotalNum,
+			SUM(w1.addOuthospitalTotalNum) addOuthospitalTotalNum
+		FROM(
+				SELECT
+					COUNT(1) addTotalNum,
+					0 updateTotalNum,
+					0 addInhospitalTotalNum,
+					0 addOutpatientTotalNum,
+					sum(case when t1.mobile is NULL then 0 else 1 end) addHasPhoneNoTotalNum,
+					0 addDiagnosisTotalNum,
+					0 addSurgeryTotalNum,
+					0 addOuthospitalTotalNum
+				FROM user_db.u_patient t1
+				WHERE t1.outPatientFlag = 2  AND t1.patientType=1 and t1.mergeFlag!=2
+					<if test="commonParam.beginDate == null and commonParam.endDate == null">
+						AND t1.createTime IS NOT NULL
+					</if>
+					<if test="commonParam.beginDate != null">
+						AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d 00:00:00')
+					</if>
+					<if test="commonParam.endDate != null">
+						<![CDATA[
+							AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d 00:00:00')
+						]]>
+					</if>
+			
+				UNION ALL
+			
+				SELECT
+					0 addTotalNum,
+					COUNT(1) updateTotalNum,
+					0 addInhospitalTotalNum,
+					0 addOutpatientTotalNum,
+					0 addHasPhoneNoTotalNum,
+					0 addDiagnosisTotalNum,
+					0 addSurgeryTotalNum,
+					0 addOuthospitalTotalNum
+				FROM user_db.u_patient t1
+				WHERE t1.outPatientFlag = 2  AND t1.patientType=1 and t1.mergeFlag!=2
+					<if test="commonParam.beginDate == null and commonParam.endDate == null">
+						AND t1.updateTime IS NOT NULL
+					</if>
+					<if test="commonParam.beginDate != null">
+						AND DATE_FORMAT(t1.updateTime, '%Y-%m-%d 00:00:00') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d 00:00:00')
+					</if>
+					<if test="commonParam.endDate != null">
+						<![CDATA[
+							AND DATE_FORMAT(t1.updateTime, '%Y-%m-%d 00:00:00') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d 00:00:00')
+						]]>
+					</if>
+			
+				UNION ALL
+			
+				SELECT
+					0 addTotalNum,
+					0 updateTotalNum,
+					COUNT(1) addInhospitalTotalNum,
+					0 addOutpatientTotalNum,
+					0 addHasPhoneNoTotalNum,
+					0 addDiagnosisTotalNum,
+					0 addSurgeryTotalNum,
+					0 addOuthospitalTotalNum
+				FROM(
+					SELECT
+						1
+					FROM ehr_db.ei_inhospital_note t1
+					WHERE 1=1
+	<!-- 				<if test="commonParam.beginDate == null and commonParam.endDate == null">
+						AND t1.inhospitalDate IS NOT NULL
+					</if> -->
+					<if test="commonParam.beginDate != null">
+						AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d 00:00:00')
+					</if>
+					<if test="commonParam.endDate != null">
+						<![CDATA[
+							AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d 00:00:00')
+						]]>
+					</if>
+				) n1
+			
+				UNION ALL
+			
+				SELECT
+					0 addTotalNum,
+					0 updateTotalNum,
+					0 addInhospitalTotalNum,
+					COUNT(1) addOutpatientTotalNum,
+					0 addHasPhoneNoTotalNum,
+					0 addDiagnosisTotalNum,
+					0 addSurgeryTotalNum,
+					0 addOuthospitalTotalNum
+				FROM(
+					SELECT
+						1
+					FROM ehr_db.ec_clinic_medical_note t1
+					WHERE 1=1
+				<!-- 	<if test="commonParam.beginDate == null and commonParam.endDate == null">
+						AND t1.visitTime IS NOT NULL
+					</if> -->
+					<if test="commonParam.beginDate != null">
+						AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d 00:00:00')
+					</if>
+					<if test="commonParam.endDate != null">
+						<![CDATA[
+							AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d 00:00:00')
+						]]>
+					</if>
+				) n1
+			
+				UNION ALL
+			
+				SELECT
+					0 addTotalNum,
+					0 updateTotalNum,
+					0 addInhospitalTotalNum,
+					0 addOutpatientTotalNum,
+					0 addHasPhoneNoTotalNum,
+					COUNT(0) addDiagnosisTotalNum,
+					0 addSurgeryTotalNum,
+					0 addOuthospitalTotalNum
+				FROM(
+					SELECT
+						1
+					FROM ehr_db.e_diagnosis_info t1
+					WHERE 1=1
+				<!-- 	<if test="commonParam.beginDate == null and commonParam.endDate == null">
+						AND t1.visitTime IS NOT NULL
+					</if> -->
+					<if test="commonParam.beginDate != null">
+						AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d 00:00:00')
+					</if>
+					<if test="commonParam.endDate != null">
+						<![CDATA[
+							AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d 00:00:00')
+						]]>
+					</if>
+				) n1
+			
+				UNION ALL
+			
+				SELECT
+					0 addTotalNum,
+					0 updateTotalNum,
+					0 addInhospitalTotalNum,
+					0 addOutpatientTotalNum,
+					0 addHasPhoneNoTotalNum,
+					0 addDiagnosisTotalNum,
+					COUNT(0) addSurgeryTotalNum,
+					0 addOuthospitalTotalNum
+				FROM(
+					SELECT
+						1
+					FROM ehr_db.eci_surgery_note t1
+					WHERE 1=1
+				<!-- 	<if test="commonParam.beginDate == null and commonParam.endDate == null">
+						AND t1.visitTime IS NOT NULL
+					</if> -->
+					<if test="commonParam.beginDate != null">
+						AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d 00:00:00')
+					</if>
+					<if test="commonParam.endDate != null">
+						<![CDATA[
+							AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d 00:00:00')
+						]]>
+					</if>
+				) n1
+			
+				UNION ALL
+			
+				SELECT
+					0 addTotalNum,
+					0 updateTotalNum,
+					0 addInhospitalTotalNum,
+					0 addOutpatientTotalNum,
+					0 addHasPhoneNoTotalNum,
+					0 addDiagnosisTotalNum,
+					0 addSurgeryTotalNum,
+					COUNT(0) addOuthospitalTotalNum
+				FROM(
+					SELECT
+						1
+					FROM ehr_db.ei_outhospital_note t1
+					WHERE 1=1
+				<!-- 	<if test="commonParam.beginDate == null and commonParam.endDate == null">
+						AND t1.visitTime IS NOT NULL
+					</if> -->
+					<if test="commonParam.beginDate != null">
+						AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') >= DATE_FORMAT(#{commonParam.beginDate}, '%Y-%m-%d 00:00:00')
+					</if>
+					<if test="commonParam.endDate != null">
+						<![CDATA[
+							AND DATE_FORMAT(t1.createTime, '%Y-%m-%d 00:00:00') <= DATE_FORMAT(#{commonParam.endDate}, '%Y-%m-%d 00:00:00')
+						]]>
+					</if>
+				) n1
+		) w1
+	</select>
+	
+	<select id="statisticsLostFollowPatient" resultType="java.util.Map">
+		<choose>
+			<when test="allFlag == 1">
+				SELECT
+					'未失访' name,
+					MAX(f1.totalQuantity) - MAX(f1.lostQuantity) quantity
+				FROM(
+					SELECT
+						COUNT(1) totalQuantity,
+						0 lostQuantity
+					FROM(
+						SELECT t1.patientId FROM followup_db.followup_result t1 where t1.mergeFlag!=2
+						GROUP BY t1.patientId
+					) f1
+					UNION ALL
+					SELECT
+						0 totalQuantity,
+						COUNT(1) lostQuantity
+					FROM user_db.u_patient t1
+					
+					<!-- 权限控制 add by zhuguo -->
+					<if test="powerSql!=null">
+						JOIN (
+							${powerSql}
+						) a ON a.patientId = t1.patientId
+					</if>
+					
+					WHERE t1.followupFlag = 2
+						AND t1.outPatientFlag = 2  AND t1.patientType=1 and t1.mergeFlag!=2
+				) f1
+				UNION ALL
+				SELECT
+					'失访' name,
+					COUNT(1) quantity
+				FROM user_db.u_patient t1
+				WHERE t1.followupFlag = 2 AND t1.outPatientFlag = 2  AND t1.patientType=1 and t1.mergeFlag!=2
+			</when>
+			<otherwise>
+				SELECT
+					IF(t2.followupResultValueId IS NULL, '未知', t2.followupResultValueName)name,
+					COUNT(1) quantity
+				FROM user_db.u_patient t1
+				
+					<!-- 权限控制 add by zhuguo -->
+					<if test="powerSql!=null">
+						JOIN (
+							${powerSql}
+						) a ON a.patientId = t1.patientId
+					</if>
+					
+					LEFT JOIN followup_db.meta_followup_result_value t2 ON t2.followupResultValueId = t1.lostFollowupCauseResultValue
+				WHERE t1.followupFlag = 2 AND t1.outPatientFlag = 2  AND t1.patientType=1 and t1.mergeFlag!=2
+				GROUP BY t1.lostFollowupCauseResultValue
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 应随访人数 -->
+	<select id="findShouldFollowupCount" resultType="java.lang.Integer" parameterType="com.esuizhen.cloudservice.statistics.bean.FollowupScheduleStatisticsReq">
+		select count(1) from user_db.u_patient 
+		where outPatientFlag=2  AND patientType=1  and mergeFlag!=2
+		<if test="confirmBeginDate!=null">
+			<![CDATA[
+				and DATE(confirmedDate) >= DATE_FORMAT(#{confirmBeginDate}, '%Y-%m-%d')
+				]]>
+		</if>
+		<if test="confirmEndDate!=null">
+			<![CDATA[
+				and DATE(confirmedDate) <= DATE_FORMAT(#{confirmEndDate}, '%Y-%m-%d')
+			]]>
+		</if>
+	</select>
+	<!-- 已随访人数 -->
+	<select id="statisticsFollowupScheduleInfo" resultMap="followupScheduleStatisticsResult" parameterType="com.esuizhen.cloudservice.statistics.bean.FollowupScheduleStatisticsReq">
+		SELECT  
+				COUNT(0) shouldFollowupCount,
+				<!-- 当随访日期大于等于当前时，执行。。。Start by fanpanwei -->
+
+				<if test="includeDeathFlag == 1 and followupBeginDate!=null">
+				<if test="calTaskFlag == 1">
+				COUNT(CASE WHEN r.patientId IS NULL AND r1.patientId IS NULL AND f3.patientId IS NULL AND t.patientId IS NOT NULL THEN 1 END) alreadyAllotTask,
+				COUNT(CASE WHEN r.patientId IS NULL AND r1.patientId IS NULL AND f3.patientId IS NULL AND t.patientId IS NULL THEN 1 END) notAllotTask,
+				</if>
+				COUNT(CASE WHEN r.patientId IS NOT NULL THEN 1 END) everDeathCount,
+				COUNT(CASE WHEN r.patientId IS NULL AND r1.patientId IS NOT NULL AND f3.patientId IS NULL THEN 1 END) everLostFollowupCount,
+				COUNT(CASE WHEN r.patientId IS NULL AND r1.patientId IS NULL AND f3.patientId IS NULL THEN 1 END) notFollowupCount,
+				COUNT(CASE WHEN r.patientId IS NULL AND f3.patientId IS NOT NULL THEN 1 END) alreadyFollowupCount,
+				<!-- COUNT(CASE WHEN r.patientId IS NULL AND r1.patientId IS NULL AND f3.patientId IS NOT NULL THEN 1 END) alreadyFollowupCount, -->
+				COUNT(CASE WHEN r.patientId IS NULL AND f3.state=1 AND f3.followupWay=2 THEN 1 END) tempSaveCount,
+				COUNT(CASE WHEN r.patientId IS NULL AND f3.followupResultValue=4 THEN 1 END) deathFollowupCount,
+				COUNT(CASE WHEN r.patientId IS NULL AND v.type=2 AND f3.followupResultValue!=4 THEN 1 END) invalidFollowupCount,
+				COUNT(CASE WHEN r.patientId IS NULL AND v.type=1 AND f3.followupResultValue!=4 THEN 1 END) surviveFollowupCount,
+				COUNT(CASE WHEN r.patientId IS NULL AND f3.lostFollowupFlag=1 THEN 1 END) lostFollowupCount,
+				COUNT(CASE WHEN r.patientId IS NULL AND f3.followupWay=1 THEN 1  END) smsFollowupCount,
+				COUNT(CASE WHEN r.patientId IS NULL AND f3.followupWay=2 THEN 1 END) phoneFollowupCount,
+				COUNT(CASE WHEN r.patientId IS NULL AND f3.followupWay=4 THEN 1 END) wexinFollowupCount,
+				COUNT(CASE WHEN r.patientId IS NULL AND f3.followupWay IN (7,8) THEN 1 END) outpatientFollowupCount,
+				COUNT(CASE WHEN r.patientId IS NOT NULL OR (r.patientId IS NULL AND f3.patientId IS NOT NULL AND f3.followupWay NOT IN (1,2,4,7,8)) THEN 1 END) otherFollowupCount,
+				COUNT(CASE WHEN r.patientId IS NULL AND f3.followupResultValue=7 THEN 1 END) noOneHeardCount,
+				COUNT(CASE WHEN r.patientId IS NULL AND f3.followupResultValue=8 THEN 1 END) spaceNumCount,
+				COUNT(CASE WHEN r.patientId IS NULL AND f3.followupResultValue=9 THEN 1 END) wrongNumCount,
+				COUNT(CASE WHEN r.patientId IS NULL AND f3.followupResultValue=10 THEN 1 END) refusedFollowupCount,
+				COUNT(CASE WHEN r.patientId IS NULL AND f3.followupResultValue=11 THEN 1 END) rejectPhoneCount,
+				COUNT(CASE WHEN r.patientId IS NULL AND f3.followupResultValue=12 THEN 1 END) shutdownCount,
+				COUNT(CASE WHEN r.patientId IS NULL AND f3.followupResultValue=13 THEN 1 END) suspendedCount,
+				COUNT(CASE WHEN r.patientId IS NULL AND f3.followupResultValue=14 THEN 1 END) notAvailableCount,
+				COUNT(CASE WHEN r.patientId IS NULL AND f3.followupResultValue=99 THEN 1 END) unKnowCount
+				</if>
+				<if test="includeDeathFlag != 1 or followupBeginDate==null">
+				<if test="calTaskFlag == 1">
+				COUNT(CASE WHEN f3.patientId IS NULL AND t.patientId IS NOT NULL THEN 1 END) alreadyAllotTask,
+				COUNT(CASE WHEN f3.patientId IS NULL AND t.patientId IS NULL THEN 1 END) notAllotTask,
+				</if>
+				0 everDeathCount,
+				0 everLostFollowupCount,
+				COUNT(CASE WHEN  f3.patientId IS NULL THEN 1 END) notFollowupCount,
+				COUNT(CASE WHEN  f3.patientId IS NOT NULL THEN 1 END) alreadyFollowupCount,
+				COUNT(CASE WHEN  f3.state=1 AND f3.followupWay=2 THEN 1 END) tempSaveCount,
+				COUNT(CASE WHEN  f3.followupResultValue=4 THEN 1 END) deathFollowupCount,
+				COUNT(CASE WHEN  v.type=2 AND f3.followupResultValue!=4 THEN 1 END) invalidFollowupCount,
+				COUNT(CASE WHEN  v.type=1 AND f3.followupResultValue!=4 THEN 1 END) surviveFollowupCount,
+				COUNT(CASE WHEN  f3.lostFollowupFlag=1 THEN 1 END) lostFollowupCount,
+				COUNT(CASE WHEN  f3.followupWay=1 THEN 1  END) smsFollowupCount,
+				COUNT(CASE WHEN  f3.followupWay=2 THEN 1 END) phoneFollowupCount,
+				COUNT(CASE WHEN  f3.followupWay=4 THEN 1 END) wexinFollowupCount,
+				COUNT(CASE WHEN  f3.followupWay IN (7,8) THEN 1 END) outpatientFollowupCount,
+				COUNT(CASE WHEN  f3.patientId IS NOT NULL AND f3.followupWay NOT IN (1,2,4,7,8) THEN 1 END) otherFollowupCount,
+				COUNT(CASE WHEN  f3.followupResultValue=7 THEN 1 END) noOneHeardCount,
+				COUNT(CASE WHEN  f3.followupResultValue=8 THEN 1 END) spaceNumCount,
+				COUNT(CASE WHEN  f3.followupResultValue=9 THEN 1 END) wrongNumCount,
+				COUNT(CASE WHEN  f3.followupResultValue=10 THEN 1 END) refusedFollowupCount,
+				COUNT(CASE WHEN  f3.followupResultValue=11 THEN 1 END) rejectPhoneCount,
+				COUNT(CASE WHEN  f3.followupResultValue=12 THEN 1 END) shutdownCount,
+				COUNT(CASE WHEN  f3.followupResultValue=13 THEN 1 END) suspendedCount,
+				COUNT(CASE WHEN  f3.followupResultValue=14 THEN 1 END) notAvailableCount,
+				COUNT(CASE WHEN  f3.followupResultValue=99 THEN 1 END) unKnowCount
+				</if>
+				<!-- end by fanpanwei -->
+			FROM user_db.u_patient p LEFT JOIN (
+			SELECT f1.patientId,f1.followupResultValue,f1.followupWay,f1.lostFollowupFlag,f1.state
+			FROM followup_db.followup_result f1,(
+			SELECT MAX(f.followupTime) followupTime,f.patientId FROM followup_db.followup_result f
+			 WHERE 1=1 and f.mergeFlag!=2
+			<if test="followupBeginDate!=null">
+			    <![CDATA[
+				    and DATE(followupTime) >= DATE_FORMAT(#{followupBeginDate}, '%Y-%m-%d')
+			    ]]>
+		    </if>
+		    <if test="followupEndDate!=null">
+				<![CDATA[
+					and DATE(followupTime) <= DATE_FORMAT(#{followupEndDate}, '%Y-%m-%d')
+				]]>
+		    </if>
+			GROUP BY f.patientId ) f2 WHERE f1.patientId=f2.patientId AND f1.followupTime=f2.followupTime 
+			GROUP BY f2.patientId,f2.followupTime) f3 ON(p.patientId=f3.patientId)
+			LEFT JOIN followup_db.meta_followup_result_value v ON  f3.followupResultValue = v.followupResultValueId
+			<!-- 当随访日期大于等于当前时，执行。。。Start by fanpanwei -->
+			<if test="calTaskFlag == 1">
+			LEFT JOIN(
+				select DISTINCT(t1.patientId) from followup_db.r_followup_task_patient t1
+				INNER JOIN followup_db.followup_task t2 ON t2.followupTaskId=t1.followupTaskId AND t2.state in (0,1)
+				where t1.STATE IN (0,1) and t1.mergeFlag!=2
+			) t ON t.patientId=p.patientId
+			</if>
+			<!-- 随访任务前，已知死亡（失访）的 -->
+			<if test="followupBeginDate!=null">
+			LEFT JOIN(
+				SELECT r2.patientId,r2.followupResultValue FROM followup_db.followup_result r2
+				where r2.followupResultValue=4 and r2.mergeFlag!=2
+					<![CDATA[
+						AND DATE(r2.followupTime) < DATE_FORMAT(#{followupBeginDate}, '%Y-%m-%d')
+					]]>
+			    GROUP BY r2.patientId
+			 ) r ON r.patientId=p.patientId AND p.liveStatus=0
+			 LEFT JOIN(
+				 Select patientId From user_db.u_patient p1
+				 where p1.followupFlag=2 AND p1.liveStatus=1
+				 <![CDATA[
+						AND DATE(p1.lostFollowupTime) < DATE_FORMAT(#{followupBeginDate}, '%Y-%m-%d')
+					]]>
+			 ) r1 ON r1.patientId=p.patientId
+		    </if>
+			<!-- end by fanpanwei -->
+			WHERE p.outPatientFlag=2 and p.patientType=1 AND p.mergeFlag!=2
+			<if test="confirmBeginDate!=null">
+				<![CDATA[
+					and DATE(p.confirmedDate) >= DATE_FORMAT(#{confirmBeginDate}, '%Y-%m-%d')
+					]]>
+			</if>
+			<if test="confirmEndDate!=null">
+				<![CDATA[
+					and DATE(p.confirmedDate) <= DATE_FORMAT(#{confirmEndDate}, '%Y-%m-%d')
+				]]>
+			</if>
+			<if test="followupRangeFlag==0">
+				AND p.sourceTumorFlag=1
+			</if>
+			<if test="followupRangeFlag==1 and sourceTumorFlags!=null">
+				AND p.sourceTumorFlag IN ${sourceTumorFlags}
+			</if>
+			<if test="followupRangeFlag==2">
+				AND exists(select diseaseTypeId from followup_db.conf_followup_range_disease_type where p.sourceDiseaseTypeId=diseaseTypeId)
+			</if>
+			<if test="followupRangeFlag == 3">
+				AND (
+					p.icdDiseaseTypeId IN (select icdDiseaseTypeId from followup_db.conf_followup_range_icd where flag=1)
+					OR p.sourceDiseaseCode IN (select diseaseCode from followup_db.conf_followup_range_icd_code where flag=1)
+				)
+			</if>
+	</select>
+	<select id="querySourceTumorFlag" resultType="java.util.HashMap">
+		SELECT g.followupRangeFlag,g.notMalignantTumorFlag FROM followup_db.conf_global g
+	</select>
+	
+	
+	
+	<!-- ################################# -->
+	<!-- 按随访方式统计随访工作量 -->
+	<select id="statisticsWorkloadByFollowupWay" resultType="java.util.Map">
+		<if test="category != null">
+			<if test="category==1">
+				<include refid="HandFollowupSql"/>
+			</if>
+			<if test="category==2">
+				<include refid="AutoFollowupSql"/>
+			</if>
+			<if test="category==3">
+				<include refid="FollowupAmountSql"/>
+			</if>
+		</if>
+	</select>
+	<!-- 人工随访，电话短信微信 -->
+	<sql id="HandFollowupSql">
+		SELECT
+			f1.*
+		FROM(
+			SELECT
+				CASE WHEN t1.followUpWay=1 THEN '短信随访' WHEN t1.followUpWay=2 THEN '电话随访' ELSE '微信随访' END followUpWay,
+				t1.followUpWay followupWayVal,
+				COUNT(DISTINCT t1.patientId) finishedQuantity,
+				COUNT(1) followupCount,
+				SUM(IF(t4.type = 1, 1, 0)) effectiveFollowup,
+				SUM(IF(t4.type = 2, 1, 0)) invalidFollowup,
+				SUM(IF(t1.followupResultValue = 1, 1, 0))effectiveStable,
+				SUM(IF(t1.followupResultValue = 2, 1, 0))effectiveRecrudescence,
+				SUM(IF(t1.followupResultValue = 3, 1, 0))effectiveTransfer,
+				SUM(IF(t1.followupResultValue = 4, 1, 0))effectiveDeath,
+				SUM(IF(t1.followupResultValue = 5, 1, 0))invalidOther,
+				SUM(IF(t1.followupResultValue = 7, 1, 0))invalidNoanswer,
+				SUM(IF(t1.followupResultValue = 10, 1, 0))invalidRefuse,
+				SUM(IF(t1.followupResultValue = 8, 1, 0))invalidEmpty,
+				SUM(IF(t1.followupResultValue = 9, 1, 0))invalidWrong,
+				SUM(IF(t1.followupResultValue = 11, 1, 0))invalidActiveRefuse,
+				SUM(IF(t1.followupResultValue = 12, 1, 0))invalidOff,
+				SUM(IF(t1.followupResultValue = 13, 1, 0))invalidNotservice,
+				SUM(IF(t1.followupResultValue = 14, 1, 0))invalidDisconnected
+			FROM followup_db.followup_result_buff t1
+				
+				<!-- 权限控制 add by zhuguo -->
+				<if test="sql!=null">
+					JOIN (
+						${sql}
+					) s ON s.doctorId = t1.operator
+				</if>
+				
+				LEFT JOIN user_db.u_patient t2 ON t1.patientId = t2.patientId
+				
+				<!-- 权限控制 add by zhuguo
+				<if test="sql!=null">
+					JOIN (
+						${sql}
+					) a ON a.patientId = t2.patientId
+				</if> -->
+				
+				LEFT JOIN followup_db.meta_followup_result_value t4 ON t4.followupResultValueId = t1.followupResultValue
+			WHERE t2.outPatientFlag = 2 AND t2.patientType=1 and t1.mergeFlag!=2 and t2.mergeFlag!=2
+				<if test="beginDate != null">
+					AND DATE_FORMAT(t1.followupTime, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(#{beginDate}, '%Y-%m-%d %H:%i:%s')
+				</if>
+				<if test="endDate != null">
+					<![CDATA[
+						AND DATE_FORMAT(t1.followupTime, '%Y-%m-%d %H:%i:%s') <= DATE_FORMAT(#{endDate}, '%Y-%m-%d %H:%i:%s')
+					]]>
+				</if>
+				<if test="operator != null">
+					AND t1.operator = #{operator}
+				</if>
+				<choose>
+					<when test="sourceFlag != null">
+						AND t1.sourceFlag=#{sourceFlag}
+					</when>
+				</choose>
+
+				<if test="patientRangeFlag!=null">
+		  			<if test="followupRangeFlag==0">
+		  				AND t2.sourceTumorFlag <choose><when test="patientRangeFlag==1">in</when><otherwise>not in</otherwise></choose>
+		  				(1)
+		  			</if>
+		  			<if test="followupRangeFlag==1 and sourceTumorFlags!=null">
+						AND t2.sourceTumorFlag <choose><when test="patientRangeFlag==1">in</when><otherwise>not in</otherwise></choose> (${sourceTumorFlags})
+					</if>
+					<if test="followupRangeFlag==2">
+						AND <choose><when test="patientRangeFlag==1">exists</when><otherwise>not exists</otherwise></choose>(select diseaseTypeId from followup_db.conf_followup_range_disease_type where t2.sourceDiseaseTypeId=diseaseTypeId)
+					</if>
+		  			<if test="followupRangeFlag==3">
+		  				AND 
+		  				(
+		  					<choose>
+			  					<when test="patientRangeFlag==1">
+				  					t2.icdDiseaseTypeId in (select icdDiseaseTypeId from followup_db.conf_followup_range_icd where flag=1)
+				  					OR
+				  					t2.sourceDiseaseCode in (select diseaseCode from followup_db.conf_followup_range_icd_code where flag=1)
+			  					</when>
+			  					<otherwise>
+			  						t2.icdDiseaseTypeId not in (select icdDiseaseTypeId from followup_db.conf_followup_range_icd where flag=1)
+			  						and
+			  						t2.sourceDiseaseCode not in (select diseaseCode from followup_db.conf_followup_range_icd_code where flag=1)
+			  					</otherwise>
+		  					</choose>
+		  				)
+		  			</if>
+		  		</if>
+		  		<if test="followupWay != null">
+		  			AND t1.followUpWay IN(${followupWay})
+		  		</if>
+		  		<if test="followupTimes != null and followupTimes==1">
+					AND EXISTS(
+						SELECT 1 FROM followup_db.var_patient_followup t99 WHERE t1.patientId=t99.patientId AND t1.followupTaskId = t99.followupTaskId AND t1.followUpWay=t99.followupWay AND t1.followupTime=t99.latestFollowupTime AND t1.followupResultValue=t99.followupResultValue
+					)
+				</if>
+			GROUP BY t1.followUpWay
+		) f1
+	</sql>
+	<!-- 自动随访，数据从医院拉取过来的结果 -->
+	<sql id="AutoFollowupSql">
+		SELECT
+			f1.*
+		FROM(
+			SELECT
+				IF(t1.followUpWay = 7, '门诊复诊', '住院复诊') followUpWay,
+				t1.followUpWay followupWayVal,
+				COUNT(DISTINCT t1.patientId) finishedQuantity,
+				COUNT(1) followupCount,
+				SUM(IF(t4.type = 1, 1, 0)) effectiveFollowup,
+				SUM(IF(t1.followupResultValue = 4, 1, 0))effectiveDeath,
+				SUM(CASE WHEN t1.followupResultValue = 15 THEN 1 WHEN t1.followupResultValue = 16 THEN 1 ELSE 0 END) treatmentLive
+			FROM followup_db.followup_result_buff t1
+				
+				<!-- 权限控制 add by zhuguo -->
+				<if test="sql!=null">
+					JOIN (
+						${sql}
+					) s ON s.doctorId = t1.operator
+				</if>
+								
+				LEFT JOIN user_db.u_patient t2 ON t1.patientId = t2.patientId
+				
+				<!-- 权限控制 add by zhuguo
+				<if test="sql!=null">
+					JOIN (
+						${sql}
+					) a ON a.patientId = t2.patientId
+				</if> -->
+				
+				LEFT JOIN followup_db.meta_followup_result_value t4 ON t4.followupResultValueId = t1.followupResultValue
+			WHERE t2.outPatientFlag = 2 AND t2.patientType=1 and t1.mergeFlag!=2 and t2.mergeFlag!=2
+				<if test="beginDate != null">
+					AND DATE_FORMAT(t1.followupTime, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(#{beginDate}, '%Y-%m-%d %H:%i:%s')
+				</if>
+				<if test="endDate != null">
+					<![CDATA[
+						AND DATE_FORMAT(t1.followupTime, '%Y-%m-%d %H:%i:%s') <= DATE_FORMAT(#{endDate}, '%Y-%m-%d %H:%i:%s')
+					]]>
+				</if>
+				<if test="operator != null">
+					AND t1.operator = #{operator}
+				</if>
+				<choose>
+					<when test="sourceFlag != null">
+						AND t1.sourceFlag=#{sourceFlag}
+					</when>
+				</choose>
+
+				<if test="patientRangeFlag!=null">
+		  			<if test="followupRangeFlag==0">
+		  				AND t2.sourceTumorFlag <choose><when test="patientRangeFlag==1">in</when><otherwise>not in</otherwise></choose> (1)
+		  			</if>
+		  			<if test="followupRangeFlag==1 and sourceTumorFlags!=null">
+						AND t2.sourceTumorFlag <choose><when test="patientRangeFlag==1">in</when><otherwise>not in</otherwise></choose> (${sourceTumorFlags})
+					</if>
+					<if test="followupRangeFlag==2">
+						AND <choose><when test="patientRangeFlag==1">exists</when><otherwise>not exists</otherwise></choose>(select diseaseTypeId from followup_db.conf_followup_range_disease_type where t2.sourceDiseaseTypeId=diseaseTypeId)
+					</if>
+		  			<if test="followupRangeFlag==3">
+		  				AND 
+		  				(
+		  					<choose>
+			  					<when test="patientRangeFlag==1">
+				  					t2.icdDiseaseTypeId in (select icdDiseaseTypeId from followup_db.conf_followup_range_icd where flag=1)
+				  					OR
+				  					t2.sourceDiseaseCode in (select diseaseCode from followup_db.conf_followup_range_icd_code where flag=1)
+			  					</when>
+			  					<otherwise>
+			  						t2.icdDiseaseTypeId not in (select icdDiseaseTypeId from followup_db.conf_followup_range_icd where flag=1)
+			  						and
+			  						t2.sourceDiseaseCode not in (select diseaseCode from followup_db.conf_followup_range_icd_code where flag=1)
+			  					</otherwise>
+		  					</choose>
+		  				)
+		  			</if>
+		  		</if>
+		  		<if test="followupWay != null">
+		  			AND t1.followUpWay IN(${followupWay})
+		  		</if>
+		  		<if test="followupTimes != null and followupTimes==1">
+					AND EXISTS(
+						SELECT 1 FROM followup_db.var_patient_followup t99 WHERE t1.patientId=t99.patientId AND t1.followupTaskId = t99.followupTaskId AND t1.followUpWay=t99.followupWay AND t1.followupTime=t99.latestFollowupTime AND t1.followupResultValue=t99.followupResultValue
+					)
+				</if>
+			GROUP BY t1.followUpWay
+		) f1
+	</sql>
+	<!-- 随访合计 -->
+	<sql id="FollowupAmountSql">
+		SELECT
+			f1.*
+		FROM(
+			SELECT
+				'合计' followUpWay,
+				COUNT(DISTINCT t1.patientId) finishedQuantity,
+				COUNT(1) followupCount,
+				SUM(IF(t4.type = 1, 1, 0)) effectiveFollowup,
+				SUM(IF(t4.type = 2, 1, 0)) invalidFollowup,
+				SUM(IF(t1.followupResultValue BETWEEN 1 AND 3 or t1.followupResultValue BETWEEN 15 AND 16, 1, 0))treatmentLive,
+				SUM(IF(t1.followupResultValue = 4, 1, 0))effectiveDeath,
+				SUM(IF(t1.followupResultValue = 5, 1, 0))invalidOther
+			FROM followup_db.followup_result_buff t1
+				
+				<!-- 权限控制 add by zhuguo -->
+				<if test="sql!=null">
+					JOIN (
+						${sql}
+					) s ON s.doctorId = t1.operator
+				</if>
+				
+				LEFT JOIN user_db.u_patient t2 ON t1.patientId = t2.patientId
+				
+				<!-- 权限控制 add by zhuguo
+				<if test="sql!=null">
+					JOIN (
+						${sql}
+					) a ON a.patientId = t2.patientId
+				</if> -->
+				
+				LEFT JOIN followup_db.meta_followup_result_value t4 ON t4.followupResultValueId = t1.followupResultValue
+			WHERE t2.outPatientFlag = 2 AND t2.patientType=1 and t1.mergeFlag!=2 and t2.mergeFlag!=2
+				<if test="beginDate != null">
+					AND DATE_FORMAT(t1.followupTime, '%Y-%m-%d %H:%i:%s') >= DATE_FORMAT(#{beginDate}, '%Y-%m-%d %H:%i:%s')
+				</if>
+				<if test="endDate != null">
+					<![CDATA[
+						AND DATE_FORMAT(t1.followupTime, '%Y-%m-%d %H:%i:%s') <= DATE_FORMAT(#{endDate}, '%Y-%m-%d %H:%i:%s')
+					]]>
+				</if>
+				<if test="operator != null">
+					AND t1.operator = #{operator}
+				</if>
+				<choose>
+					<when test="sourceFlag != null">
+						AND t1.sourceFlag=#{sourceFlag}
+					</when>
+				</choose>
+
+				<if test="patientRangeFlag!=null">
+		  			<if test="followupRangeFlag==0">
+		  				AND t2.sourceTumorFlag  <choose><when test="patientRangeFlag==1">in</when><otherwise>not in</otherwise></choose> (1)
+		  			</if>
+		  			<if test="followupRangeFlag==1 and sourceTumorFlags!=null">
+						AND t2.sourceTumorFlag <choose><when test="patientRangeFlag==1">in</when><otherwise>not in</otherwise></choose> (${sourceTumorFlags})
+					</if>
+					<if test="followupRangeFlag==2">
+						AND <choose><when test="patientRangeFlag==1">exists</when><otherwise>not exists</otherwise></choose>(select diseaseTypeId from followup_db.conf_followup_range_disease_type where t2.sourceDiseaseTypeId=diseaseTypeId)
+					</if>
+		  			<if test="followupRangeFlag==3">
+		  				AND 
+		  				(
+		  					<choose>
+			  					<when test="patientRangeFlag==1">
+				  					t2.icdDiseaseTypeId in (select icdDiseaseTypeId from followup_db.conf_followup_range_icd where flag=1)
+				  					OR
+				  					t2.sourceDiseaseCode in (select diseaseCode from followup_db.conf_followup_range_icd_code where flag=1)
+			  					</when>
+			  					<otherwise>
+			  						t2.icdDiseaseTypeId not in (select icdDiseaseTypeId from followup_db.conf_followup_range_icd where flag=1)
+			  						and
+			  						t2.sourceDiseaseCode not in (select diseaseCode from followup_db.conf_followup_range_icd_code where flag=1)
+			  					</otherwise>
+		  					</choose>
+		  				)
+		  			</if>
+		  		</if>
+		  		<if test="followupTimes != null and followupTimes==1">
+					AND EXISTS(
+						SELECT 1 FROM followup_db.var_patient_followup t99 
+						WHERE t1.patientId=t99.patientId AND t1.followupTaskId = t99.followupTaskId AND t1.followUpWay=t99.followupWay AND t1.followupTime=t99.latestFollowupTime AND t1.followupResultValue=t99.followupResultValue
+					)
+				</if>
+		) f1
+	</sql>
+</mapper>

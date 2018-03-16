@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.research.dao.crf.CrfCourseDetailDao">
+	<select id="queryCourseDetailInfoes" resultType="com.esuizhen.cloudservice.research.model.crf.CrfCourseDetail" parameterType="java.lang.String">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM pro_db.crf_course_detail d1
+			INNER JOIN pro_db.crf_course d2 ON d1.crfCourseId=d2.crfCourseId
+		WHERE d2.crfCourseId=#{crftCourseId}
+		ORDER BY d1.crfCourseItemIndex ASC
+	</select>
+
+	<select id="queryCourseDetailsByCourseId" resultType="com.esuizhen.cloudservice.research.model.crf.CrfCourseDetail" parameterType="java.lang.String">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM pro_db.crf_course_detail d1
+		WHERE d1.crfCourseId=#{crfCourseId}
+		ORDER BY d1.crfCourseItemIndex
+	</select>
+
+	<sql id="base_column_list">
+		d1.crfCourseItemId,
+		d1.crfCourseId, 
+		d1.crfCourseItemName, 
+		d1.crfCourseItemIndex, 
+		d1.`index`, 
+		d1.distanceTime, 
+		d1.createTime, 
+		d1.updateTime
+	</sql>
+
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.research.model.crf.CrfCourseDetail">
+		INSERT INTO pro_db.crf_course_detail(
+			crfCourseItemId, 
+			crfCourseId,
+			crfCourseItemName, 
+			crfCourseItemIndex,
+			`index`, 
+			distanceTime, 
+			createTime, 
+			updateTime)
+		VALUES(
+			#{crfCourseItemId},
+			#{crfCourseId},
+			#{crfCourseItemName},
+			#{crfCourseItemIndex},
+			#{index},
+			#{distanceTime},
+			NOW(), NOW()
+		)
+	</insert>
+	
+	<delete id="delete" parameterType="java.lang.String">
+		DELETE FROM pro_db.crf_course_detail WHERE crfCourseItemId=#{crfCourseItemId}
+	</delete>
+	
+</mapper>

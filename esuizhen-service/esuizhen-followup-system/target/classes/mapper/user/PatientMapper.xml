@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.user.PatientDao">
+	
+	<update id="updatePatientContactInfo" parameterType="com.esuizhen.cloudservice.followup.model.followupresult.TPatientContactInfo">
+		update user_db.u_patient_family 
+		<set>
+			<if test="isValid !=null">
+				isValid=#{isValid},
+			</if>
+			<if test="phoneStatus !=null">
+				phoneStatus=#{phoneStatus}
+			</if>
+		</set>
+		<where>
+			id=#{id}
+		</where>
+	</update>
+	
+	<update id="updatePatientFamilyStatusIsValueOrNull" parameterType="com.esuizhen.cloudservice.followup.model.followupresult.TPatientContactInfo">
+		update user_db.u_patient_family 
+		<set>
+			<if test="isValid !=null">
+				isValid=#{isValid},
+			</if>
+			phoneStatus=#{phoneStatus}
+		</set>
+		<where>
+			id=#{id}
+		</where>
+	</update>
+	
+	<!-- 根据id查询患者id和家庭电话号码 add by zhuguo -->
+	<select id="findPatientInfoById" parameterType="com.esuizhen.cloudservice.followup.model.followupresult.TPatientContactInfo"
+		resultType="com.esuizhen.cloudservice.followup.model.followupresult.TPatientContactInfo">
+		SELECT
+			id,
+			patientId,
+			familyPhone,
+			phoneStatus,
+			isValid
+		FROM
+			user_db.u_patient_family
+		WHERE
+			id = #{id}
+	</select>
+
+	<!-- 根据患者id和手机号码，修改同一患者重复的手机号码的电话状态 add by zhuguo -->
+	<update id="updatePatientFamilyPhoneStatus" parameterType="com.esuizhen.cloudservice.followup.model.followupresult.TPatientContactInfo">
+		UPDATE user_db.u_patient_family
+		<set>
+			<if test="phoneStatus !=null">
+				phoneStatus = #{phoneStatus},
+			</if>
+			<if test="isValid !=null">
+				isValid = #{isValid},
+			</if>
+			updateTime=NOW()
+		</set>
+		WHERE
+			patientId = #{patientId}
+		AND familyPhone = #{familyPhone}
+		AND id &lt;&gt; #{id}
+	</update>
+
+	<!-- 根据患者id和手机号码，修改同一患者重复的手机号码的电话状态 add by zhuguo -->
+	<update id="updatePatientFamilyPhoneStatusToOther" parameterType="com.esuizhen.cloudservice.followup.model.followupresult.TPatientContactInfo">
+		UPDATE user_db.u_patient_family
+		SET isValid = 1,
+		 phoneStatus = NULL
+		WHERE
+			patientId = #{patientId}
+		AND familyPhone = #{familyPhone}
+	</update>
+	
+	<update id="savePatientFollowupFlag">
+		update user_db.u_patient 
+		<set>
+			<if test="followupFlag !=null">
+				followupFlag=#{followupFlag},
+			</if>
+			<if test="lostFollowupCause !=null">
+				lostFollowupCause=#{lostFollowupCause},
+			</if>
+			<if test="lostFollowupCauseResultValue !=null">
+				lostFollowupCauseResultValue=#{lostFollowupCauseResultValue},
+			</if>
+			<if test="lostFollowupTime !=null">
+				lostFollowupTime=#{lostFollowupTime},
+			</if>
+				updateTime=now()
+		</set>
+		<where>
+			patientId=#{patientId}
+		</where>
+	</update>
+	
+	<resultMap id="patientContactInfoMap" type="com.esuizhen.cloudservice.followup.model.followupresult.TPatientContactInfo">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="patientId" property="patientId" jdbcType="BIGINT" />
+		<result column="patientRelation" property="patientRelation"
+			jdbcType="INTEGER" />
+		<result column="familyName" property="familyName" jdbcType="VARCHAR" />
+		<result column="familyPhone" property="familyPhone" jdbcType="VARCHAR" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="zipcode" property="zipcode" jdbcType="VARCHAR" />
+		<result column="isDefault" property="isDefault" jdbcType="INTEGER" />
+		<result column="isValid" property="isValid" jdbcType="INTEGER" />
+		<result column="patientRelationName" property="patientRelationName" jdbcType="VARCHAR" />
+		<result column="phoneStatus" property="phoneStatus" jdbcType="INTEGER" />
+		<result column="phoneStatusName" property="phoneStatusName" jdbcType="VARCHAR" />
+	</resultMap>
+	<select id="getPatientContactList" resultMap="patientContactInfoMap">
+		SELECT t1.id, t1.patientId,
+		t1.patientRelation, t1.familyName, t1.familyPhone, t1.address,
+		t1.createTime, t1.updateTime, t1.remark,t1.zipcode,t1.isDefault,t1.isValid,
+		(SELECT r.relationName FROM user_db.meta_relation r WHERE r.relationId=t1.patientRelation) patientRelationName,
+		t1.phoneStatus,
+		(select mt.followupResultValueName from meta_followup_result_value mt where mt.followupResultValueId=t1.phoneStatus) phoneStatusName
+		FROM user_db.u_patient_family t1 WHERE
+		t1.patientId=#{patientId,jdbcType=BIGINT}
+		order by t1.isValid desc,t1.isDefault desc
+	</select>
+	
+	<select id="queryEciTreatmentNoteByPatientId" parameterType="Long" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TTreatmentInfo">
+		select treatmentId,treatmentName from ehr_db.eci_treatment_note 
+		<where>
+			patientId=#{patientId}
+		</where>
+	</select>
+	
+	<select id="getTreatmentNameByPatientId" parameterType="Long" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TTreatmentInfo">
+		select DISTINCT(treatmentName) from ehr_db.eci_treatment_note 
+		<where>
+			patientId=#{patientId}
+		</where>
+	</select>
+
+	<!-- 获取患者所在医院 -->
+	<select id="queryHospitalByPatientId" parameterType="java.lang.Long" resultType="java.lang.Integer">
+		SELECT hospitalId FROM user_db.r_hospital_patient WHERE patientId=#{patientId};
+	</select>
+	<!-- 获取患者同步标识 -->
+	<select id="queryPatientSyncFlagByPatientId" parameterType="java.lang.Long" resultType="java.lang.Integer">
+		SELECT syncFlag FROM user_db.u_patient WHERE patientId=#{patientId};
+	</select>
+	
+	
+	<!-- 更新患者表的随访状态  -->
+  	<update id="updatePatientByFollowupResult">
+  		UPDATE user_db.u_patient
+  		<set>
+  			<if test="liveStatus!=null">
+  				liveStatus=#{liveStatus},
+  			</if>
+  			<if test="deathDate!=null">
+  				deathDate=#{deathDate},
+  			</if>
+  			<if test="isInHospitalDeath!=null">
+  				isInHospitalDeath=#{isInHospitalDeath},
+  			</if>
+  			<if test="isTumourDeath!=null">
+  				isTumourDeath=#{isTumourDeath},
+  			</if>
+  			<if test="deathCause!=null">
+  				causeOfDeath=#{deathCause},
+  			</if>
+  			<if test="underlyCausesOfDeath!=null">
+  				underlyCausesOfDeath=#{underlyCausesOfDeath},
+  			</if>
+  			<if test="followupFlag!=null">
+  				followupFlag=#{followupFlag},
+  			</if>
+  			<if test="lostFollowupCauseResultValue!=null">
+  				lostFollowupCauseResultValue=#{lostFollowupCauseResultValue},
+  			</if>
+  			<if test="lostFollowupCause!=null">
+  				lostFollowupCause=#{lostFollowupCause},
+  			</if>
+  			<if test="lostFollowupTime!=null">
+  				lostFollowupTime=#{lostFollowupTime},
+  			</if>
+  			<!-- add by zhuguo -->
+  			<if test="wholeProcessFlag!=null">
+  				wholeProcessFlag=#{wholeProcessFlag},
+  			</if>
+  			updateTime = now()
+  		</set>
+  		WHERE patientId=#{patientId}
+  	</update>
+
+	<select id="queryPatientByPrimaryKey" parameterType="java.lang.Long" resultType="com.westangel.common.bean.Patient">
+		select * from user_db.u_patient where patientId=#{patientId}
+	</select>
+	
+  	<update id="updatePatientByPrimaryKey">
+  		UPDATE user_db.u_patient
+  		<set>
+			liveStatus=#{liveStatus},
+			deathDate=#{deathDate},
+			isInHospitalDeath=#{isInHospitalDeath},
+			isTumourDeath=#{isTumourDeath},
+			causeOfDeath=#{deathCause},
+			followupFlag=#{followupFlag},
+			lostFollowupCauseResultValue=#{lostFollowupCauseResultValue},
+			lostFollowupCause=#{lostFollowupCause},
+			lostFollowupTime=#{lostFollowupTime},
+			wholeProcessFlag=#{wholeProcessFlag},
+			updateTime = now()
+  		</set>
+  		WHERE patientId=#{patientId}
+  	</update>
+  	<update id="updateSearchTableInfo">
+  		UPDATE ${searchTableName} set ${searchColumn}=3 WHERE patientId=#{patientId}
+  	</update>
+</mapper>

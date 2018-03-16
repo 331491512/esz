@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.crf.TCrfObservationSubjectElementDao">
+	<resultMap type="com.esuizhen.cloudservice.research.bean.TCrfCourseDetailInfo" id="baseTCrfCourseDetailInfoResultMap">
+		<id column="crfCourseItemId" property="crfCourseItemId"/>
+		<result column="crfCourseItemTime" property="crfCourseItemTime"/>
+		
+		<collection property="crfObserveList" ofType="com.esuizhen.cloudservice.research.model.crf.TCrfObservationSubjectElement">
+			<id column="crfObserveId" property="crfObserveId"/>
+			<result column="subjectElementId" property="subjectElementId"/>
+			<result column="subjectElementName" property="subjectElementName"/>
+			<result column="subjectIndex" property="subjectIndex"/>
+			<result column="collectFlag" property="collectFlag"/>
+		</collection>
+	</resultMap>
+
+	<select id="findChildListByCrfObserveId" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfObservationSubjectElement">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM pro_db.crf_observation_subject_element t1
+			INNER JOIN pro_db.crf_observation_subject_element t2 ON t2.subjectElementId = t1.parentId AND t2.crfCourseItemId = t1.crfCourseItemId
+		WHERE t2.crfObserveId = #{crfObserveId}
+	</select>
+	
+	<select id="findFollowupTimeAxis" resultMap="baseTCrfCourseDetailInfoResultMap">
+		SELECT
+			w1.*
+		FROM
+			(
+				SELECT
+					m1.*,
+				IF (
+					m1.collectFlag_1 + m1.collectFlag_2 > 0,
+					1,
+					collectFlag_3 + collectFlag_4
+				) collectFlag
+				FROM
+					(
+						SELECT
+							t1.crfCourseItemId,
+							t1.crfObserveId,
+							t1.subjectElementId,
+							t2.subjectElementName,
+							t1.subjectIndex,
+							(
+								SELECT
+									COUNT(0)
+								FROM
+									pro_db.crf_result_main i1
+								WHERE
+									i1.crfObserveId = t1.crfObserveId
+									AND i1.patientId = t7.patientId
+							) collectFlag_1,
+							(
+								SELECT
+									COUNT(0)
+								FROM
+									pro_db.crf_result_main i1
+								INNER JOIN pro_db.crf_observation_subject_element i2 ON i2.crfObserveId = i1.crfObserveId
+								WHERE
+									i1.patientId = t7.patientId
+								AND i2.parentId = t1.subjectElementId
+								AND i2.crfCourseItemId = t1.crfCourseItemId
+							) collectFlag_2,
+							(
+								SELECT
+									IF (i1.crfCourseItemIndex >= t3.crfCourseItemIndex, 0, -1)
+								FROM
+									pro_db.crf_course_detail i1
+								WHERE
+									i1.crfCourseItemId = #{currentCrfCourseItemId}
+							) collectFlag_3,
+							(
+								SELECT
+									IF (i1.crfCourseItemIndex + 1 = t3.crfCourseItemIndex AND #{available}, 1, 0)
+								FROM
+									pro_db.crf_course_detail i1
+								WHERE
+									i1.crfCourseItemId = #{currentCrfCourseItemId}
+							) collectFlag_4,
+							(
+								CASE
+								WHEN t5.followupStartMark = 1 THEN
+									(
+										CASE
+										WHEN t4.crfCourseIndex = 0 THEN
+											t7.createTime
+										ELSE
+											DATE_ADD(t7.createTime, INTERVAL #{days} DAY)
+										END
+									)
+								ELSE
+									(
+										CASE
+										WHEN t4.crfCourseIndex = 0 THEN
+											(
+												SELECT
+													n1.diagnosisDate
+												FROM
+													pro_db.crf_result_diagnosis_info n1
+												INNER JOIN pro_db.crf_result_main n2 ON n1.crfResultId = n2.crfResultId
+												WHERE
+													n1.diagnosisType = 1
+												AND n2.patientId = t7.patientId
+												AND n2.projectId = t6.projectId
+											)
+										ELSE
+											DATE_ADD(
+												(
+													SELECT
+														n1.diagnosisDate
+													FROM
+														pro_db.crf_result_diagnosis_info n1
+													INNER JOIN pro_db.crf_result_main n2 ON n1.crfResultId = n2.crfResultId
+													WHERE
+														n1.diagnosisType = 1
+													AND n2.patientId = t7.patientId
+													AND n2.projectId = t6.projectId
+												),
+												INTERVAL #{days} DAY
+											)
+										END
+									)
+								END
+							) crfCourseItemTime,
+							t3.crfCourseItemIndex
+						FROM
+							pro_db.crf_observation_subject_element t1
+						INNER JOIN pro_db.meta_crf_subject_element t2 ON t1.subjectElementId = t2.subjectElementId AND t2.subjectElementLevel = 2
+						INNER JOIN pro_db.crf_course_detail t3 ON t1.crfCourseItemId = t3.crfCourseItemId
+						INNER JOIN pro_db.crf_course t4 ON t3.crfCourseId = t4.crfCourseId
+						INNER JOIN pro_db.project_crf_template t5 ON t4.crfTemplateId = t5.crfTemplateId
+						INNER JOIN pro_db.r_crftemplate_project t6 ON t5.crfTemplateId = t6.crfTemplateId
+						INNER JOIN pro_db.r_subcenter_patient t7 ON t6.projectId = t7.projectId
+						INNER JOIN user_db.u_patient t8 ON t7.patientId = t8.patientId
+						WHERE
+							t1.crfCourseItemId = #{crfCourseItemId}
+						AND t7.patientId = #{patientId}
+						ORDER BY
+							t1.subjectIndex
+					) m1
+			) w1
+			<if test="collectFlag != null">
+				WHERE w1.collectFlag = #{collectFlag}
+			</if>
+		<!-- 
+		SELECT * FROM(
+			SELECT
+				m1.*,
+				(CASE WHEN collectFlag_1 + collectFlag_2 > 0 THEN 1 ELSE collectFlag_3 END) collectFlag
+			FROM (
+			<![CDATA[
+				SELECT
+					t1.crfCourseItemId,
+					t1.crfObserveId,
+					t1.subjectElementId,
+					t2.subjectElementName,
+					t1.subjectIndex,
+					(
+						CASE WHEN c1.crfResultId IS NOT NULL THEN 1 ELSE 0 END
+					) collectFlag_1,
+					(
+						SELECT
+							CASE WHEN COUNT(f1.crfResultId) > 0 THEN 1 ELSE 0 END
+						FROM pro_db.crf_result_main f1
+							INNER JOIN pro_db.crf_observation_subject_element f2 ON f1.crfObserveId = f2.crfObserveId
+							INNER JOIN pro_db.crf_observation_subject_element f3 ON f2.parentId = f3.subjectElementId AND f2.crfCourseItemId = f3.crfCourseItemId
+						WHERE f3.crfObserveId = t1.crfObserveId AND f1.projectId = #{projectId} AND f1.patientId = #{patientId}
+					) collectFlag_2,
+					(
+						CASE
+							WHEN t4.crfCourseIndex < (
+								SELECT i1.crfCourseIndex FROM pro_db.crf_course i1
+								INNER JOIN pro_db.crf_course_detail i2 ON i1.crfCourseId = i2.crfCourseId
+								WHERE i2.crfCourseItemId = #{currentCrfCourseItemId}
+							)
+							OR t3.crfCourseItemIndex <= (
+								SELECT i3.crfCourseItemIndex FROM pro_db.crf_course_detail i3
+								WHERE i3.crfCourseItemId = #{currentCrfCourseItemId}
+							)
+							THEN 0 ELSE (IF(
+								t3.crfCourseItemIndex = (SELECT i3.crfCourseItemIndex + 1 FROM pro_db.crf_course_detail i3
+								WHERE i3.crfCourseItemId = #{currentCrfCourseItemId}) AND #{available}, 0, -1))
+						END
+					) collectFlag_3,
+					(CASE
+						WHEN t5.followupStartMark = 1 THEN
+							(CASE WHEN t4.crfCourseIndex = 0 THEN t7.createTime ELSE DATE_ADD(t7.createTime,INTERVAL #{days} DAY) END)
+						ELSE
+							(CASE WHEN t4.crfCourseIndex = 0 THEN (
+								SELECT
+									n1.diagnosisDate
+								FROM pro_db.crf_result_diagnosis_info n1
+									INNER JOIN pro_db.crf_result_main n2 ON n1.crfResultId = n2.crfResultId AND n2.projectId = #{projectId}
+								WHERE n1.diagnosisType = 1 AND n2.patientId = t7.patientId
+							) ELSE DATE_ADD((
+										SELECT
+											n1.diagnosisDate
+										FROM pro_db.crf_result_diagnosis_info n1
+											INNER JOIN pro_db.crf_result_main n2 ON n1.crfResultId = n2.crfResultId AND n2.projectId = #{projectId}
+										WHERE n1.diagnosisType = 1 AND n2.patientId = t7.patientId
+									), INTERVAL #{days} DAY) END)
+					END) crfCourseItemTime,
+					t3.crfCourseItemIndex
+				FROM pro_db.crf_observation_subject_element t1
+					INNER JOIN pro_db.meta_crf_subject_element t2 ON t1.subjectElementId = t2.subjectElementId AND t2.subjectElementLevel = 2
+					INNER JOIN pro_db.crf_course_detail t3 ON t1.crfCourseItemId = t3.crfCourseItemId
+					INNER JOIN pro_db.crf_course t4 ON t3.crfCourseId = t4.crfCourseId
+					INNER JOIN pro_db.project_crf_template t5 ON t4.crfTemplateId = t5.crfTemplateId
+					INNER JOIN pro_db.r_crftemplate_project t6 ON t5.crfTemplateId = t6.crfTemplateId
+					INNER JOIN pro_db.r_subcenter_patient t7 ON t6.projectId = t7.projectId
+					INNER JOIN user_db.u_patient t8 ON t7.patientId = t8.patientId
+					LEFT JOIN pro_db.crf_result_main c1 ON t1.crfObserveId = c1.crfObserveId
+				WHERE t1.crfCourseItemId = #{crfCourseItemId} AND t7.patientId = #{patientId}
+				ORDER BY t1.subjectIndex
+			]]>
+			) m1
+		) w1
+		<if test="collectFlag != null">
+			WHERE w1.collectFlag = #{collectFlag}
+		</if>
+		 -->
+	</select>
+	
+	<sql id="base_column_list">
+		t1.crfObserveId, 
+		t1.crfCourseItemId, 
+		t1.subjectElementId, 
+		t1.parentId, 
+		t1.subjectIndex, 
+		t1.createTime, 
+		t1.updateTime
+	</sql>
+
+	<insert id="insertCrfObservationSubjectElement" parameterType="com.esuizhen.cloudservice.research.model.crf.TCrfObservationSubjectElement">
+        INSERT INTO crf_observation_subject_element (
+        	crfObserveId ,
+        	crfCourseItemId ,
+        	subjectElementId ,
+        	parentId ,
+        	subjectIndex ,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{crfObserveId} ,
+        	#{crfCourseItemId} ,
+        	#{subjectElementId} ,
+        	#{parentId} ,
+        	#{subjectIndex} ,
+        	NOW() ,
+        	NOW() 
+        )
+	</insert>
+    
+    <insert id="insertCrfObservationSubjectElementList"  parameterType="java.util.List">
+		INSERT INTO crf_observation_subject_element (
+        	crfObserveId ,
+        	crfCourseItemId ,
+        	subjectElementId ,
+        	parentId ,
+        	subjectIndex ,
+        	createTime ,
+        	updateTime 
+        ) VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+		(
+        	#{item.crfObserveId} ,
+        	#{item.crfCourseItemId} ,
+        	#{item.subjectElementId} ,
+        	#{item.parentId} ,
+        	#{item.subjectIndex} ,
+        	NOW() ,
+        	NOW() 
+        )
+		</foreach>
+	</insert>
+	
+	<update id="updateCrfObservationSubjectElement">
+        UPDATE crf_observation_subject_element 
+        <set>
+	        <if test="crfCourseItemId != null">
+                crfCourseItemId = #{crfCourseItemId} ,
+            </if>
+	        <if test="subjectElementId != null">
+                subjectElementId = #{subjectElementId} ,
+            </if>
+	        <if test="parentId != null">
+                parentId = #{parentId} ,
+            </if>
+	        <if test="subjectIndex != null">
+                subjectIndex = #{subjectIndex} ,
+            </if>
+	        <if test="1==1">
+                updateTime = NOW() ,
+            </if>
+        </set>
+        WHERE 
+	        crfObserveId = #{crfObserveId} 
+	</update>
+
+    <delete id="deleteCrfObservationSubjectElement">
+        DELETE FROM crf_observation_subject_element WHERE crfObserveId = #{crfObserveId} 
+    </delete>
+    
+    <delete id="deleteCrfObservationSubjectElementByIds">
+        CALL pro_crf_subject_detail_delete('${crfObserveIds}',@a)
+    </delete>
+    
+    <delete id="deleteCrfObservationSubjectElementByCrfCourseItemId">
+        DELETE FROM crf_observation_subject_element
+        WHERE crfCourseItemId = #{crfCourseItemId}
+        AND parentId=#{parentId}
+        AND subjectElementId NOT IN (${subjectElementIds})
+    </delete>
+	
+	<delete id="deleteByBatch">
+		DELETE FROM pro_db.crf_observation_subject_element
+		WHERE crfObserveId IN(
+			<foreach collection="records" item="record" index="index" separator=",">
+				#{record.crfObserveId}
+			</foreach>
+		)
+	</delete>
+    
+    <select id="queryCrfObservationSubjectElement" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfObservationSubjectElement">
+		SELECT 
+        	crfObserveId,
+        	crfCourseItemId,
+        	subjectElementId,
+        	parentId,
+        	subjectIndex,
+        	createTime,
+        	updateTime
+		FROM crf_observation_subject_element 
+	    WHERE 
+	        crfObserveId = #{crfObserveId} 
+	</select>
+	
+    <select id="findCrfObservationSubjectElementBySubjectElementId" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfObservationSubjectElement">
+		SELECT
+			t1.crfObserveId,
+			t1.crfCourseItemId,
+			t1.subjectElementId,
+			t1.parentId,
+			t1.subjectIndex,
+			t1.createTime,
+			t1.updateTime
+		FROM pro_db.crf_observation_subject_element t1
+			INNER JOIN pro_db.crf_course_detail t2 ON t1.crfCourseItemId = t2.crfCourseItemId
+			INNER JOIN pro_db.crf_course t3 ON t2.crfCourseId = t3.crfCourseId
+			INNER JOIN pro_db.r_crftemplate_project t4 ON t3.crfTemplateId = t4.crfTemplateId
+		WHERE t1.subjectElementId = #{subjectElementId} AND t4.projectId = #{projectId}
+	</select>
+	
+	<select id="queryCrfSubjectElementChild" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfObservationSubjectElement">
+		SELECT 
+        	t1.crfObserveId,
+        	t1.crfCourseItemId,
+        	t1.subjectElementId,
+        	(SELECT subjectElementName FROM meta_crf_subject_element WHERE subjectElementId=t1.subjectElementId) subjectElementName ,
+			(SELECT subjectElementCode FROM meta_crf_subject_element WHERE subjectElementId=t1.subjectElementId) subjectElementCode ,
+			(SELECT emrItemTypeId FROM meta_crf_subject_element WHERE subjectElementId=t1.subjectElementId) emrItemTypeId ,
+        	t1.parentId,
+        	t1.subjectIndex,
+        	t1.createTime,
+        	t1.updateTime
+		FROM crf_observation_subject_element t1
+		<where>
+		    t1.crfCourseItemId = #{crfCourseItemId} 
+			<if test="parentId != null">
+		        AND t1.parentId=#{parentId}
+		    </if> 
+		</where>
+	    ORDER BY t1.subjectIndex
+	</select>
+	
+</mapper>
+

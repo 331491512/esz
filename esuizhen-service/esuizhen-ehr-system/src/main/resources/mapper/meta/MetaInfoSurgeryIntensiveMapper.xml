@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.meta.MetaInfoSurgeryIntensiveDao">
+
+    
+    <select id="getMetaInfoSurgeryIntensiveList" resultType="com.esuizhen.cloudservice.ehr.model.meta.TMetaInfoSurgeryIntensive">
+		SELECT 
+        	surgeryId,
+        	surgeryCode,
+        	surgeryName
+		FROM meta_e_surgery_intensive 
+		<where>
+			<if test="surgeryCode!=null">
+				AND surgeryCode LIKE CONCAT(#{surgeryCode},'%')  
+			</if>
+			<if test="surgeryName!=null">
+				AND surgeryName LIKE CONCAT(#{surgeryName},'%')  
+			</if>
+		</where>
+	</select>
+	
+</mapper>
+

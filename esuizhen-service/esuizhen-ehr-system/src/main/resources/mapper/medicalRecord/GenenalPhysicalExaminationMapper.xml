@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.medicalRecord.GenenalPhysicalExaminationDao">
+	
+	<select id="queryGenenalPhysicalExamination" parameterType="com.esuizhen.cloudservice.ehr.bean.AttendPatientReq" resultType="com.esuizhen.cloudservice.ehr.model.medicalRecord.GenenalExaminationInfo">
+		select * from e_genenal_physical_examination t1
+		<where>
+			<if test="patientId !=null">
+				and t1.patientId=#{patientId}
+			</if>
+			<if test="inhospitalId !=null">
+				and t1.inhospitalId=#{inhospitalId}
+			</if>
+			<if test="clinicMedicalId !=null">
+				and t1.clinicMedicalId=#{clinicMedicalId}
+			</if>
+		</where>
+		limit 1
+	</select>
+	
+	<insert id="insertGenenalPhysicalExamination" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.GenenalExaminationInfo" >
+        INSERT INTO e_genenal_physical_examination (
+        	physicalExaminationResultId,
+			patientId,
+			inhospitalId,
+			clinicMedicalId,
+			checkDate,
+			hight,
+			weightLof,
+			heartRate,
+			pulse,
+			temperature,
+			waist,
+			weight,
+			bodyArea,
+			breath,
+			bloodLow,
+			bloodHigh,
+			hipline,
+			bust,
+			nutritionStateId,
+			nutritionStateName,
+			consciouStateId,
+			consciouStateName,
+			bodilyId,
+			bodilyName,
+			developmentId,
+			developmentName,
+			intonationId,
+			intonationName,
+			faceId,
+			faceName,
+			bodyPositionId,
+			bodyPositionName,
+			posture,
+			gaitId,
+			gaitName,
+			createTime,
+			updateTime
+        ) VALUES (
+        	#{physicalExaminationResultId},
+			#{patientId},
+			#{inhospitalId},
+			#{clinicMedicalId},
+			#{checkDate},
+			#{hight},
+			#{weightLof},
+			#{heartRate},
+			#{pulse},
+			#{temperature},
+			#{waist},
+			#{weight},
+			#{bodyArea},
+			#{breath},
+			#{bloodLow},
+			#{bloodHigh},
+			#{hipline},
+			#{bust},
+			#{nutritionStateId},
+			#{nutritionStateName},
+			#{consciouStateId},
+			#{consciouStateName},
+			#{bodilyId},
+			#{bodilyName},
+			#{developmentId},
+			#{developmentName},
+			#{intonationId},
+			#{intonationName},
+			#{faceId},
+			#{faceName},
+			#{bodyPositionId},
+			#{bodyPositionName},
+			#{posture},
+			#{gaitId},
+			#{gaitName},
+        	NOW() ,
+        	NOW() 
+        )
+	</insert>
+    
+	<update id="updateGenenalPhysicalExaminationSelective" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.GenenalExaminationInfo">
+        UPDATE e_genenal_physical_examination 
+        <set>
+        	<if test="patientId !=null">
+        		patientId=#{patientId},
+        	</if>
+	        <if test="inhospitalId !=null">
+	        	inhospitalId=#{inhospitalId},	
+	        </if>
+	        <if test="clinicMedicalId !=null">
+	        	clinicMedicalId=#{clinicMedicalId},	
+	        </if>
+	        <if test="checkDate !=null">
+	        	checkDate=#{checkDate},
+	        </if>
+			<if test="hight !=null">
+				hight=#{hight},
+			</if>
+			<if test="weightLof !=null">
+				weightLof=#{weightLof},
+			</if>
+			<if test="heartRate !=null">
+				heartRate=#{heartRate},
+			</if>
+			<if test="pulse !=null">
+				pulse=#{pulse},
+			</if>
+			<if test="temperature !=null">
+				temperature=#{temperature},
+			</if>
+			<if test="waist !=null">
+				waist=#{waist},
+			</if>
+			<if test="weight !=null">
+				weight=#{weight},
+			</if>			
+			<if test="bodyArea !=null">
+				bodyArea=#{bodyArea},
+			</if>
+			<if test="breath !=null">
+				breath=#{breath},
+			</if>
+			<if test="bloodLow !=null">
+				bloodLow=#{bloodLow},
+			</if>
+			<if test="bloodHigh !=null">
+				bloodHigh=#{bloodHigh},
+			</if>
+			<if test="hipline !=null">
+				hipline=#{hipline},
+			</if>
+			<if test="bust !=null">
+				bust=#{bust},
+			</if>
+			<if test="nutritionStateId !=null">
+				nutritionStateId=#{nutritionStateId},
+			</if>
+			<if test="nutritionStateName !=null">
+				nutritionStateName=#{nutritionStateName},
+			</if>
+			<if test="consciouStateId !=null">
+				consciouStateId=#{consciouStateId},
+			</if>
+			<if test="consciouStateName !=null">
+				consciouStateName=#{consciouStateName},
+			</if>
+			<if test="bodilyId !=null">
+				bodilyId=#{bodilyId},
+			</if>
+			<if test="bodilyName !=null">
+				bodilyName=#{bodilyName},
+			</if>
+			<if test="developmentId !=null">
+				developmentId=#{developmentId},
+			</if>
+			<if test="developmentName !=null">
+				developmentName=#{developmentName},
+			</if>
+			<if test="intonationId !=null">
+				intonationId=#{intonationId},
+			</if>
+			<if test="intonationName !=null">
+				intonationName=#{intonationName},
+			</if>
+			<if test="faceId !=null">
+				faceId=#{faceId},
+			</if>
+			<if test="faceName !=null">
+				faceName=#{faceName},
+			</if>
+			<if test="bodyPositionId !=null">
+				bodyPositionId=#{bodyPositionId},
+			</if>
+			<if test="bodyPositionName !=null">
+				bodyPositionName=#{bodyPositionName},
+			</if>
+			<if test="posture !=null">
+				posture=#{posture},
+			</if>
+			<if test="gaitId !=null">
+				gaitId=#{gaitId},
+			</if>
+			<if test="gaitName !=null">
+				gaitName=#{gaitName},
+			</if>
+	        <if test="1==1">
+                updateTime = NOW() ,
+            </if>
+        </set>
+        WHERE 
+	        physicalExaminationResultId = #{physicalExaminationResultId} 
+	</update>
+	
+	<update id="updateGenenalPhysicalExamination" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.GenenalExaminationInfo">
+        UPDATE e_genenal_physical_examination 
+        <set>
+        		patientId=#{patientId},
+	        	inhospitalId=#{inhospitalId},	
+	        	clinicMedicalId=#{clinicMedicalId},	
+	        	checkDate=#{checkDate},
+				hight=#{hight},
+				weightLof=#{weightLof},
+				heartRate=#{heartRate},
+				pulse=#{pulse},
+				temperature=#{temperature},
+				waist=#{waist},
+				weight=#{weight},
+				bodyArea=#{bodyArea},
+				breath=#{breath},
+				bloodLow=#{bloodLow},
+				bloodHigh=#{bloodHigh},
+				hipline=#{hipline},
+				bust=#{bust},
+				nutritionStateId=#{nutritionStateId},
+				nutritionStateName=#{nutritionStateName},
+				consciouStateId=#{consciouStateId},
+				consciouStateName=#{consciouStateName},
+				bodilyId=#{bodilyId},
+				bodilyName=#{bodilyName},
+				developmentId=#{developmentId},
+				developmentName=#{developmentName},
+				intonationId=#{intonationId},
+				intonationName=#{intonationName},
+				faceId=#{faceId},
+				faceName=#{faceName},
+				bodyPositionId=#{bodyPositionId},
+				bodyPositionName=#{bodyPositionName},
+				posture=#{posture},
+				gaitId=#{gaitId},
+				gaitName=#{gaitName},
+                updateTime = NOW() ,
+        </set>
+        WHERE 
+	        physicalExaminationResultId = #{physicalExaminationResultId} 
+	</update>
+
+    <delete id="deleteGenenalPhysicalExamination">
+        DELETE FROM e_genenal_physical_examination WHERE
+        physicalExaminationResultId = #{physicalExaminationResultId} 
+    </delete>
+	
+</mapper>
+

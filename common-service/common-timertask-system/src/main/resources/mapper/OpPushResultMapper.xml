@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.westangel.timertask.dao.OpPushResultDao">
+
+	<insert id="insertOpPushResult" useGeneratedKeys="true" parameterType="com.westangel.timertask.model.OpPushResult">
+		<selectKey resultType="long" keyProperty="id" order="AFTER" >
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+        INSERT INTO operation_db.op_push_result 
+        (
+        	pushRuleId ,
+        	patientId ,
+        	articleId ,
+        	pushTimes,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{pushRuleId} ,
+        	#{patientId} ,
+        	#{articleId} ,
+        	#{pushTimes} ,
+        	NOW() ,
+        	NOW() 
+        )
+	</insert>
+    
+    <insert id="insertOpPushResultList" useGeneratedKeys="true" parameterType="java.util.List">
+		<selectKey resultType="long" keyProperty="id" order="AFTER" >
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+        INSERT INTO operation_db.op_push_result 
+        (
+        	pushRuleId ,
+        	patientId ,
+        	articleId ,
+        	pushTimes,
+        	createTime ,
+        	updateTime 
+        ) VALUES 
+        <foreach collection="list" index="index" item="item" separator=",">
+        (
+        	#{item.pushRuleId} ,
+        	#{item.patientId} ,
+        	#{item.articleId} ,
+        	#{item.pushTimes} ,
+        	NOW() ,
+        	NOW() 
+        )
+        </foreach>
+        
+	</insert>
+	
+	<update id="updateOpPushResult" parameterType="com.westangel.timertask.model.OpPushResult">
+        UPDATE operation_db.op_push_result 
+        <set>
+	        <if test="pushRuleId != null">
+                pushRuleId = #{pushRuleId} ,
+            </if>
+	        <if test="pushTimes != null">
+                pushTimes = #{pushTimes} ,
+            </if>
+            <if test="patientId != null">
+                patientId = #{patientId} ,
+            </if>
+	        <if test="articleId != null">
+                articleId = #{articleId} ,
+            </if>
+            updateTime = NOW()
+        </set>
+        WHERE 
+	        pushResultId = #{pushResultId} 
+	</update>
+
+    <delete id="deleteOpPushResult">
+        DELETE FROM operation_db.op_push_result WHERE pushResultId = #{pushResultId} 
+    </delete>
+    
+    <select id="queryOpPushResultById" resultType="com.westangel.timertask.model.OpPushResult">
+		SELECT 
+        	pushResultId,
+        	pushRuleId,
+        	patientId,
+        	articleId,
+        	pushTimes,
+        	createTime,
+        	updateTime
+		FROM operation_db.op_push_result 
+	    WHERE 
+	        pushResultId = #{pushResultId} 
+	</select>
+	
+	<select id="queryOpPushResult" resultType="com.westangel.timertask.model.OpPushResult">
+		SELECT 
+        	pushResultId,
+        	pushRuleId,
+        	patientId,
+        	articleId,
+        	pushTimes,
+        	createTime,
+        	updateTime
+		FROM operation_db.op_push_result 
+	    WHERE 
+	        pushRuleId = #{pushRuleId} 
+	    AND patientId = #{patientId} 
+	    AND articleId = #{articleId} 
+	</select>
+</mapper>
+

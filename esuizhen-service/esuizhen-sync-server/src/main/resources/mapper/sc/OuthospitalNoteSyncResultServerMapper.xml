@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<mapper namespace="com.esuizhen.server.sync.dao.sc.OuthospitalNoteSyncResultServerDao" >
+	<insert id="insert">
+	INSERT INTO sc_db.ei_outhospital_note_sync_result_server(
+		outhospitalId,batchId,syncFlag,opFlag,syncTime,cause,createTime
+	)VALUES(#{resultId},#{batchId},#{syncFlag},#{opFlag},#{syncTime},#{cause},NOW())
+	ON DUPLICATE KEY UPDATE
+		batchId=VALUES(batchId),
+		syncFlag=VALUES(syncFlag),
+		opFlag=VALUES(opFlag),
+		syncTime=VALUES(syncTime),
+		cause=VALUES(cause),
+		updateTime = NOW()
+	</insert>
+	<!-- 获取同步结果 -->
+	<select id="getBatchDataResult"
+		resultType="com.esuizhen.server.sync.bean.TBatchDataResultInfo" parameterType="java.lang.String">
+		SELECT
+		t1.outhospitalId AS resultId,
+		t1.syncFlag,
+		t1.syncTime,
+		t1.cause
+		FROM
+		sc_db.ei_outhospital_note_sync_result_server t1
+		WHERE
+		t1.batchId =#{batchId}
+	</select>
+</mapper>

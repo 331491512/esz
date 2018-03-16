@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.CloudDoctorDao" >
+	<resultMap id="baseResultMap" type="com.westangel.common.bean.Doctor" >
+		<id column="doctorId" property="doctorId" jdbcType="BIGINT" />
+		<result column="userId" property="userId" jdbcType="BIGINT" />
+		<result column="uuid" property="uuid"/>
+		<result column="trueName" property="trueName" jdbcType="VARCHAR" />
+		<result column="nickName" property="nickName" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="sex" property="sex" jdbcType="INTEGER" />
+		<result column="birthDate" property="birthDate" jdbcType="TIMESTAMP" />
+		<result column="userPictureUrl" property="userPictureUrl" jdbcType="VARCHAR" />
+		<result column="professionCredence" property="professionCredence" jdbcType="VARCHAR" />
+		<result column="registerCredence" property="registerCredence" jdbcType="VARCHAR" />
+		<result column="professionCredencePicUrl" property="professionCredencePicUrl" jdbcType="VARCHAR" />
+		<result column="registerCredencePicUrl" property="registerCredencePicUrl" jdbcType="VARCHAR" />
+		<result column="isExpert" property="isExpert" jdbcType="INTEGER" />
+		<result column="skills" property="skills" jdbcType="VARCHAR" />
+		<result column="tagIds" property="tagIds" jdbcType="VARCHAR" />
+		<result column="tags" property="tags" jdbcType="VARCHAR" />
+		<result column="positionTitle" property="positionTitle" jdbcType="INTEGER" />
+		<result column="professionalRank" property="professionalRank" jdbcType="INTEGER" />
+		<result column="tel" property="tel" jdbcType="VARCHAR" />
+		<result column="introduction" property="introduction" jdbcType="VARCHAR" />
+		<result column="hospitalId" property="hospitalId" jdbcType="BIGINT"></result>
+		<result column="hospitalName" property="hospitalName" jdbcType="VARCHAR"></result>
+		<result column="auditState" property="auditState" jdbcType="INTEGER" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<sql id="base_column_list" >
+	   t1.doctorId, 
+	   t1.uuid, 
+	   t1.userId, 
+	   t1.trueName, 
+	   t1.nickName, 
+	   t1.mobile, 
+	   t1.sex, 
+	   t1.birthDate, 
+	   t1.userPictureUrl, 
+	   t1.professionCredence, 
+	   t1.registerCredence, 
+	   t1.professionCredencePicUrl,
+	   t1.registerCredencePicUrl, 
+	   t1.isExpert,
+	   t1.skills, 
+	   t1.tagIds,
+	   t1.tags, 
+	   t1.positionTitle, 
+	   t1.professionalRank, 
+	   t1.tel, 
+	   t1.introduction, 
+	   t1.auditState, 
+	   t1.createTime, 
+	   t1.updateTime
+	</sql>
+	
+	<select id="findByUserId" resultMap="baseResultMap">
+	   SELECT
+	   		<include refid="base_column_list" />
+	   FROM user_db.u_doctor t1
+	   where t1.userId=#{userId,jdbcType=BIGINT}
+	</select>
+	
+	<select id="findById" resultMap="baseResultMap">
+	   SELECT
+	   		<include refid="base_column_list" />
+	   	FROM user_db.u_doctor t1
+	   	where t1.doctorId=#{doctorId,jdbcType=BIGINT}
+	</select>
+	 
+	<select id="findByUuid" resultMap="baseResultMap">
+		SELECT
+			<include refid="base_column_list" />
+		FROM user_db.u_doctor t1
+			INNER JOIN user_db.u_user t2 ON t1.userId=t2.userId
+		WHERE t2.uuid=#{uuid,jdbcType=VARCHAR}
+	</select>
+
+	<insert id="insert" parameterType="com.westangel.common.bean.Doctor" >
+	    <selectKey resultType="long" keyProperty="doctorId" order="AFTER" >
+			SELECT LAST_INSERT_ID() as doctorId
+		</selectKey>
+	    insert into user_db.u_doctor(
+	    	userId,
+			uuid,
+			trueName,
+			nickName,
+			mobile,
+			sex,
+			birthDate,
+			userPictureUrl,
+			professionCredence,
+			registerCredence,
+			professionCredencePicUrl,
+			registerCredencePicUrl,
+			isExpert,
+			skills,
+			tagIds,
+			tags,
+			positionTitle,
+			professionalRank,
+			tel,
+			introduction,
+			auditState,
+			createTime,
+			updateTime,
+			syncTime,
+			syncFlag
+		)values(
+	    	#{userId},
+			#{uuid},
+			#{trueName},
+			#{nickName},
+			#{mobile},
+			#{sex},
+			#{birthDate},
+			#{userPictureUrl},
+			#{professionCredence},
+			#{registerCredence},
+			#{professionCredencePicUrl},
+			#{registerCredencePicUrl},
+			#{isExpert},
+			#{skills},
+			#{tagIds},
+			#{tags},
+			#{positionTitle},
+			#{professionalRank},
+			#{tel},
+			#{introduction},
+			#{auditState},
+			#{createTime},
+			#{updateTime},
+			NOW(),
+			#{syncFlag}
+		)
+	  </insert>
+	  
+	  <update id="update" parameterType="com.westangel.common.bean.Doctor">
+		update user_db.u_doctor
+		<set>
+			<if test="userId != null">
+				userId = #{userId,jdbcType=BIGINT},
+			</if>
+			<if test="uuid != null">
+				uuid=#{uuid,jdbcType=VARCHAR},
+			</if>
+			<if test="trueName != null">
+				trueName = #{trueName,jdbcType=VARCHAR},
+			</if>
+			<if test="nickName != null">
+				nickName = #{nickName,jdbcType=VARCHAR},
+			</if>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="sex != null">
+				sex = #{sex,jdbcType=INTEGER},
+			</if>
+			<if test="birthDate != null">
+				birthDate = #{birthDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="userPictureUrl != null">
+				userPictureUrl = #{userPictureUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="professionCredence != null">
+				professionCredence=#{professionCredence,jdbcType=VARCHAR},
+			</if>
+			<if test="registerCredence != null">
+				registerCredence = #{registerCredence,jdbcType=VARCHAR},
+			</if>
+			<if test="professionCredencePicUrl != null">
+				professionCredencePicUrl = #{professionCredencePicUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="registerCredencePicUrl != null">
+				registerCredencePicUrl = #{registerCredencePicUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="isExpert != null">
+				isExpert = #{isExpert,jdbcType=INTEGER},
+			</if>
+			<if test="skills != null">
+				skills = #{skills,jdbcType=VARCHAR},
+			</if>
+			<if test="tagIds != null">
+				tagIds = #{tagIds,jdbcType=VARCHAR},
+			</if>
+			<if test="tags != null">
+				tags = #{tags,jdbcType=VARCHAR},
+			</if>
+			<if test="positionTitle != null">
+				positionTitle = #{positionTitle,jdbcType=INTEGER},
+			</if>
+			<if test="professionalRank != null">
+				professionalRank = #{professionalRank,jdbcType=INTEGER},
+			</if>
+			<if test="tel != null">
+				tel = #{tel,jdbcType=VARCHAR},
+			</if>
+			<if test="introduction != null">
+				introduction = #{introduction,jdbcType=VARCHAR},
+			</if>
+			<if test="auditState != null">
+				auditState = #{auditState,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				createTime = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="syncFlag != null">
+				syncFlag = #{syncFlag, jdbcType=INTEGER},
+			</if>
+			syncTime=NOW(),
+			updateTime=NOW()
+		</set>
+		WHERE doctorId=#{doctorId, jdbcType=BIGINT}
+	</update>
+</mapper>

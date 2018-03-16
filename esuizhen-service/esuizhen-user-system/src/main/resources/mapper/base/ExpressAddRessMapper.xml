@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.ExpressAddressDao">
+	
+	<select id="queryList" resultType="com.esuizhen.cloudservice.user.bean.ExpressAddressReq">
+		SELECT
+			addressId, userId, cityCode, cityAddress, addressDetail, receiptContact, receiptPhone,
+			zipCode, remark, isDefault, createTime, updateTime
+		FROM user_db.u_express_address
+		where userId=#{userId}
+		ORDER BY isDefault DESC ,createTime DESC
+	</select>
+	
+	<select id="queryOne" resultType="com.esuizhen.cloudservice.user.bean.ExpressAddressReq" >
+		SELECT
+			addressId, userId, cityCode, cityAddress, addressDetail, receiptContact, receiptPhone,
+			zipCode, remark, isDefault, createTime, updateTime
+		FROM user_db.u_express_address
+		<where>
+			<if test="addressId!=null">
+				addressId=#{addressId}
+			</if>
+			<if test="userId !=null">
+				AND userId=#{userId}
+			</if>
+			<if test="isDefault!=null">
+				AND isDefault=#{isDefault}
+			</if>
+		</where>
+	</select>
+
+	<insert id="insert" >
+		insert into user_db.u_express_address (addressId, userId, cityCode,
+		  cityAddress, addressDetail, receiptContact,
+		  receiptPhone, zipCode, remark,
+		  isDefault, createTime, updateTime)
+		values (#{addressId}, #{userId}, #{cityCode},
+		  #{cityAddress}, #{addressDetail}, #{receiptContact},
+		  #{receiptPhone}, #{zipCode}, #{remark},
+		  #{isDefault}, now(), now())
+	</insert>
+
+	<update id="update">
+		update user_db.u_express_address
+		<set >
+			<if test="userId != null" >
+				userId = #{userId},
+			</if>
+			<if test="cityCode != null" >
+				cityCode = #{cityCode},
+			</if>
+			<if test="cityAddress != null" >
+				cityAddress = #{cityAddress},
+			</if>
+			<if test="addressDetail != null" >
+				addressDetail = #{addressDetail},
+			</if>
+			<if test="receiptContact != null" >
+				receiptContact = #{receiptContact},
+			</if>
+			<if test="receiptPhone != null" >
+				receiptPhone = #{receiptPhone},
+			</if>
+			<if test="zipCode != null" >
+				zipCode = #{zipCode},
+			</if>
+			<if test="remark != null" >
+				remark = #{remark},
+			</if>
+			<if test="isDefault != null" >
+				isDefault = #{isDefault},
+			</if>
+				updateTime = now()
+		</set>
+		where addressId = #{addressId}
+	</update>
+	
+	<update id="modifyDefaultByUserId">
+		UPDATE user_db.u_express_address
+		set isDefault=0
+		where userId=#{userId}
+	</update>
+
+	<update id="modifyDefaultByCreateTime">
+		UPDATE user_db.u_express_address d,
+			(SELECT addressId FROM user_db.u_express_address
+				where userId=#{userId}
+				ORDER BY createTime DESC Limit 0,1) d1
+		SET d.isDefault=1,d.updateTime = now()
+		where d.addressId=d1.addressId
+	</update>
+
+	<delete id="deleteExpressAddressById">
+		DELETE FROM user_db.u_express_address
+		WHERE addressId=#{addressId}
+		<if test="userId!=null">
+			AND userId=#{userId}
+		</if>
+	</delete>
+
+	<update id="modifyDefaultByCreateTimeNotIn">
+		UPDATE user_db.u_express_address d, (SELECT addressId FROM user_db.u_express_address
+				where userId=#{userId} AND addressId!=#{addressId}
+				ORDER BY createTime DESC Limit 0,1) d1
+		SET d.isDefault=1,d.updateTime = now()
+		where d.addressId=d1.addressId
+
+	</update>
+	
+</mapper>

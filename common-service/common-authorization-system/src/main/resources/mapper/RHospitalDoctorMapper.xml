@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.westangel.commonservice.authorization.dao.RHospitalDoctorDao">
+
+	<select id="find" resultType="com.westangel.common.bean.HospitalDoctor">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM user_db.r_hospital_doctor t1
+		WHERE t1.hospitalId = #{hospitalId} AND t1.doctorId = #{doctorId}
+	</select>
+	
+	<select id="findStaffNo" resultType="java.lang.String">
+		SELECT
+			CONCAT(#{prefix}, COUNT(1) + 1)
+		FROM user_db.r_hospital_doctor t1
+		WHERE POSITION(#{prefix} IN t1.staffNo) = 1
+		<if test="hospitalId != null">
+			AND t1.hospitalId = #{hospitalId}
+		</if>
+	</select>
+	
+	<sql id="base_column_list">
+		t1.id,
+		t1.hospitalId,
+		t1.doctorId,
+		t1.hospitalName,
+		t1.deptId,
+		t1.positionTitle,
+		t1.staffNo,
+		t1.createTime
+	</sql>
+
+	<!-- 新增医生基本信息 -->
+	<insert id="insert" parameterType="com.westangel.common.bean.Doctor">
+		<selectKey resultType="long" keyProperty="id" order="AFTER">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO user_db.r_hospital_doctor(
+			hospitalId,
+			doctorId,
+			deptId, 
+			positionTitle, 
+			staffNo, 
+			createTime
+		)VALUES(
+			#{hospitalId},
+			#{doctorId},
+			#{deptId},
+			#{positionTitle},
+			#{staffNo},
+			NOW()
+		)
+	</insert>
+	
+	<update id="updateByDoctorId">
+		UPDATE user_db.r_hospital_doctor
+		<set>
+			positionTitle = #{positionTitle},
+			deptId = #{deptId},
+			staffNo = #{staffNo}
+		</set>
+		WHERE doctorId = #{doctorId}
+	</update>
+</mapper>

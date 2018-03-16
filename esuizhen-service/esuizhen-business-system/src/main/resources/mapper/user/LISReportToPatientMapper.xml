@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.business.dao.user.LISReportToPatientDao">
+	<resultMap type="com.esuizhen.cloudservice.business.bean.TReportPatientPushBatch" id="reportPushBatchWaitMap">
+		<id column="reportPushBatchId" property="reportPushBatchId"/>
+		<result column="userId" property="userId"/>
+		<result column="patientId" property="patientId"/>
+		<result column="pushState" property="pushState"/>
+		<result column="failCause" property="failCause"/>
+		<result column="pushTime" property="pushTime"/>
+		<result column="pushItemCount" property="pushItemCount"/>
+		<result column="pushCount" property="pushCount"/>
+		<result column="createTime" property="createTime"/>
+		<result column="openId" property="openId"/>
+		<collection column="reportPushBatchId" property="detailList" ofType="com.esuizhen.cloudservice.business.bean.TReportPatientPushBatchDetail">
+			<id column="reportPushItemId" property="reportPushItemId"/>
+			<result column="reportPushBatchId" property="reportPushBatchId"/>
+			<result column="type" property="type"/>
+			<result column="reportId" property="reportId"/>
+			<result column="promptFlag" property="promptFlag"/>
+			<result column="pushItemName" property="pushItemName"/>
+			<result column="itemCheckTime" property="itemCheckTime"/>
+			<result column="reportTime" property="reportTime"/>
+			<result column="applyTime" property="applyTime"/>
+			<result column="sampleTime" property="sampleTime"/>
+			<result column="hospitalId" property="hospitalId"/>
+			<result column="doctorId" property="doctorId"/>
+			<result column="doctorUserId" property="doctorUserId"/>
+			<result column="createTime" property="createTime"/>
+		</collection>
+	</resultMap>
+	<select id="queryWaitPushBatch" resultMap="reportPushBatchWaitMap">
+		SELECT 
+		t1.reportPushBatchId,t1.userId,t1.patientId,t1.pushState,t1.failCause,t1.pushTime,t1.pushItemCount,t1.pushCount,t1.createTime,t3.openId,
+		t2.reportPushItemId,t2.reportPushBatchId,t2.type,t2.reportId,t2.promptFlag,t2.pushItemName,t2.itemCheckTime,t2.reportTime,
+		t2.applyTime,t2.sampleTime,t2.hospitalId,t2.doctorId,t2.doctorUserId
+		FROM lis_realtime_db.ctl_report_push_batch_wait t1 
+		JOIN lis_realtime_db.ctl_report_push_batch_detail_wait t2 ON t1.reportPushBatchId=t2.reportPushBatchId
+		LEFT JOIN user_db.u_thirdparty t3 ON t1.userId = t3.userId
+	</select>
+	
+	<update id="updatePushBatchWait">
+		UPDATE lis_realtime_db.ctl_report_push_batch_wait
+		<set>
+			pushState=#{pushState},
+			failCause=#{failCause},
+			pushTime=#{pushTime},
+			pushItemCount=#{pushItemCount},
+			updateTime=now()
+		</set>
+		WHERE reportPushBatchId=#{reportPushBatchId}
+	</update>
+	
+	<insert id="createPushBatchWaitHistory">
+		INSERT INTO lis_realtime_db.ctl_report_push_batch_history(
+	  		reportPushBatchId,userId,patientId,pushState,failCause,pushTime,pushCount,pushItemCount,createTime,updateTime
+	  	)
+	  	SELECT reportPushBatchId,userId,patientId,pushState,failCause,pushTime,pushCount,pushItemCount,createTime,updateTime
+	  	FROM lis_realtime_db.ctl_report_push_batch_wait
+		<where>
+			<if test="reportPushBatchList!=null">
+				<foreach collection="reportPushBatchList" open="reportPushBatchId IN (" close=")" separator="," item="item">
+					#{item.reportPushBatchId}
+				</foreach>
+			</if>
+		</where>	  	
+	</insert>
+	
+	<insert id="createPushBatchDetailWaitHistory">
+		insert into lis_realtime_db.ctl_report_push_batch_detail_history(
+  			reportPushItemId,reportPushBatchId,type,reportId,promptFlag,pushItemName,itemCheckTime,hospitalId,doctorId,doctorUserId,reportTime,applyTime,sampleTime,createTime,updateTime
+	  	)
+	  	SELECT reportPushItemId,reportPushBatchId,type,reportId,promptFlag,pushItemName,itemCheckTime,hospitalId,doctorId,doctorUserId,reportTime,applyTime,sampleTime,createTime,updateTime
+	  	FROM lis_realtime_db.ctl_report_push_batch_detail_wait
+		<where>
+			<if test="reportPushBatchList!=null">
+				<foreach collection="reportPushBatchList" open="reportPushBatchId IN (" close=")" separator="," item="item">
+					#{item.reportPushBatchId}
+				</foreach>
+			</if>
+		</where>	
+	</insert>
+	
+	<delete id="deletePushBatchWait">
+		DELETE t2.*,t1.* FROM lis_realtime_db.ctl_report_push_batch_wait t1 
+		LEFT JOIN lis_realtime_db.ctl_report_push_batch_detail_wait t2 ON t1.reportPushBatchId=t2.reportPushBatchId
+		<where>
+			t1.pushState=1 OR t1.pushCount>=3
+		</where>
+	</delete>
+</mapper>

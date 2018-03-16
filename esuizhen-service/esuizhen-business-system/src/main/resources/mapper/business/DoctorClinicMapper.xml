@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.business.dao.business.DoctorClinicDao">
+	<!-- 医生出诊时间信息 -->
+	<resultMap id="doctorClinicInfoResultMap"
+		type="com.esuizhen.cloudservice.business.bean.TDoctorClinicInfo">
+		<result property="introduction" column="clinicIntroduction" />
+		<result property="updateTime" column="updateTime" />
+		<collection property="dataList" ofType="com.esuizhen.cloudservice.business.bean.TDoctorClinicScheduleInfo">
+			<result property="clinicDay" column="clinicDay" />
+			<result property="moningSchedule" column="moningSchedule" />
+			<result property="moningLimit" column="moningLimit" />
+			<result property="afternoonSchedule" column="afternoonSchedule" />
+			<result property="afternoonLimit" column="afternoonLimit" />
+			<result property="eveningSchedule" column="eveningSchedule" />
+			<result property="eveningLimit" column="eveningLimit" />
+		</collection>
+	</resultMap>
+	<!-- 创建医生出诊时间 -->
+	<insert id="createDoctorClinicSchedule">
+		INSERT INTO
+		s_doctor_clinic_schedule(doctorId,doctorUserId,hospitalId,clinicDay,moningSchedule,moningLimit,moningSet,afternoonSchedule,afternoonLimit,afternoonSet,eveningSchedule,eveningLimit,eveningSet,createTime,updateTime)
+		VALUES(#{doctorId},#{doctorUserId},#{hospitalId},#{clinicDay},#{moningSchedule},#{moningLimit},#{moningSet},#{afternoonSchedule},#{afternoonLimit},#{afternoonSet},#{eveningSchedule},#{eveningLimit},#{eveningSet},NOW(),NOW())
+		ON DUPLICATE KEY UPDATE
+		moningSchedule=VALUES(moningSchedule),
+		moningSet=VALUES(moningSet),
+		afternoonSchedule=VALUES(afternoonSchedule),
+		afternoonSet=VALUES(afternoonSet),
+		eveningSchedule=VALUES(eveningSchedule),
+		eveningSet=VALUES(eveningSet),
+		updateTime=NOW()
+	</insert>
+	
+	
+	<!-- 查询医生出诊详细信息 -->
+	<select id="queryDoctorClinicScheduleInfo" resultMap="doctorClinicInfoResultMap">
+		SELECT
+		rd.updateTime,
+		rd.clinicIntroduction,
+		clinicDay,
+		moningSchedule,
+		moningLimit,
+		afternoonSchedule,
+		afternoonLimit,
+		eveningSchedule,
+		eveningLimit
+		FROM
+		s_registering_doctors rd,
+		s_doctor_clinic_schedule dcs
+		WHERE
+		rd.doctorId = dcs.doctorId
+		AND dcs.doctorId = #{doctorId}
+	</select>
+	
+	<!-- 查询医生出诊简要信息  -->
+	<select id="queryDoctorClinicScheduleSampleInfo" resultType="com.esuizhen.cloudservice.business.bean.TDoctorClinicInfo">
+		SELECT clinicIntroduction introduction,updateTime FROM s_registering_doctors WHERE doctorId=#{doctorId}
+	</select>
+	
+	
+	<!-- 获取医生预约挂号信息 -->
+	<select id="getDoctorClinicUsage" resultType="com.esuizhen.cloudservice.business.bean.TDoctorClinicScheduleInfo">
+		SELECT t1.*,
+		IFNULL(t2.moningUsage,0) moningUsage,
+		IFNULL(t2.afternoonUsage,0) afternoonUsage,
+		IFNULL(t2.eveningUsage,0) eveningUsage
+		FROM(
+		SELECT
+					subdate(curdate(),date_format(curdate(),'%w')-clinicDay-7*#{week}) clinicDate,
+					t1.doctorId,
+					t1.doctorUserId,
+					clinicDay,
+					moningSchedule,
+					moningLimit,
+					moningSet,
+					afternoonSchedule,
+					afternoonLimit,
+					afternoonSet,
+					eveningSchedule,
+					eveningLimit,
+					eveningSet,
+					${week} 'week'
+					FROM
+						hds_db.s_doctor_clinic_schedule t1
+		<where>
+			<if test="doctorUserId!=null">
+				AND doctorUserId=#{doctorUserId}
+			</if>
+			<if test="doctorId!=null">
+				AND doctorId=#{doctorId}
+			</if>
+			<if test="clinicDay!=null">
+				AND clinicDay = #{clinicDay}
+			</if>
+		</where>
+		)t1
+		LEFT JOIN hds_db.s_doctor_clinic_usage t2 
+		ON t1.doctorId=t2.doctorId AND t2.clinicDate=t1.clinicDate
+		ORDER BY t1.clinicDay
+	</select>
+	
+	<!-- 创建医生门诊 -->
+	<insert id="createRegisterDoctor">
+		INSERT INTO hds_db.s_registering_doctors (
+			doctorId,
+			doctorUserId,
+			hospitalId,
+			registeringFlag,
+			createTime
+		)
+		VALUES
+			(#{doctorId},#{doctorUserId},#{hospitalId},#{registeringFlag},NOW())
+	</insert>
+	<!-- 修改医生门诊信息 -->
+	<update id="modifyRegisteringDoctor">
+		UPDATE s_registering_doctors
+		<set>
+			clinicIntroduction = #{introduction},
+			updateTime = NOW()
+		</set>
+		WHERE doctorId=#{doctorId}
+	</update>
+	
+	
+	<!-- 获取医生加号项  -->
+	<select id="queryDoctorClinicScheduleByUsage" resultType="com.esuizhen.cloudservice.business.bean.TDoctorClinicScheduleInfo">
+		SELECT
+			*
+		FROM
+			hds_db.s_doctor_clinic_schedule
+		<where>
+			<if test="doctorUserId!=null">
+				AND doctorUserId=#{doctorUserId}
+			</if>
+			<if test="doctorId!=null">
+				AND doctorId=#{doctorId}
+			</if>
+			<if test="clinicDay!=null">
+				AND clinicDay = #{clinicDay}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 添加预约加号项信息 -->
+	<insert id="createDoctorClinicScheduleUsage">
+		INSERT INTO hds_db.s_doctor_clinic_usage (
+			clinicUsageId,
+			doctorUserId,
+			doctorId,
+			clinicDate,
+			clinicDay,
+			week,
+			year,
+			moningUsage,
+			afternoonUsage,
+			eveningUsage,
+			createTime,
+			updateTime
+		)
+		VALUES
+			(#{id},#{doctorUserId},#{doctorId},#{clinicDate},#{clinicDay},WEEK(#{clinicDate}),YEAR(#{clinicDate})
+			,#{moningUsage},#{afternoonUsage},#{eveningUsage},NOW(),NOW())
+		ON DUPLICATE KEY UPDATE
+		moningUsage=VALUES(moningUsage),
+		afternoonUsage=VALUES(afternoonUsage),
+		eveningUsage=VALUES(eveningUsage),
+		updateTime=now()
+	</insert>
+	
+	<!-- 添加预约加号患者信息 -->
+	<insert id="createDoctorClinicPatientUsage">
+		INSERT INTO hds_db.s_doctor_clinic_patient_usage (
+			clinicUsageId,
+			doctorUserId,
+			patientUserId,
+			doctorId,
+			patientId,
+			clinicDate,
+			clinicTime,
+			createTime
+		)
+		VALUES
+			(#{id},#{doctorUserId},#{patientUserId},#{doctorId},#{patientId},#{clinicDate},#{clinicTime},NOW())
+	</insert>
+	
+	<!-- 修改预约加号信息 -->
+	<update id="modifyDoctorClinicScheduleUsage">
+		UPDATE hds_db.s_doctor_clinic_usage
+			<set>
+				updateTime = NOW()
+				<if test="moningUsage!=null">
+					,moningUsage =#{moningUsage}
+				</if>
+				<if test="afternoonUsage!=null">
+					,afternoonUsage =#{afternoonUsage}
+				</if>
+				<if test="eveningUsage!=null">
+					,eveningUsage =#{eveningUsage}
+				</if>
+			</set>
+			<where>
+				<if test="doctorUserId!=null">
+					AND doctorUserId =#{doctorUserId}
+				</if>
+				<if test="doctorId!=null">
+					AND doctorId =#{doctorId}
+				</if>
+				<if test="clinicDate!=null">
+					AND clinicDate=#{clinicDate}
+				</if>
+			</where>
+	</update>
+	
+	<!-- 查找预约加号门诊信息 -->
+	<select id="getDoctorClinicUsageId" resultType="java.lang.String">
+			SELECT
+				clinicUsageId
+			FROM
+				hds_db.s_doctor_clinic_usage
+			WHERE
+				doctorId =#{doctorId}
+			<if test="clinicDate!=null">
+				AND clinicDate = #{clinicDate}
+			</if>
+	</select>
+	
+	<!-- 修改预约加号信息 -->
+	<update id="updateDoctorClinicScheduleUsageById">
+		UPDATE
+		(SELECT t1.clinicUsageId,
+		COUNT(IF(clinicTime=0 AND usageFlag=1,1,NULL)) moningUsage,
+		COUNT(IF(clinicTime=1 AND usageFlag=1,1,NULL)) afternoonUsage,
+		COUNT(IF(clinicTime=2 AND usageFlag=1,1,NULL)) eveningUsage
+		FROM hds_db.s_doctor_clinic_patient_usage t1
+		WHERE t1.clinicUsageId=#{id})t1
+		JOIN hds_db.s_doctor_clinic_usage t2 ON t1.clinicUsageId=t2.clinicUsageId
+		SET t2.moningUsage=t1.moningUsage,t2.afternoonUsage=t1.afternoonUsage,t2.eveningUsage=t1.eveningUsage
+	</update>
+	
+	<!-- 删除患者门诊加号信息 -->
+	<update id="deleteDoctorClinicPatientUsageById">
+		UPDATE
+			hds_db.s_doctor_clinic_patient_usage
+		<set>
+			usageFlag=0,updateTime=NOW()
+		</set>
+		<where>
+			<if test="id!=null">
+				AND clinicUsageId = #{id}
+			</if>
+			<if test="patientUserId!=null">
+				AND patientUserId = #{patientUserId}
+			</if>
+			<if test="patientId!=null">
+				AND patientId=#{patientId}
+			</if>
+			<if test="doctorId!=null">
+				AND doctorId=#{doctorId}
+			</if>
+			<if test="clinicDate!=null">
+				AND clinicDate=#{clinicDate}
+			</if>
+			<if test="clinicTime!=null">
+				AND clinicTime = #{clinicTime}
+			</if>
+		</where>
+	</update>
+	
+	<!-- 查询患者门诊加号信息 -->
+	<select id="queryDoctorClinicPatientUsageById" resultType="java.lang.String">
+		SELECT
+			clinicUsageId
+		FROM
+			hds_db.s_doctor_clinic_patient_usage
+		<where>
+		<if test="patientUserId!=null">
+			AND patientUserId =#{patientUserId}
+		</if>
+		<if test="doctorUserId!=null">
+			AND doctorUserId = #{doctorUserId}
+		</if>
+		<if test="patientId!=null">
+			AND patientId =#{patientId}
+		</if>
+		<if test="doctorUserId!=null">
+			AND doctorId = #{doctorId}
+		</if>
+		<if test="clinicDate!=null">
+			AND clinicDate = #{clinicDate}
+		</if>
+		<if test="clinicTime!=null">
+			AND clinicTime = #{clinicTime}
+		</if>
+			AND usageFlag=1
+		</where>
+	</select>
+	
+</mapper>

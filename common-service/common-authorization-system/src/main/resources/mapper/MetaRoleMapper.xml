@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.westangel.commonservice.authorization.dao.MetaRoleDao">
+	<select id="findUserRoleValue" resultType="java.lang.Integer">
+		<![CDATA[
+			SELECT
+				CASE WHEN MAX(t1.userRole) < 100 THEN 100
+				ELSE MAX(t1.userRole) + 1 END userRole
+			FROM user_db.meta_role t1
+		]]>
+	</select>
+
+	<select id="findRoleNameCount" resultType="java.lang.Integer">
+		SELECT COUNT(0) FROM user_db.meta_role t1
+		WHERE t1.roleName = #{roleName}
+	</select>
+
+	<select id="findAll" resultType="com.westangel.common.bean.authorization.MetaRole">
+		SELECT
+			<include refid="base_column_list"></include>,
+			(SELECT CASE WHEN 12 > t1.userRole OR COUNT(0) > 0 THEN 0 ELSE 1 END FROM user_db.r_user_role r1 WHERE r1.userRole = t1.userRole) allowDeleteFlag
+		FROM user_db.meta_role t1
+		<if test="userId != null">
+			INNER JOIN user_db.r_user_role t2 ON t1.userRole = t2.userRole
+		</if>
+		WHERE 1=1
+		<choose>
+			<when test="userId != null">
+				AND t2.userId = #{userId}
+			</when>
+			<otherwise>
+				AND t1.roleType != 2
+			</otherwise>
+		</choose>
+	</select>
+	
+	<sql id="base_column_list">
+		t1.userRole,
+		t1.roleName,
+		t1.roleType,
+		t1.remark
+	</sql>
+	
+	<insert id="insert">
+		INSERT INTO user_db.meta_role(
+			userRole,
+			roleName,
+			roleType,
+			deptId,
+			remark
+		)VALUES(
+			#{userRole},
+			#{roleName},
+			#{roleType},
+			#{deptId},
+			#{remark}
+		);
+	</insert>
+	
+	<delete id="delete">
+		DELETE FROM user_db.meta_role
+		WHERE userRole = #{userRole}
+	</delete>
+</mapper>

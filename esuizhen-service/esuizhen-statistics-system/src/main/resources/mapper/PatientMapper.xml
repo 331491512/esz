@@ -1,0 +1,541 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.statistics.dao.PatientDao">
+	<sql id="join_data_privilege">
+	  	<choose>
+			<!-- 数据权限1全院查询 -->
+			<when test="dataId!=null and dataId==1 and operator!=null">
+				select dp.patientId from user_db.r_doctor_patient dp where dp.doctorId=#{operator}
+				UNION
+				select hp.patientId from user_db.r_hospital_doctor hd join user_db.r_hospital_patient hp on hd.doctorId=#{operator} AND hd.hospitalId=hp.hospitalId
+			</when>
+			<!-- 数据权限4查询本医生 -->
+			<when test="dataId!=null and dataId==4 and operator!=null">
+				select t1.patientId from user_db.r_doctor_patient t1 where t1.doctorId=#{operator}
+			</when>
+			<!-- 云端默认查询本医生 -->
+			<when test="deployLocation != null and deployLocation==2 and operator!=null">
+					select t1.patientId from user_db.r_doctor_patient t1
+				LEFT JOIN user_db.r_doctor t2 ON t1.doctorId = t2.doctorId AND t2.state = 1
+				where 1
+				<choose>
+					<when test="doctorLevel != null and doctorLevel==1">
+						AND t2.deanDoctorId=#{operator}
+					</when>
+					<when test="doctorLevel != null and doctorLevel==2">
+						AND t2.deptDoctorId=#{operator}
+					</when>
+					<when test="doctorLevel != null and doctorLevel==21">
+						AND t2.deptSecDoctorId=#{operator}
+					</when>
+					<when test="doctorLevel != null and doctorLevel==3">
+						AND t2.directorDoctorId=#{operator}
+					</when>
+					<when test="doctorLevel != null and doctorLevel==4">
+						AND t2.inchargeDoctorId=#{operator}
+					</when>
+					<otherwise>
+						AND t1.doctorId=#{operator}
+					</otherwise>
+				</choose>
+				GROUP BY t1.patientId
+				<if test="doctorLevel != null and doctorLevel==1">
+				UNION
+					SELECT
+						t1.patientId
+					FROM
+						user_db.r_hospital_patient t1
+					JOIN user_db.r_hospital_doctor t2 ON t1.hospitalId = t2.hospitalId
+					WHERE
+						t2.doctorId = #{operator}
+					GROUP BY t1.patientId
+				</if>
+			</when>
+		</choose>
+	</sql>
+	 
+	<!-- 患者总数统计 -->
+	<select id="statisticsTotalPatient" resultType="java.util.LinkedHashMap">
+		select count(0) totalCount
+		from user_db.u_patient t1
+		
+		<!-- 权限控制 add by zhuguo -->
+		<if test="powerSql!=null">
+			JOIN (
+				${powerSql}
+			) a ON a.patientId = t1.patientId
+		</if>
+		
+		<!-- <if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+			JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId 
+			<choose>
+				<when test="operator!=null and (deployLocation != null and deployLocation==2)">
+					<choose>
+						<when test="userRole != null and (userRole == 55 or userRole == 56)"></when>
+						<otherwise>
+							JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId
+						</otherwise>
+					</choose>
+				</when>
+				<otherwise>
+					JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId
+				</otherwise>
+			</choose>
+		</if>-->
+		<include refid="patient_state_statistics_where_condition"/>
+	</select>
+	
+	<!-- 肿瘤患者数统计 -->
+	<select id="statisticsTumorPatient" resultType="java.util.LinkedHashMap">
+		SELECT 
+		COUNT(CASE WHEN t1.sourceTumorFlag=0 THEN 1 END) benignTumorCount,
+		COUNT(CASE WHEN t1.sourceTumorFlag=1 THEN 1 END) malignantTumorCount,
+		COUNT(CASE WHEN t1.sourceTumorFlag=-1 THEN 1 END) dynamicUncertainCount,
+		COUNT(CASE WHEN t1.sourceTumorFlag=-2 OR t1.sourceDiseaseTypeId IS NULL THEN 1 END) unknowTumorCount,
+		COUNT(CASE WHEN t1.sourceTumorFlag=-3 THEN 1 END) nonTumorCount
+		FROM user_db.u_patient t1 
+		
+		<!-- 权限控制 add by zhuguo -->
+		<if test="powerSql!=null">
+			JOIN (
+				${powerSql}
+			) a ON a.patientId = t1.patientId
+		</if>
+		
+		<!-- <if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+			 JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId 
+			<choose>
+				<when test="operator!=null and (deployLocation != null and deployLocation==2)">
+					<choose>
+						<when test="userRole != null and (userRole == 55 or userRole == 56)"></when>
+						<otherwise>
+							JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId
+						</otherwise>
+					</choose>
+				</when>
+				<otherwise>
+					JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId
+				</otherwise>
+			</choose>
+		</if>-->
+		<include refid="patient_state_statistics_where_condition"/>
+	</select>
+	
+	<!-- 任务患者数统计 -->
+	<select id="statisticsTaskPatient" resultType="java.util.LinkedHashMap">
+		SELECT COUNT(1) taskCount,
+			COUNT(CASE WHEN v.type=1 THEN 1 END) effectiveFollowupCount,
+			COUNT(CASE WHEN v.type=2 THEN 1 END) invalidFollowupCount,
+			COUNT(CASE WHEN v.type is null THEN 1 END) notFollowupCount
+		FROM followup_db.followup_task t 
+		LEFT JOIN followup_db.r_followup_task_patient p ON(p.followupTaskId=t.followupTaskId)
+		LEFT JOIN followup_db.followup_result f ON f.followupTaskId=p.followupTaskId AND f.patientId=p.patientId
+		LEFT JOIN followup_db.meta_followup_result_value v ON f.followupResultValue = v.followupResultValueId
+		JOIN user_db.u_patient t1 ON p.patientId=t1.patientId
+		
+		<!-- 权限控制 add by zhuguo -->
+		<if test="powerSql!=null">
+			JOIN (
+				${powerSql}
+			) a ON a.patientId = t1.patientId
+		</if>
+		<!-- 
+		<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+			JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId
+		</if> -->
+		WHERE t.state IN (0,1) and p.mergeFlag!=2
+		<if test="operator!=null and ((dataId!=null and dataId==4) or (deployLocation != null and deployLocation==2))">
+			 AND t.creator=#{operator}
+		</if>
+		<if test="hospitalId != null">
+  			AND t1.patientId IN(
+				SELECT t2.patientId FROM user_db.r_hospital_patient t2 WHERE t2.hospitalId=#{hospitalId}
+			)
+  		</if>
+	</select>
+	
+	<!-- 失访患者数统计 -->
+	<select id="statisticsLostFollowupPatient" resultType="java.util.LinkedHashMap">
+		select count(0) lostFollowupCount
+		from user_db.u_patient t1 
+		
+		<!-- 权限控制 add by zhuguo -->
+		<if test="powerSql!=null">
+			JOIN (
+				${powerSql}
+			) a ON a.patientId = t1.patientId
+		</if>
+		
+		<!--<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+			 JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId 
+			<choose>
+				<when test="operator!=null and (deployLocation != null and deployLocation==2)">
+					<choose>
+						<when test="userRole != null and userRole == 55"></when>
+						<otherwise>
+							JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId
+						</otherwise>
+					</choose>
+				</when>
+				<otherwise>
+					JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId
+				</otherwise>
+			</choose>
+		</if>-->
+		where  <if test="outPatientFlag != null">t1.outPatientFlag=#{outPatientFlag}  AND </if> t1.patientType=1 AND t1.followupFlag=2 AND t1.mergeFlag!=2
+	</select>
+	
+	<!-- 疑似重复患者数统计 -->
+	<select id="statisticsSimilarPatient" resultType="java.util.LinkedHashMap">
+		SELECT
+			COUNT(0) similarCount
+		FROM
+			user_db.uuid_patient_merge t2
+		JOIN user_db.u_patient t1 ON t1.patientId = t2.patientId
+		
+		<!-- 权限控制 add by zhuguo -->
+		<if test="powerSql!=null">
+			JOIN (
+				${powerSql}
+			) a ON a.patientId = t1.patientId
+		</if>
+		
+		<!--<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+			 JOIN (<include refid="join_data_privilege"></include>) t3 ON t1.patientId=t3.patientId 
+			<choose>
+				<when test="operator!=null and (deployLocation != null and deployLocation==2)">
+					<choose>
+						<when test="userRole != null and userRole == 55"></when>
+						<otherwise>
+							JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId
+						</otherwise>
+					</choose>
+				</when>
+				<otherwise>
+					JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId
+				</otherwise>
+			</choose>
+		</if>-->
+		WHERE
+			 <if test="outPatientFlag != null">t1.outPatientFlag=#{outPatientFlag}  AND </if> t2.repeatflag = 1 AND t1.patientType=1 AND t1.mergeFlag!=2
+	</select>
+	
+	<!-- 数据质量分析 -->
+	<select id="statisticsFaultPatient" resultType="java.util.LinkedHashMap">
+		SELECT
+			<!-- COUNT(
+				CASE
+				WHEN t.trueNameDataFlag in (0,-1) 
+				OR t.IdentificationDataFlag in (0,-1)
+				OR t.diseaseCodeDataFlag in (0,-1)
+				OR t.contactDataFlag in (0,-1)
+				OR t.patientNoDataFlag = 0
+				OR t.diagnosisDataFlag = 0
+				OR t.diseaseTypeDataFlag = 0
+				THEN
+					t.patientId
+				END
+			) faultCount, -->
+			COUNT(
+				CASE
+				WHEN t1.trueNameDataFlag = 0
+				OR t1.IdentificationDataFlag = 0
+				OR t1.diseaseCodeDataFlag = 0
+				OR t1.contactDataFlag = 0
+				OR t1.patientNoDataFlag = 0
+				OR t1.diagnosisDataFlag = 0
+				OR t1.diseaseTypeDataFlag = 0 
+				THEN
+					t1.patientId
+				END
+			) missingCount,
+			COUNT(
+				CASE
+				WHEN t1.trueNameDataFlag =-1 
+				OR t1.IdentificationDataFlag =-1
+				OR t1.diseaseCodeDataFlag =-1
+				OR t1.contactDataFlag =-1
+				THEN
+					t1.patientId
+				END
+			) invalidCount
+		FROM
+			user_db.u_patient t1
+			
+			<!-- 权限控制 add by zhuguo -->
+			<if test="powerSql!=null">
+				JOIN (
+					${powerSql}
+				) a ON a.patientId = t1.patientId
+			</if>
+			
+			<!--<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+				 JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId 
+				<choose>
+				<when test="operator!=null and (deployLocation != null and deployLocation==2)">
+					<choose>
+						<when test="userRole != null and userRole == 55"></when>
+						<otherwise>
+							JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId
+						</otherwise>
+					</choose>
+				</when>
+				<otherwise>
+					JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId
+				</otherwise>
+			</choose>
+			</if>-->
+		WHERE
+			 <if test="outPatientFlag != null">t1.outPatientFlag=#{outPatientFlag}  AND </if> t1.patientType=1 AND t1.mergeFlag!=2
+	</select>
+	
+	<!-- 263 新增功能 add by yuanwenming start -->
+	<sql id="patient_state_statistics_where_condition">
+		<where>
+			<if test="outPatientFlag != null">t1.outPatientFlag=#{outPatientFlag}  AND </if> t1.patientType=1 AND t1.mergeFlag!=2
+			<if test="tumorFlag != null">
+				AND t1.sourceTumorFlag IN 
+				<foreach collection="tumorFlag" item="item" open="(" close=")" separator=",">
+					#{item}
+				</foreach>
+			</if>
+			<if test="hospitalId != null">
+	  			AND t1.patientId IN(
+					SELECT t2.patientId FROM user_db.r_hospital_patient t2 WHERE t2.hospitalId=#{hospitalId}
+				)
+	  		</if>
+		</where>
+	</sql>
+	<select id="statisticsTumorStatusPatient" resultType="java.util.LinkedHashMap">
+		SELECT v2.*,ROUND((v2.cancerCount/v2.totalNum)*100,2) cancerPercent FROM(
+			SELECT 
+				v1.*,
+				CASE 
+					WHEN v1.sourceTumorFlag=1 THEN '良性' 
+					WHEN v1.sourceTumorFlag=2 THEN '恶性' 
+					WHEN v1.sourceTumorFlag=3 THEN '动态未定' 
+					WHEN v1.sourceTumorFlag=4 THEN '未知' 
+					WHEN v1.sourceTumorFlag=5 THEN '非肿瘤' 
+				END cancerName,
+				COUNT(*) cancerCount
+			FROM(
+				SELECT 
+					CASE 
+						WHEN t1.sourceTumorFlag=0 THEN 1
+						WHEN t1.sourceTumorFlag=1 THEN 2
+						WHEN t1.sourceTumorFlag=-1 THEN 3
+						WHEN t1.sourceTumorFlag=-2 OR t1.sourceTumorFlag IS NULL THEN 4
+						WHEN t1.sourceTumorFlag=-3 THEN 5
+					END sourceTumorFlag,
+					(SELECT COUNT(*) FROM user_db.u_patient t1 
+					<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+						JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId
+					</if>
+					 <include refid="patient_state_statistics_where_condition"/>)totalNum
+				FROM user_db.u_patient t1
+				<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+					JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId
+				</if>
+				<include refid="patient_state_statistics_where_condition"/>
+			) v1 GROUP BY v1.sourceTumorFlag ORDER BY cancerCount DESC
+		) v2
+	</select>
+	<select id="statisticsTumourPartPatient" resultType="java.util.LinkedHashMap">
+		SELECT v1.*,ROUND((v1.cancerCount/v1.totalNum)*100,2) cancerPercent FROM(
+			SELECT 
+				IFNULL(t3.deseaseBodyPartName,'未知') cancerName,
+				COUNT(*) cancerCount,
+				(SELECT COUNT(*) FROM user_db.u_patient t1 
+				<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+					JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId 
+				</if>
+				<include refid="patient_state_statistics_where_condition"/>) totalNum
+			FROM user_db.u_patient t1
+			LEFT JOIN ehr_db.meta_c_disease_type t2 ON t1.sourceDiseaseTypeId=t2.diseaseTypeId
+			LEFT JOIN ehr_db.meta_e_disease_body_part t3 ON t2.diseaseBodyPartId=t3.deseaseBodyPartId
+			<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+				JOIN (<include refid="join_data_privilege"></include>) t4 ON t1.patientId=t4.patientId
+			</if>
+			<include refid="patient_state_statistics_where_condition"/>
+			GROUP BY t3.deseaseBodyPartId ORDER BY cancerCount DESC
+		) v1
+	</select>
+	<select id="statisticsDiseaseTypePatient" resultType="java.util.LinkedHashMap">
+		SELECT v1.*,ROUND((v1.cancerCount/v1.totalNum)*100,2) cancerPercent FROM(
+			SELECT 
+				IFNULL(t2.diseaseTypeName,'未知') cancerName,
+				COUNT(*) cancerCount,
+				(SELECT COUNT(*) FROM user_db.u_patient t1 
+				<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+					JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId 
+				</if>
+				<include refid="patient_state_statistics_where_condition"/>) totalNum
+			FROM user_db.u_patient t1
+			LEFT JOIN ehr_db.meta_c_disease_type t2 ON t1.sourceDiseaseTypeId=t2.diseaseTypeId
+			<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+				JOIN (<include refid="join_data_privilege"></include>) t3 ON t1.patientId=t3.patientId
+			</if>
+			<include refid="patient_state_statistics_where_condition"/>
+			GROUP BY t1.sourceDiseaseTypeId ORDER BY cancerCount DESC
+		) v1
+	</select>
+	<select id="statisticsDepartmentPatient" resultType="java.util.LinkedHashMap">
+		SELECT v1.*,ROUND((v1.cancerCount/v1.totalNum)*100,2) cancerPercent FROM(
+			SELECT 
+				IFNULL(t3.deptName,'未知') cancerName,
+				COUNT(*) cancerCount,
+				(
+				SELECT COUNT(*) FROM user_db.u_patient v2 
+				JOIN ehr_db.ei_inhospital_note v3 ON v2.patientId=v3.patientId 
+				<if test="inhospitalTimes != null">
+					<if test="inhospitalTimes == 1">
+						AND v3.inhospitalTimes=1
+					</if>
+					<if test="inhospitalTimes == 2">
+						AND v3.inhospitalLastTime=1
+					</if>
+				</if>
+				<if test="deptTypeId != null">
+					<if test="deptTypeId == 1">
+						AND v3.inhospitalDeptId IS NOT NULL
+					</if>
+					<if test="deptTypeId == 2">
+						AND v3.outhospitalDeptId IS NOT NULL
+					</if>
+				</if>
+				WHERE <if test="outPatientFlag != null">v2.outPatientFlag=#{outPatientFlag}  AND </if> v2.patientType=1  AND v2.mergeFlag!=2
+				<if test="tumorFlag != null">
+					AND v2.sourceTumorFlag IN 
+					<foreach collection="tumorFlag" item="item" open="(" close=")" separator=",">
+						#{item}
+					</foreach>
+				</if>
+				) totalNum
+			FROM user_db.u_patient t1
+			JOIN ehr_db.ei_inhospital_note t2 ON t1.patientId=t2.patientId
+			<if test="inhospitalTimes != null">
+				<if test="inhospitalTimes == 1">
+					AND t2.inhospitalTimes=1
+				</if>
+				<if test="inhospitalTimes == 2">
+					AND t2.inhospitalLastTime=1
+				</if>
+			</if>
+			<if test="deptTypeId != null">
+				<if test="deptTypeId == 1">
+					AND t2.inhospitalDeptId IS NOT NULL
+				</if>
+				<if test="deptTypeId == 2">
+					AND t2.outhospitalDeptId IS NOT NULL
+				</if>
+			</if>
+			<!-- 左连接科室 -->
+			<if test="deptTypeId != null">
+				<if test="deptTypeId == 1">
+					LEFT JOIN user_db.u_department t3 ON t2.inhospitalDeptId=t3.deptId
+				</if>
+				<if test="deptTypeId == 2">
+					LEFT JOIN user_db.u_department t3 ON t2.outhospitalDeptId=t3.deptId
+				</if>
+			</if>
+			WHERE  <if test="outPatientFlag != null">t1.outPatientFlag=#{outPatientFlag}  AND </if> t1.patientType=1 AND t1.mergeFlag!=2
+			<if test="tumorFlag != null">
+				AND t1.sourceTumorFlag IN 
+				<foreach collection="tumorFlag" item="item" open="(" close=")" separator=",">
+					#{item}
+				</foreach>
+			</if>
+			GROUP BY t3.deptId ORDER BY cancerCount DESC
+		) v1
+	</select>
+	<select id="statisticsAreaPatient" resultType="java.util.LinkedHashMap">
+		SELECT v1.*,ROUND((v1.cancerCount/v1.totalNum)*100,2) cancerPercent FROM(
+			SELECT 
+				IFNULL(t3.cityName,'未知') cancerName,
+				COUNT(*) cancerCount,
+				(SELECT COUNT(*) FROM user_db.u_patient t1 
+				<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+					JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId 
+				</if>
+				JOIN user_db.u_user v3 ON t1.userId=v3.userId <include refid="patient_state_statistics_where_condition"/>) totalNum
+			FROM user_db.u_patient t1
+			<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+				JOIN (<include refid="join_data_privilege"></include>) t4 ON t1.patientId=t4.patientId
+			</if>
+			JOIN user_db.u_user t2 ON t1.userId=t2.userId
+			LEFT JOIN user_db.meta_city t3 ON t2.birthPlaceCode=t3.cityCode
+			<include refid="patient_state_statistics_where_condition"/>
+			GROUP BY t2.birthPlaceCode ORDER BY cancerCount DESC
+		) v1
+	</select>
+	<select id="statisticsAgePatient" resultType="java.util.LinkedHashMap">
+		SELECT v3.*,ROUND((v3.cancerCount/v3.totalNum)*100,2) cancerPercent FROM (
+			SELECT 
+				CASE
+					WHEN v1.age=1 THEN '10岁及以下'
+					WHEN v1.age=2 THEN '11-20岁'
+					WHEN v1.age=3 THEN '21-30岁'
+					WHEN v1.age=4 THEN '31-40岁'
+					WHEN v1.age=5 THEN '41-50岁'
+					WHEN v1.age=6 THEN '51-60岁'
+					WHEN v1.age=7 THEN '61-70岁'
+					WHEN v1.age=8 THEN '71-80岁'
+					WHEN v1.age=9 THEN '81-90岁'
+					WHEN v1.age=10 THEN '91-100岁'
+					WHEN v1.age=11 THEN '100岁以上'
+					ELSE '未知' 
+				END cancerName,
+				COUNT(*) cancerCount,
+				(SELECT COUNT(*) FROM user_db.u_patient t1 
+				<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+					JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId
+				</if>
+				<include refid="patient_state_statistics_where_condition"/>) totalNum
+			FROM (
+				SELECT
+						CASE 
+						WHEN (YEAR(NOW())-YEAR(t1.birthDate)) <![CDATA[<=]]> 10 THEN 1 
+						WHEN (YEAR(NOW())-YEAR(t1.birthDate)) BETWEEN 11 AND 20 THEN 2
+						WHEN (YEAR(NOW())-YEAR(t1.birthDate)) BETWEEN 21 AND 30 THEN 3
+						WHEN (YEAR(NOW())-YEAR(t1.birthDate)) BETWEEN 31 AND 40 THEN 4
+						WHEN (YEAR(NOW())-YEAR(t1.birthDate)) BETWEEN 41 AND 50 THEN 5
+						WHEN (YEAR(NOW())-YEAR(t1.birthDate)) BETWEEN 51 AND 60 THEN 6
+						WHEN (YEAR(NOW())-YEAR(t1.birthDate)) BETWEEN 61 AND 70 THEN 7
+						WHEN (YEAR(NOW())-YEAR(t1.birthDate)) BETWEEN 71 AND 80 THEN 8
+						WHEN (YEAR(NOW())-YEAR(t1.birthDate)) BETWEEN 81 AND 90 THEN 9
+						WHEN (YEAR(NOW())-YEAR(t1.birthDate)) BETWEEN 91 AND 100 THEN 10
+						WHEN (YEAR(NOW())-YEAR(t1.birthDate)) <![CDATA[>]]> 100 THEN 11
+					END age 
+				FROM user_db.u_patient t1
+				<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+					JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId
+				</if>
+				<include refid="patient_state_statistics_where_condition"/>
+			) v1 GROUP BY age ORDER BY cancerCount DESC
+		) v3
+	</select>
+	<select id="statisticsSexPatient" resultType="java.util.LinkedHashMap">
+		SELECT v1.*,ROUND((v1.cancerCount/v1.totalNum)*100,2) cancerPercent FROM(
+			SELECT 
+				CASE WHEN sex=1 THEN '男' WHEN sex=2 THEN '女' ELSE '未知' END cancerName,
+				COUNT(*) cancerCount,
+				(SELECT COUNT(*) FROM user_db.u_patient t1 
+				<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+					JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId
+				</if>
+				<include refid="patient_state_statistics_where_condition"/>
+				) totalNum
+			FROM user_db.u_patient t1
+			<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+				JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId
+			</if>
+			<include refid="patient_state_statistics_where_condition"/>
+			GROUP BY cancerName ORDER BY cancerCount DESC
+		) v1
+	</select>
+	<!-- 263 新增功能 add by yuanwenming end -->
+</mapper>
+

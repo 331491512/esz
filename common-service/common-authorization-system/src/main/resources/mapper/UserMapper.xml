@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.westangel.commonservice.authorization.dao.UserDao">
+	<select id="findHasContactInformationManager" resultType="com.westangel.common.bean.UserProfile">
+		SELECT
+			t1.mobile,
+			t1.email
+		FROM user_db.u_user t1
+			INNER JOIN user_db.r_user_role t2 ON t1.userId = t2.userId
+		WHERE t1.mobile IS NOT NULL AND t2.userRole = 12
+		LIMIT 1
+	</select>
+
+	<select id="searchUserProfiles" resultType="com.westangel.common.bean.UserProfile">
+		SELECT * FROM(
+			SELECT
+				<include refid="base_column_list"></include>,
+				t2.doctorId, t2.parentId, t3.positionTitleId, t3.positionTitleName,
+				t4.userRole, t5.roleName, t6.hospitalId, t6.staffNo,
+				t7.deptId, t7.deptName,
+				t8.professionalRankId, t8.professionalRankName
+			FROM user_db.u_user t1
+				INNER JOIN user_db.u_doctor t2 ON t1.userId = t2.userId
+				LEFT JOIN user_db.meta_position_title t3 on t2.positionTitle = t3.positionTitleId
+				LEFT JOIN user_db.r_user_role t4 ON t1.userId = t4.userId
+				LEFT JOIN user_db.meta_role t5 ON t4.userRole = t5.userRole
+				LEFT JOIN user_db.r_hospital_doctor t6 ON t2.doctorId = t6.doctorId
+				LEFT JOIN user_db.u_department t7 ON t6.deptId = t7.deptId
+				LEFT JOIN user_db.meta_professional_rank t8 ON t2.professionalRank = t8.professionalRankId
+			WHERE 1 = 1
+			<if test="state != null">
+				AND t1.state = #{state}
+			</if>
+			<if test="noneStateFlag != null">
+				AND t1.state != #{noneStateFlag}
+			</if>
+			<choose>
+				<when test="patternFlag == 0">
+					<if test="userName != null">
+						AND t1.userName = #{userName}
+					</if>
+					<if test="staffNo != null">
+						AND t6.staffNo = #{staffNo}
+					</if>
+				</when>
+				<otherwise>
+					<if test="userName != null">
+						<bind name="patternUserName" value="'%' + userName + '%'" />
+						AND (t1.userName LIKE #{patternUserName} OR t1.trueName LIKE #{patternUserName})
+					</if>
+					<if test="trueName != null">
+						<bind name="patternTrueName" value="'%' + trueName + '%'" />
+						AND t1.trueName LIKE #{patternTrueName}
+					</if>
+					<if test="staffNo != null">
+						<bind name="patternStaffNo" value="'%' + staffNo + '%'" />
+						AND t6.staffNo LIKE #{patternStaffNo}
+					</if>
+				</otherwise>
+			</choose>
+			<if test="accountTypeFlag == 1">
+				AND t1.accountType > 0
+			</if>
+			<if test="userRole != null">
+				AND t4.userRole = #{userRole}
+			</if>
+			<if test="deptId != null">
+				AND t6.deptId = #{deptId}
+			</if>
+			<if test="positionTitleId != null">
+				AND t2.positionTitle = #{positionTitleId}
+			</if>
+			<if test="professionalRankId != null">
+				AND t2.professionalRank = #{professionalRankId}
+			</if>
+			<if test="mobile != null">
+				AND t1.mobile = #{mobile}
+			</if>
+			ORDER BY t4.userRole ASC
+		) f1
+		GROUP BY f1.userId
+	</select>
+	
+	<select id="findUserProfileByUserName" resultType="com.westangel.common.bean.UserProfile">
+		SELECT
+			<include refid="base_column_list"></include>,
+			t2.qrcodeUrl
+		FROM user_db.u_user t1
+			LEFT JOIN user_db.u_qrcode t2 ON t2.userId = t1.userId
+		WHERE t1.userName = #{userName}
+		AND t1.accountType > 0
+		<if test="role != null">
+			AND t1.role = #{role}
+		</if>
+	</select>
+	
+	<select id="findUserProfileByUserId" resultType="com.westangel.common.bean.UserProfile">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM user_db.u_user t1
+		WHERE t1.userId = #{userId}
+	</select>
+	
+	<select id="findByUserId" resultType="com.westangel.common.bean.User">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM user_db.u_user t1
+		WHERE t1.userId = #{userId}
+	</select>
+	
+	<select id="findByMobile" resultType="com.westangel.common.bean.User">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM user_db.u_user t1
+		WHERE t1.mobile = #{mobile}
+			AND t1.role = #{role}
+	</select>
+	
+	<select id="findByUserName" resultType="com.westangel.common.bean.User">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM user_db.u_user t1
+		WHERE t1.userName = #{userName}
+			AND t1.role = #{role}
+	</select>
+	
+	<sql id="base_column_list">
+		t1.userId,
+		t1.uuid,
+		t1.userName,
+		t1.role,
+		t1.accountType,
+		t1.infoState,
+		t1.syncFlag,
+		t1.trueName,
+		t1.firstLoginTime,
+		t1.createTime,
+		t1.updateTime,
+		t1.cryptPasswd,
+		t1.nickName,
+		t1.mobile,
+		t1.sex,
+		t1.birthDate,
+		t1.userPictureUrl,
+		t1.email,
+		t1.nation,
+		t1.country,
+		t1.cityId,
+		t1.cityCode,
+		t1.city,
+		t1.address,
+		t1.nativePlace,
+		t1.profession,
+		t1.company,
+		t1.idType,
+		t1.identification,
+		t1.marriageStatus,
+		t1.signature,
+		t1.education,
+		t1.school,
+		t1.interest,
+		t1.idFileUrl,
+		t1.state,
+		t1.subroles,
+		t1.points,
+		t1.lastLoginTime,
+		t1.lastLogoutTime,
+		t1.sourceFlag,
+		t1.userFlag,
+		t1.migrateFlag,
+		t1.appFlag,
+		t1.weixinFlag,
+		t1.pcFlag
+	</sql>
+
+	<!-- 新增用户 -->
+	<insert id="insert" parameterType="com.westangel.common.bean.User">
+		<selectKey resultType="long" keyProperty="userId" order="AFTER">
+			SELECT LAST_INSERT_ID() as userId
+		</selectKey>
+		INSERT INTO user_db.u_user(
+			uuid,
+			userName,
+			cryptPasswd, 
+			trueName,
+			nickName,
+			mobile,
+			sex,
+			birthDate,
+			userPictureUrl,
+			email,
+			nation,
+			country,
+			cityCode,
+			city,
+			address,
+			nativePlace,
+			profession,
+			company,
+			idType,
+			identification,
+			marriageStatus,
+			signature,
+			education,
+			school,
+			interest,
+			idFileUrl,
+			accountType,
+			infoState,
+			state,
+			role,
+			subroles,
+			points,
+			syncFlag,
+			createTime,
+			updateTime,
+			firstLoginTime,
+			lastLoginTime,
+			sourceFlag,
+			appFlag,
+			weixinFlag,
+			pcFlag
+		)VALUES(
+			#{uuid},
+			#{userName},
+			#{cryptPasswd},
+			#{trueName},
+			#{nickName},
+			#{mobile},
+			#{sex},
+			#{birthDate},
+			#{userPictureUrl},
+			#{email},
+			#{nation},
+			#{country},
+			#{cityCode},
+			#{city},
+			#{address},
+			#{nativePlace},
+			#{profession},
+			#{company},
+			#{idType},
+			#{identification},
+			#{marriageStatus},
+			#{signature},
+			#{education},
+			#{school},
+			#{interest},
+			#{idFileUrl},
+			#{accountType},
+			#{infoState},
+			#{state},
+			#{role},
+			#{subroles},
+			#{points},
+			#{syncFlag},
+			NOW(),
+			NOW(),
+			#{firstLoginTime},
+			#{lastLoginTime},
+			#{sourceFlag},
+			#{appFlag},
+			#{weixinFlag},
+			#{pcFlag}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.westangel.common.bean.User">
+		update user_db.u_user
+		<set>
+			<if test="userName != null">
+				userName = #{userName,jdbcType=VARCHAR},
+			</if>
+			<if test="cryptPasswd != null">
+				cryptPasswd = #{cryptPasswd,jdbcType=VARCHAR},
+			</if>
+			<if test="trueName != null">
+				trueName = #{trueName,jdbcType=VARCHAR},
+			</if>
+			<if test="nickName != null">
+				nickName = #{nickName,jdbcType=VARCHAR},
+			</if>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="sex != null">
+				sex = #{sex,jdbcType=INTEGER},
+			</if>
+			<if test="birthDate != null">
+				birthDate = #{birthDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="userPictureUrl != null">
+				userPictureUrl = #{userPictureUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="email != null">
+				email = #{email,jdbcType=VARCHAR},
+			</if>
+			<if test="nation != null">
+				nation = #{nation,jdbcType=VARCHAR},
+			</if>
+			<if test="country != null">
+				country = #{country,jdbcType=VARCHAR},
+			</if>
+			<if test="cityCode != null">
+				cityCode = #{cityCode,jdbcType=VARCHAR},
+			</if>
+			<if test="city != null">
+				city = #{city,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null">
+				address = #{address,jdbcType=VARCHAR},
+			</if>
+			<if test="nativePlace != null">
+				nativePlace = #{nativePlace,jdbcType=VARCHAR},
+			</if>
+			<if test="profession != null">
+				profession = #{profession,jdbcType=VARCHAR},
+			</if>
+			<if test="company != null">
+				company = #{company,jdbcType=VARCHAR},
+			</if>
+			<if test="idType != null">
+				idType = #{idType,jdbcType=INTEGER},
+			</if>
+			<if test="identification != null">
+				identification = #{identification,jdbcType=VARCHAR},
+			</if>
+			<if test="marriageStatus != null">
+				marriageStatus = #{marriageStatus,jdbcType=INTEGER},
+			</if>
+			<if test="signature != null">
+				signature = #{signature,jdbcType=VARCHAR},
+			</if>
+			<if test="education != null">
+				education = #{education,jdbcType=INTEGER},
+			</if>
+			<if test="school != null">
+				school = #{school,jdbcType=VARCHAR},
+			</if>
+			<if test="interest != null">
+				interest = #{interest,jdbcType=VARCHAR},
+			</if>
+			<if test="idFileUrl != null">
+				idFileUrl = #{idFileUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="accountType != null">
+				accountType = #{accountType,jdbcType=INTEGER},
+			</if>
+			<if test="infoState != null">
+				infoState = #{infoState,jdbcType=INTEGER},
+			</if>
+			<if test="state != null">
+				state = #{state,jdbcType=INTEGER},
+			</if>
+			<if test="role != null">
+				role = #{role,jdbcType=INTEGER},
+			</if>
+			<if test="subroles != null">
+				subroles = #{subroles,jdbcType=VARCHAR},
+			</if>
+			<if test="points != null">
+				points = #{points,jdbcType=INTEGER},
+			</if>
+			<if test="lastLoginTime != null">
+				lastLoginTime=#{lastLoginTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="syncFlag != null">
+				syncFlag = #{syncFlag},
+			</if>
+			<if test="uuid != null">
+				uuid = #{uuid},
+			</if>
+			updateTime = NOW()
+		</set>
+		WHERE userId = #{userId,jdbcType=BIGINT}
+	</update>
+	
+	<update id="activationOrCancellation">
+		update user_db.u_user
+		<set>
+			<if test="userName != null">
+				userName = #{userName,jdbcType=VARCHAR},
+			</if>
+			<if test="cryptPasswd != null">
+				cryptPasswd = #{cryptPasswd,jdbcType=VARCHAR},
+			</if>
+			<if test="accountType != null">
+				accountType = #{accountType},
+			</if>
+			updateTime = NOW()
+		</set>
+		where userId = #{userId}
+	</update>
+</mapper>

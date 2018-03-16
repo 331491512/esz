@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<mapper namespace="com.esuizhen.server.sync.dao.server.RHospitalPatientDao" >
+    <insert id="insert">
+    	INSERT INTO user_db.r_hospital_patient(
+			patientId,
+			hospitalId,
+			patientNo,
+			sourceFlag,
+			lastestFollowupResultSyncTime,
+			hospitalCertificateState,
+			createTime,
+			patientUuid,
+			inhospitalDate,
+			certificateTime
+		)VALUES(
+			#{patientId},
+			#{hospitalId},
+			#{patientNo},
+			#{sourceFlag},
+			#{lastestFollowupResultSyncTime},
+			#{hospitalCertificateState},
+			#{createTime},
+			#{patientUuid},
+			#{inhospitalDate},
+			#{certificateTime}
+		)
+    </insert>
+
+    <update id="update">
+    	update user_db.r_hospital_patient
+    	<set>
+    		<if test="patientNo!=null">
+    			patientNo=#{patientNo},
+    		</if>
+    		<if test="sourceFlag!=null">
+    			sourceFlag=#{sourceFlag},
+    		</if>
+    		<if test="lastestFollowupResultSyncTime!=null">
+    			lastestFollowupResultSyncTime=#{lastestFollowupResultSyncTime},
+    		</if>
+    		<if test="hospitalCertificateState!=null">
+    			hospitalCertificateState=#{hospitalCertificateState},
+    		</if>
+    		<if test="createTime!=null">
+    			createTime=#{createTime},
+    		</if>
+    		<if test="patientUuid!=null">
+    			patientUuid=#{patientUuid},
+    		</if>
+    		<if test="inhospitalDate!=null">
+    			inhospitalDate=#{inhospitalDate},
+    		</if>
+    		<if test="certificateTime!=null">
+    			certificateTime=#{certificateTime},
+    		</if>
+    	</set>
+    	<where>
+    		patientId=#{patientId}
+    		AND
+    		hospitalId=#{hospitalId}
+    	</where>
+    </update>
+    
+    <select id="queryHospitalPatientRelation" resultType="com.esuizhen.server.sync.model.server.THospitalPatient">
+    	select 
+	    	id,
+			patientId,
+			hospitalId,
+			patientNo,
+			sourceFlag,
+			lastestFollowupResultSyncTime,
+			hospitalCertificateState,
+			createTime,
+			patientUuid,
+			inhospitalDate,
+			certificateTime
+		from user_db.r_hospital_patient
+		where patientId=#{patientId} AND hospitalId=#{hospitalId}
+    </select>
+</mapper>

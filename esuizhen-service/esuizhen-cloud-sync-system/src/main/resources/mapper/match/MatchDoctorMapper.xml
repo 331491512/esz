@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_match_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.match.MatchDoctorDao" >
+	<resultMap id="baseResultMap" type="com.westangel.common.bean.Doctor">
+		<id column="doctorId" property="doctorId" jdbcType="BIGINT" />
+		<result column="userId" property="userId" jdbcType="BIGINT" />
+		<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+		<result column="trueName" property="trueName" jdbcType="VARCHAR" />
+		<result column="nickName" property="nickName" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="sex" property="sex" jdbcType="INTEGER" />
+		<result column="birthDate" property="birthDate" jdbcType="TIMESTAMP" />
+		<result column="userPictureUrl" property="userPictureUrl" jdbcType="VARCHAR" />
+		<result column="professionCredence" property="professionCredence" jdbcType="VARCHAR" />
+		<result column="registerCredence" property="registerCredence" jdbcType="VARCHAR" />
+		<result column="professionCredencePicUrl" property="professionCredencePicUrl" jdbcType="VARCHAR" />
+		<result column="registerCredencePicUrl" property="registerCredencePicUrl" jdbcType="VARCHAR" />
+		<result column="isExpert" property="isExpert" jdbcType="INTEGER" />
+		<result column="skills" property="skills" jdbcType="VARCHAR" />
+		<result column="tagIds" property="tagIds" jdbcType="VARCHAR" />
+		<result column="tags" property="tags" jdbcType="VARCHAR" />
+		<result column="positionTitle" property="positionTitle" jdbcType="INTEGER" />
+		<result column="professionalRank" property="professionalRank" jdbcType="INTEGER" />
+		<result column="tel" property="tel" jdbcType="VARCHAR" />
+		<result column="introduction" property="introduction" jdbcType="VARCHAR" />
+		<result column="hospitalId" property="hospitalId" jdbcType="BIGINT"></result>
+		<result column="hospitalName" property="hospitalName" jdbcType="VARCHAR"></result>
+		<result column="auditState" property="auditState" jdbcType="INTEGER" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<!-- add by fanpanwei -->
+	<select id="findDoctorByUuId" resultType="java.lang.Integer" parameterType="java.lang.String">
+		SELECT 1 FROM u_doctor t1 WHERE t1.UuId=#{doctorUuId,jdbcType=VARCHAR}
+	</select>
+	<!-- end by fanpanwei -->
+	<select id="findByUserId" resultMap="baseResultMap" parameterType="java.lang.Long">
+		SELECT <include refid="base_column_list"></include>
+		FROM u_doctor t1 WHERE t1.userId=#{userId,jdbcType=BIGINT}
+	</select>
+	 
+	 <select id="selectNopushDoctors" resultType="com.westangel.common.bean.user.TTobeconfirmedDoctor">
+	 	SELECT
+			rm.targetUserId userId, rm.matchUuid uuid, t1.mobile,rm.matchType,
+			IFNULL(m1.trueName,t1.trueName) trueName,
+			IFNULL(m2.staffNo,t2.staffNo)staffNo,
+			IFNULL(m3.hospitalName,t3.hospitalName) hospitalName,
+			IFNULL(m4.deptName,t4.deptName) deptName
+		FROM user_db.r_match_doctor rm
+		LEFT JOIN user_db.u_user t1 ON t1.userId = rm.targetUserId
+		LEFT JOIN user_db.r_hospital_doctor t2 ON t2.doctorId = rm.targetDoctorId
+		LEFT JOIN user_db.u_hospital t3 ON t3.hospitalId = t2.hospitalId
+		LEFT JOIN user_db.u_department t4 ON t2.deptId = t4.deptId
+		LEFT JOIN user_db.u_user m1 ON m1.userId = rm.matchUserId
+		LEFT JOIN user_db.r_hospital_doctor m2 ON m2.doctorId = rm.matchDoctorId
+		LEFT JOIN user_db.u_hospital m3 ON m3.hospitalId = m2.hospitalId
+		LEFT JOIN user_db.u_department m4 ON m2.deptId = m4.deptId
+		WHERE rm.pushFlag!=1
+		GROUP BY mobile
+	 </select>
+	 
+	 <select id="selectNopushDoctor" resultType="com.westangel.common.bean.user.TTobeconfirmedDoctor">
+	 	SELECT
+			rm.targetUserId userId,rm.targetUuid mathUserUuid, rm.matchUuid uuid, t1.mobile,
+			IFNULL(m1.trueName,t1.trueName) trueName,
+			IFNULL(m2.staffNo,t2.staffNo)staffNo,
+			IFNULL(m3.hospitalName,t3.hospitalName) hospitalName,
+			IFNULL(m4.deptName,t4.deptName) deptName
+		FROM user_db.r_match_doctor rm
+		LEFT JOIN user_db.u_user t1 ON t1.userId = rm.targetUserId
+		LEFT JOIN user_db.r_hospital_doctor t2 ON t2.doctorId = rm.targetDoctorId
+		LEFT JOIN user_db.u_hospital t3 ON t3.hospitalId = t2.hospitalId
+		LEFT JOIN user_db.u_department t4 ON t2.deptId = t4.deptId
+		LEFT JOIN user_db.u_user m1 ON t1.userId = rm.matchUserId
+		LEFT JOIN user_db.r_hospital_doctor m2 ON m2.doctorId = rm.matchDoctorId
+		LEFT JOIN user_db.u_hospital m3 ON m3.hospitalId = m2.hospitalId
+		LEFT JOIN user_db.u_department m4 ON m2.deptId = m4.deptId
+		WHERE rm.matchUserId=#{userId}
+	 </select>
+
+	<sql id="base_column_list">
+		t1.doctorId, t1.uuid, t1.userId, t1.trueName, t1.nickName, t1.mobile, t1.sex, t1.birthDate, t1.userPictureUrl,
+		t1.professionCredence, t1.registerCredence, t1.professionCredencePicUrl, t1.registerCredencePicUrl,
+		t1.isExpert, t1.skills, t1.tagIds, t1.tags, t1.positionTitle, t1.professionalRank, t1.tel, t1.introduction,
+		t1.auditState, t1.createTime, t1.updateTime
+	</sql>
+
+	<insert id="insert" parameterType="com.westangel.common.bean.Doctor" >
+		<selectKey resultType="long" keyProperty="doctorId" order="AFTER" >
+			SELECT LAST_INSERT_ID() as doctorId
+		</selectKey>
+	   insert into cloud_sync_match_db.u_doctor (
+	   		userId,
+			uuid,
+			trueName,
+			nickName,
+			mobile,
+			sex,
+			birthDate,
+			userPictureUrl,
+			professionCredence,
+			registerCredence,
+			professionCredencePicUrl,
+			registerCredencePicUrl,
+			isExpert,
+			skills,
+			tagIds,
+			tags,
+			positionTitle,
+			professionalRank,
+			tel,
+			introduction,
+			auditState,
+			createTime,
+			updateTime,
+			syncTime,
+			syncFlag
+		) values (
+	   		#{userId},
+			#{uuid},
+			#{trueName},
+			#{nickName},
+			#{mobile},
+			#{sex},
+			#{birthDate},
+			#{userPictureUrl},
+			#{professionCredence},
+			#{registerCredence},
+			#{professionCredencePicUrl},
+			#{registerCredencePicUrl},
+			#{isExpert},
+			#{skills},
+			#{tagIds},
+			#{tags},
+			#{positionTitle},
+			#{professionalRank},
+			#{tel},
+			#{introduction},
+			#{auditState},
+			#{createTime},
+			#{updateTime},
+			NOW(),
+			#{syncFlag}
+		)
+	 </insert>
+	 
+	 <delete id="delete">
+	 	DELETE FROM cloud_sync_match_db.u_doctor WHERE doctorId=#{doctorId,jdbcType=BIGINT}
+	 </delete>
+	 
+	 <update id="setNotifyDoctorAgain">
+	 	<![CDATA[
+	 	UPDATE user_db.r_match_doctor 
+	 	SET pushFlag=0 
+	 	WHERE 
+		(DATE_SUB(CURDATE(), INTERVAL 3 DAY)>=pushTime OR pushTime IS NULL)
+		AND pushFlag=1 AND affirm =0
+		]]>
+	 </update>
+	 
+	 <update id="updatePushFlag">
+	 	UPDATE user_db.r_match_doctor
+	 	<set>
+	 		pushFlag=#{pushFlag},
+	 		pushTimes=pushTimes+1,
+	 		pushTime=NOW(),
+	 		updateTime=NOW()
+	 	</set>
+	 	WHERE matchUuid IN
+	 	(
+			<foreach collection="matchUuids" item="uuid" index="index" separator=",">
+				#{uuid}
+			</foreach>
+		)
+	 </update>
+	 
+	 <update id="setAffirm">
+	 	UPDATE user_db.r_match_doctor
+	 	<set>
+	 		affirm=#{affirm}
+	 	</set>
+	 	WHERE targetUserId=#{targetUserId} AND matchUuid=#{matchUuid}
+	 </update>
+	 
+	 <select id="findAffirmByMatchUuid" resultType="java.lang.Integer">
+	 	select affirm from user_db.r_match_doctor WHERE matchUuid= #{matchUuid} order by id desc limit 1	
+	 </select>
+</mapper>

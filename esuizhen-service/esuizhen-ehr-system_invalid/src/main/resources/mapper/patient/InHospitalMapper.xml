@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.patient.InHospitalDao">
+
+	<!-- 获取患者出院记录 -->
+	<select id="queryPatientInhospitalInfoByPatientId" resultType="com.esuizhen.cloudservice.ehr.bean.TInhospitalInfo">
+		SELECT 
+		t1.inhospitalId,t1.inhospitalNo,t1.emrId,t1.patientId,t1.inhospitalWay
+		,t1.inhospitalDeptId,t1.inhospitalWard,t1.inhospitalTimes,t1.mainDiagnosis
+		,t1.mainDiagnosisCode,t1.inchargeDoctor,t1.outhospitalDate,t1.inhospitalDate,t1.patientNo
+		,t2.hospitalName 
+		,t3.deptName inhospitalDeptName
+		FROM ehr_db.ei_inhospital_note t1
+			LEFT JOIN user_db.u_hospital t2 ON t1.hospitalId=t2.hospitalId
+			LEFT JOIN user_db.u_department t3 ON t3.deptId = t1.inhospitalDeptId
+			WHERE 
+			t1.inhospitalDate IS NOT NULL
+			AND
+			t1.patientId=#{patientId}
+			<if test="hospitalId!=null">
+				AND t1.hospitalId=#{hospitalId}
+			</if>
+			<if test="reqFlag==1">
+				AND t1.infoState>1
+			</if>
+			ORDER BY t1.inhospitalDate desc
+	</select>
+	
+	<!-- 患者出院时间 -->
+	<select id="queryPatientOutHospitalDate" resultType="com.esuizhen.cloudservice.ehr.bean.TOutHospitalInfo">
+		select outhospitalDate,inhospitalId 
+		from 
+		ehr_db.ei_inhospital_note t 
+		where 
+		outhospitalDate is not null
+		and patientId = #{patientId} 
+		and hospitalId=#{hospitalId}
+		order by outhospitalDate desc
+	</select>	
+
+</mapper>
+

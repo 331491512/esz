@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.meta.MetaInfoPayChannelDao">
+
+    
+    <select id="getMetaInfoPayChannelList" resultType="com.esuizhen.cloudservice.ehr.model.meta.TMetaInfoPayChannel">
+		SELECT 
+        	payChannelId,
+        	payChannelCode,
+        	payChannelName
+		FROM meta_e_pay_channel 
+		<where>
+			<if test="payChannelName!=null">
+				AND (payChannelName LIKE CONCAT(#{payChannelName},'%') or payChannelCode LIKE CONCAT(#{payChannelName},'%'))  
+			</if>
+		</where>
+	</select>
+	
+</mapper>
+

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.statis.StatisDao">
+	<select id="querySURStatisResult" resultType="java.util.LinkedHashMap">
+		SELECT COUNT(*) totalSamples ,
+			SUM((CASE WHEN t1.followupTime > date_add(t2.confirmedDate, interval 3 month) THEN 1 ELSE 0 END )) base3 ,
+			SUM((CASE WHEN (t1.followupTime > date_add(t2.confirmedDate, interval 3 month) ) AND (t1.deathDate > date_add(t2.confirmedDate, interval 3 month)  OR t1.deathDate IS NULL) THEN 1 ELSE 0 END )) live3 	,
+
+			SUM((CASE WHEN t1.followupTime > date_add(t2.confirmedDate, interval 6 month)THEN 1 ELSE 0 END )) base6 ,
+			SUM((CASE WHEN (t1.followupTime > date_add(t2.confirmedDate, interval 6 month) ) AND (t1.deathDate > date_add(t2.confirmedDate , interval 6 month)  OR t1.deathDate IS NULL)  THEN 1 ELSE 0 END )) live6 	,
+
+			SUM((CASE WHEN t1.followupTime > date_add(t2.confirmedDate, interval 12 month) THEN 1 ELSE 0 END )) base12 ,
+			SUM((CASE WHEN (t1.followupTime > date_add(t2.confirmedDate, interval 12 month)) AND (t1.deathDate > date_add(t2.confirmedDate , interval 12 month)   OR t1.deathDate IS NULL)  THEN 1 ELSE 0 END )) live12 	,
+
+			SUM((CASE WHEN t1.followupTime > date_add(t2.confirmedDate, interval 36 month) THEN 1 ELSE 0 END )) base36 ,
+			SUM((CASE WHEN (t1.followupTime > date_add(t2.confirmedDate, interval 36 month) ) AND (t1.deathDate > date_add(t2.confirmedDate , interval 36 month) OR t1.deathDate IS NULL)  THEN 1 ELSE 0 END )) live36 	,
+
+			SUM((CASE WHEN t1.followupTime > date_add(t2.confirmedDate, interval 60 month)  THEN 1 ELSE 0 END )) base60 ,
+			SUM((CASE WHEN (t1.followupTime > date_add(t2.confirmedDate, interval 60 month)) AND (t1.deathDate > date_add(t2.confirmedDate , interval 60 month) OR t1.deathDate IS NULL)  THEN 1 ELSE 0 END )) live60	
+		FROM (SELECT * FROM (SELECT * FROM followup_result where mergeFlag!=2 ORDER BY followupTime DESC) t GROUP BY patientId) t1 , 
+		user_db.u_patient t2 , user_db.r_doctor_patient t3
+		<where>     
+	        <if test="1==1">     
+	            t1.patientId = t2.patientId  
+	        </if>     
+	        <if test="1==1 ">     
+	            AND t2.patientId=t3.patientId   
+	        </if> 
+	        <if test="confirmedDateBegin!=null ">     
+	           AND t2.confirmedDate >= '${confirmedDateBegin}'
+	        </if> 
+	        <if test="confirmedDateEnd!=null">     
+	            AND '${confirmedDateEnd}' >=  t2.confirmedDate  
+	        </if> 
+	        <if test="diseaseTypeIds!=null ">     
+	            AND t2.sourceDiagnosis IN(${diseaseTypeIds})   
+	        </if> 
+	        <if test="doctorId!=null">     
+	           AND t3.doctorId = #{doctorId} 
+	        </if>     
+    	</where> 
+	</select>
+</mapper>
+

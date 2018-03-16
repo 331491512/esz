@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_incre_db -->
+<mapper namespace="com.esuizhen.base.dao.global.GreyTestPatientDao" >
+
+	<select id="listGreyTestPatient" resultType="com.esuizhen.base.model.GreyTestPatient">
+		SELECT
+			*
+		FROM com_sys_db.sys_grey_test_patient
+		where 
+		<if test="productType !=null">
+			productType=#{productType}
+		</if>
+	</select>
+	
+</mapper>

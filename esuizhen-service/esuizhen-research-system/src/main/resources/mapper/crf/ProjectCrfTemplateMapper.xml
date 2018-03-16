@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.research.dao.crf.ProjectCrfTemplateDao">
+
+	<resultMap id="baseProjectTemplateDetailResultMap" type="com.esuizhen.cloudservice.research.bean.TProjectTemplateDetailInfo">
+		<id column="crfTemplateId" property="crfTemplateId" jdbcType="VARCHAR" />
+		<result column="crfTemplateName" property="crfTemplateName" jdbcType="VARCHAR" />
+		<result column="isBaselineCopied" property="isBaselineCopied" jdbcType="INTEGER" />
+		<result column="crfTemplateType" property="crfTemplateType" jdbcType="INTEGER" />
+		<result column="description" property="description" jdbcType="VARCHAR" />
+		<result column="author" property="author" jdbcType="BIGINT" />
+		<result column="authorName" property="authorName" jdbcType="VARCHAR" />
+		<result column="isPublish" property="isPublish" jdbcType="INTEGER" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+		
+		<collection column="crfTemplateId" property="crfCourseList" ofType="com.esuizhen.cloudservice.research.bean.TCrfCourseOutline">
+			<id column="crfCourseId" property="crfCourseId" jdbcType="VARCHAR" />
+			<result column="crfCourseItemName" property="crfCourseItemName" jdbcType="VARCHAR" />
+			<result column="crfCourseIndex" property="crfCourseIndex" jdbcType="INTEGER" />
+			
+			<collection column="crfCourseId" property="crfObserveList" ofType="com.esuizhen.cloudservice.research.model.crf.TCrfObservationSubjectElement">
+				<id column="crfObserveId" property="crfObserveId" jdbcType="VARCHAR" />
+				<id column="subjectElementId" property="subjectElementId" jdbcType="VARCHAR" />
+				<result column="subjectElementName" property="subjectElementName" jdbcType="VARCHAR" />
+				<result column="collectionFlag" property="collectionFlag" />
+			</collection>
+		</collection>
+	</resultMap>
+
+	<parameterMap type="java.util.Map" id="baseExcuteMap">
+		<parameter property="projectId" mode="IN" jdbcType="VARCHAR"/>
+		<parameter property="state" mode="OUT" jdbcType="INTEGER"/>
+    </parameterMap>
+
+	<select id="proCrfTemplateItemsCreate" statementType="CALLABLE" parameterMap="baseExcuteMap">
+	<![CDATA[
+		{CALL pro_db.pro_crf_template_create(?, ?)}
+	]]>
+	</select>
+	
+	<select id="proCrfTemplateItemsDelete" statementType="CALLABLE" parameterMap="baseExcuteMap">
+	<![CDATA[
+	    {call pro_db.pro_crf_template_delete(?, ?)}
+	]]>
+	</select>
+	
+	<select id="proCrfTemplateModify" statementType="CALLABLE" parameterMap="baseExcuteMap">
+	<![CDATA[
+	    {call pro_db.pro_crf_template_copy_basics(?, ?)}
+	]]>
+	</select>
+	
+	<select id="proCrfTemplateDetailDelete" statementType="CALLABLE" parameterMap="baseExcuteMap">
+	<![CDATA[
+	    {call pro_db.pro_crf_template_detail_delete(?, ?)}
+	]]>
+	</select>
+	
+	<select id="proCrfTemplateCopyDelete" statementType="CALLABLE" parameterMap="baseExcuteMap">
+	<![CDATA[
+	    {call pro_db.pro_crf_template_copy_delete(?, ?)}
+	]]>
+	</select>
+	
+	<select id="proCrfTemplateReference" statementType="CALLABLE">
+	<![CDATA[
+	    {call pro_db.pro_crf_template_reference(#{projectId,mode=IN,jdbcType=VARCHAR},
+	    	#{crfTemplateId,mode=IN,jdbcType=VARCHAR}, #{state,mode=OUT,jdbcType=INTEGER})}
+	]]>
+	</select>
+
+	<select id="findProjectTemplateDetail" resultMap="baseProjectTemplateDetailResultMap" parameterType="java.lang.String">
+		SELECT
+			t1.crfTemplateId,
+			t1.crfTemplateName,
+			t1.isBaselineCopied, 
+			t1.crfTemplateType, 
+			t2.crfCourseId, 
+			t2.crfCourseItemName,
+			t3.crfObserveId, 
+			t3.subjectElementId, 
+			t4.subjectElementName,
+			IF(t3.subjectElementId NOT IN(SELECT n1.parentId FROM pro_db.meta_crf_subject_element n1 WHERE n1.subjectElementLevel = 3 GROUP BY n1.parentId), 1,
+				(
+					SELECT
+						IF(COUNT(0) > 0, 1, 0)
+					FROM pro_db.crf_observation_subject_element i1
+					WHERE i1.parentId = t3.subjectElementId
+						AND i1.crfCourseItemId = t3.crfCourseItemId
+				)
+			) collectionFlag
+		FROM pro_db.project_crf_template t1
+			INNER JOIN pro_db.crf_course t2 ON t1.crfTemplateId=t2.crfTemplateId
+			INNER JOIN pro_db.crf_observation_subject_element t3 ON t3.crfCourseItemId=
+				(SELECT b1.crfCourseItemId FROM pro_db.crf_course_detail b1 WHERE b1.crfCourseItemIndex=
+					(SELECT MIN(c1.crfCourseItemIndex) FROM pro_db.crf_course_detail c1
+					WHERE c1.crfCourseId=t2.crfCourseId) AND b1.crfCourseId=t2.crfCourseId)
+			INNER JOIN pro_db.meta_crf_subject_element t4 ON t4.subjectElementId=t3.subjectElementId AND t4.subjectElementLevel=2
+		WHERE t3.subjectElementId IS NOT NULL AND t1.crfTemplateId=#{crfTemplateId}
+		ORDER BY t2.crfCourseIndex ASC, t3.subjectIndex ASC
+	</select>
+
+	<select id="queryPublicTemplate" resultType="com.esuizhen.cloudservice.research.bean.TProjectTemplateSimpleInfo">
+		SELECT
+			<include refid="base_column_list"></include>, t2.trueName authorName
+		FROM pro_db.project_crf_template t1
+			LEFT JOIN user_db.u_doctor t2 ON t1.author=t2.doctorId
+		WHERE t1.isPublish=1
+		<if test="author != null">
+			AND t1.author=#{author}
+		</if>
+		<if test="mainDiseaseTypeId != 0">
+			AND t1.mainDiseaseTypeId=#{mainDiseaseTypeId}
+		</if>
+	</select>
+	
+	<select id="findByCrfTemplateId" resultType="com.esuizhen.cloudservice.research.bean.TProjectTemplateSimpleInfo">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM pro_db.project_crf_template t1
+		WHERE t1.crfTemplateId=#{crfTemplateId}
+	</select>
+	
+	<select id="findByProjectId" resultType="com.esuizhen.cloudservice.research.bean.TProjectTemplateSimpleInfo">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM pro_db.project_crf_template t1
+			INNER JOIN pro_db.r_crftemplate_project t2 ON t1.crfTemplateId = t2.crfTemplateId
+		WHERE t2.projectId = #{projectId}
+	</select>
+ 
+	<sql id="base_column_list">
+		t1.crfTemplateId, t1.crfTemplateName, t1.crfTemplateType, t1.description, t1.mainDiseaseTypeId,
+		t1.author, t1.isPublish, t1.followupStartMark, t1.citations, t1.createTime, t1.updateTime
+	</sql>
+
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.research.bean.TProjectTemplateDetailInfo">
+		INSERT INTO pro_db.project_crf_template(
+			crfTemplateId, crfTemplateName, crfTemplateType, description, author, isPublish, createTime, updateTime
+		)
+		VALUES(
+			#{crfTemplateId},
+			#{crfTemplateName},
+			#{crfTemplateType},
+			#{description},
+			#{author},
+			#{isPublish},
+			NOW(), NOW()
+		)
+	</insert>
+	
+	<update id="setProjectTemplatePublish">
+		UPDATE pro_db.project_crf_template
+		<set>
+			isPublish=1,
+			updateTime=NOW()
+		</set>
+		WHERE crfTemplateId=#{crfTemplateId}
+	</update>
+	
+	<update id="setIsBaselineCopied">
+		UPDATE pro_db.project_crf_template
+		<set>
+			isBaselineCopied=1,
+			updateTime=NOW()
+		</set>
+		WHERE crfTemplateId=#{crfTemplateId}
+	</update>
+	
+	<update id="increaseCitations">
+		UPDATE pro_db.project_crf_template
+		<set>
+			citations = citations + 1,
+			updateTime=NOW()
+		</set>
+		WHERE crfTemplateId=#{crfTemplateId}
+	</update>
+	
+	<update id="updateCrfTemplateIdcrfTemplateId">
+		UPDATE pro_db.project_crf_template
+		<set>
+			followupStartMark = #{followupStartMark},
+			updateTime=NOW()
+		</set>
+		WHERE crfTemplateId=#{crfTemplateId}
+	</update>
+	
+	<update id="update">
+		UPDATE pro_db.project_crf_template
+		<set>
+			crfTemplateName = #{crfTemplateName},
+			updateTime=NOW()
+		</set>
+		WHERE crfTemplateId = #{crfTemplateId}
+	</update>
+	
+</mapper>

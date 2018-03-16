@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.CloudProductServiceApplyDao" >
+
+<resultMap id="postServiceMap" type="com.esuizhen.cloudservice.sync.bean.MedicalRecordPost" >
+	  <id column="productApplyId" property="productApplyId" jdbcType="VARCHAR" />
+	  <result column="trueName" property="patientName" jdbcType="VARCHAR" />
+	  <result column="progressState" property="progressState" jdbcType="INTEGER" />
+	  <result column="description" property="description" jdbcType="VARCHAR" />
+	  <result column="patientMobile" property="patientMobile" jdbcType="VARCHAR" />
+	  <result column="applyTime" property="applyTime" jdbcType="TIMESTAMP" />
+	  <result column="subType" property="subType" jdbcType="INTEGER" />
+	  <result column="serviceCode" property="serviceCode" jdbcType="VARCHAR" />
+	  <result column="syncFlag" property="syncFlag" jdbcType="INTEGER" />
+	  <result column="state" property="state" jdbcType="INTEGER" />
+	<collection property="caseExpressList" ofType="com.esuizhen.cloudservice.sync.bean.MedicalPostDetail" >
+        	<result column="productApplyId2" property="productApplyId" jdbcType="VARCHAR"/>
+        	<result column="patientNo" property="patientNo" jdbcType="VARCHAR"/>
+        	<result column="inhospitalNo" property="inhospitalNo" jdbcType="VARCHAR"/>
+        	<result column="inhospitalDate" property="inhospitalDate" jdbcType="TIMESTAMP"/>
+        	<result column="amount" property="amount" jdbcType="INTEGER"/>
+	</collection>     
+  </resultMap>
+  	<!-- 获取未同步病案邮寄信息 -->
+	<select id="getSeviceApplyList" parameterType="java.util.HashMap" resultMap="postServiceMap" >
+		SELECT
+			s.productApplyId,
+			p.trueName trueName,
+			s.progressState ,
+			(case when s.progressState=5 or s.progressState=6 or s.progressState<![CDATA[<]]>0 THEN s.progressState
+			      WHEN s.state=3 or s.state<![CDATA[>]]>5 THEN -2 END ) state,
+			s.description,
+			IFNULL(pc.mobile,p.mobile) patientMobile,
+			IFNULL(s.createTime,Now()) applyTime,
+			d.inhospitalNo,
+			(CASE WHEN d.detailId IS NOT NULL THEN s.productApplyId ELSE NULL END) productApplyId2,
+			d.patientNo,
+			d.inhospitalDate,
+			d.amount,
+			s.productSubType subType,
+			s.serviceCode,
+			s.syncFlag
+		FROM hds_db.s_product_service_apply s
+		INNER JOIN user_db.u_hospital h1 ON h1.hospitalId=#{hm.hospitalId} AND h1.userId=s.vendor
+		INNER JOIN user_db.u_patient p ON p.userId=s.buyer
+		LEFT JOIN hds_db.s_express_service_detail d ON d.productApplyId=s.productApplyId
+		LEFT JOIN user_db.u_hospital_patient_certificated_history pc ON pc.hospitalId=h1.hospitalId
+		                         AND pc.patientId=p.patientId AND pc.certificatedState=1
+		WHERE s.productType=9 AND ((s.syncFlag=0 AND s.state=2) or (s.syncFlag=2))
+		Limit #{hm.pageSize}
+	</select>
+	
+	  	<!-- 设为已同步标志 -->
+	<update id="setServiceApplySyncedFlag" parameterType="java.util.HashMap">
+		UPDATE hds_db.s_product_service_apply
+		<set> 
+			syncFlag=#{hm.syncFlag},updateTime=now()
+		</set>
+		WHERE productApplyId = #{hm.productApplyId}
+	</update>
+</mapper>

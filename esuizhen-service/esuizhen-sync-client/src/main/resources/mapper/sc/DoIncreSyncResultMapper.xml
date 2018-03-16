@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.esuizhen.client.sync.dao.sc.DoIncreSyncResultDao" >	
+	<!-- 调用存储过程 -->           
+	<select id="doIncreSyncResultPre" statementType="CALLABLE" parameterType="java.lang.Integer">
+		<choose>
+			<when test="tableId==100">
+	       		{CALL sc_db.incre_user_sync_result_pro()}  
+	       	</when>
+	       	<when test="tableId==101">
+	       		{CALL sc_db.incre_doctor_sync_result_pro()}  
+	       	</when>
+	       	<when test="tableId==102">
+	       		{CALL sc_db.incre_patient_sync_result_pro()}  
+	       	</when>
+	       	<when test="tableId==103">
+	       		{CALL sc_db.incre_patientfamily_sync_result_pro()}  
+	       	</when>
+	       	<when test="tableId==104">
+	       		{CALL sc_db.incre_ruuidpatientno_sync_result_pro()}  
+	       	</when>
+	       	<when test="tableId==105">
+	       		{CALL sc_db.incre_rdoctorPatient_sync_result_pro()}  
+	       	</when>
+	       	<when test="tableId==106">
+	       		{CALL sc_db.incre_rhospitaldoctor_sync_result_pro()}  
+	       	</when>
+	       	<when test="tableId==107">
+	       		{CALL sc_db.incre_rhospitalpatient_sync_result_pro()}  
+	       	</when>
+	       	<when test="tableId==108">
+	       		{CALL sc_db.incre_rdeptpatient_sync_result_pro()}  
+	       	</when>
+	       	<when test="tableId==200">
+	       		{CALL sc_db.incre_inhospitalnote_sync_result_pro()}  
+	       	</when>
+	       	<when test="tableId==201">
+	       		{CALL sc_db.incre_outhospitalnote_sync_result_pro()}  
+	       	</when>
+	       	<when test="tableId==202">
+	       		{CALL sc_db.incre_diagnosis_sync_result_pro()}  
+	       	</when>
+	       	<when test="tableId==203">
+	       		{CALL sc_db.incre_clinicmedicalnote_sync_result_pro()}  
+	       	</when>
+	       	<when test="tableId==204">
+	       		{CALL sc_db.incre_surgerynote_sync_result_pro()}  
+	       	</when>
+	       	<when test="tableId==205">
+	       		{CALL sc_db.incre_treatmentnote_sync_result_pro()}  
+	       	</when>
+	       	<when test="tableId==300">
+	       		{CALL sc_db.incre_detectionreport_sync_result_pro()}  
+	       	</when>
+	       	<when test="tableId==301">
+	       		{CALL sc_db.incre_detectiondetail_sync_result_pro()}  
+	       	</when>
+	       	<when test="tableId==302">
+	       		{CALL sc_db.incre_examreport_sync_result_pro()}  
+	       	</when>
+	       	<when test="tableId==400">
+	       		{CALL sc_db.incre_followupresult_sync_result_pro()}  
+	       	</when>
+	       	<when test="tableId==401">
+	       		{CALL sc_db.incre_followupresultbuff_sync_result_pro()}  
+	       	</when>
+	       	<otherwise>
+	       		SELECT 0
+	       	</otherwise>
+		</choose>
+  	</select>
+</mapper>

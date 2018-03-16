@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.esuizhen.cloudservice.research.dao.crf.TCrfPainScaleOptionsDao">
+	<select id="findCrfPainScaleInfoByCrfObserveId" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfPainScaleOptions">
+		SELECT
+			<include refid="base_column_lise"/>
+		FROM pro_db.crf_observation_pain_scale_options t1
+		WHERE t1.crfObserveId = #{crfObserveId}
+	</select>
+	
+	<sql id="base_column_lise">
+		t1.crfPainScaleId,
+		t1.crfObserveId,
+		t1.subjectElementId,
+		t1.collectionFlag,
+		t1.createTime,
+		t1.updateTime
+	</sql>
+	
+	<insert id="insert">
+		INSERT INTO pro_db.crf_observation_pain_scale_options(
+			crfPainScaleId,
+			crfObserveId,
+			subjectElementId,
+			collectionFlag,
+			createTime,
+			updateTime
+		)VALUES(
+			#{crfPainScaleId},
+			#{crfObserveId},
+			#{subjectElementId},
+			#{collectionFlag},
+			NOW(),
+			NOW()
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.esuizhen.cloudservice.research.model.crf.TCrfPainScaleOptions">
+		UPDATE pro_db.crf_observation_pain_scale_options
+		<set>
+			<if test="subjectElementId != null">
+				subjectElementId = #{subjectElementId},
+			</if>
+			<if test="collectionFlag != null">
+				collectionFlag = #{collectionFlag},
+			</if>
+			updateTime = NOW()
+		</set>
+		WHERE 1 = 1
+		<if test="crfPainScaleId != null">
+			AND crfPainScaleId = #{crfPainScaleId}
+		</if>
+		<if test="crfObserveId != null">
+			AND crfObserveId = #{crfObserveId}
+		</if>
+	</update>
+</mapper>

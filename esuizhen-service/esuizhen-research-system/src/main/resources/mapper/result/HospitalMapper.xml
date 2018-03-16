@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.HospitalDao">
+	<select id="findByDoctorId" resultType="com.westangel.common.bean.HospitalProfile">
+		SELECT
+			<include refid="base_column_list"/>
+		FROM user_db.u_hospital t1
+			INNER JOIN user_db.r_hospital_doctor t2 ON t2.hospitalId = t1.hospitalId
+		WHERE t2.doctorId = #{doctorId}
+	</select>
+	
+	<sql id="base_column_list">
+		t1.hospitalId,
+		t1.hospitalName,
+		t1.nickName,
+		t1.address,
+		t1.cityId,
+		t1.introduction,
+		t1.contactMobile,
+		t1.pictureUrl
+	</sql>
+</mapper>
+

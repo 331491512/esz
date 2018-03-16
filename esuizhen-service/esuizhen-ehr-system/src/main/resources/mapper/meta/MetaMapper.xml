@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.meta.MetaDao">
+	
+	<select id="queryMetaEIcdOList" resultType="com.esuizhen.cloudservice.ehr.bean.TMetaEIcdO">
+		select organCode,organName from meta_e_icd_o order by organId ASC
+	</select>
+	
+	<select id="queryDiagnosisTypeList" resultType="com.esuizhen.cloudservice.ehr.model.disease.TDiagnosisTypeInfo">
+		select diagnosisTypeId,diagnosisTypeName from meta_e_diagnosis_type 
+		<where>
+			<if test="flag != null">
+				flag=#{flag}
+			</if>
+		</where>
+		order by diagnosisTypeId ASC
+	</select>
+	
+	<select id="queryDiagnosisBasisList" resultType="com.esuizhen.cloudservice.ehr.model.disease.TDiagnosisBasisInfo">
+		select diagnosisBasisId,diagnosisBasisCode,diagnosisBasisName from meta_e_diagnosis_basis order by diagnosisBasisId ASC
+	</select>
+	
+	<select id="queryAnesthesiaWayList" resultType="com.esuizhen.cloudservice.ehr.model.disease.TAnesthesiaWayInfo">
+		select anesthesiaId,anesthesiaCode,anesthesiaName from meta_e_anesthesia_way
+		<where>
+			<choose>
+				<when test="anesthesiaName!=null and anesthesiaCode!=null">
+				     anesthesiaName =#{anesthesiaName} or anesthesiaCode =#{anesthesiaCode}
+				</when>
+				<otherwise>
+				
+				<if test="anesthesiaCode!=null">
+					AND anesthesiaCode =#{anesthesiaCode}
+				</if>
+				<if test="anesthesiaName!=null">
+					AND anesthesiaName =#{anesthesiaName}
+				</if>
+				</otherwise>
+			</choose>
+		</where>
+		 order by anesthesiaId ASC
+	</select>
+	<!-- add by fanpanwei -->
+	<select id="getMetaListByTableName" resultType="java.util.HashMap">
+		select * from ${tableName}
+		<if test="condition!=null and condition!=''">
+			${condition}
+		</if>
+	</select>
+	
+	<!-- add by zhuguo 手术操作性质 -->
+	<select id="queryOperationNature" resultType="com.esuizhen.cloudservice.ehr.model.meta.OperationNature">
+		SELECT
+			t1.operationNatureCode,
+			t1.operationNatureName
+		FROM ehr_db.meta_operation_nature t1
+	</select>
+	<!-- end -->
+	
+	<!-- add by zhuguo NNIS手术切口清洁度 -->
+	<select id="queryNNISOperationIncisionClean" resultType="com.esuizhen.cloudservice.ehr.model.meta.NNISOperationIncisionClean">
+		SELECT
+			t1.operationIncisionCleanCode,
+			t1.operationIncisionCleanName
+		FROM ehr_db.meta_nnis_operation_incision_clean t1
+	</select>
+	<!-- end -->
+	
+	<!-- add by zhuguo NNIS麻醉分级 -->
+	<select id="queryNNISAnaesthesiaLevel" resultType="com.esuizhen.cloudservice.ehr.model.meta.NNISAnaesthesiaLevel">
+		SELECT
+			t1.anaesthesiaLevelCode,
+			t1.anaesthesiaLevelName
+		FROM ehr_db.meta_nnis_anaesthesia_level t1
+	</select>
+	<!-- end -->
+	
+	<!-- add by zhuguo NNIS手术级别 -->
+	<select id="queryNNISOperationLevel" resultType="com.esuizhen.cloudservice.ehr.model.meta.NNISOperationLevel">
+		SELECT
+			t1.operationLevelCode,
+			t1.operationLevelName
+		FROM ehr_db.meta_nnis_operation_level t1
+	</select>
+	<!-- end -->
+	
+	<!-- add by zhuguo NNIS手术持续时间 -->
+	<select id="queryNNISOperationContinuedTime" resultType="com.esuizhen.cloudservice.ehr.model.meta.NNISOperationContinuedTime">
+		SELECT
+			t1.operationContinuedTimeCode,
+			t1.operationContinuedTimeName
+		FROM ehr_db.meta_nnis_operation_continued_time t1
+	</select>
+	<!-- end -->
+	
+	<!-- add by zhuguo NNIS切口感染 -->
+	<select id="queryNNISIncisionInfected" resultType="com.esuizhen.cloudservice.ehr.model.meta.NNISIncisionInfected">
+		SELECT
+			t1.incisionInfectedCode,
+			t1.incisionInfectedName
+		FROM ehr_db.meta_nnis_incision_infected t1
+	</select>
+	<!-- end -->
+</mapper>

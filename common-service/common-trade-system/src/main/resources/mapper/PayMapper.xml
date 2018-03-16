@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+                   
+<mapper namespace="com.westangel.commonservice.trade.dao.PayDao">
+	
+	
+	<!-- 获取订单支付状态信息 -->
+	<select id="getOrderPayId" resultType="java.lang.String">
+	   SELECT  
+	         payId
+	   FROM
+	         com_trade_db.`order_payment` 
+	   WHERE
+	         orderId=#{orderId}
+	    
+	</select>
+	
+	<!-- 根据状态查找相应订单支付信息 -->
+	<select id="getPayIdByState" resultType="java.lang.String">
+	   SELECT  
+	         payId
+	   FROM
+	         com_trade_db.`order_payment` 
+	   WHERE
+	         state=#{state} AND orderId=#{orderId}
+	    
+	</select>
+	
+	<!-- 根据订单号查找支付状态信息 -->
+	<select id="getPayState" resultType="java.lang.Integer">
+	   SELECT  
+	         state
+	   FROM
+	         com_trade_db.`order_payment` 
+	   WHERE
+	         orderId=#{orderId}
+	      
+	</select>
+
+
+	<!-- 根据订单号查找支付信息 -->
+	<select id="getOrderPayInfo" resultType="com.westangel.common.bean.trade.TOrderPayInfo">
+	   SELECT  
+	         payId,buyer,vendor,orderId,state,onlinePayWay,onlinePayValue/100 onlinePayValue,onlinePayAccount,couponsPayValue/100 couponsPayValue,
+	         onlinePayNo,remark,agentPayFlag,agentOrderId
+	   FROM
+	         com_trade_db.`order_payment` 
+	   WHERE
+	         orderId=#{orderId}
+	      
+	</select>
+	
+	<!--  更新订单支付表状态，由服务系统内部调用 -->
+	<update id="updateAgentPayState">
+	    UPDATE 
+	       `order_agent_payment`
+	    <set>
+	        <if test="remark!=null">
+	         remark=#{remark},       
+	        </if>
+	        <if test="refundNo!=null">
+	         refundNo=#{refundNo},       
+	        </if>
+	        <if test="onlinePayNo!=null">
+	        	onlinePayNo=#{onlinePayNo},
+	        </if>
+	        <if test="onlinePayValue!=null">
+	        	onlinePayValue=#{onlinePayValue}*100,
+	        </if>
+	        <if test="payCompleteTime!=null">
+	        	payCompleteTime = #{payCompleteTime},
+	        </if>
+	        state=#{state},
+	        updateTime=NOW()
+	    </set>
+	    WHERE
+	        agentOrderId=#{agentOrderId}
+	</update>
+	
+	
+	<!--  更新订单支付表状态，由服务系统内部调用 -->
+	<update id="updatePayState" parameterType="com.westangel.common.bean.trade.TOrderPayInfo">
+	    UPDATE 
+	       `order_payment`
+	    <set>
+	        <if test="remark!=null">
+	         remark=#{remark},       
+	        </if>
+	        <if test="refundNo!=null">
+	         refundNo=#{refundNo},       
+	        </if>
+	        <if test="onlinePayNo!=null">
+	        	onlinePayNo=#{onlinePayNo},
+	        </if>
+	        <if test="onlinePayValue!=null">
+	        	onlinePayValue=#{onlinePayValue}*100,
+	        </if>
+	        <if test="onlinePayWay!=0">
+	        	onlinePayWay = #{onlinePayWay},
+	        </if>
+	        <if test="agentPayFlag!=null">
+	        	agentPayFlag = #{agentPayFlag},
+	        </if>
+	        <if test="agentAccountId!=null">
+	        	agentAccountId = #{agentAccountId},
+	        </if>
+	        <if test="agentOrderId!=null">
+	        	agentOrderId = #{agentOrderId},
+	        </if>
+	        <!-- 需要一起修改 -->
+	        <if test="coupons!=null">
+	        	coupons=#{coupons},couponsPayValue=#{couponsPayValue}*100,
+	        </if>
+	        <if test="payCompleteTime!=null">
+	        	payCompleteTime = #{payCompleteTime},
+	        </if>
+	        state=#{state},
+	        updateTime=NOW()
+	    </set>
+	    WHERE
+	        orderId=#{orderId}
+	</update>
+	
+	<!--  更新订单支付表状态，由服务系统内部调用 -->
+	<update id="updatePayStateOnly" >
+	    UPDATE 
+	       `order_payment`
+	    <set>
+	        state=#{state},
+	        updateTime=NOW()
+	    </set>
+	    WHERE
+	        orderId=#{orderId}
+	    
+	</update>
+	
+		
+	<!--  更新订单支付表打款状态，内部调用 -->
+	<update id="updateProfitFlag" >
+	    UPDATE 
+	       `order_payment`
+	    <set>
+	        profitFlag=#{profitFlag},
+	        updateTime=NOW()
+	    </set>
+	    WHERE
+	        orderId=#{orderId}
+	</update>
+	
+	<!-- 通过productId获取微信支付信息 -->
+	<select id="queryWeiXinPayInfoByProductId" resultType="com.westangel.commonservice.trade.model.pay.WeiXinPayInfo">
+		select appId,appSecret,mchId,certificatePath from com_push_db.push_weixin_channel where businessId=1
+		<choose>
+			<when test="productId!=null">
+				 AND productId = #{productId}
+			</when>
+			<otherwise>
+				 AND productId = 2
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 通过orderId 获取微信支付信息 -->
+	<select id="queryWeiXinPayInfoByOrderId" resultType="com.westangel.commonservice.trade.model.pay.WeiXinPayInfo">
+		SELECT appId,appSecret,mchId,certificatePath FROM com_push_db.push_weixin_channel t1
+		JOIN com_trade_db.order t2 ON t1.productId = t2.wxProductId AND t2.orderId = #{orderId}
+		WHERE businessId=1
+	</select>
+	
+	
+	<!-- 通过agentOrderId 获取代支付信息 -->
+	<select id="queryOrderAgentPayByOrderAgentId" resultType="com.westangel.common.bean.trade.TOrderAgentPayInfo">
+		SELECT agentPayId,orderId,agentOrderId,onlinePayValue/100 onlinePayValue,onlinePayWay,
+		onlinePayAccount,onlinePayNo,refundNo,payCompleteTime,state,remark 
+		FROM com_trade_db.order_agent_payment
+		WHERE agentOrderId = #{agentOrderId}
+	</select>
+	
+	<!-- 查询订单是否需要退款 -->
+	<select id="queryOrderAgentNeedrefund" resultType="java.lang.String">
+		SELECT t1.agentOrderId 
+		FROM com_trade_db.order_agent_payment t1
+		JOIN com_trade_db.order_payment t2 ON t1.orderId = t2.orderId
+		WHERE 
+		t1.agentOrderId=#{agentOrderId} AND t1.state = 1 AND t2.state = 1
+		AND ((t2.agentPayFlag=1 AND t2.agentOrderId !=t1.agentOrderId) OR t2.agentPayFlag = 0)
+	</select>
+</mapper>

@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.patientinfo.PatientFamilyDao">
+	<resultMap id="baseResultMap" type="com.westangel.common.bean.user.PatientFamily">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="patientId" property="patientId" jdbcType="BIGINT" />
+		<result column="patientRelation" property="patientRelation" jdbcType="INTEGER" />
+		<result column="familyName" property="familyName" jdbcType="VARCHAR" />
+		<result column="familyPhone" property="familyPhone" jdbcType="VARCHAR" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="zipcode" property="zipcode" jdbcType="VARCHAR" />
+		<result column="isDefault" property="isDefault" jdbcType="INTEGER" />
+		<result column="isValid" property="isValid" jdbcType="INTEGER" />
+		<result column="sourceFlag" property="sourceFlag" jdbcType="INTEGER" />
+		<result column="patientRelationName" property="patientRelationName" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<insert id="batchInsert">
+		insert into user_db.u_patient_family(
+			patientId,
+			contactId,
+			operator,
+			patientRelation,
+			familyName,
+			familyPhone,
+			address,
+			remark,
+			zipcode,
+			isDefault,
+			sourceFlag,
+			isValid,
+			rawCreateTime,
+			createTime,
+			updateTime,
+			recordTime
+		) values 
+		<foreach collection="patientFamilyList" item="item" separator=",">
+		(
+			#{item.patientId},
+			#{item.contactId},
+			#{item.operatorId},
+			#{item.patientRelation},
+			#{item.familyName},
+			#{item.familyPhone},
+			#{item.address},
+			#{item.remark},
+			#{item.zipcode},
+			#{item.isDefault},
+			#{item.sourceFlag},
+			#{item.isValid},
+			now(),
+			now(),
+			now(),
+			now()
+			)
+		</foreach>
+		
+	</insert>
+	
+	<insert id="insert" parameterType="com.westangel.common.bean.user.PatientFamily">
+		<selectKey resultType="long" keyProperty="id" order="AFTER">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		insert into user_db.u_patient_family(
+			patientId,
+			contactId,
+			operator,
+			patientRelation,
+			familyName,
+			familyPhone,
+			address,
+			remark,
+			zipcode,
+			isDefault,
+			sourceFlag,
+			isValid,
+			rawCreateTime,
+			createTime,
+			updateTime,
+			recordTime
+		) values (
+			#{patientId},
+			#{contactId},
+			#{operatorId},
+			#{patientRelation},
+			#{familyName},
+			#{familyPhone},
+			#{address},
+			#{remark},
+			#{zipcode},
+			#{isDefault},
+			#{sourceFlag},
+			#{isValid},
+			now(),
+			now(),
+			now(),
+			now()
+		)
+	</insert>
+	
+	
+	
+	<select id="find" resultMap="baseResultMap">
+		SELECT t1.id, t1.patientId,
+		t1.patientRelation, t1.familyName, t1.familyPhone, t1.address,
+		t1.createTime, t1.updateTime, t1.remark,t1.zipcode,t1.isDefault,t1.isValid,t1.sourceFlag,
+		(SELECT r.relationName FROM user_db.meta_relation r WHERE r.relationId=t1.patientRelation) patientRelationName
+		FROM user_db.u_patient_family t1 WHERE
+		t1.patientId=#{patientId,jdbcType=BIGINT} 
+		<choose>
+			<when test="mobile == null">AND t1.familyPhone IS NULL</when>
+			<otherwise>AND t1.familyPhone=#{mobile}</otherwise>
+		</choose>
+		<choose>
+			<when test="familyName == null">AND t1.familyName IS NULL</when>
+			<otherwise>AND t1.familyName=#{familyName}</otherwise>
+		</choose>
+	</select>
+	<update id="update" parameterType="com.westangel.common.bean.user.PatientFamily">
+		update user_db.u_patient_family
+		<set>
+			<if test="patientRelation != null">
+				patientRelation=#{patientRelation,jdbcType=INTEGER},
+			</if>
+			<if test="familyName != null">
+				familyName=#{familyName,jdbcType=VARCHAR},
+			</if>
+			<if test="familyPhone != null">
+				familyPhone=#{familyPhone,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null">
+				address=#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				remark=#{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="isValid !=null">
+				isValid=#{isValid},
+			</if>
+			<if test="isDefault !=null">
+				isDefault=#{isDefault},
+			</if>
+			<if test="operatorId !=null">
+				operator=#{operatorId},
+			</if>
+			<if test="zipcode !=null">
+				zipcode=#{zipcode},
+			</if>
+			<if test="phoneStatus !=null">
+				phoneStatus=#{phoneStatus},
+			</if>
+			<if test="patientId !=null">
+				patientId=#{patientId},
+			</if>
+			<if test="sourceFlag==null">
+				sourceFlag=4,
+			</if>
+			<if test="sourceFlag!=null">
+				sourceFlag=#{sourceFlag},
+			</if>
+			updateTime=NOW()
+		</set>
+		where id=#{id,jdbcType=BIGINT}
+	</update>
+
+</mapper>

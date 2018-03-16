@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.lisrealtime.RealtimeDetectionReportDao" >
+  <!-- 查看检查列表 -->
+  <select id="queryWaitPushDetectionReport" resultType="com.esuizhen.cloudservice.ehr.model.lisrealtime.TReportPushBatch">
+	SELECT
+		t1.patientId,
+		t2.userId,
+		t3.detectionReportId reportId,
+		t3.detectionTypeName pushItemName,
+		t3.acceptTime itemCheckTime,
+		t3.reportTime,
+		t3.applyTime,
+		t3.sampleTime,
+		t5.hospitalId,
+		CASE WHEN(
+			select count(1) 
+			from lis_db.eci_detection_detail inner1 
+			where (inner1.promptType>1 or inner1.prompt is not null) and inner1.detectionReportId=t3.detectionReportId limit 1
+		)>0 THEN -1 ELSE 1 END promptFlag,
+		2 as type
+	FROM 
+		user_db.u_patient t1
+	JOIN user_db.u_user t2 on t1.userId=t2.userId
+	JOIN lis_realtime_db.eci_detection_report t3 ON t1.patientId = t3.patientId
+	JOIN user_db.u_hospital t5 on t3.hospitalId=t5.hospitalId
+	JOIN com_trade_db.product t6 on t5.userId=t6.vendor
+	LEFT JOIN lis_realtime_db.eci_detection_detail t7 on t7.detectionReportId=t3.detectionReportId
+	<where>
+		t2.accountType=2
+		and t6.productType=10
+		and t3.handleFlag=0
+		and t3.reportTime > '${reportTime}'
+		and t7.detectionDetailId is not null
+	</where>
+	GROUP BY t3.detectionReportId,t1.patientId
+  </select>
+  
+  <!-- 查看检查列表 -->
+  <select id="queryWaitPushDetectionReportByGreyTest" resultType="com.esuizhen.cloudservice.ehr.model.lisrealtime.TReportPushBatch">
+	SELECT
+		t1.patientId,
+		t2.userId,
+		t3.detectionReportId reportId,
+		t3.applyDoctorId doctorId,
+		doctor.userId doctorUserId,
+		t3.detectionTypeName pushItemName,
+		t3.acceptTime itemCheckTime,
+		t3.reportTime,
+		t3.applyTime,
+		t3.sampleTime,
+		t5.hospitalId,
+		CASE WHEN(
+			select count(1) 
+			from lis_db.eci_detection_detail inner1 
+			where (inner1.promptType>1 or inner1.prompt is not null) and inner1.detectionReportId=t3.detectionReportId limit 1
+		)>0 THEN -1 ELSE 1 END promptFlag,
+		2 as type
+	FROM
+		com_sys_db.sys_grey_test_patient t1
+	JOIN user_db.u_patient patient on t1.patientId=patient.patientId
+	JOIN user_db.u_user t2 on patient.userId=t2.userId
+	JOIN lis_realtime_db.eci_detection_report t3 ON t1.patientId = t3.patientId
+	JOIN user_db.u_hospital t5 on t3.hospitalId=t5.hospitalId
+	JOIN com_trade_db.product t6 on t5.userId=t6.vendor
+	LEFT JOIN user_db.u_doctor doctor on t3.applyDoctorId=doctor.doctorId
+	LEFT JOIN lis_realtime_db.eci_detection_detail t7 on t7.detectionReportId=t3.detectionReportId
+	<where>
+		t2.accountType=2
+		and t6.productType=10
+		and t3.handleFlag=0
+		and t3.reportTime > '${reportTime}'
+		and t1.productType=1
+		and t1.enable=1
+		and t7.detectionDetailId is not null
+	</where>
+	GROUP BY t3.detectionReportId,t1.patientId
+  </select>
+  
+  <update id="updateHandleFlagByPrimaryKey">
+    update lis_realtime_db.eci_detection_report
+    set 
+      handleFlag = 1
+    where detectionReportId in
+	<foreach collection="list" index="index" item="item" open="(" separator="," close=")">    
+   		#{item.reportId}
+    </foreach>
+  </update>
+</mapper>

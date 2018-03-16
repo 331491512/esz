@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_incre_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.incre.IncreDoctorDao">
+
+	<insert id="insert" parameterType="com.westangel.common.bean.Doctor">
+		<selectKey resultType="long" keyProperty="doctorId" order="AFTER">
+			SELECT LAST_INSERT_ID() as doctorId
+		</selectKey>
+		insert into cloud_sync_incre_db.u_doctor (
+			userId, 
+			uuid, 
+			trueName,
+			nickName, 
+			mobile, 
+			sex,
+			birthDate, 
+			userPictureUrl, 
+			professionCredence,
+			registerCredence, 
+			professionCredencePicUrl,
+			registerCredencePicUrl, 
+			isExpert, 
+			skills,
+			tagIds, 
+			tags, 
+			positionTitle,
+			professionalRank, 
+			tel, 
+			introduction, 
+			auditState, 
+			createTime, 
+			updateTime,
+			syncTime,
+			syncFlag
+		)VALUES(
+			#{userId,jdbcType=BIGINT}, 
+			#{uuid, jdbcType=VARCHAR}, 
+			#{trueName,jdbcType=VARCHAR},
+			#{nickName,jdbcType=VARCHAR}, 
+			#{mobile,jdbcType=VARCHAR},
+			#{sex,jdbcType=INTEGER},
+			#{birthDate,jdbcType=TIMESTAMP}, 
+			#{userPictureUrl,jdbcType=VARCHAR},
+			#{professionCredence,jdbcType=VARCHAR},
+			#{registerCredence,jdbcType=VARCHAR},
+			#{professionCredencePicUrl,jdbcType=VARCHAR},
+			#{registerCredencePicUrl,jdbcType=VARCHAR},
+			#{isExpert,jdbcType=INTEGER}, 
+			#{skills,jdbcType=VARCHAR},
+			#{tagIds,jdbcType=VARCHAR}, 
+			#{tags,jdbcType=VARCHAR},
+			#{positionTitle,jdbcType=INTEGER},
+			#{professionalRank,jdbcType=INTEGER}, 
+			#{tel,jdbcType=VARCHAR},
+			#{introduction,jdbcType=VARCHAR}, 
+			#{auditState,jdbcType=INTEGER},
+			#{createTime},
+			#{updateTime},
+			NOW(),
+			#{syncFlag}
+		)
+	</insert>
+</mapper>

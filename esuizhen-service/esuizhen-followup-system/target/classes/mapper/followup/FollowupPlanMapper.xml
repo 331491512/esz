@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followup.FollowupPlanDao">
+	<!-- 随访计划模版详情 -->
+	<resultMap id="followupPlanTemplategResultMap" type="com.esuizhen.cloudservice.followup.model.followup.FollowupPlanTemplate" >
+    	<result property="planTemplateId" column="planTemplateId"/>
+    	<result property="planTemplateName" column="planTemplateName"/>
+    	<result property="planTemplateType" column="planTemplateType"/>
+    	<result property="author" column="author"/>
+    	<result property="isPublic" column="isPublic"/>
+    	<result property="createTime" column="createTime"/>
+    	<result property="followupType" column="followupType"/>
+    	
+    	<result property="followupSource" column="followupSource"/>
+  		<collection property="detailList" ofType="com.esuizhen.cloudservice.followup.model.followup.FollowupPlanTemplateDetialInfo">
+    		<result property="planTemplateId" column="planTemplateId"/>
+    		<result property="planTemplateItemId" column="planTemplateItemId"/>
+    		<result property="planTemplateItemIndex" column="planTemplateItemIndex"/>
+    		<result property="intervalDays" column="intervalDays"/>
+    		<result property="actionType" column="actionType"/>
+    		<result property="content" column="content"/>
+    	</collection>
+	</resultMap>
+
+	<resultMap id="queryFollowupPlanDetailInfoResultMap" type="com.esuizhen.cloudservice.followup.model.followup.TFollowupPlan">
+		<result property="followupId" column="followupId"/>
+    	<result property="followupName" column="followupName"/>
+    	<result property="followupDescription" column="followupDescrption"/>
+    	<result property="confirmedDate" column="confirmedDate"/>
+    	<result property="followupType" column="followupType"/>
+    	<result property="followupSource" column="followupSource"/>
+    	<result property="sourceDiagnosis" column="sourceDiagnosis"/>
+    	<result property="trueName" column="trueName"/>
+    	<result property="outHospitalDate" column="outHospitalDate"/>
+    	<result property="beforAlterDate" column="beforAlterDate"/>
+    	<result property="afterAlterDate" column="afterAlterDate"/>
+    	<result property="noFeedbackNum" column="noFeedbackNum"/>
+  		<collection property="detailList" ofType="com.esuizhen.cloudservice.followup.model.followup.TFollowupPlanDetialInfo">
+    		<result property="actionType" column="actionType"/>
+    		<result property="actionTypeName" column="actionTypeName"/>
+    		<result property="intervalDays" column="intervalDays"/>
+    		<result property="intervalDaysTips" column="intervalDaysTips"/>
+    		<result property="content" column="content"/>
+    		<result property="followupDate" column="followupDate"/>
+    		<result property="isAlertSent" column="isAlertSent"/>
+    		<result property="isAlertSent" column="isAlertSent"/>
+    		<result property="isSurveryFeedback" column="isSurveryFeedback"/>
+    		<result property="questionnaireUrl" column="questionnaireUrl"/>
+    		<result property="questionnaireResultUrl" column="questionnaireResultUrl"/>
+    	</collection>
+	</resultMap>
+	<!-- 查询患者随访计划详情 -->
+	<select id="queryFollowupPlanInfo"  resultType="com.esuizhen.cloudservice.followup.model.followup.TFollowupPlan">
+		SELECT t1.followupId , t1.followupName , t1.followupDescrption , t1.confirmedDate , t1.followupType ,
+		       t1.followupSource , t1.followupDescrption ,
+			   (SELECT trueName FROM user_db.u_patient  WHERE patientId=t1.patientId) trueName 
+		FROM followup_plan t1 
+		WHERE t1.patientId=#{patientId}
+	</select>
+	
+	<select id="queryintervalDaysByPatientId"  resultType="java.lang.Integer">
+		SELECT MAX(intervalDays)
+		FROM followup_plan_detail t1 
+		WHERE isAlertSent=1
+		AND t1.patientId=#{patientId}
+	</select>
+	
+	<select id="queryplanTemplateIdByPatientId"  resultType="java.lang.String">
+		SELECT planTemplateId FROM followup_plan_template WHERE diseaseTypeId=#{diseaseTypeId}
+		UNION
+		SELECT planTemplateId FROM followup_plan_template WHERE diseaseTypeId=999
+		LIMIT 1
+	</select>
+	
+	<!-- 查询患者随访计划 -->
+	<select id="queryFollowupPlanDetailInfo"  resultMap="queryFollowupPlanDetailInfoResultMap">
+		SELECT t1.followupId , t1.followupName , t1.followupDescrption , t1.confirmedDate , t1.followupType , t1.followupSource , t1.followupDescrption ,
+			 t2.actionType , (CASE WHEN t2.actionType=0 THEN '随访计划开启' WHEN t2.actionType=1 THEN '康复知识' WHEN t2.actionType=2 THEN '复查提醒' ELSE '随访问卷' END  ) actionTypeName ,
+			 t2.intervalDays , 
+			 t2.intervalDaysTips , 
+			 t2.content , t2.followupDate , t2.isAlertSent ,
+       		 t2.isSurveryFeedback ,
+			 CONCAT('${questionnaireUrl}',t2.followupItemId) questionnaireUrl , CONCAT('${questionnaireResultUrl}',t2.followupItemId) questionnaireResultUrl ,
+			 (SELECT openId FROM user_db.u_thirdparty ti1, user_db.u_patient ti2 WHERE ti1.userId=ti2.userId AND ti2.patientId=t1.patientId LIMIT 1) openId , 
+			 (SELECT trueName FROM user_db.u_patient  WHERE patientId=t1.patientId) trueName ,
+			 (SELECT sourceDiagnosis FROM user_db.u_patient  WHERE patientId=t1.patientId) sourceDiagnosis
+			 ,(SELECT count(followupId) FROM followup_db.followup_plan_detail WHERE followupId=t1.followupId AND actionType=3 AND followupDate &lt; NOW() AND isSurveryFeedback=0) noFeedbackNum,
+			 (SELECT followupDate FROM followup_db.followup_plan_detail WHERE followupId=t1.followupId AND actionType=2 AND isAlertSent=1 ORDER BY followupDate desc LIMIT 1) beforAlterDate,
+			 (SELECT followupDate FROM followup_db.followup_plan_detail WHERE followupId=t1.followupId AND actionType=2 AND isAlertSent=0 ORDER BY followupDate asc LIMIT 1) afterAlterDate,
+			 (SELECT outhospitalDate FROM ehr_db.ei_inhospital_note t WHERE patientId = t1.patientId AND outhospitalDate IS NOT NULL order by outhospitalDate DESC LIMIT 1)outHospitalDate
+		FROM followup_db.followup_plan t1 , followup_db.followup_plan_detail t2
+		WHERE t1.followupId=t2.followupId
+		AND t1.patientId=#{patientId}
+		ORDER BY t2.intervalMonths ASC , t2.intervalDays ASC
+	</select>
+	
+	<!-- 查看随访计划模版详情 -->
+	<select id="queryFollowupPlanTemplate" parameterType="java.lang.String" resultMap="followupPlanTemplategResultMap">
+		SELECT t1.planTemplateId , planTemplateName , planTemplateType , author , isPublic , t1.createTime , t1.followupSource , t1.followupDescription ,
+		       planTemplateItemId , planTemplateItemIndex , intervalDays , actionType , content
+		FROM followup_plan_template t1 , followup_plan_template_detail t2
+		WHERE t1.planTemplateId=t2.planTemplateId
+		AND t1.planTemplateId = #{planTemplateId}
+	</select>
+	
+	<!-- 查看随访计划(归集随访计划) -->
+	<select id="queryFollowupDetailByPatientId" resultType="java.util.HashMap">
+		SELECT t1.followupId , t2.followupItemId
+		FROM followup_plan t1 , followup_plan_detail t2 
+		WHERE t1.followupId=t2.followupId
+		AND t1.patientId=#{patientId}
+		AND t2.followupDate>=DATE_ADD(NOW(),INTERVAL -10 DAY)
+		AND DATE_ADD(NOW(),INTERVAL 10 DAY)>=t2.followupDate
+		LIMIT 1
+	</select>
+	
+	<!-- 查询公开的随访计划 -->
+	<select id="selectFollowupPlanTemplate"  resultType="com.esuizhen.cloudservice.followup.model.followup.TFollowupPlanTemplateSimpleInfo">
+		SELECT t1.planTemplateId , t1.planTemplateName , isPublic , '医院名称' hospitalName , '姓名' userName , 2 referenceCount
+		FROM followup_plan_template t1
+		WHERE author!=9
+		AND t1.isPublic=1
+	</select>
+	
+	<!-- 查询我的随访患者 -->
+	<select id="selectFollowupPatientList"  resultType="com.esuizhen.cloudservice.followup.model.followup.TPatientSimpleInfo">
+		SELECT t4.patientId , t4.trueName , t4.picFileUrl , t4.sourceDiagnosis , 
+		      (SELECT accountType FROM user_db.u_user WHERE userId=t4.userId) accountType,
+					t4.confirmedDate
+		FROM (SELECT t1.* FROM user_db.u_patient t1 , user_db.r_doctor_patient t2 , user_db.u_doctor t3 WHERE t1.patientId=t2.patientId AND t2.doctorId=t3.doctorId) t4
+		WHERE EXISTS (SELECT 1 FROM followup_plan t1 WHERE t1.patientId=t4.patientId)
+	</select>
+	
+	<!-- 查询患者随访计划 -->
+	<select id="queryFollowupPlanId"  resultType="java.lang.String">
+		SELECT t1.followupId 
+		FROM followup_db.followup_plan t1
+		WHERE t1.patientId=#{patientId}
+	</select>
+	
+	<!-- 创建随访计划模版 -->
+	<insert id="createFollowupPlanTemplate" parameterType="com.esuizhen.cloudservice.followup.model.followup.FollowupPlanTemplate">
+		INSERT INTO followup_plan_template
+		(planTemplateId , planTemplateName , planTemplateType ,diseaseTypeId, followupDescrption,followupSource , author , isPublic , createTime , updateTime)
+		VALUES
+		(#{planTemplateId},#{planTemplateName},#{planTemplateType},#{diseaseTypeId},#{followupDescrption},#{followupSource},#{author},#{isPublic},NOW(),NOW())
+	</insert>
+	
+	<!-- 创建随访计划 -->
+	<insert id="createFollowupPlan" parameterType="java.util.LinkedHashMap">
+		INSERT INTO followup_plan (
+        	followupId , cacheIndex , followupName  , followupType ,followupSource, 
+        	followupDescrption ,patientId , planTemplateId ,
+        	state , confirmedDate , startTime , currPerformDays , wxProductId, createTime , updateTime 
+        ) 
+		SELECT '${followupId}' , 1 , planTemplateName , planTemplateType ,
+				<if test="followupSource!=null">
+					#{followupSource}
+				</if>
+				<if test="followupSource==null">
+					followupSource
+				</if>
+				 , followupDescrption, ${patientId} , planTemplateId , 1 , 
+			   '${confirmedDate}' , NOW() , 0 ,#{wxProductId}, NOW() , NOW()
+		FROM followup_plan_template WHERE planTemplateId=#{planTemplateId} LIMIT 1 
+	</insert>
+	
+	<!-- 修改随访计划模版 -->
+	<update id="updateFollowupPlanTemplate" parameterType="com.esuizhen.cloudservice.followup.model.followup.FollowupPlanTemplate">  
+        UPDATE followup_plan_template 
+        <set>
+            <if test="planTemplateName != null">
+                planTemplateName = #{planTemplateName} ,
+            </if>
+            <if test="planTemplateType != null">
+                planTemplateType = #{planTemplateType} ,
+            </if>
+            <if test="author != null">
+                author = #{author} ,
+            </if>
+            <if test="isPublic != null">
+                isPublic = #{isPublic} ,
+            </if>
+            <if test="1==1">
+                updateTime = NOW()
+            </if>
+        </set>
+        WHERE planTemplateId = #{planTemplateId}  
+    </update> 
+    
+    <!-- 修改随访计划模版 -->
+	<update id="updateFollowupPlanDetail" parameterType="com.esuizhen.cloudservice.followup.model.followup.TFollowupPlanDetialInfo">  
+        UPDATE followup_plan_detail 
+        <set>
+            <if test="isSurveryFeedback != null">
+                isSurveryFeedback = #{isSurveryFeedback} ,
+            </if>
+            <if test="isAlertSent != null">
+                isAlertSent = #{isAlertSent} 
+            </if>
+        </set>
+        WHERE followupItemId = #{followupItemId}  
+    </update> 
+    
+	<!-- 添加随访计划详情 开启5年随访计划 -->
+	<insert id="addFollowupPlanDetialInfo"  parameterType="com.esuizhen.cloudservice.followup.model.followup.TFollowupPlanDetialInfo">
+		INSERT INTO followup_plan_detail (
+        	followupItemId , followupId , planTemplateItemIndex , followupDate , intervalDays , isAlertSent ,
+        	isSurveryFeedback , content , actionType , createTime , updateTime , intervalMonths , intervalDaysTips 
+        )
+        SELECT    
+			CONCAT('ITEM',DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'),ROUND(RAND()*1000),ROUND(RAND()*100)) ,
+			'${followupId}' , planTemplateItemIndex , 
+			DATE_ADD(DATE_ADD('${confirmedDate}', interval t2.intervalDays DAY), interval t2.intervalMonths MONTH),
+			t2.intervalDays , 0 , 0 , content , actionType , NOW() , NOW() , t2.intervalMonths ,t2.intervalDaysTips
+		FROM followup_plan_template t1
+		JOIN followup_plan_template_detail t2 ON t1.planTemplateId=t2.planTemplateId
+		WHERE t1.planTemplateId=#{planTemplateId}
+		AND t2.intervalMonths&gt;=TIMESTAMPDIFF(MONTH,'${confirmedDate}',CURDATE()) 
+		AND t2.intervalMonths&lt;=TIMESTAMPDIFF(MONTH,'${confirmedDate}',CURDATE())+60
+	</insert>
+	
+	<insert id="addFollowupPlanDetialInfoParam"  parameterType="com.esuizhen.cloudservice.followup.model.followup.TFollowupPlanDetialInfo">
+		INSERT INTO followup_plan_detail (
+        	followupItemId , followupId , planTemplateItemIndex , followupDate , intervalDays , isAlertSent ,intervalMonths ,intervalDaysTips,
+        	isSurveryFeedback , content , actionType , createTime , updateTime 
+        )
+		VALUES
+		(#{followupItemId},#{followupId},#{planTemplateItemIndex} , #{followupDate} , #{intervalDays} , #{isAlertSent}, #{intervalMonths},#{intervalDaysTips},
+		 #{isSurveryFeedback} , #{content},#{actionType},NOW(),NOW())
+	</insert>
+	
+	<!-- 添加随访计划模版详情 -->
+	<insert id="addFollowupPlanTemplateDetialInfo"  parameterType="java.util.List">
+		INSERT INTO followup_plan_template_detail
+		(planTemplateItemId , planTemplateId , planTemplateItemIndex , intervalMonths , intervalDays ,intervalDaysTips, actionType , content , createTime , updateTime)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.planTemplateItemId},#{item.planTemplateId},#{item.planTemplateItemIndex},#{item.intervalMonths},#{item.intervalDays},#{item.intervalDaysTips},#{item.actionType},#{item.content},NOW(),NOW())
+		</foreach>
+	</insert>
+	
+	<!-- 根据随访计划模版ID删除随访计划模版 -->
+	<delete id="deleteFollowupPlanTemplateById" parameterType="java.lang.String">  
+        DELETE FROM followup_plan_template WHERE planTemplateId = #{planTemplateId}  
+    </delete> 
+    
+    <!-- 根据随访计划模版详情ID删除随访计划模版详情 -->
+    <delete id="deleteFollowupPlanTemplateDetialInfoById" parameterType="java.lang.String">  
+        DELETE FROM followup_plan_template_detail WHERE planTemplateItemId = #{planTemplateItemId}  
+    </delete> 
+    
+    <!-- 根据随访计划模版ID删除随访计划模版详情 -->
+    <delete id="deleteFollowupPlanTemplateDetialInfoByPlanId" parameterType="java.lang.String">  
+        DELETE FROM followup_plan_template_detail WHERE planTemplateId = #{planTemplateId}  
+    </delete> 
+    
+    <!-- 获取患者来源信息 -->
+    <select id="queryPatientSource" resultType="java.util.LinkedHashMap">
+    	SELECT
+			CASE t2.sourceFlag 
+			WHEN 1 THEN (select u2.trueName from user_db.r_doctor_patient u1 JOIN  user_db.u_doctor u2 ON u1.doctorId=u2.doctorId WHERE u1.patientId=t1.patientId  ORDER BY t1.createTime ASC LIMIT 1) 
+			WHEN 5 THEN (select u2.hospitalName from user_db.r_hospital_patient u1 JOIN  user_db.u_hospital u2 ON u1.hospitalId=u2.hospitalId WHERE u1.patientId=t1.patientId  ORDER BY t1.createTime ASC LIMIT 1) 
+			END trueName,weixinName
+		FROM
+			user_db.u_patient t1
+		JOIN user_db.u_user t2 ON t1.userId = t2.userId
+		LEFT JOIN user_db.conf_hospital_wx ON productId=#{productId}
+		WHERE t1.patientId = #{patientId}
+    </select>
+    <!-- 修改随访计划 -->
+	<update id="updateFollowupPlanByPatientId" parameterType="java.lang.String">  
+        UPDATE followup_db.followup_plan
+		<set>
+            <if test="state != null">
+                state=#{state},
+            </if>
+                updateTime = NOW()
+		</set>
+        WHERE patientId=#{patientId}
+    </update> 
+</mapper>

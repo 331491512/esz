@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.client.sync.dao.DetectionReportDao" >	
+	
+	<select id="getBatchSyncDetectionReport" resultType="java.util.LinkedHashMap" parameterType="com.esuizhen.client.sync.model.TBatchDetailInfo">
+       	SELECT
+			t1.detectionReportId,t1.emrId,t2.patientId,t2.uuid AS patientUuid,t1.patientNo,t1.inhospitalTimes,t1.patientIdno,t1.patientAddress,
+			t1.patientMobile,t1.patientSex,t1.patientAge,t1.patientBirth,t1.patientName,t1.wardArea,t1.bedNo,t1.outPatientFlag,
+			t1.hospitalId,t1.detectionTypeId,t1.detectionChildTypeId,t1.detectionTypeName,t1.deptId,
+			(SELECT uuid FROM user_db.u_department WHERE deptId=t1.deptId) AS deptUuid,
+			t1.deptName,t1.diagnosis,
+			t1.sampleNo,t1.sampleName,t1.sampleType,t1.sampleState,t1.instrument,t1.applyDoctorId,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.applyDoctorId) as applyDoctorUuid,
+			t1.applyDoctorNo,t1.applyDoctorName,t1.operateDoctorId,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.operateDoctorId) as operateDoctorUuid,
+			t1.operateDoctorNo,t1.operateDoctorName,t1.reportDoctorId,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.reportDoctorId) as reportDoctorUuid,
+			t1.reportDoctorNo,t1.reportDoctorName,t1.auditDoctorId,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.auditDoctorId) as auditDoctorUuid,
+			t1.auditDoctorNo,t1.auditDoctorName,t1.remark,t1.readFlag,t1.applyTime,t1.sampleTime,t1.acceptTime,t1.reportTime,
+			t1.state,t1.createTime,t1.updateTime,t1.rawDetectionTypeId,t1.rawDetectionChildTypeId,t1.mainID,t1.rawCreateTime,t1.mergeFlag,t1.mergeFrom,
+			IFNULL(t1.mergeFromUuid,(SELECT uuid FROM user_db.u_patient WHERE patientId =t1.mergeFrom)) AS mergeFromUuid,
+			t1.mergeTarget,
+			IFNULL(t1.mergeTargetUuid,(SELECT uuid FROM user_db.u_patient WHERE patientId =t1.mergeTarget)) AS mergeTargetUuid,
+			t1.mergeTime,3 as sourceFlag
+		FROM
+		     lis_db.eci_detection_report t1
+		JOIN user_db.u_patient t2 ON t1.patientId = t2.patientId 
+		JOIN sc_db.u_patient_sync_result_client t3 ON t2.uuid = t3.uuid
+		join sc_db.eci_detection_report_sync_result_client t4 ON t1.detectionReportId = t4.detectionReportId
+		WHERE
+			t3.syncFlag=1 AND t4.syncFlag = 0
+	    LIMIT #{detailInfo.syncSize}
+  	</select>
+  	
+   	<update id="updateDetectionReportSyncflag" parameterType="java.lang.String">
+		UPDATE sc_db.eci_detection_report_sync_result_client t1
+		SET t1.opFlag=IF(t1.syncFlag=0,1,2),t1.syncFlag = 9 , t1.syncTime=NOW(),t1.updateTime = NOW()
+		WHERE
+			t1.detectionReportId IN (${detectionReportIds})
+	</update>
+	
+	<update id="updateSyncResult" parameterType="com.esuizhen.client.sync.bean.TBatchDataResultInfo">
+		UPDATE sc_db.eci_detection_report_sync_result_client t1
+		SET 
+		    t1.batchId = #{tBatchDataResultInfo.batchId},
+		    t1.syncFlag = #{tBatchDataResultInfo.syncFlag},
+			t1.cause = #{tBatchDataResultInfo.cause},
+			t1.updateTime = NOW()
+		WHERE
+			t1.detectionReportId = #{tBatchDataResultInfo.resultId} and t1.syncFlag = 9
+	</update>
+</mapper>

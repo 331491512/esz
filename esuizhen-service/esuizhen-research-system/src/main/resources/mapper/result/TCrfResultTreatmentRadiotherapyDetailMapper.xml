@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TCrfResultTreatmentRadiotherapyDetailDao">
+
+	<insert id="insertCrfResultTreatmentRadiotherapyDetail" parameterType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentRadiotherapyDetail">
+        INSERT INTO crf_result_treatment_radiotherapy_detail (
+        	crfTreatmentRadiotherapyResultDetailId ,
+        	crfTreatmentRadiotherapyResultId ,
+        	radiotherapyBodyPart ,
+        	radiotherapyPartName ,
+        	totalDose ,
+        	singleDose ,
+        	counts ,
+        	beginTime ,
+        	endTime ,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{crfTreatmentRadiotherapyResultDetailId} ,
+        	#{crfTreatmentRadiotherapyResultId} ,
+        	#{radiotherapyBodyPart} ,
+        	#{radiotherapyPartName} ,
+        	#{totalDose} ,
+        	#{singleDose} ,
+        	#{counts} ,
+        	#{beginTime} ,
+        	#{endTime} ,
+        	NOW() ,
+        	NOW()
+        )
+	</insert>
+    
+    <insert id="insertCrfResultTreatmentRadiotherapyDetailList" parameterType="java.util.List">
+        INSERT INTO crf_result_treatment_radiotherapy_detail (
+        	crfTreatmentRadiotherapyResultDetailId ,
+        	crfTreatmentRadiotherapyResultId ,
+        	radiotherapyBodyPart ,
+        	radiotherapyPartName ,
+        	totalDose ,
+        	singleDose ,
+        	counts ,
+        	beginTime ,
+        	endTime ,
+        	createTime ,
+        	updateTime 
+        ) VALUES 
+        <foreach collection="list" index="index" item="item" separator=",">
+        (
+        	#{item.crfTreatmentRadiotherapyResultDetailId} ,
+        	#{item.crfTreatmentRadiotherapyResultId} ,
+        	#{item.radiotherapyBodyPart} ,
+        	#{item.radiotherapyPartName} ,
+        	#{item.totalDose} ,
+        	#{item.singleDose} ,
+        	#{item.counts} ,
+        	#{item.beginTime} ,
+        	#{item.endTime} ,
+        	NOW() ,
+        	NOW()
+        )
+        </foreach>
+        
+	</insert>
+	
+	<update id="updateCrfResultTreatmentRadiotherapyDetail" parameterType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentRadiotherapyDetail">
+        UPDATE crf_result_treatment_radiotherapy_detail 
+        <set>
+	        <if test="crfTreatmentRadiotherapyResultId != null">
+                crfTreatmentRadiotherapyResultId = #{crfTreatmentRadiotherapyResultId} ,
+            </if>
+	        <if test="radiotherapyBodyPart != null">
+                radiotherapyBodyPart = #{radiotherapyBodyPart} ,
+            </if>
+	        <if test="radiotherapyPartName != null">
+                radiotherapyPartName = #{radiotherapyPartName} ,
+            </if>
+	        <if test="totalDose != null">
+                totalDose = #{totalDose} ,
+            </if>
+	        <if test="singleDose != null">
+                singleDose = #{singleDose} ,
+            </if>
+	        <if test="counts != null">
+                counts = #{counts} ,
+            </if>
+	        <if test="beginTime != null">
+                beginTime = #{beginTime} ,
+            </if>
+	        <if test="endTime != null">
+                endTime = #{endTime} ,
+            </if>
+	        <if test="1==1">
+                updateTime = NOW() ,
+            </if>
+        </set>
+        WHERE 
+	        crfTreatmentRadiotherapyResultDetailId = #{crfTreatmentRadiotherapyResultDetailId} 
+	</update>
+
+    <delete id="deleteCrfResultTreatmentRadiotherapyDetail">
+        DELETE FROM crf_result_treatment_radiotherapy_detail WHERE
+        crfTreatmentRadiotherapyResultDetailId = #{crfTreatmentRadiotherapyResultDetailId} 
+    </delete>
+    
+    <delete id="deleteCrfResultTreatmentRadiotherapyDetailByCrfResultId">
+        DELETE t1.*
+        FROM crf_result_treatment_radiotherapy_detail t1 , crf_result_treatment_radiotherapy t2
+        WHERE t1.crfTreatmentRadiotherapyResultId = t2.crfTreatmentRadiotherapyResultId
+        AND t2.crfResultId=#{crfResultId}
+    </delete>
+    
+    <select id="queryCrfResultTreatmentRadiotherapyDetailById" resultType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentRadiotherapyDetail">
+		SELECT 
+        	crfTreatmentRadiotherapyResultDetailId,
+        	crfTreatmentRadiotherapyResultId,
+        	radiotherapyBodyPart,
+        	radiotherapyPartName,
+        	totalDose,
+        	singleDose,
+        	counts,
+        	beginTime,
+        	endTime,
+        	createTime,
+        	updateTime
+		FROM crf_result_treatment_radiotherapy_detail 
+	    WHERE 
+	        crfTreatmentRadiotherapyResultDetailId = #{crfTreatmentRadiotherapyResultDetailId} 
+	</select>
+	
+	<delete id="deleteByProjectId">
+		DELETE
+			i7.*
+		FROM pro_db.crf_result_main i1,
+			pro_db.crf_observation_subject_element i2,
+			pro_db.crf_course_detail i3,
+			pro_db.crf_course i4,
+			pro_db.r_crftemplate_project i5,
+			pro_db.crf_result_treatment_radiotherapy i6,
+			pro_db.crf_result_treatment_radiotherapy_detail i7
+		WHERE i1.crfObserveId = i2.crfObserveId
+			AND i2.crfCourseItemId = i3.crfCourseItemId
+			AND i3.crfCourseId = i4.crfCourseId
+			AND i4.crfTemplateId = i5.crfTemplateId
+			AND i1.crfResultId = i6.crfResultId
+			AND i6.crfTreatmentRadiotherapyResultId = i7.crfTreatmentRadiotherapyResultId
+			AND i5.projectId = #{projectId}
+	</delete>
+</mapper>
+

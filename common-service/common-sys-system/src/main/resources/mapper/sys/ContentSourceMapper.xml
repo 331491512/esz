@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.westangel.commonservice.sys.dao.ContentSourceDao">
+
+	<select id="getContentSourceList" resultType="com.westangel.commonservice.sys.bean.ContentSourceInfo">
+		SELECT
+			t1.sourceId,t1.sourceName,t1.contentType,t1.linkUrl,t1.apiUrl,
+			t1.detailUrl,t1.pictureUrl,t1.createTime,t1.updateTime,t1.sourceType
+		FROM
+			operation_db.conf_content_source t1
+			JOIN operation_db.r_product_show_rule_source t2 ON t2.sourceId=t1.sourceId AND t2.ruleId=#{ruleId}
+		WHERE
+			t1.state=1
+		ORDER BY t2.sort
+	</select>
+
+	<select id="getContentRule" resultType="com.westangel.commonservice.sys.bean.ContentRule">
+		SELECT
+			ruleId,pageTitle,pageNum,remark
+		FROM
+			com_trade_db.conf_product_show_rule
+		WHERE
+			ruleId=#{ruleId}
+	</select>
+
+</mapper>

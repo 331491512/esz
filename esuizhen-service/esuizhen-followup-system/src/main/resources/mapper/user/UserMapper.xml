@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.user.UserDao">
+	
+	<select id="queryPatientInfoByOpenId" resultType="java.util.LinkedHashMap">
+		SELECT
+			t1.productId,t1.userId,t3.patientId
+		FROM
+			user_db.u_thirdparty t1
+		JOIN user_db.u_user t2 ON t1.userId = t2.userId
+		JOIN user_db.u_patient t3 ON t3.userId = t1.userId
+		WHERE
+		t1.openId = #{openId}
+	</select>
+	
+	<select id="queryUserInfoByPatientId" resultType="java.util.LinkedHashMap">
+		SELECT
+			u.*,patient.*,t.openId
+		FROM
+			user_db.u_patient patient 
+			left join user_db.u_user u ON patient.userId = u.userId
+			left join user_db.u_thirdparty t on patient.userId=t.userId
+		WHERE
+			patient.patientId = #{patientId}
+	</select>
+	
+	<select id="getValidContactMobile" resultType="java.util.LinkedHashMap">
+		SELECT
+			family.id patientFamilyId,
+			family.patientRelation,
+			family.familyName,
+			family.familyPhone mobile,
+			family.address,
+			family.isDefault,
+			family.isValid,
+			family.remark,
+			patient.patientId,
+			patient.trueName,
+			patient.userId
+		FROM
+			user_db.u_patient_family family
+		LEFT JOIN user_db.u_patient patient ON family.patientId = patient.patientId
+		<where>
+			family.patientId= #{patientId} 
+			and family.isValid=1 
+			and family.familyPhone LIKE '1%'
+		</where>
+		order by family.isDefault desc
+		limit 1
+	</select>
+	
+	<select id="getDoctorId" resultType="java.lang.Long">
+		SELECT t1.doctorId
+		FROM 
+		     user_db.u_doctor t1
+		WHERE
+		     t1.userId=#{userId}
+	
+	
+	</select>
+	
+	<select id="isPatientExist" resultType="java.lang.Integer">
+		SELECT count(0)
+		FROM 
+		     user_db.u_patient 
+		WHERE
+		     patientId=#{patientId}
+
+	
+	
+	</select>
+	
+	
+	
+</mapper>

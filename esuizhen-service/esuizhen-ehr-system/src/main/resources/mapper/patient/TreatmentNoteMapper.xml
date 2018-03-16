@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.patient.TreatmentNoteDao">
+<!-- 获取患者治疗 -->
+<select id="queryPatientTreatment" resultType="com.esuizhen.cloudservice.ehr.bean.TTreatmentInfo">
+	<choose>
+		<when test="pageFlag != null and pageFlag == 1">
+			SELECT 
+				(SELECT treatmentTypeName FROM ehr_db.meta_e_treatment WHERE treatmentTypeId=t1.treatmentTypeId) treatmentTypeName,IFNULL(t1.treatmentWay,t1.treatmentName) treatmentWay,t1.medicine,t1.treatmentDosage,t1.dosageUnit, t1.treatmentBeginTime,t1.treatmentEndTime,t1.treatmentProcessFlag,t1.inhospitalId,i.catalogState
+			FROM ehr_db.eci_treatment_note t1
+			LEFT JOIN ehr_db.ei_inhospital_note i ON t1.inhospitalId=i.inhospitalId
+			WHERE t1.patientId = #{patientId}
+			<if test="medicine != null">
+				AND t1.medicine LIKE '%${medicine}%'
+			</if>
+			UNION
+			SELECT 
+				treatmentSchemeName treatmentTypeName,CONCAT(opCode,surgeryName) treatmentWay,'' medicine,'' treatmentDosage,'' dosageUnit,'' treatmentBeginTime,surgeryDate treatmentEndTime,incisionHealingId treatmentProcessFlag,t1.inhospitalId,i.catalogState 
+			FROM ehr_db.eci_surgery_note t1
+			LEFT JOIN ehr_db.ei_inhospital_note i ON t1.inhospitalId=i.inhospitalId WHERE t1.patientId = #{patientId}
+		</when>
+		<otherwise>
+			select 
+			t1.treatmentId,t1.treatmentBeginTime,t1.treatmentEndTime,t1.treatmentWay,t1.treatmentDosage,t1.dosageUnit,t1.treatmentProcessFlag,t1.treatmentTypeId,t1.treatmentName,t1.medicine,t1.operationDoctor,t1.inhospitalId
+			,IFNULL(t2.sourceFlag,3) sourceFlag,t2.creatorId
+			,CASE t2.sourceFlag WHEN 0 THEN "未知" WHEN 1 THEN "患者本人" WHEN 2 THEN t4.trueName WHEN 3 THEN "住院病案" ELSE "住院病案" END creatorName
+			,t3.treatmentTypeName,i.catalogState
+			from ehr_db.eci_treatment_note t1
+			LEFT JOIN ehr_db.ei_inhospital_note i ON t1.inhospitalId=i.inhospitalId
+			LEFT JOIN ehr_db.e_medical_record t2 ON t1.emrId=t2.emrId
+			LEFT JOIN ehr_db.meta_e_treatment t3 ON t1.treatmentTypeId = t3.treatmentTypeId
+			LEFT JOIN user_db.u_doctor t4 ON t2.sourceFlag=2 AND t4.doctorId = t2.creatorId
+			WHERE t1.patientId = #{patientId}
+			<if test="pageFlag == null">
+				ORDER BY t1.treatmentBeginTime DESC
+			</if>
+		</otherwise>
+	</choose>
+</select>
+
+<!-- 获取治疗emrId -->
+<select id="queryPatientTreatmentEmrIdByCreatorId" resultType="java.lang.String">
+	select t2.emrId from ehr_db.eci_treatment_note t1
+	INNER JOIN
+	ehr_db.e_medical_record t2 ON t1.emrId=t2.emrId AND t2.creatorId= #{creatorId}
+	where 
+	t1.treatmentId=#{treatmentId}
+</select>
+
+<!-- 新增治疗信息 -->
+<insert id="createTreatment">
+	INSERT INTO ehr_db.eci_treatment_note(treatmentId,emrId,patientId,treatmentTypeId,treatmentName,treatmentBeginTime,createTime,updateTime)
+	VALUES(#{treatmentId},#{emrId},#{patientId},#{treatmentTypeId},#{treatmentName},#{treatmentBeginTime},NOW(),NOW())
+</insert>
+<!-- 修改治疗 -->
+<update id="modifyTreatment">
+	UPDATE ehr_db.eci_treatment_note t1
+	INNER JOIN ehr_db.e_medical_record t2 ON t1.emrId=t2.emrId AND t2.creatorId=#{creatorId}
+	<set>
+	t1.updateTime=NOW()
+		<if test="treatmentBeginTime!=null">
+			,t1.treatmentBeginTime=#{treatmentBeginTime}
+		</if>
+		<if test="treatmentTypeId!=null">
+			,t1.treatmentTypeId=#{treatmentTypeId}
+		</if>
+		<if test="treatmentName!=null">
+			,t1.treatmentName=#{treatmentName}
+		</if>
+	</set>
+	where t1.treatmentId=#{treatmentId}
+</update>
+<!-- 删除治疗信息 -->
+<delete id="delPatientTreatment">
+	delete from ehr_db.eci_treatment_note where treatmentId=#{treatmentId}
+</delete>
+<!-- 通过患者id删除治疗信息 -->
+<delete id="delPatientTreatmentByPatientId">
+	delete from ehr_db.eci_treatment_note where patientId=#{patientId}
+</delete>
+</mapper>
+

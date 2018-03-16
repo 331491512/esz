@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.temp.TempEDiagnosisInfoDao" >
+    <!-- 向temp表推送数据 -->
+    <insert id="insert">
+		INSERT INTO server_sync_temp_db.e_diagnosis_info (
+			diagnosisId,emrId,mainID,tempId,patientId,patientUuid,patientNo,oldPatientNo,
+			inhospitalTimes,oldInhospitalTimes,inhospitalNo,inhospitalId,diagnosisTypeId,diagnosis,
+			diseaseCode,zdyCode,eszCode,diseaseTypeId,icdDiseaseTypeId,diseaseBasis,diagnosisExplain,
+			inHospitalCondition,organCode,organName,treatmentHistory,isFollowup,sourceCancerCount,
+			diseaseBodyPartId,pathologyDiagnosis,pathologyDiagnosisCode,disagnosisPeriodizationId,diagnosisBasisId,
+			isSourceDiagnosis,remark,visitTime,operatorId,operatorUuid,createTime,updateTime,
+			outhospitalCondition,firstdiagnosisHospitalId,firstdiagnosisHospitalName,firstdiagnosisTime,
+			specialDiseaseDiagnosisId,diagnosisDoctorId,diagnosisDoctorUuid,diagnosisDoctorName,suspectedDiagnosisFlag,
+			surgeryFlag,outhospitalDeptId,outhospitalDeptUuid,tumourPeriodizationT,tumourPeriodizationN,tumourPeriodizationM1,
+			tumourPeriodizationClinic,tumourPeriodization,outhospitalDiagnosis,outhospitalDiagnosisCode,clinicNo,
+			rawCreateTime,seq,creator,creatorUuid,mergeFlag,mergeFrom,mergeFromUuid,mergeTarget,
+			mergeTargetUuid,mergeTime,specialDiseaseRegisterId,batchId,sourceFlag
+		)
+		VALUES(
+			#{diagnosisId},#{emrId},#{mainID},#{tempId},#{patientId},#{patientUuid},#{patientNo},#{oldPatientNo},
+			#{inhospitalTimes},#{oldInhospitalTimes},#{inhospitalNo},#{inhospitalId},#{diagnosisTypeId},#{diagnosis},
+			#{diseaseCode},#{zdyCode},#{eszCode},#{diseaseTypeId},#{icdDiseaseTypeId},#{diseaseBasis},#{diagnosisExplain},
+			#{inHospitalCondition},#{organCode},#{organName},#{treatmentHistory},#{isFollowup},#{sourceCancerCount},
+			#{diseaseBodyPartId},#{pathologyDiagnosis},#{pathologyDiagnosisCode},#{disagnosisPeriodizationId},#{diagnosisBasisId},
+			#{isSourceDiagnosis},#{remark},#{visitTime},#{operatorId},#{operatorUuid},#{createTime},#{updateTime},
+			#{outhospitalCondition},#{firstdiagnosisHospitalId},#{firstdiagnosisHospitalName},#{firstdiagnosisTime},
+			#{specialDiseaseDiagnosisId},#{diagnosisDoctorId},#{diagnosisDoctorUuid},#{diagnosisDoctorName},#{suspectedDiagnosisFlag},
+			#{surgeryFlag},#{outhospitalDeptId},#{outhospitalDeptUuid},#{tumourPeriodizationT},#{tumourPeriodizationN},#{tumourPeriodizationM1},
+			#{tumourPeriodizationClinic},#{tumourPeriodization},#{outhospitalDiagnosis},#{outhospitalDiagnosisCode},#{clinicNo},
+			#{rawCreateTime},#{seq},#{creator},#{creatorUuid},#{mergeFlag},#{mergeFrom},#{mergeFromUuid},#{mergeTarget},
+			#{mergeTargetUuid},#{mergeTime},#{specialDiseaseRegisterId},#{batchId},#{sourceFlag}
+		)
+	</insert>
+
+	<select id="getSyncDiagnosisInfo" resultType="com.esuizhen.server.sync.bean.server.DiagnosisInfoRes" parameterType="com.esuizhen.server.sync.bean.TBatchDetailInfo">
+		SELECT
+			t1.diagnosisId,t1.emrId,t1.mainID,t1.tempId,
+			IFNULL(t4.patientId,t41.patientId) patientId,
+			t1.patientUuid,t1.patientNo,t1.oldPatientNo,
+			t1.inhospitalTimes,t1.oldInhospitalTimes,t1.inhospitalNo,t1.inhospitalId,t1.diagnosisTypeId,t1.diagnosis,t1.diseaseCode,
+			t1.zdyCode,t1.eszCode,t1.diseaseTypeId,t1.icdDiseaseTypeId,t1.diseaseBasis,t1.diagnosisExplain,t1.inHospitalCondition,t1.organCode,
+			t1.organName,t1.treatmentHistory,t1.isFollowup,t1.sourceCancerCount,t1.diseaseBodyPartId,t1.pathologyDiagnosis,
+			t1.pathologyDiagnosisCode,
+			if(t1.disagnosisPeriodizationId=0,NULL ,t1.disagnosisPeriodizationId) disagnosisPeriodizationId,
+			t1.diagnosisBasisId,t1.isSourceDiagnosis,t1.remark,t1.visitTime,
+			IFNULL(t5.doctorId,t51.doctorId) operatorId,
+			t1.operatorUuid,
+			t1.createTime,t1.updateTime,t1.outhospitalCondition,t1.firstdiagnosisHospitalId,t1.firstdiagnosisHospitalName,
+			t1.firstdiagnosisTime,t1.specialDiseaseDiagnosisId,
+			IFNULL(t6.doctorId,t61.doctorId) diagnosisDoctorId,
+			t1.diagnosisDoctorUuid,
+			t1.diagnosisDoctorName,t1.suspectedDiagnosisFlag,t1.surgeryFlag,t8.deptId outhospitalDeptId,t1.outhospitalDeptUuid,t1.tumourPeriodizationT,
+			t1.tumourPeriodizationN,t1.tumourPeriodizationM1,t1.tumourPeriodizationClinic,t1.tumourPeriodization,t1.outhospitalDiagnosis,t1.outhospitalDiagnosisCode,
+			t1.clinicNo,t1.rawCreateTime,t1.seq,
+			IFNULL(t7.doctorId,t71.doctorId) creator,
+			t1.creatorUuid,
+			t1.mergeFlag,
+			t1.mergeFromUuid,
+			t1.mergeTargetUuid,
+			t1.mergeTime,t1.specialDiseaseRegisterId,
+			if(t2.diagnosisId is null,1,2) opFlag,
+			t1.sourceFlag
+		FROM
+		     server_sync_temp_db.e_diagnosis_info t1
+		LEFT JOIN ehr_db.e_diagnosis_info t2 ON t2.diagnosisId=t1.diagnosisId
+		LEFT JOIN user_db.u_patient t4 ON t4.uuid=t1.patientUuid
+		LEFT JOIN user_db.r_uuid_patient_relationship t41 ON t1.patientUuid=t41.uuid
+		LEFT JOIN user_db.u_doctor t5 ON t5.uuid=t1.operatorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t51 ON t1.operatorUuid=t51.uuid
+		LEFT JOIN user_db.u_doctor t6 ON t6.uuid=t1.diagnosisDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t61 ON t1.diagnosisDoctorUuid=t61.uuid
+		LEFT JOIN user_db.u_doctor t7 ON t7.uuid=t1.creatorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t71 ON t1.creatorUuid=t71.uuid
+		LEFT JOIN user_db.u_department t8 ON t1.outhospitalDeptUuid=t8.uuid
+		WHERE t1.batchId=#{batchId}
+	</select>
+</mapper>

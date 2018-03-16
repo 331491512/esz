@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TCrfResultClinicalSymptomsInfoDao">
+
+	<resultMap id="crfResultClinicalSymptomsInfoMap" type="com.esuizhen.cloudservice.research.model.result.TCrfResultMainInfo" >
+		<result property="crfResultId" column="crfResultId" />
+		<result property="crfObserveId" column="crfObserveId" />
+		<result property="subjectElementId" column="subjectElementId" />
+		<result property="projectId" column="projectId" />
+		<result property="patientId" column="patientId" />
+		<result property="creatorId" column="creatorId" />
+		<result property="happenTime" column="happenTime"/>
+		<result property="crfCourseItemTime" column="crfCourseItemTime" />
+		<collection property="crfResult" javaType="ArrayList" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultClinicalSymptomsInfo">
+			<result property="crfSymptomResultId" column="crfSymptomResultId" />
+			<result property="crfResultId" column="crfResultId" />
+			<result property="createTime" column="createTime" />
+			<collection property="crfResultClinicalSymptomsDetailList" javaType="ArrayList" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultClinicalSymptomsDetailInfo">
+				<result property="crfSymptomResultDetailId" column="crfSymptomResultDetailId"/>
+				<result property="crfSymptomResultId" column="crfSymptomResultId"/>
+				<result property="symptomId" column="symptomId"/>
+				<result property="symptomName" column="symptomName"/>
+				<result property="symptomDegree" column="symptomDegree"/>
+				<result property="description" column="description"/>
+				<result property="index" column="index"/>
+				<result property="beginTime" column="beginTime"/>
+				<result property="endTime" column="endTime"/>
+			</collection>
+		</collection>
+	</resultMap>
+    
+    <resultMap id="crfResultTcmSymptomsInfoMap" type="com.esuizhen.cloudservice.research.model.result.TCrfResultMainInfo" >
+		<result property="crfResultId" column="crfResultId" />
+		<result property="crfObserveId" column="crfObserveId" />
+		<result property="subjectElementId" column="subjectElementId" />
+		<result property="projectId" column="projectId" />
+		<result property="patientId" column="patientId" />
+		<result property="creatorId" column="creatorId" />
+		<result property="happenTime" column="happenTime"/>
+		<result property="crfCourseItemTime" column="crfCourseItemTime" />
+		<collection property="crfResult" javaType="ArrayList" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultClinicalSymptomsInfo">
+			<result property="crfSymptomResultId" column="crfSymptomResultId" />
+			<result property="crfResultId" column="crfResultId" />
+			<result property="createTime" column="createTime" />
+			<collection property="crfResultTcmSymptomsDetailList" javaType="ArrayList" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultTcmSymptomsDetail">
+				<result property="crfSymptomResultDetailId" column="crfSymptomResultDetailId" />
+				<result property="tcmSymptomId" column="tcmSymptomId" />
+				<result property="tcmSymptomName" column="tcmSymptomName" />
+				<result property="description" column="description" />
+				<result property="tcmType" column="tcmType"/>
+				<result property="beginTime" column="beginTime" />
+				<result property="endTime" column="endTime" />
+			</collection>
+		</collection>
+	</resultMap>
+	
+	<insert id="insertCrfResultClinicalSymptoms" parameterType="com.esuizhen.cloudservice.research.model.result.TCrfResultClinicalSymptomsInfo">
+        INSERT INTO crf_result_clinical_symptoms 
+        (
+        	crfSymptomResultId ,
+        	crfResultId ,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{crfSymptomResultId} ,
+        	#{crfResultId} ,
+        	#{createTime} ,
+        	NOW()
+        )
+	</insert>
+    
+	<update id="updateCrfResultClinicalSymptoms" parameterType="com.esuizhen.cloudservice.research.model.result.TCrfResultClinicalSymptomsInfo">
+        UPDATE crf_result_clinical_symptoms 
+        <set>
+	        <if test="crfResultId != null">
+                crfResultId = #{crfResultId} ,
+            </if>
+	        <if test="1==1">
+                updateTime = NOW() ,
+            </if>
+        </set>
+        WHERE crfSymptomResultId = #{crfSymptomResultId}
+	</update>
+
+    <delete id="deleteCrfResultClinicalSymptoms">
+        DELETE FROM crf_result_clinical_symptoms WHERE crfSymptomResultId = #{crfSymptomResultId} 
+    </delete>
+    
+    <delete id="deleteCrfResultClinicalSymptomsByCrfResultId">
+        DELETE FROM crf_result_clinical_symptoms WHERE crfResultId = #{crfResultId} 
+    </delete>
+    
+    <select id="queryCrfResultClinicalSymptomsById" resultType="com.esuizhen.cloudservice.research.model.result.TCrfResultClinicalSymptomsInfo">
+		SELECT 
+        	crfSymptomResultId,
+        	crfResultId,
+        	createTime,
+        	updateTime
+		FROM crf_result_clinical_symptoms 
+	    WHERE 
+	        crfSymptomResultId = #{crfSymptomResultId} 
+	</select>
+	
+	<select id="queryCrfResultClinicalSymptomsByPatientIdAndCrfObserveId" resultMap="crfResultClinicalSymptomsInfoMap">
+		SELECT 
+			t1.crfResultId,
+	    	t1.crfObserveId,
+	    	t1.subjectElementId,
+	    	t1.projectId,
+	    	t1.patientId,
+	    	t1.creatorId,
+        	t2.crfSymptomResultId,
+        	t2.createTime,
+        	t3.crfSymptomResultDetailId ,
+        	t3.symptomId ,
+        	t3.symptomName ,
+        	t3.symptomDegree ,
+        	t3.description ,
+        	t3.beginTime ,
+        	t3.endTime
+		FROM crf_result_main t1 , crf_result_clinical_symptoms t2 , crf_result_clinical_symptoms_detail t3
+	    WHERE t1.crfResultId=t2.crfResultId
+		AND t2.crfSymptomResultId=t3.crfSymptomResultId
+		AND t1.crfObserveId=#{crfObserveId}
+		AND t1.patientId=#{patientId}
+		ORDER BY t3.`index` ASC
+	</select>
+	
+	<select id="queryCrfResultClinicalSymptomsByPatientIdAndProjectId" resultType="com.esuizhen.cloudservice.research.model.result.TCrfResultClinicalSymptomsInfo">
+		SELECT * FROM(
+			SELECT
+				t2.crfSymptomResultId,
+				t2.createTime
+			FROM
+				pro_db.crf_result_main t1, pro_db.crf_result_clinical_symptoms t2, pro_db.crf_result_clinical_symptoms_detail t3
+			WHERE
+				t1.crfResultId = t2.crfResultId AND t2.crfSymptomResultId = t3.crfSymptomResultId
+			AND t1.projectId = #{projectId}
+			AND t1.patientId=#{patientId}
+			ORDER BY t1.createTime DESC
+		) f1
+		GROUP BY f1.createTime
+		ORDER BY f1.createTime DESC
+	</select>
+	
+	<select id="queryCrfResultTcmSymptomsByPatientIdAndCrfObserveId" resultMap="crfResultTcmSymptomsInfoMap">
+		SELECT 
+			t1.crfResultId,
+	    	t1.crfObserveId,
+	    	t1.subjectElementId,
+	    	t1.projectId,
+	    	t1.patientId,
+	    	t1.creatorId,
+        	t2.crfSymptomResultId,
+        	t2.createTime,
+        	t3.crfSymptomResultDetailId ,
+        	t3.tcmSymptomId ,
+        	t3.tcmType,
+        	t3.tcmSymptomName ,
+        	t3.description ,
+        	t3.beginTime ,
+        	t3.endTime
+		FROM crf_result_main t1 , crf_result_clinical_symptoms t2 , crf_result_tcm_symptoms t3
+	    WHERE t1.crfResultId=t2.crfResultId
+		AND t2.crfSymptomResultId=t3.crfSymptomResultId
+		AND t1.crfObserveId=#{crfObserveId}
+		AND t1.patientId=#{patientId}
+		ORDER BY t3.createTime
+	</select>
+
+	<delete id="deleteByProjectId">
+		DELETE
+			i6.*
+		FROM pro_db.crf_result_main i1,
+			pro_db.crf_observation_subject_element i2,
+			pro_db.crf_course_detail i3,
+			pro_db.crf_course i4,
+			pro_db.r_crftemplate_project i5,
+			pro_db.crf_result_clinical_symptoms i6
+		WHERE i1.crfObserveId = i2.crfObserveId
+			AND i2.crfCourseItemId = i3.crfCourseItemId
+			AND i3.crfCourseId = i4.crfCourseId
+			AND i4.crfTemplateId = i5.crfTemplateId
+			AND i5.projectId = #{projectId}
+	</delete>
+</mapper>
+

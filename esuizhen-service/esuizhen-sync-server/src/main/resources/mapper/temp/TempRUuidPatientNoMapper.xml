@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.temp.TempRUuidPatientNoDao" >
+    <!-- 向temp表推送数据 -->
+    <insert id="insert">
+		INSERT INTO server_sync_temp_db.r_uuid_patientno (
+			id,uuid,patientId,patientUuid,patientNo,newPatientNo,type,
+			flag,createTime,updateTime,hospitalId,batchId
+		)
+		VALUES(
+			#{id},#{uuid},#{patientId},#{patientUuid},#{patientNo},#{newPatientNo},#{type},
+			#{flag},#{createTime},#{updateTime},#{hospitalId},#{batchId}
+		)
+	</insert>
+	
+	<select id="queryRUuidPatientNoList" resultType="com.esuizhen.server.sync.model.temp.SyncRUuidPatientNo">
+		SELECT
+		t1.id,
+		t1.uuid,
+		IFNULL(t2.patientId,t21.patientId) patientId,
+		t1.patientUuid,
+		t1.patientNo,
+		t1.newPatientNo,
+		t1.type,
+		t1.flag,
+		t1.createTime,
+		t1.updateTime,
+		t1.hospitalId,
+		t1.batchId
+		FROM
+			server_sync_temp_db.r_uuid_patientno t1
+		LEFT JOIN user_db.u_patient t2 ON t1.patientUuid=t2.uuid
+		LEFT JOIN user_db.r_uuid_patientno t21 ON t1.patientUuid=t21.uuid
+		WHERE t1.batchId=#{batchId}
+	</select>
+</mapper>

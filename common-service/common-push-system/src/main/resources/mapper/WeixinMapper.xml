@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.westangel.commonservice.push.dao.WeixinDao">
+<!-- 获取QR -->
+<select id="getQR" resultType="com.westangel.commonservice.push.model.weixin.Weixin2QRInfo">
+	SELECT 
+	id as id,
+	userId as userId,
+	userRole as userRole,
+	targetId as targetId,
+	serviceName as serviceName,
+	ticketId as ticketId,
+	ticket as ticket,
+	url as url,
+	qrUrl as qrUrl
+	FROM qr_weixin
+	WHERE
+	(userId=#{userId} and userRole=#{userRole} and targetId=#{targetId} and serviceName=#{serviceName})
+</select>
+
+<!-- 保存QR -->
+<insert id="saveQR" parameterType="com.westangel.commonservice.push.model.weixin.Weixin2QRInfo">
+	REPLACE INTO qr_weixin
+	(userId,userRole,targetId,serviceName,ticketId,ticket,url,qrUrl)
+	VALUES
+	(#{userId},#{userRole},#{targetId},#{serviceName},#{ticketId},#{ticket},#{url},#{qrUrl})	
+</insert>
+
+<!-- 获取序列码 -->
+<select id="getSequence" parameterType="java.lang.String" resultType="java.lang.Integer">
+	SELECT weixin_ticket_nextval('${serviceName}')
+</select>
+</mapper>

@@ -1,0 +1,902 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followupresult.FollowupResultWayDao">
+
+	<!-- 随访结果缓存新增 -->
+	<insert id="insertFollowupResultBuff"  parameterType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultDetailInfo">
+        INSERT INTO followup_result_buff (
+        	followupResultBuffId ,
+        	followupTaskId ,
+        	followupAssignId ,
+        	followupResultId ,
+        	patientId ,
+        	operator ,
+        	updateOperator,
+			updateOperatorName,
+        	followupResultValue ,
+        	replyContent,
+        	relapseParts ,
+        	relapseDate ,
+        	transferParts ,
+        	transferDate ,
+        	deathDate ,
+        	isInHospitalDeath ,
+        	isTumourDeath ,
+        	deathCause ,
+        	otherCause ,
+        	followupWay ,
+        	contentTemplateId ,
+        	followupResultPhone ,
+        	followupTime ,
+        	phoneRecordUrl ,
+        	remark ,
+        	syncFlag ,
+        	hospitalId,
+        	sourceFlag ,
+        	replyTime,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{followupResultBuffId} ,
+        	#{followupTaskId} ,
+        	#{followupAssignId} ,
+        	#{followupResultId} ,
+        	#{patientId} ,
+        	#{operator} ,
+        	#{updateOperator},
+			#{updateOperatorName},
+        	#{followupResultValue} ,
+        	#{replyContent},
+        	#{relapseParts} ,
+        	#{relapseDate} ,
+        	#{transferParts} ,
+        	#{transferDate} ,
+        	#{deathDate} ,
+        	#{isInHospitalDeath} ,
+        	#{isTumourDeath} ,
+        	#{deathCause} ,
+        	#{otherCause} ,
+        	#{followupWay} ,
+        	#{contentTemplateId} ,
+        	#{followupResultPhone} ,
+        	#{followupTime} ,
+        	#{phoneRecordUrl} ,
+        	#{remark} ,
+        	#{syncFlag} ,
+        	#{hospitalId},
+        	#{sourceFlag} ,
+        	#{replyTime},
+        	now() ,
+        	now()
+        )
+	</insert>
+    
+	<update id="updateFollowupResultBuff" parameterType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultDetailInfo">
+        UPDATE followup_result_buff 
+        <set>
+	        <if test="followupTaskId != null">
+                followupTaskId = #{followupTaskId} ,
+            </if>
+	        <if test="followupAssignId != null">
+                followupAssignId = #{followupAssignId} ,
+            </if>
+	        <if test="patientId != null">
+                patientId = #{patientId} ,
+            </if>
+	        <if test="operator != null">
+                operator = #{operator} ,
+            </if>
+	        <if test="followupResultValue != null">
+                followupResultValue = #{followupResultValue} ,
+            </if>
+	        <if test="relapseParts != null">
+                relapseParts = #{relapseParts} ,
+            </if>
+	        <if test="relapseDate != null">
+                relapseDate = #{relapseDate} ,
+            </if>
+	        <if test="transferParts != null">
+                transferParts = #{transferParts} ,
+            </if>
+	        <if test="transferDate != null">
+                transferDate = #{transferDate} ,
+            </if>
+	        <if test="deathDate != null">
+                deathDate = #{deathDate} ,
+            </if>
+	        <if test="isInHospitalDeath != null">
+                isInHospitalDeath = #{isInHospitalDeath} ,
+            </if>
+	        <if test="isTumourDeath != null">
+                isTumourDeath = #{isTumourDeath} ,
+            </if>
+	        <if test="deathCause != null">
+                deathCause = #{deathCause} ,
+            </if>
+	        <if test="otherCause != null">
+                otherCause = #{otherCause} ,
+            </if>
+	        <if test="followupWay != null">
+                followupWay = #{followupWay} ,
+            </if>
+	        <if test="contentTemplateId != null">
+                contentTemplateId = #{contentTemplateId} ,
+            </if>
+	        <if test="followupResultPhone != null">
+                followupResultPhone = #{followupResultPhone} ,
+            </if>
+	        <if test="followupTime != null">
+                followupTime = #{followupTime} ,
+            </if>
+	        <if test="phoneRecordUrl != null">
+                phoneRecordUrl = #{phoneRecordUrl} ,
+            </if>
+	        <if test="remark != null">
+                remark = #{remark} ,
+            </if>
+	        <if test="syncFlag != null">
+                syncFlag = #{syncFlag} ,
+            </if>
+	        <if test="sourceFlag != null">
+                sourceFlag = #{sourceFlag} ,
+            </if>
+	        <if test="createTime != null">
+                createTime = now() ,
+            </if>
+	        <if test="hospitalId != null">
+                hospitalId = #{hospitalId} ,
+            </if>
+	        <if test="replyContent != null">
+                replyContent = #{replyContent} ,
+            </if>
+	        <if test="followupResultId != null">
+                followupResultId = #{followupResultId} ,
+            </if>
+	        <if test="replyTime != null">
+                replyTime = #{replyTime} ,
+            </if>
+            <if test="updateOperator != null">
+                updateOperator = #{updateOperator} ,
+            </if>
+	        <if test="updateOperatorName != null">
+                updateOperatorName = #{updateOperatorName} ,
+            </if>
+            updateTime=now()
+        </set>
+        WHERE 
+	        followupResultBuffId = #{followupResultBuffId} 
+	</update>
+    
+    <update id="updateFollowupResultBuffNotSelective" parameterType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultDetailInfo">
+        UPDATE followup_result_buff 
+        <set>
+            operator = #{operator} ,
+            followupResultValue = #{followupResultValue} ,
+            relapseParts = #{relapseParts} ,
+            relapseDate = #{relapseDate} ,
+            transferParts = #{transferParts} ,
+            transferDate = #{transferDate} ,
+            deathDate = #{deathDate} ,
+            isInHospitalDeath = #{isInHospitalDeath} ,
+            isTumourDeath = #{isTumourDeath} ,
+            deathCause = #{deathCause} ,
+            otherCause = #{otherCause} ,
+            remark = #{remark} ,
+            updateOperator = #{updateOperator} ,
+            updateOperatorName = #{updateOperatorName} ,
+            updateTime=now()
+        </set>
+        WHERE 
+	        followupResultBuffId = #{followupResultBuffId} 
+	</update>
+    
+    <!-- 随访结果新增 -->
+	<insert id="insertFollowupResult"  parameterType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultDetailInfo">
+        INSERT INTO followup_result (
+        	followupResultId ,
+        	followupTaskId ,
+        	followupAssignId ,
+        	patientId ,
+        	operator ,
+        	followupResultValue ,
+        	relapseParts ,
+        	relapseDate ,
+        	transferParts ,
+        	transferDate ,
+        	deathDate ,
+        	isInHospitalDeath ,
+        	isTumourDeath ,
+        	deathCause ,
+        	otherCause ,
+        	followupWay ,
+        	contentTemplateId ,
+        	followupResultPhone ,
+        	followupTime ,
+        	phoneRecordUrl ,
+        	remark ,
+        	syncFlag ,
+        	hospitalId,
+        	sourceFlag ,
+        	lostFollowupFlag,
+        	lostFollowupCauseResultValue,
+        	state,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{followupResultId} ,
+        	#{followupTaskId} ,
+        	#{followupAssignId} ,
+        	#{patientId} ,
+        	#{operator} ,
+        	#{followupResultValue} ,
+        	#{relapseParts} ,
+        	#{relapseDate} ,
+        	#{transferParts} ,
+        	#{transferDate} ,
+        	#{deathDate} ,
+        	#{isInHospitalDeath} ,
+        	#{isTumourDeath} ,
+        	#{deathCause} ,
+        	#{otherCause} ,
+        	#{followupWay} ,
+        	#{contentTemplateId} ,
+        	#{followupResultPhone} ,
+        	#{followupTime} ,
+        	#{phoneRecordUrl} ,
+        	#{remark} ,
+        	#{syncFlag} ,
+        	#{hospitalId},
+        	#{sourceFlag} ,
+        	#{followupFlag},
+        	#{lostFollowupCauseResultValue} ,
+        	#{followupResultState},
+        	now() ,
+        	now()
+        )
+	</insert>
+    
+    <!-- 更新随访结果 -->
+	<update id="updateFollowupResult" parameterType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultDetailInfo">
+        UPDATE followup_result 
+        <set>
+	        <if test="followupTaskId != null">
+                followupTaskId = #{followupTaskId} ,
+            </if>
+	        <if test="followupAssignId != null">
+                followupAssignId = #{followupAssignId} ,
+            </if>
+	        <if test="patientId != null">
+                patientId = #{patientId} ,
+            </if>
+	        <if test="operator != null">
+                operator = #{operator} ,
+            </if>
+	        <if test="followupResultValue != null">
+                followupResultValue = #{followupResultValue} ,
+            </if>
+                relapseParts = #{relapseParts} ,
+                relapseDate = #{relapseDate} ,
+                transferParts = #{transferParts} ,
+                transferDate = #{transferDate} ,
+                deathDate = #{deathDate} ,
+                isInHospitalDeath = #{isInHospitalDeath} ,
+                isTumourDeath = #{isTumourDeath} ,
+                deathCause = #{deathCause} ,
+                otherCause = #{otherCause} ,
+                remark = #{remark} ,
+	        <if test="followupWay != null">
+                followupWay = #{followupWay} ,
+            </if>
+	        <if test="contentTemplateId != null">
+                contentTemplateId = #{contentTemplateId} ,
+            </if>
+	        <if test="followupResultPhone != null">
+                followupResultPhone = #{followupResultPhone} ,
+            </if>
+	        <if test="followupTime != null">
+                followupTime = #{followupTime} ,
+            </if>
+	        <if test="phoneRecordUrl != null">
+                phoneRecordUrl = #{phoneRecordUrl} ,
+            </if>
+	        <if test="syncFlag != null">
+                syncFlag = #{syncFlag} ,
+            </if>
+	        <if test="sourceFlag != null">
+                sourceFlag = #{sourceFlag} ,
+            </if>
+	        <if test="hospitalId != null">
+                hospitalId = #{hospitalId} ,
+            </if>
+            <if test="followupFlag != null">
+                lostFollowupFlag = #{followupFlag},
+            </if>
+            <!-- <if test="lostFollowupCauseResultValue != null"> -->
+                lostFollowupCauseResultValue = #{lostFollowupCauseResultValue},
+            <!-- </if> -->
+            <if test="followupResultState != null">
+                state = #{followupResultState},
+            </if>
+            <if test="updateOperator != null">
+                updateOperator = #{updateOperator} ,
+            </if>
+	        <if test="updateOperatorName != null">
+                updateOperatorName = #{updateOperatorName} ,
+            </if>
+            updateTime = now()
+        </set>
+        WHERE 
+	        followupResultId = #{followupResultId} 
+	</update>
+	
+	<!-- 更新随访结果 -->
+	<update id="updateFollowupResultNotSelective" parameterType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultDetailInfo">
+        UPDATE followup_result 
+        <set>
+            operator = #{operator} ,
+            followupResultValue = #{followupResultValue} ,
+            relapseParts = #{relapseParts} ,
+            relapseDate = #{relapseDate} ,
+            transferParts = #{transferParts} ,
+            transferDate = #{transferDate} ,
+            deathDate = #{deathDate} ,
+            isInHospitalDeath = #{isInHospitalDeath} ,
+            isTumourDeath = #{isTumourDeath} ,
+            deathCause = #{deathCause} ,
+            otherCause = #{otherCause} ,
+            remark = #{remark} ,
+            updateOperator = #{updateOperator} ,
+            updateOperatorName = #{updateOperatorName} ,
+            updateTime = now()
+        </set>
+        WHERE 
+	        followupResultId = #{followupResultId} 
+	</update>
+	
+	<delete id="deleteFollowupResult" parameterType="String">
+		delete from followup_result where followupResultId = #{followupResultId} 
+	</delete>
+	
+	<delete id="deleteFollowupResultBuff" parameterType="String">
+		delete from followup_result_buff where followupResultBuffId = #{followupResultBuffId} 
+	</delete>
+    
+    <!-- 随访历史结果统计 -->
+    <select id="queryFollowupResultHistory" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultDetailInfo" parameterType="java.util.Map">
+    	SELECT
+    		CASE 
+    			WHEN result.followupResultId  is null THEN '暂存' 
+				WHEN result.followupResultId  is not null THEN IF(result.state = 2,'正式' ,'暂存')
+			END resultFlagName,
+    		buff.*,
+    		case when task.followupType is null then 1 
+			when task.followupType is not null then task.followupType end followupType,
+    		(CASE 
+			WHEN task.followupType=1 THEN '常规随访'
+			WHEN task.followupType=2 THEN '专题随访'
+			WHEN task.followupType is null THEN '常规随访'
+			END) followupTypeName,
+			patient.mobile,
+			patient.sourceDiagnosis,
+			patient.confirmedDate,
+			way.followupWayName,
+			metaResult.followupResultValueName,
+			doctor.trueName operatorName,
+			<!-- add by xueyongyan 20170525 -->
+			case when (select count(0) from followup_phone_call_record r where r.patientId = buff.patientId
+			AND buff.followupTaskId = r.followupTaskId )> 0 then 1 else 0 end phoneRecording,
+			
+			case when (select count(0) from followup_phone_call_record r where r.patientId = buff.patientId
+			AND buff.followupTaskId = r.followupTaskId and r.readFlag=1 )> 0 then 1 else 0 end readFlag
+
+			<!-- add by xueyongyan 20170525 -->
+		FROM
+			followup_result_buff buff
+			LEFT JOIN followup_result result  ON result.followupResultId = buff.followupResultId
+			AND result.patientId = buff.patientId
+			AND result.followupWay = buff.followupWay
+			LEFT JOIN followup_task task ON task.followupTaskId = buff.followupTaskId
+			LEFT JOIN user_db.u_patient patient ON buff.patientId = patient.patientId
+			LEFT JOIN meta_followup_way way ON way.followupWayId = buff.followUpWay
+			LEFT JOIN meta_followup_result_value metaResult ON metaResult.followupResultValueId = buff.followupResultValue
+			LEFT JOIN user_db.u_doctor doctor ON buff.operator = doctor.doctorId
+		<where>
+			buff.mergeFlag!=2
+			<if test="followupTimeStart !=null and followupTimeStart !=''">
+				and buff.followupTime &gt;=#{followupTimeStart}
+			</if>
+			<if test="followupTimeEnd !=null and followupTimeEnd !=''">
+				and buff.followupTime &lt;=#{followupTimeEnd}
+			</if>
+			<if test="followupType !=null and followupType !=''">
+				<if test="followupType==1">
+					and (task.followupType = 1 OR task.followupType is null)
+				</if>
+				<if test="followupType!=1">
+					and task.followupType = #{followupType}
+				</if>
+			</if>
+			<if test="followupWay !=null and followupWay !=''">
+				and buff.followupWay = #{followupWay}
+			</if>
+			<if test="followupResultValue !=null and followupResultValue !=''">
+				and buff.followupResultValue =#{followupResultValue}
+			</if>
+			<if test="patientId != null and patientId != ''">
+               and buff.patientId = #{patientId}
+            </if>
+		</where>
+		<choose>
+			<when test="sortFlag==0">
+				order by buff.followupTime asc
+			</when>
+			<otherwise>
+				order by buff.followupTime desc
+			</otherwise>
+		</choose>
+    </select>
+    
+    
+    <!-- 正式随访结果列表 -->
+    <select id="queryFollowupResultFormalHistory" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultDetailInfo">
+    	SELECT	
+		    t1.*,m1.followupResultValueName,m2.followupWayName,t2.trueName operatorName
+			FROM
+			followup_result t1
+			LEFT JOIN meta_followup_result_value m1 ON t1.followupResultValue=m1.followupResultValueId
+			LEFT JOIN meta_followup_way m2 ON t1.followupWay=m2.followupWayId
+			LEFT JOIN user_db.u_doctor t2 ON t1.sourceFlag=4 AND t1.operator = t2.doctorId
+		<where>
+			t1.mergeFlag!=2
+			<if test="followupTimeStart !=null and followupTimeStart !=''">
+				and t1.followupTime &gt;=#{followupTimeStart}
+			</if>
+			<if test="followupTimeEnd !=null and followupTimeEnd !=''">
+				and t1.followupTime &lt;=#{followupTimeEnd}
+			</if>
+			<if test="followupWay !=null and followupWay !=''">
+				and t1.followupWay = #{followupWay}
+			</if>
+			<if test="followupResultValue !=null and followupResultValue !=''">
+				and t1.followupResultValue =#{followupResultValue}
+			</if>
+			<if test="patientId != null and patientId != ''">
+               and t1.patientId = #{patientId}
+            </if>
+		</where>
+		order by t1.followupTime desc
+    </select>
+    
+     <!-- 查询随访结果  -->
+     <select id="queryFollowupResult" parameterType="java.util.Map" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultDetailInfo">
+    	select 
+			r.followupResultId,
+			r.followupTaskId,
+			r.followupAssignId,
+			r.patientId,
+			r.hospitalId,
+			r.operator,
+			r.followupResultValue,
+			r.relapseParts,
+			r.relapseDate,
+			r.transferParts,
+			r.transferDate,
+			r.deathDate,
+			r.isInHospitalDeath,
+			r.isTumourDeath,
+			r.deathCause,
+			r.otherCause,
+			r.followupWay,
+			r.contentTemplateId,
+			r.followupResultPhone,
+			r.followupTime,
+			r.lostFollowupFlag,
+			r.lostFollowupCauseResultValue,
+			r.phoneRecordUrl,
+			r.remark,
+			r.syncFlag,
+			r.sourceFlag,
+			r.state followupResultState,
+			r.createTime,
+			r.updateTime,
+			p.followupFlag,
+			metaResult.type followupResultType
+    	from followup_result r
+    	left join user_db.u_patient p on r.patientId=p.patientId
+    	LEFT JOIN meta_followup_result_value metaResult ON metaResult.followupResultValueId = r.followupResultValue
+    	<where>
+    		r.mergeFlag!=2
+    		<if test="followupResultId !=null">
+    			and r.followupResultId=#{followupResultId}
+    		</if>
+    		<if test="followupTaskId !=null">
+    			and r.followupTaskId=#{followupTaskId}
+    		</if>
+    		<if test="followupAssignId !=null and followupAssignId !=''">
+    			and r.followupAssignId=#{followupAssignId}
+    		</if>
+    		<if test="followupResultValue !=null">
+    			and r.followupResultValue=#{followupResultValue}
+    		</if>
+    		<if test="patientId !=null">
+    			and r.patientId=#{patientId}
+    		</if>
+    		<if test="followupResultState !=null">
+    			and r.state=#{followupResultState}
+    		</if>
+    		<if test="followupResultType !=null">
+    			and metaResult.type=#{followupResultType}
+    		</if>
+    	</where>
+    	order by r.followupTime desc
+    </select>
+    
+    <!-- 查询随访结果  -->
+     <select id="queryFollowupResultById" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultDetailInfo">
+    	select 
+			r.followupResultId,
+			r.followupTaskId,
+			r.followupAssignId,
+			r.patientId,
+			r.hospitalId,
+			r.operator,
+			r.followupResultValue,
+			r.relapseParts,
+			r.relapseDate,
+			r.transferParts,
+			r.transferDate,
+			r.deathDate,
+			r.isInHospitalDeath,
+			r.isTumourDeath,
+			r.deathCause,
+			r.otherCause,
+			r.followupWay,
+			r.contentTemplateId,
+			r.followupResultPhone,
+			r.followupTime,
+			r.lostFollowupFlag,
+			r.lostFollowupCauseResultValue,
+			r.phoneRecordUrl,
+			r.remark,
+			r.syncFlag,
+			r.sourceFlag,
+			r.state followupResultState,
+			r.createTime,
+			r.updateTime,
+			p.followupFlag,
+			metaResult.type followupResultType,
+			metaResult.followupResultValueName
+    	from followup_result r
+    	left join user_db.u_patient p on r.patientId=p.patientId
+    	LEFT JOIN meta_followup_result_value metaResult ON metaResult.followupResultValueId = r.followupResultValue
+    	<where>
+    		r.followupResultId=#{followupResultId}
+    	</where>
+    </select>
+    
+    <!-- 根据UUID查询最后一次随访结果  -->
+     <select id="queryLastFollowupResultByPatientUuid" parameterType="java.util.Map" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultDetailInfo">
+    	select 
+    		p.patientId,
+			r.followupResultId,
+			r.followupTaskId,
+			r.followupAssignId,
+			r.hospitalId,
+			r.operator,
+			r.followupResultValue,
+			r.relapseParts,
+			r.relapseDate,
+			r.transferParts,
+			r.transferDate,
+			r.deathDate,
+			r.isInHospitalDeath,
+			r.isTumourDeath,
+			r.deathCause,
+			r.otherCause,
+			r.followupWay,
+			r.contentTemplateId,
+			r.followupResultPhone,
+			r.followupTime,
+			r.lostFollowupFlag,
+			r.lostFollowupCauseResultValue,
+			r.phoneRecordUrl,
+			r.remark,
+			r.syncFlag,
+			r.sourceFlag,
+			r.createTime,
+			r.updateTime,
+			p.followupFlag
+    	from user_db.u_patient p 
+    	left join followup_result r on r.patientId=p.patientId
+    	<where>
+    		p.uuid=#{patientUuid}
+    	</where>
+    	order by r.followupTime desc limit 1
+    </select>
+    
+    <!-- 查询随访结果缓存  -->
+    <select id="queryFollowupResultBuff" parameterType="java.util.Map" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultDetailInfo">
+    	select buff.*,metaResult.followupResultValueName,p.followupFlag,metaResult.type followupResultType from followup_result_buff buff 
+    	left join user_db.u_patient p on buff.patientId=p.patientId
+    	LEFT JOIN meta_followup_result_value metaResult ON metaResult.followupResultValueId = buff.followupResultValue
+    	<where>
+    		buff.mergeFlag!=2
+    		<if test="followupResultBuffId !=null">
+    			and buff.followupResultBuffId=#{followupResultBuffId}
+    		</if>
+    		<if test="followupResultId !=null">
+    			and buff.followupResultId=#{followupResultId}
+    		</if>
+    		<if test="followupTaskId !=null">
+    			and buff.followupTaskId=#{followupTaskId}
+    		</if>
+    		<if test="followupAssignId !=null and followupAssignId !=''">
+    			and buff.followupAssignId=#{followupAssignId}
+    		</if>
+    		<if test="patientId !=null">
+    			and buff.patientId=#{patientId}
+    		</if>
+    		<if test="followUpWay !=null">
+    			and buff.followUpWay=#{followUpWay}
+    		</if>
+    	</where>
+    	order by buff.followupTime desc
+    </select>
+    
+    <!-- 查询随访结果缓存  -->
+    <select id="queryFollowupResultBuffByPrimaryKey" parameterType="String" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultDetailInfo">
+    	select buff.*,p.followupFlag,metaResult.type followupResultType,metaResult.followupResultValueName from followup_result_buff buff 
+    	left join user_db.u_patient p on buff.patientId=p.patientId
+    	LEFT JOIN meta_followup_result_value metaResult ON metaResult.followupResultValueId = buff.followupResultValue
+    	<where>
+    		buff.followupResultBuffId=#{followupResultBuffId}
+    	</where>
+    </select>
+    
+    <!-- 根据随访结果查询 -->
+    <sql id="resultSearchSql">
+    	rftp.mergeFlag!=2
+    	<if test="searchPatientNo !=null">
+    		and (
+  				exists(
+	  				select pn.patientId from user_db.r_uuid_patientno pn where pn.patientId=p.patientId 
+	  				and (
+	  					pn.patientNo LIKE concat('%',#{searchPatientNo},'%')
+	  				) 
+  				) 
+  				or p.patientNo  LIKE concat('%',#{searchPatientNo},'%')
+  			)
+	    	</if>
+	    	<if test="nationIdStr !=null">
+	    		and u.nationId IN (${nationIdStr})
+	    	</if>
+	    	<if test="sourceDiseaseTypeIdStr !=null">
+	    		and p.sourceDiseaseTypeId IN (${sourceDiseaseTypeIdStr})
+	    	</if>
+			<if test="searchTrueName !=null">
+	    		and p.trueName like concat('%',#{searchTrueName},'%')
+	    	</if>
+	    	<if test="searchMobile !=null">
+	    		and p.mobile like =#{searchMobile}
+	    	</if>
+			<if test="searchSourceDiagnosis !=null">
+	    		and p.sourceDiagnosis like concat('%',#{sourceDiagnosis},'%')
+	    	</if>
+	    	<if test="followupAssignId !=null  and followupAssignId !=''">
+	    		and rftp.followupAssignId =#{followupAssignId}
+	    	</if>
+	    	<if test="followupTaskId !=null">
+	    		and rftp.followupTaskId =#{followupTaskId}
+	    	</if>
+	    	<if test="searchState !=null">
+	    		and rftp.state =#{searchState}
+	    	</if>
+	    	<if test="searchFollowupResultValue !=null">
+	    		and r.followupResultValue =#{searchFollowupResultValue}
+	    	</if>
+	    	
+	    	<if test="isValidWx !=null">
+		    	and EXISTS (
+					select * from user_db.u_thirdparty innerT
+					where innerT.userId=p.userId and innerT.openId is not null
+				)
+			</if>
+			<if test="isValidSms !=null">
+				and EXISTS (
+					select * from user_db.u_patient_family innerF
+					where innerF.patientId=rftp.patientId and innerF.isValid=1 and innerF.familyPhone LIKE '1%'
+				)
+			</if>
+			<if test="judgeValidFlag ==null">
+			and (
+				r.followupWay!=2
+				or r.state=1
+				or r.followupResultValue is NULL
+			)
+			</if>
+    </sql>
+    <select id="queryPatientIdsByFollowupResult" resultType="com.esuizhen.cloudservice.followup.bean.FollowupPatientInfo" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupMsgSendReq">
+    	SELECT
+			p.patientId
+		FROM
+			r_followup_task_patient rftp
+		LEFT JOIN followup_result r on rftp.followupAssignId=r.followupAssignId and rftp.patientId=r.patientId
+		LEFT JOIN user_db.u_patient p ON rftp.patientId = p.patientId
+		LEFT JOIN user_db.u_user u ON u.userId = p.userId
+    	<where>
+	    	<include refid="resultSearchSql"/>
+    	</where>
+    </select>
+    
+    <!-- 根据随访结果查询 -->
+    <select id="queryPatientIdCountByFollowupResult" resultType="Integer" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupMsgSendReq">
+    	SELECT
+			count(1)
+		FROM
+			r_followup_task_patient rftp
+		LEFT JOIN followup_result r on rftp.followupAssignId=r.followupAssignId and rftp.patientId=r.patientId
+		LEFT JOIN user_db.u_patient p ON rftp.patientId = p.patientId
+		LEFT JOIN user_db.u_user u ON u.userId = p.userId
+    	<where>
+	    	<include refid="resultSearchSql"/>
+    	</where>
+    </select>
+    
+    <select id="getFollowupTaskNameById" resultType="java.util.Map" parameterType="java.util.Map">
+    	SELECT
+    		task.followupTaskId,
+    		task.followupTaskName
+		FROM
+			followup_task task
+		<where>
+			<if test="followupTaskId !=null">
+    			task.followupTaskId=#{followupTaskId}
+    		</if>
+		</where>
+    </select>
+    
+    <select id="getMetaInfoFollowupResultValueList" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultValueInfo">
+		SELECT 
+		   t1.followupResultValueId,
+		   t1.followupResultValueName,
+		   t1.type
+		FROM 
+		   followup_db.meta_followup_result_value t1
+	</select>
+	
+	<!-- 查询患者列表的最后一次随访结果 -->
+	<select id="findLastFollowupResultList" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultDetailInfo">
+		SELECT
+			f1.*
+		FROM(
+			SELECT
+				t1.patientId,
+				t2.trueName,
+				t2.patientNo,
+				t3.followupResultValueName,
+				t1.followupResultId,
+				t1.followupTaskId,
+				t1.followupAssignId,
+				t1.hospitalId,
+				t1.operator,
+				t1.followupResultValue,
+				t1.relapseParts,
+				t1.relapseDate,
+				t1.transferParts,
+				t1.transferDate,
+				t1.deathDate,
+				t1.isInHospitalDeath,
+				t1.isTumourDeath,
+				t1.deathCause,
+				t1.otherCause,
+				t1.followupWay,
+				t1.contentTemplateId,
+				t1.followupResultPhone,
+				t1.followupTime,
+				t1.lostFollowupFlag,
+				t1.lostFollowupCauseResultValue,
+				t1.phoneRecordUrl,
+				t1.remark,
+				t1.syncFlag,
+				t1.sourceFlag,
+				t1.createTime,
+				t1.updateTime,
+				t2.followupFlag
+			FROM followup_db.followup_result t1
+				<if test="sql != null and sql != ''">
+					join 
+					(
+					${sql}
+					) s on s.doctorId = t1.operator
+				</if>
+				INNER JOIN user_db.u_patient t2 ON t2.patientId = t1.patientId
+				INNER JOIN followup_db.meta_followup_result_value t3 ON t3.followupResultValueId = t1.followupResultValue
+			WHERE t1.mergeFlag!=2 and t1.patientId IN(
+				<foreach collection="params" item="item" index="index" separator=",">
+					#{item.patientId}
+				</foreach>
+				)
+			ORDER BY t1.followupTime DESC
+		) f1
+		GROUP BY f1.patientId
+	</select>
+	<!-- add by fanpanwei 查询有微信随访结果的患者数 -->
+	<select id="getHadWxRecordTotal" resultType="Integer" parameterType="java.util.Map">
+    	SELECT
+			count(1)
+		From (
+			Select rftp.patientId
+			FROM
+				r_followup_task_patient rftp
+			JOIN followup_wx_req wx ON wx.mergeFlag!=2 AND wx.patientId=rftp.patientId AND wx.state=1
+			LEFT JOIN followup_result r on rftp.followupAssignId=r.followupAssignId and rftp.patientId=r.patientId
+			LEFT JOIN user_db.u_patient p ON rftp.patientId = p.patientId
+			LEFT JOIN user_db.u_user u ON u.userId = p.userId
+	    	WHERE
+		    	<include refid="resultSearchSql"/>
+		    	<if test="followupTaskId != null">
+	                and wx.followupTaskId = #{followupTaskId}
+	            </if>
+	             <if test="followupAssignId != null">
+	                and wx.followupAssignId = #{followupAssignId}
+	            </if>
+				<if test="templateId !=null">
+					and wx.templateId =#{templateId}
+				</if>
+	    	GROUP BY rftp.patientId)aa
+    </select>
+    
+    <select id="getHadSmsRecordTotal" resultType="Integer" parameterType="java.util.Map">
+    	SELECT
+			count(1)
+		From (
+			Select rftp.patientId
+			FROM
+				r_followup_task_patient rftp
+			INNER JOIN followup_sms_req sms ON  sms.mergeFlag!=2 AND sms.patientId=rftp.patientId AND sms.state IN (1,3)
+			LEFT JOIN followup_result r on rftp.followupAssignId=r.followupAssignId and rftp.patientId=r.patientId
+			LEFT JOIN user_db.u_patient p ON rftp.patientId = p.patientId
+			LEFT JOIN user_db.u_user u ON u.userId = p.userId
+	    	WHERE
+		    	<include refid="resultSearchSql"/>
+		    	<if test="followupTaskId != null">
+	                and sms.followupTaskId = #{followupTaskId}
+	            </if>
+	             <if test="followupAssignId != null">
+	                and sms.followupAssignId = #{followupAssignId}
+	            </if>
+				<if test="templateId !=null">
+					and sms.templateId =#{templateId}
+				</if>
+	    	GROUP BY rftp.patientId) aa
+    </select>
+    
+    <select id="queryValidFollowupFlag" resultType="java.lang.String" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupMsgSendReq">
+    	SELECT
+				(CASE c.followupResultFlag WHEN 1 THEN (CASE r.followupWay WHEN 2 THEN 0 ELSE 
+								(CASE c.otherAsValidResultFlag WHEN 1 THEN
+											(CASE WHEN r.state=2 AND r.followupResultValue IN (1,2,3,4,5) THEN 0 ELSE 1 END)ELSE
+											(CASE WHEN r.state=2 AND r.followupResultValue IN (1,2,3,4) THEN 0 ELSE 1 END)
+							END)
+				END)
+				ELSE (CASE c.otherAsValidResultFlag WHEN 1 THEN
+											(CASE WHEN r.state=2 AND r.followupResultValue IN (1,2,3,4,5) THEN 0 ELSE 1 END)ELSE
+											(CASE WHEN r.state=2 AND r.followupResultValue IN (1,2,3,4) THEN 0 ELSE 1 END)
+							END)
+				END)validFlag
+		FROM
+			followup_db.r_followup_task_patient rftp
+		LEFT JOIN followup_db.followup_result r on rftp.followupAssignId=r.followupAssignId and rftp.patientId=r.patientId
+		LEFT JOIN followup_db.conf_global c ON 1=1
+   		WHERE rftp.mergeFlag!=2	and rftp.patientId =#{patientId}
+   			<if test="followupAssignId !=null  and followupAssignId !=''">
+	    		and rftp.followupAssignId =#{followupAssignId}
+	    	</if>
+	    	<if test="followupTaskId !=null">
+	    		and rftp.followupTaskId =#{followupTaskId}
+	    	</if>
+    </select>
+</mapper>

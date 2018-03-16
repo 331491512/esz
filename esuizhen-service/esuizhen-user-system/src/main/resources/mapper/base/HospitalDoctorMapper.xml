@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.HospitalDoctorDao">
+	<resultMap id="BaseResultMap" type="com.westangel.common.bean.HospitalDoctor">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="doctorId" property="doctorId" jdbcType="BIGINT" />
+		<result column="hospitalId" property="hospitalId" jdbcType="INTEGER" />
+		<result column="hospitalName" property="hospitalName" jdbcType="VARCHAR" />
+		<result column="deptId" property="deptId" jdbcType="INTEGER" />
+		<result column="positionTitle" property="positionTitle" jdbcType="INTEGER" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<insert id="insert" parameterType="com.westangel.common.bean.HospitalDoctor">
+		<selectKey resultType="long" keyProperty="id" order="AFTER">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		insert into
+		r_hospital_doctor(doctorId,hospitalId,hospitalName,deptId,positionTitle,createTime)
+		values(#{doctorId,jdbcType=BIGINT},
+		#{hospitalId,jdbcType=INTEGER},
+		#{hospitalName,jdbcType=VARCHAR},
+		#{deptId,jdbcType=INTEGER},
+		#{positionTitle,jdbcType=INTEGER},
+		NOW())
+	</insert>
+
+	<update id="updateHospitalDoctor" parameterType="com.westangel.common.bean.HospitalDoctor">
+		update r_hospital_doctor
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="record.hospitalId != null">
+				hospitalId=#{record.hospitalId,jdbcType=INTEGER},
+			</if>
+			<if test="record.hospitalName != null">
+				hospitalName=#{record.hospitalName,jdbcType=VARCHAR},
+			</if>
+			<if test="record.deptId != null">
+				deptId=#{record.deptId,jdbcType=INTEGER},
+			</if>
+			<if test="record.positionTitle != null">
+				positionTitle=#{record.positionTitle,jdbcType=INTEGER},
+			</if>
+			<if test="record.doctorId != null">
+				doctorId=#{record.doctorId,jdbcType=INTEGER}
+			</if>
+		</trim>
+		where id=#{record.id,jdbcType=BIGINT}
+	</update>
+
+	<delete id="deleteById" parameterType="java.lang.Long">
+		delete from r_hospital_doctor where id=#{id,jdbcType=BIGINT}
+	</delete>
+
+	<select id="selectHospitalDoctor" resultMap="BaseResultMap">
+		select <include refid="base_column_list"></include> from
+		r_hospital_doctor t1 where t1.doctorId=#{doctorId,jdbcType=BIGINT}
+	</select>
+	
+	<sql id="base_column_list">
+		t1.id,t1.doctorId,t1.hospitalId,t1.hospitalName,t1.deptId,t1.positionTitle,t1.createTime
+	</sql>
+</mapper>

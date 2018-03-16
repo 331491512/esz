@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.patientinfo.TUserInfoDao">
+	<update id="updateByPrimaryKey" parameterType="com.esuizhen.cloudservice.ehr.model.patientinfo.TUserInfo">
+		UPDATE  
+		 user_db.u_user t1 set
+		 t1.trueName = #{trueName} ,
+		 t1.birthDate = #{birthDate} ,
+		 t1.nativePlace = #{nativePlace} ,
+		 t1.birthPlaceCode = #{birthPlaceCode} ,
+		 t1.birthPlaceAddress = #{birthPlaceAddress} ,
+		 t1.nationId = #{nationId} ,
+		 t1.nation = #{nation} ,
+		 t1.identification = #{identification} ,
+		 t1.idType = #{idType} ,
+		 t1.sex = #{sex} ,
+		 t1.company = #{company}
+		WHERE t1.userId=#{userId}
+	</update>
+    <select id="selectByPrimaryKey" parameterType = "java.lang.String" resultType="com.esuizhen.cloudservice.ehr.model.patientinfo.TUserInfo">
+    	select userId,uuid from user_db.u_user where userId = #{userId}
+    </select>
+	<update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.cloudservice.ehr.model.patientinfo.TUserInfo">
+		UPDATE  
+		 user_db.u_user t1
+		<set>
+	        <if test="trueName != null">
+                t1.trueName = #{trueName} ,
+            </if>
+            <if test="birthDate != null">
+                t1.birthDate = #{birthDate} ,
+            </if>
+            <if test="birthDate != null">
+                t1.birthDate = #{birthDate} ,
+            </if>
+            <if test="nativePlace != null">
+                t1.nativePlace = #{nativePlace} ,
+            </if>
+            <if test="birthPlaceCode != null">
+                t1.birthPlaceCode = #{birthPlaceCode} ,
+            </if>
+            <if test="birthPlaceAddress != null">
+                t1.birthPlaceAddress = #{birthPlaceAddress} ,
+            </if>
+            <if test="nationId != null">
+                t1.nationId = #{nationId} ,
+            </if>
+            <if test="nation != null">
+                t1.nation = #{nation} ,
+            </if>
+            <if test="identification != null">
+                t1.identification = #{identification} ,
+            </if>
+            <if test="idType != null">
+                t1.idType = #{idType} ,
+            </if>
+            <if test="sex != null">
+                t1.sex = #{sex} ,
+            </if>
+            <if test="company != null">
+                t1.company = #{company} ,
+            </if>
+            <if test="nationalityId != null">
+            	t1.nationalityId = #{nationalityId},
+            </if>
+            <if test="country != null and country != ''">
+            	t1.country=#{country},
+            </if>
+            <if test="occupationId != null">
+            	t1.occupationId=#{occupationId},
+            </if>
+            <if test="profession != null">
+            	t1.profession = #{profession},
+            </if>
+            <if test="marriageStatus != null">
+            	t1.marriageStatus=#{marriageStatus},
+            </if>
+            <if test="address != null">
+            	t1.address = #{address},
+            </if>
+            t1.updateTime=now()
+        </set>
+		WHERE t1.userId=#{userId}
+	</update>
+
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.ehr.model.patientinfo.TUserInfo">
+		<selectKey resultType="long" keyProperty="userId" order="AFTER">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		insert into user_db.u_user (
+			uuid, 
+			userName,
+			cryptPasswd, 
+			trueName, 
+			nickName,
+			mobile, 
+			sex, 
+			birthDate,
+			userPictureUrl, 
+			email, 
+			nation,
+			country, 
+			cityCode, 
+			city,
+			address, 
+			nativePlace, 
+			profession,
+			company, 
+			idType, 
+			identification,
+			marriageStatus, 
+			signature, 
+			education,
+			school, 
+			interest, 
+			idFileUrl,
+			accountType, 
+			infoState, 
+			state,
+			role, 
+			subroles, 
+			points,
+			syncFlag,
+			createTime, 
+			updateTime, 
+			firstLoginTime,
+			lastLoginTime, 
+			sourceFlag,
+			tobFlag,
+			occupationId,
+			nationId,
+			birthPlaceCode,
+		 	birthPlaceAddress,
+		 	nationalityId
+		)VALUES(
+		<choose>
+			<when test="uuid != null">
+				#{uuid,jdbcType=VARCHAR},
+			</when>
+			<otherwise>
+			REPLACE(UUID(),'-',''),
+			</otherwise>
+		</choose>
+		
+			#{userName,jdbcType=VARCHAR},
+			#{cryptPasswd,jdbcType=VARCHAR},
+			#{trueName,jdbcType=VARCHAR},
+			#{nickName,jdbcType=VARCHAR},
+			#{mobile,jdbcType=VARCHAR},
+			#{sex,jdbcType=INTEGER},
+			#{birthDate,jdbcType=TIMESTAMP},
+			#{userPictureUrl,jdbcType=VARCHAR},
+			#{email,jdbcType=VARCHAR},
+			#{nation,jdbcType=VARCHAR},
+			#{country,jdbcType=VARCHAR},
+			#{cityCode,jdbcType=VARCHAR},
+			#{city,jdbcType=VARCHAR},
+			#{address,jdbcType=VARCHAR},
+			#{nativePlace,jdbcType=VARCHAR},
+			#{profession,jdbcType=VARCHAR},
+			#{company,jdbcType=VARCHAR},
+			#{idType,jdbcType=INTEGER},
+			#{identification,jdbcType=VARCHAR},
+			#{marriageStatus,jdbcType=INTEGER},
+			#{signature,jdbcType=VARCHAR},
+			#{education,jdbcType=INTEGER},
+			#{school,jdbcType=VARCHAR},
+			#{interest,jdbcType=VARCHAR},
+			#{idFileUrl,jdbcType=VARCHAR},
+			#{accountType,jdbcType=INTEGER},
+			#{infoState,jdbcType=INTEGER},
+			#{state,jdbcType=INTEGER},
+			#{role,jdbcType=INTEGER},
+			#{subroles,jdbcType=VARCHAR},
+			#{points,jdbcType=INTEGER},
+			#{syncFlag,jdbcType=INTEGER},
+			NOW(), 
+			NOW(),
+			#{firstLoginTime,jdbcType=TIMESTAMP},
+			#{lastLoginTime,jdbcType=TIMESTAMP},
+			#{sourceFlag,jdbcType=INTEGER},
+			#{tobFlag,jdbcType=INTEGER},
+			#{occupationId},
+			#{nationId},
+			#{birthPlaceCode} ,
+			#{birthPlaceAddress},
+			#{nationalityId}
+		)
+	</insert>
+	
+	<select id="queryHospitalByName" resultType="com.westangel.common.bean.HospitalSearchReq">
+		SELECT hospitalId,hospitalName FROM user_db.u_hospital
+		<where>
+			<if test="hospitalName!=null">
+				AND hospitalName =#{hospitalName}  
+			</if>
+			<!-- <if test="hospitalName!=null">
+				AND hospitalName LIKE CONCAT(#{hospitalName},'%')  
+			</if> -->
+		</where>
+	</select>
+</mapper>
+

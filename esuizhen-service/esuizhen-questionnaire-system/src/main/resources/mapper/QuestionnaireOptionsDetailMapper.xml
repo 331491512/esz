@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.questionnaire.dao.QuestionnaireOptionsDetailDao">
+
+	<insert id="insertQuestionnaireOptionsDetail" useGeneratedKeys="true" parameterType="com.esuizhen.cloudservice.questionnaire.model.TFollowupQuestionnaireOptions">
+		<selectKey resultType="long" keyProperty="id" order="AFTER" >
+			SELECTLAST_INSERT_ID() as id
+		</selectKey>
+        INSERT INTO questionnaire_options_detail (
+        	questionnaireOptionId ,
+        	questionnaireStemId ,
+        	stemCode ,
+        	questionnaireId ,
+        	optionIndex ,
+        	contentType ,
+        	content ,
+        	indicateValue ,
+        	nextStemCode ,
+        	parentOptionId ,
+        	level ,
+        	title ,
+        	questionType ,
+        	fillFlag ,
+        	fillContent ,
+        	isChecked ,
+        	createTime 
+        ) VALUES (
+        	#{questionnaireOptionId} ,
+        	#{questionnaireStemId} ,
+        	#{stemCode} ,
+        	#{questionnaireId} ,
+        	#{optionIndex} ,
+        	#{contentType} ,
+        	#{content} ,
+        	#{indicateValue} ,
+        	#{nextStemCode} ,
+        	#{parentOptionId} ,
+        	#{level} ,
+        	#{title} ,
+        	#{questionType} ,
+        	#{fillFlag} ,
+        	#{fillContent} ,
+        	#{isChecked} ,
+        	#{createTime} 
+        )
+	</insert>
+    
+	<update id="updateQuestionnaireOptionsDetail" parameterType="com.esuizhen.cloudservice.questionnaire.model.TFollowupQuestionnaireOptions">
+        UPDATE questionnaire_options_detail 
+        <set>
+	        <if test="questionnaireStemId != null">
+                questionnaireStemId = #{questionnaireStemId} ,
+            </if>
+	        <if test="stemCode != null">
+                stemCode = #{stemCode} ,
+            </if>
+	        <if test="questionnaireId != null">
+                questionnaireId = #{questionnaireId} ,
+            </if>
+	        <if test="optionIndex != null">
+                optionIndex = #{optionIndex} ,
+            </if>
+	        <if test="contentType != null">
+                contentType = #{contentType} ,
+            </if>
+	        <if test="content != null">
+                content = #{content} ,
+            </if>
+	        <if test="indicateValue != null">
+                indicateValue = #{indicateValue} ,
+            </if>
+	        <if test="nextStemCode != null">
+                nextStemCode = #{nextStemCode} ,
+            </if>
+	        <if test="parentOptionId != null">
+                parentOptionId = #{parentOptionId} ,
+            </if>
+	        <if test="level != null">
+                level = #{level} ,
+            </if>
+	        <if test="title != null">
+                title = #{title} ,
+            </if>
+	        <if test="questionType != null">
+                questionType = #{questionType} ,
+            </if>
+	        <if test="fillFlag != null">
+                fillFlag = #{fillFlag} ,
+            </if>
+	        <if test="fillContent != null">
+                fillContent = #{fillContent} ,
+            </if>
+	        <if test="isChecked != null">
+                isChecked = #{isChecked} ,
+            </if>
+	        <if test="createTime != null">
+                createTime = #{createTime} ,
+            </if>
+        </set>
+        WHERE 
+	        questionnaireOptionId = #{questionnaireOptionId} 
+	</update>
+
+    <delete id="deleteQuestionnaireOptionsDetail">
+        DELETE FROM questionnaire_options_detail WHERE
+        questionnaireOptionId = #{id} 
+    </delete>
+    
+    <!-- 根据选项ID查询选项 -->
+    <select id="queryQuestionnaireOptionsDetailById" resultType="com.esuizhen.cloudservice.questionnaire.model.TFollowupQuestionnaireOptions">
+		SELECT 
+        	questionnaireOptionId,
+        	questionnaireStemId,
+        	stemCode,
+        	questionnaireId,
+        	optionIndex,
+        	contentType,
+        	content,
+        	indicateValue,
+        	nextStemCode,
+        	parentOptionId,
+        	level,
+        	title,
+        	questionType,
+        	fillFlag,
+        	fillContent,
+        	fillContent2,
+        	fillContentType,
+        	fillContentType2,
+        	isChecked,
+        	createTime
+		FROM questionnaire_options_detail 
+	    WHERE 
+	        questionnaireOptionId = #{id} 
+	</select>
+	
+	<!-- 根据题干查询选项 -->
+	<select id="queryOptionsDetailByStemId" resultType="com.esuizhen.cloudservice.questionnaire.model.TFollowupQuestionnaireOptions">
+		SELECT 
+        	questionnaireOptionId,
+        	questionnaireStemId,
+        	stemCode,
+        	questionnaireId,
+        	optionIndex,
+        	contentType,
+        	content,
+        	questionType,
+        	indicateValue,
+        	nextStemCode,
+        	parentOptionId,
+        	level,
+        	title,
+        	fillContent,
+        	fillContent2,
+        	fillContentType,
+        	fillContentType2,
+        	fillFlag,
+        	fillContent,
+        	isChecked,
+        	createTime
+		FROM questionnaire_options_detail 
+	    WHERE questionnaireStemId = #{questionnaireStemId} 
+	    <if test="diseaseTypeId!=null">
+	        AND diseaseTypeId=#{diseaseTypeId}
+	    </if>
+	    AND level=0
+	    ORDER BY optionIndex
+	</select>
+	
+	<!-- 根据父选项查询选项 -->
+	<select id="queryOptionsDetailByParentOptionId" resultType="com.esuizhen.cloudservice.questionnaire.model.TFollowupQuestionnaireOptions">
+		SELECT 
+        	questionnaireOptionId,
+        	questionnaireStemId,
+        	stemCode,
+        	questionnaireId,
+        	optionIndex,
+        	contentType,
+        	content,
+        	indicateValue,
+        	nextStemCode,
+        	parentOptionId,
+        	level,
+        	title,
+        	questionType,
+        	fillFlag,
+        	fillContent,
+        	fillContent2,
+        	fillContentType,
+        	fillContentType2,
+        	isChecked,
+        	createTime
+		FROM questionnaire_options_detail 
+	    WHERE 
+	        parentOptionId = #{parentOptionId} 
+	    ORDER BY optionIndex
+	</select>
+	
+	<select id="queryPatientDiseaseTypeId" resultType="java.lang.String" parameterType="java.lang.String">
+		SELECT 
+			sourceDiseaseTypeId 
+		FROM user_db.u_patient t1 
+		WHERE patientId=#{patientId}
+	</select>
+	
+	<!-- 根据题干查询选项 -->
+	<select id="queryQuestionnaireOptionsByStemId" resultType="com.esuizhen.cloudservice.questionnaire.model.TFollowupQuestionnaireOptions">
+		SELECT 
+        	questionnaireOptionId,
+        	questionnaireStemId,
+        	stemCode,
+        	questionnaireId,
+        	optionIndex,
+        	contentType,
+        	content,
+        	questionType,
+        	indicateValue,
+        	nextStemCode,
+        	parentOptionId,
+        	level,
+        	title,
+        	fillContent,
+        	fillContent2,
+        	fillContentType,
+        	fillContentType2,
+        	fillFlag,
+        	fillContent,
+        	isChecked,
+        	createTime
+		FROM questionnaire_options_detail 
+	    WHERE questionnaireStemId = #{questionnaireStemId}
+	</select>
+</mapper>
+

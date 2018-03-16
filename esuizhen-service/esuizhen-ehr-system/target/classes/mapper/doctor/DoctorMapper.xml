@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.doctor.DoctorDao">
+	
+	<!-- 获取医生姓名和部门信息 -->
+	<select id="getDoctorInfoById" resultType="java.util.HashMap">
+		SELECT d.doctorId,d.trueName doctorName,d.staffNo,h.deptId,m.deptName
+		FROM user_db.u_doctor d
+		INNER JOIN user_db.r_hospital_doctor h ON d.doctorId=h.doctorId
+		INNER JOIN user_db.u_department m ON m.deptId=h.deptId
+		WHERE d.doctorId=#{doctorId}
+	</select>
+	
+	<select id="queryDoctorByLashInhospitalInfo" parameterType="Long" resultType="com.westangel.common.bean.Doctor">
+		select t1.inchargeDoctor doctorId,t1.inchargeDoctorName trueName,t2.userId 
+		from ehr_db.ei_inhospital_note t1 
+			join user_db.u_doctor t2 on t1.inchargeDoctor=t2.doctorId
+			JOIN user_db.u_user t3 on t2.userId=t3.userId
+    		JOIN com_trade_db.product t4 on t3.userId=t4.vendor
+		where t1.patientId=#{patientId} 
+		and t1.inchargeDoctor is not null
+		and t3.role=2 
+	    and t3.appFlag=1
+    	and t4.productType=1
+    	and t4.state=1
+		order by t1.createTime desc
+		limit 1
+	</select>
+	
+	<select id="queryDoctorByRelation" parameterType="Long" resultType="com.westangel.common.bean.Doctor">
+		select t1.doctorId,t2.trueName,t2.userId from user_db.r_doctor_patient t1
+		join user_db.u_doctor t2 on t1.doctorId=t2.doctorId 
+		JOIN user_db.u_user t3 on t2.userId=t3.userId
+   		JOIN com_trade_db.product t4 on t3.userId=t4.vendor
+		where t1.patientId=#{patientId}
+		and t3.role=2 
+	    and t3.appFlag=1
+    	and t4.productType=1
+    	and t4.state=1
+		limit 1
+	</select>
+	
+	<select id="queryServiceDutyDoctor" parameterType="Integer" resultType="com.westangel.common.bean.Doctor">
+		select t1.doctorId,t2.trueName,t2.userId 
+		from hds_db.s_service_duty_doctor t1
+		join user_db.u_doctor t2 on t1.doctorId=t2.doctorId 
+		where t1.hospitalId=#{hospitalId} and state=1
+		limit 1
+	</select>
+	
+</mapper>

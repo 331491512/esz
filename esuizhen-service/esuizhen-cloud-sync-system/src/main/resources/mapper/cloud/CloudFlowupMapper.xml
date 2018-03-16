@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- hds_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.CloudFlowupDao">
+	<!-- 获取未同步记录 -->
+	<select id="findIncrResultsOfHostpital" resultType="com.esuizhen.cloudservice.sync.bean.TPatientFollowupResultDetailInfo">
+		<!-- <![CDATA[ -->
+		SELECT
+			t6.id,
+			t1.followupResultBuffId,
+			t1.followupResultBuffId followupResultId,
+			t3.uuid patientUuid, 
+			t4.uuid operatorUuid, 
+			t1.followupResultValue,
+			t1.relapseParts, 
+			t1.relapseDate, 
+			t1.transferParts, 
+			t1.transferDate, 
+			t1.deathDate, 
+			t1.isInHospitalDeath, 
+			t1.isTumourDeath,
+			t1.deathCause, 
+			t1.otherCause, 
+			t1.followUpWay, 
+			t1.followupResultPhone, 
+			t1.followupTime, 
+			t7.uuid hospitalUuid, 
+			t1.remark,t1.sourceFlag,
+			t8.messageId
+		FROM followup_db.followup_result_buff t1
+			INNER JOIN user_db.u_patient t2 ON t1.patientId=t2.patientId
+			INNER JOIN user_db.u_user t3 ON t2.userId=t3.userId
+			LEFT JOIN user_db.u_doctor t4 ON t1.operator=t4.doctorId
+			INNER JOIN user_db.r_hospital_patient t6 ON t1.patientId=t6.patientId
+			<!-- modily by zhuguo -->
+			<if test="hospitalId != -1">
+			AND t6.hospitalId = t1.hospitalId
+			</if>
+			INNER JOIN user_db.u_hospital t7 ON t6.hospitalId=t7.hospitalId
+			LEFT JOIN followup_db.followup_wx_req t8 ON t8.followupResultBuffId = t1.followupResultBuffId
+		WHERE (t1.createTime > t6.lastestFollowupResultSyncTime OR t6.lastestFollowupResultSyncTime IS NULL)
+			<!-- modily by zhuguo -->
+			<if test="hospitalId != -1">
+				AND t1.hospitalId IN(0, #{hospitalId})
+			</if>
+			AND t1.syncFlag &lt;&gt; 1
+			AND t1.sourceFlag &lt;&gt; 3
+		<!-- ]]> -->
+	</select>
+	
+	<!-- 保存到云端 result-->
+	<insert id="addResultRecord2Cloud" parameterType="com.esuizhen.cloudservice.sync.bean.TPatientFollowupResultDetailInfo">
+		INSERT INTO followup_db.followup_result(
+			followupResultId,
+			followupTaskId,
+			patientId,
+			operator,
+			hospitalId, 
+			followupResultValue,
+			relapseParts,
+			relapseDate,
+			transferParts,
+			transferDate,
+			deathDate,
+			isInHospitalDeath,
+			isTumourDeath,
+			deathCause,
+			otherCause,
+			followUpWay,
+			contentTemplateId,
+			followupResultPhone,
+			followupTime,
+			phoneRecordUrl,
+			remark,
+			syncFlag,
+			syncTime,
+			sourceFlag,
+			createTime,
+			updateTime
+		)VALUES(
+			#{followupResultId},
+			#{followupTaskId},
+			#{patientId},
+			#{operator},
+			#{hospitalId},
+			#{followupResultValue},
+			#{relapseParts},
+			#{relapseDate},
+			#{transferParts},
+			#{transferDate},
+			#{deathDate},
+			#{isInHospitalDeath},
+			#{isTumourDeath},
+			#{deathCause},
+			#{otherCause},
+			#{followUpWay},
+			#{contentTemplateId},
+			#{followupResultPhone},
+			#{followupTime},
+			#{phoneRecordUrl},
+			#{remark},
+			#{syncFlag},
+			NOW(),
+			#{sourceFlag},
+			#{createTime},
+			#{updateTime}
+		)
+		ON DUPLICATE KEY UPDATE 
+			followupTaskId = VALUES(followupTaskId),
+			patientId = VALUES(patientId),
+			operator = VALUES(operator),
+			followupResultValue = VALUES(followupResultValue),
+			relapseParts = VALUES(relapseParts),
+			relapseDate = VALUES(relapseDate),
+			transferParts = VALUES(transferParts),
+			transferDate = VALUES(transferDate),
+			deathDate = VALUES(deathDate),
+			isInHospitalDeath = VALUES(isInHospitalDeath),
+			isTumourDeath = VALUES(isTumourDeath),
+			deathCause = VALUES(deathCause),
+			otherCause = VALUES(otherCause),
+			followUpWay = VALUES(followUpWay),
+			contentTemplateId = VALUES(contentTemplateId),
+			followupResultPhone = VALUES(followupResultPhone),
+			followupTime = VALUES(followupTime),
+			phoneRecordUrl = VALUES(phoneRecordUrl),
+			remark = VALUES(remark),
+			syncFlag = VALUES(syncFlag),
+			sourceFlag = VALUES(sourceFlag),
+			createTime = now(),
+			updateTime = now()
+	</insert>
+	
+	<!-- 保存云端result_buff -->
+	<insert id="addResultBuffRecord2Cloud">
+		INSERT INTO followup_db.followup_result_buff(
+			followupResultBuffId,
+			followupResultId,
+			followupTaskId,
+			patientId,
+			operator,
+			hospitalId, 
+			followupResultValue,
+			relapseParts,
+			relapseDate,
+			transferParts,
+			transferDate,
+			deathDate,
+			isInHospitalDeath,
+			isTumourDeath,
+			deathCause,
+			otherCause,
+			followUpWay,
+			contentTemplateId,
+			followupResultPhone,
+			followupTime,
+			phoneRecordUrl,
+			remark,
+			syncFlag,
+			syncTime,
+			sourceFlag,
+			createTime,
+			updateTime
+		)VALUES(
+			#{followupResultBuffId},
+			#{followupResultId},
+			#{followupTaskId},
+			#{patientId},
+			#{operator},
+			#{hospitalId},
+			#{followupResultValue},
+			#{relapseParts},
+			#{relapseDate},
+			#{transferParts},
+			#{transferDate},
+			#{deathDate},
+			#{isInHospitalDeath},
+			#{isTumourDeath},
+			#{deathCause},
+			#{otherCause},
+			#{followUpWay},
+			#{contentTemplateId},
+			#{followupResultPhone},
+			#{followupTime},
+			#{phoneRecordUrl},
+			#{remark},
+			#{syncFlag},
+			NOW(),
+			#{sourceFlag},
+			#{createTime},
+			#{updateTime}
+		)
+		ON DUPLICATE KEY UPDATE 
+			followupResultId = VALUES(followupResultId),
+			createTime = now(),
+			updateTime = now()
+	</insert>
+	
+	<!-- 云端同步到B端的数据确认 -->
+	<update id="setC2BSyncMark">
+		UPDATE followup_db.followup_result_buff
+		<set>
+			syncFlag = 1,
+			syncTime = NOW()
+		</set>
+		WHERE followupResultBuffId IN(
+			<foreach collection = "uuids" item="item" index="index" separator=",">
+				#{item.followupResultBuffId}
+			</foreach>
+		)
+	</update>
+	
+	<!-- 随访结果状态查询  -->
+	<select id="findResultValueTypeById" resultType="java.lang.Integer">
+		SELECT type FROM followup_db.meta_followup_result_value WHERE followupResultValueId=#{followupResultValueId} 
+	</select>
+	
+	<!-- 随访方式查询  -->
+	<select id="findResultWayNameById" resultType="java.lang.String">
+		SELECT followupWayName FROM followup_db.meta_followup_way WHERE followupWayId=#{followupWayId} 
+	</select>
+	
+	<!-- 判断记录是否存在  -->
+	<select id="isExistsResult" resultType="java.lang.Integer" parameterType="com.esuizhen.cloudservice.sync.bean.TPatientFollowupResultDetailInfo">
+		SELECT 1 FROM followup_db.followup_result f
+		WHERE f.patientId=#{patientId} AND f.followupResultValue=#{followupResultValue}
+		AND f.followUpTime=#{followupTime} AND f.followUpWay=#{followUpWay}
+	</select>
+</mapper>

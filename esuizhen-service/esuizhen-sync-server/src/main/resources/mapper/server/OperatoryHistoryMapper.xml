@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.server.OperatorHistoryDao">
+	<insert id="insert">
+		INSERT INTO user_db.s_operation_history(`operationName`, `description`, `actionType`, `operatorId`, `createTime`) 
+		VALUES(
+			#{operationName},#{description},#{actionType},#{operatorId},now()
+		)
+	</insert>
+</mapper>

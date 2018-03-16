@@ -1,0 +1,1129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.inhospital.TInhospitalDetailInfoDao">
+	<resultMap type="com.esuizhen.cloudservice.ehr.model.inhospital.TInhospitalInfo" id="BaseResultMap">
+		<id property="inhospitalId" column="inhospitalId" />
+		<result property="patientNo" column="patientNo"/>
+		<result property="inhospitalWay" column="inhospitalWay"/>
+		<result property="inhospitalWayName" column="inhospitalWayName"/>
+		<result property="inhospitalDate" column="inhospitalDate"/>
+		<result property="inhospitalTimes" column="inhospitalTimes"/>
+		<result property="outhospitalDate" column="outhospitalDate"/>
+		<result property="outhospitalDeptId" column="outhospitalDeptId"/>
+		<result property="inhospitalSource" column="inhospitalSource"/>
+		<result property="outhoispitalWay" column="outhoispitalWay"/>
+		<result property="outhoispitalWayName" column="outhoispitalWayName"/>
+		<result property="surgeryName" column="surgeryName"/>
+		<result property="outhospitalDeptName" column="outhospitalDeptName"/>
+		<result property="diagnose" column="diagnose"/>
+		<result property="flag" column="flag"/>
+		<result property="codePerson" column="codePerson"/>
+		<result property="codePersonName" column="codePersonName"/>
+		<result property="mainDiagnosis" column="mainDiagnosis"/>
+		<result property="operatorId" column="operatorId"/>
+		<result property="operatorName" column="operatorName"/>
+		<result property="inhospitalNo" column="inhospitalNo"/>
+		<result property="treatmentRecord" column="treatmentRecord"/>
+	</resultMap>
+	
+	<select id="queryInhospitalInfoByPatientId" resultType="com.esuizhen.cloudservice.ehr.model.inhospital.TInhospitalInfo">
+		SELECT 
+        	t1.patientNo,
+        	t1.inhospitalId,
+        	t1.inhospitalWay,
+        	(CASE WHEN t1.inhospitalWay=1 THEN '急诊'
+        		  WHEN t1.inhospitalWay=2 THEN '门诊'
+        		  WHEN t1.inhospitalWay=3 THEN '其他医疗机构转入'
+        	ELSE '其他' END) inhospitalWayName ,
+        	t1.inhospitalDate,
+        	t1.inhospitalTimes,
+        	t1.outhospitalDate,
+        	t1.outhospitalDeptId,
+        	t1.inhospitalSource,
+        	t1.outhoispitalWay,
+        	(CASE WHEN t1.outhoispitalWay=1 THEN '医嘱离院'
+        		  WHEN t1.outhoispitalWay=2 THEN '医嘱转院'
+        		  WHEN t1.outhoispitalWay=3 THEN '医嘱转社区卫生服务机构'
+        		  WHEN t1.outhoispitalWay=4 THEN '非医嘱离院'
+        		  WHEN t1.outhoispitalWay=5 THEN '死亡'
+        	ELSE '其他' END) outhoispitalWayName ,
+        	(SELECT surgeryName FROM eci_surgery_note WHERE inhospitalId=t1.inhospitalId  ORDER BY surgeryDate LIMIT 1) surgeryName ,
+        	(SELECT deptName FROM user_db.u_department WHERE deptId=t1.outhospitalDeptId LIMIT 1) outhospitalDeptName ,
+        	t1.diagnose,
+        	t1.flag,
+        	t1.codePerson,
+        	t1.codePersonName,
+        	t1.mainDiagnosis,
+        	t1.operatorId,
+        	t1.operatorName,
+        	t1.inchargeDoctorName,
+        	t1.catalogState,
+        	(SELECT GROUP_CONCAT(DISTINCT(b.treatmentTypeName)) FROM eci_treatment_note tn LEFT JOIN ehr_db.meta_e_treatment b on tn.treatmentTypeId = b.treatmentTypeId WHERE tn.inHospitalId=t1.inhospitalId GROUP BY tn.inHospitalId) treatmentName,
+        	(SELECT GROUP_CONCAT(DISTINCT(d.diagnosis)) FROM e_diagnosis_info d WHERE d.inhospitalId=t1.inhospitalId AND d.diagnosisTypeId != 1 GROUP BY d.inhospitalId) otherDiagnosises,
+        	CASE t1.inhospitalId WHEN (SELECT d.inhospitalId FROM e_diagnosis_info d WHERE d.patientId=t1.patientId AND d.isSourceDiagnosis=1 ORDER BY visitTime LIMIT 1) THEN 1 ELSE 0 END firstSourceDiagnosisFlag,
+        	(SELECT CASE WHEN t2.outhospitalId IS NOT NULL THEN 1 END  FROM ei_outhospital_note t2 WHERE t1.inhospitalId=t2.inhospitalId LIMIT 1) summaryFlag
+		FROM ei_inhospital_note t1
+	    WHERE 
+	    	t1.deleteFlag=1 and
+	        t1.patientId = #{patientId}
+	        <if test="outhospitalDateStart != null">
+	        	and t1.outhospitalDate <![CDATA[>=]]> DATE_FORMAT(#{outhospitalDateStart},'%Y-%m-%d')
+	        </if>
+	        <if test="outhospitalDateEnd != null">
+	        	and t1.outhospitalDate <![CDATA[<=]]> CONCAT(DATE_FORMAT(#{outhospitalDateEnd},'%Y-%m-%d'),' 23:59:59')
+	        </if>
+	        <if test="outhospitalDeptId != null">
+	        	and t1.outhospitalDeptId = #{outhospitalDeptId}
+	        </if>
+	        <if test="patientNo != null">
+	        	AND t1.patientNo=#{patientNo}
+	        </if>
+	        <if test="patientId != null">
+	        	AND t1.patientId=#{patientId}
+	        </if>
+	        <if test="inhospitalTimes != null">
+	        	AND t1.inhospitalTimes=#{inhospitalTimes}
+	        </if>
+	        <if test="inhospitalDate != null">
+	        	AND DATE_FORMAT(t1.inhospitalDate,'%Y-%m-%d')=DATE_FORMAT(#{inhospitalDate},'%Y-%m-%d')
+	        </if>
+	    ORDER BY t1.inhospitalDate DESC,t1.outhospitalDate DESC
+	    <if test="startRow != null">
+			LIMIT #{startRow},#{pageSize}
+		</if>
+	</select>
+    
+    <update id="updateInhospitalFiling" >
+        UPDATE ei_inhospital_note 
+        <set>
+	        <if test="flag != null">
+                flag = #{flag} ,
+                <choose>
+                	<when test="flag==1">
+                		catalogState = 3 ,
+                	</when>
+                	<otherwise>
+                		catalogState = 2 ,
+                	</otherwise>
+                </choose>
+            </if>
+            catalogDate = NOW() 
+        </set>
+        WHERE 
+	        inhospitalId = #{inhospitalId} 
+	</update>
+	
+	<insert id="createInhospitalDetail" parameterType="com.esuizhen.cloudservice.ehr.model.inhospital.TInhospitalDetailInfo">
+        insert into ei_inhospital_note(
+       		inhospitalId,
+       		inhospitalNo,
+        	inhospitalSource,
+        	emrId,
+        	patientId,
+        	patientNo,
+        	hospitalId,
+        	medicalPayType,
+        	healthCardNo,
+        	inhospitalWay,
+        	inhospitalDate,
+        	inhospitalDeptId,
+        	inhospitalWard,
+        	inhospitalTimes,
+        	turnDeptId,
+        	turnDept,
+        	turnDeptDate,
+        	outhospitalDate,
+        	outhospitalDeptId,
+        	outhospitalWard,
+        	outhoispitalWay,
+        	inhospitalDays,
+        	diagnose,
+        	diseaseCode,
+        	deptDoctor,
+        	deptDoctorName,
+        	directorDoctor,
+        	directorDoctorName,
+        	inchargeDoctor,
+        	inchargeDoctorName,
+        	inhospitalDoctor,
+        	inhospitalDoctorName,
+        	attendingDoctor,
+        	attendingDoctorName,
+        	dutyNurse,
+        	dutyNurseName,
+        	postgraduateDoctor,
+        	postgraduateDoctorName,
+        	internshipDoctor,
+        	internshipDoctorName,
+        	codePerson,
+        	codePersonName,
+        	medicalRecordsQuality,
+        	qualityControlDoctor,
+        	qualityControlDoctorName,
+        	qualityControlNurse,
+        	qualityControlNurseName,
+        	qualityControlDate,
+        	mainDiagnosis,
+        	mainDiagnosisCode,
+        	inhospitalCondition,
+        	syncflag,
+        	sourceflag,
+        	historyCuration,
+        	sourceCancerNum,
+        	age,
+        	occupationId,
+        	idType,
+        	identification,
+        	marriageStatus,
+        	outhospitalCondition,
+        	reInhospitalPlan31Days,
+        	reInhospitalTarget31Days,
+        	preComaHour,
+        	preComaMinute,
+        	inComaHour,
+        	inComaMinute,
+        	inviabilityScore,
+        	outviabilityScore,
+        	babyAge,
+        	babyBornWeight,
+        	babyWeightInHospital,
+        	transfusion,
+        	respiratorUseTime,
+        	isAllergy,
+        	allergyDesc,
+        	autopsy,
+        	aboBlood,
+        	rhBlood,
+        	redBloodCell,
+        	platelet,
+        	plasma,
+        	wholeBlood,
+        	other,
+        	pathologyNo,
+        	poisoningReason,
+        	poisoningDiseaseCode,
+        	recHospitalName,
+        	tumourPeriodizationTId,
+        	tumourPeriodizationNId,
+        	tumourPeriodizationM1Id,
+        	tumourPeriodizationT,
+        	tumourPeriodizationN,
+        	tumourPeriodizationM1,
+        	tumourPeriodizationClinic,
+        	pathologyDiagnosis,
+        	pathologyDiagnosisCode,
+        	householdZipCode,
+        	householdCountyCode,
+        	householdAddress,
+        	companyZipCode,
+        	companyCountyCode,
+        	companyAddress,
+        	liveZipCode,
+        	liveCountyCode,
+        	liveAddress,
+        	familyName,
+        	patientRelation,
+        	familyCountyCode,
+        	familyAddress,
+        	createTime,
+        	updateTime,
+        	syncTime,
+        	nationalityId,
+        	nativePlaceCityCode,
+        	nativePlaceAddress,
+        	companyTel,
+        	liveTel,
+        	familyTel,
+        	deathCause,
+        	deathTime,
+        	operatorId,
+        	operatorName,
+        	deleteFlag,
+        	inhospitalDeptName,
+        	outhospitalDeptName,
+        	hospitalName
+        ) values(
+        	#{inhospitalId},
+       		#{inhospitalNo},
+        	#{inhospitalSource},
+        	1,
+        	#{patientId},
+        	#{patientNo},
+        	#{hospitalId},
+        	#{medicalPayType},
+        	#{healthCardNo},
+        	#{inhospitalWay},
+        	#{inhospitalDate},
+        	#{inhospitalDeptId},
+        	#{inhospitalWard},
+        	#{inhospitalTimes},
+        	#{turnDeptId},
+        	#{turnDept},
+        	#{turnDeptDate},
+        	#{outhospitalDate},
+        	#{outhospitalDeptId},
+        	#{outhospitalWard},
+        	#{outhoispitalWay},
+        	#{inhospitalDays},
+        	#{diagnose},
+        	#{diseaseCode},
+        	#{deptDoctor},
+        	#{deptDoctorName},
+        	#{directorDoctor},
+        	#{directorDoctorName},
+        	#{inchargeDoctor},
+        	#{inchargeDoctorName},
+        	#{inhospitalDoctor},
+        	#{inhospitalDoctorName},
+        	#{attendingDoctor},
+        	#{attendingDoctorName},
+        	#{dutyNurse},
+        	#{dutyNurseName},
+        	#{postgraduateDoctor},
+        	#{postgraduateDoctorName},
+        	#{internshipDoctor},
+        	#{internshipDoctorName},
+        	#{codePerson},
+        	#{codePersonName},
+        	#{medicalRecordsQuality},
+        	#{qualityControlDoctor},
+        	#{qualityControlDoctorName},
+        	#{qualityControlNurse},
+        	#{qualityControlNurseName},
+        	#{qualityControlDate},
+        	#{mainDiagnosis},
+        	#{mainDiagnosisCode},
+        	#{inhospitalCondition},
+        	#{syncflag},
+        	#{sourceflag},
+        	#{historyCuration},
+        	#{sourceCancerNum},
+        	#{age},
+        	#{occupationId},
+        	#{idType},
+        	#{identification},
+        	#{marriageStatus},
+        	#{outhospitalCondition},
+        	#{reInhospitalPlan31Days},
+        	#{reInhospitalTarget31Days},
+        	#{preComaHour},
+        	#{preComaMinute},
+        	#{inComaHour},
+        	#{inComaMinute},
+        	#{inviabilityScore},
+        	#{outviabilityScore},
+        	#{babyAge},
+        	#{babyBornWeight},
+        	#{babyWeightInHospital},
+        	#{transfusion},
+        	#{respiratorUseTime},
+        	#{isAllergy},
+        	#{allergyDesc},
+        	#{isAut},
+        	#{aboBlood},
+        	#{rhBlood},
+        	#{redBloodCell},
+        	#{platelet},
+        	#{plasma},
+        	#{wholeBlood},
+        	#{other},
+        	#{pathologyNo},
+        	#{poisoningReason},
+        	#{poisoningDiseaseCode},
+        	#{recHospitalName},
+        	#{tumourPeriodizationTId},
+        	#{tumourPeriodizationNId},
+        	#{tumourPeriodizationM1Id},
+        	#{tumourPeriodizationT},
+        	#{tumourPeriodizationN},
+        	#{tumourPeriodizationM1},
+        	#{tumourPeriodizationClinic},
+        	#{pathologyDiagnosis},
+        	#{pathologyDiagnosisCode},
+        	#{householdZipCode},
+        	#{householdCountyCode},
+        	#{householdAddress},
+        	#{companyZipCode},
+        	#{companyCountyCode},
+        	#{companyAddress},
+        	#{liveZipCode},
+        	#{liveCountyCode},
+        	#{liveAddress},
+        	#{familyName},
+        	#{patientRelation},
+        	#{familyCountyCode},
+        	#{familyAddress},
+        	now(),
+        	now(),
+        	#{syncTime},
+        	#{nationalityId},
+        	#{nativePlaceCityCode},
+        	#{nativePlaceAddress},
+        	#{companyTel},
+        	#{liveTel},
+        	#{familyTel},
+        	#{deathCause},
+        	#{deathTime},
+        	#{operatorId},
+        	#{operatorName},
+        	1,
+        	#{inhospitalDeptName},
+        	#{outhospitalDeptName},
+        	#{hospitalName}
+        )
+	</insert>
+	<update id="updateInhospitalTimes">
+		update ei_inhospital_note n join
+		(select (@d:=@d+1) AS rowno,inhospitalDate from ehr_db.ei_inhospital_note,(select @d:=0) as it where patientId=#{patientId} order by inhospitalDate) t 
+		on t.inhospitalDate=n.inhospitalDate 
+		set n.inhospitalTimes=t.rowno
+		where patientId=#{patientId} 
+	</update>
+	<update id="updateInhospitalAge">
+		update ei_inhospital_note n  
+		set n.age=datediff(n.inhospitalDate,#{birthDate})/365
+		where n.patientId=#{patientId} 
+	</update>
+	<update id="updateInhospitalByCode" parameterType="com.esuizhen.cloudservice.ehr.model.inhospital.TInhospitalDetailInfo">
+	UPDATE ei_inhospital_note set
+		tumourPeriodizationTId=#{tumourPeriodizationTId},
+        	tumourPeriodizationNId=#{tumourPeriodizationNId},
+        	tumourPeriodizationM1Id=#{tumourPeriodizationM1Id},
+        	tumourPeriodizationT=#{tumourPeriodizationT},
+        	tumourPeriodizationN=#{tumourPeriodizationN},
+        	tumourPeriodizationM1=#{tumourPeriodizationM1}
+        	where  mainDiagnosisCode =#{mainDiagnosisCode}
+	</update>
+	<update id="updateInhospitalDetail" parameterType="com.esuizhen.cloudservice.ehr.model.inhospital.TInhospitalDetailInfo">
+        UPDATE ei_inhospital_note 
+        <set>
+	        <if test="1==1">
+                inhospitalNo = #{inhospitalNo} ,
+            </if>
+	        <if test="1==1">
+                inhospitalSource = #{inhospitalSource} ,
+            </if>
+            <if test="1==1">
+                emrId = #{emrId} ,
+            </if>
+	        <if test="1==1">
+                patientId = #{patientId} ,
+            </if>
+	        <if test="1==1">
+                patientNo = #{patientNo} ,
+            </if>
+	        <if test="1==1">
+                hospitalId = #{hospitalId} ,
+            </if>
+	        <if test="1==1">
+                medicalPayType = #{medicalPayType} ,
+            </if>
+	        <if test="1==1">
+                healthCardNo = #{healthCardNo} ,
+            </if>
+	        <if test="1==1">
+                inhospitalWay = #{inhospitalWay} ,
+            </if>
+	        <if test="1==1">
+                inhospitalDate = #{inhospitalDate} ,
+            </if>
+	        <if test="1==1">
+                inhospitalDeptId = #{inhospitalDeptId} ,
+            </if>
+	        <if test="1==1">
+                inhospitalWard = #{inhospitalWard} ,
+            </if>
+	        <if test="1==1">
+                inhospitalTimes = #{inhospitalTimes} ,
+            </if>
+	        <if test="1==1">
+                turnDeptId = #{turnDeptId} ,
+            </if>
+            <if test="1==1">
+                turnDept = #{turnDept} ,
+            </if>
+	        <if test="1==1">
+                turnDeptDate = #{turnDeptDate} ,
+            </if>
+	        <if test="1==1">
+                outhospitalDate = #{outhospitalDate} ,
+            </if>
+	        <if test="1==1">
+                outhospitalDeptId = #{outhospitalDeptId} ,
+            </if>
+	        <if test="1==1">
+                outhospitalWard = #{outhospitalWard} ,
+            </if>
+	        <if test="1==1">
+                outhoispitalWay = #{outhoispitalWay} ,
+            </if>
+	        <if test="1==1">
+                inhospitalDays = #{inhospitalDays} ,
+            </if>
+	        <if test="1==1">
+                diagnose = #{diagnose} ,
+            </if>
+	        <if test="1==1">
+                diseaseCode = #{diseaseCode} ,
+            </if>
+	        <if test="1==1">
+                deptDoctor = #{deptDoctor} ,
+            </if>
+	        <if test="1==1">
+                deptDoctorName = #{deptDoctorName} ,
+            </if>
+	        <if test="1==1">
+                directorDoctor = #{directorDoctor} ,
+            </if>
+	        <if test="1==1">
+                directorDoctorName = #{directorDoctorName} ,
+            </if>
+	        <if test="1==1">
+                inchargeDoctor = #{inchargeDoctor} ,
+            </if>
+	        <if test="1==1">
+                inchargeDoctorName = #{inchargeDoctorName} ,
+            </if>
+	        <if test="1==1">
+                inhospitalDoctor = #{inhospitalDoctor} ,
+            </if>
+	        <if test="1==1">
+                inhospitalDoctorName = #{inhospitalDoctorName} ,
+            </if>
+	        <if test="1==1">
+                attendingDoctor = #{attendingDoctor} ,
+            </if>
+	        <if test="1==1">
+                attendingDoctorName = #{attendingDoctorName} ,
+            </if>
+	        <if test="1==1">
+                dutyNurse = #{dutyNurse} ,
+            </if>
+	        <if test="1==1">
+                dutyNurseName = #{dutyNurseName} ,
+            </if>
+	        <if test="1==1">
+                postgraduateDoctor = #{postgraduateDoctor} ,
+            </if>
+	        <if test="1==1">
+                postgraduateDoctorName = #{postgraduateDoctorName} ,
+            </if>
+	        <if test="1==1">
+                internshipDoctor = #{internshipDoctor} ,
+            </if>
+	        <if test="1==1">
+                internshipDoctorName = #{internshipDoctorName} ,
+            </if>
+	        <if test="1==1">
+                codePerson = #{codePerson} ,
+            </if>
+            <if test="1==1">
+                codePersonName = #{codePersonName} ,
+            </if>
+	        <if test="1==1">
+                medicalRecordsQuality = #{medicalRecordsQuality} ,
+            </if>
+	        <if test="1==1">
+                qualityControlDoctor = #{qualityControlDoctor} ,
+            </if>
+	        <if test="1==1">
+                qualityControlDoctorName = #{qualityControlDoctorName} ,
+            </if>
+	        <if test="1==1">
+                qualityControlNurse = #{qualityControlNurse} ,
+            </if>
+	        <if test="1==1">
+                qualityControlNurseName = #{qualityControlNurseName} ,
+            </if>
+	        <if test="1==1">
+                qualityControlDate = #{qualityControlDate} ,
+            </if>
+	        <!-- <if test="1==1">
+                mainDiagnosis = #{mainDiagnosis} ,
+            </if>
+	        <if test="1==1">
+                mainDiagnosisCode = #{mainDiagnosisCode} ,
+            </if> -->
+	        <if test="1==1">
+                inhospitalCondition = #{inhospitalCondition} ,
+            </if>
+	        <if test="1==1">
+                syncflag = #{syncflag} ,
+            </if>
+	        <if test="1==1">
+                sourceflag = #{sourceflag} ,
+            </if>
+	        <if test="1==1">
+                historyCuration = #{historyCuration} ,
+            </if>
+	        <if test="1==1">
+                sourceCancerNum = #{sourceCancerNum} ,
+            </if>
+	        <if test="1==1">
+                age = #{age} ,
+            </if>
+	        <if test="1==1">
+                occupationId = #{occupationId} ,
+            </if>
+	        <if test="1==1">
+                idType = #{idType} ,
+            </if>
+	        <if test="1==1">
+                identification = #{identification} ,
+            </if>
+	        <if test="1==1">
+                marriageStatus = #{marriageStatus} ,
+            </if>
+	        <if test="1==1">
+                outhospitalCondition = #{outhospitalCondition} ,
+            </if>
+	        <if test="1==1">
+                reInhospitalPlan31Days = #{reInhospitalPlan31Days} ,
+            </if>
+	        <if test="1==1">
+                reInhospitalTarget31Days = #{reInhospitalTarget31Days} ,
+            </if>
+	        <if test="1==1">
+                preComaHour = #{preComaHour} ,
+            </if>
+	        <if test="1==1">
+                preComaMinute = #{preComaMinute} ,
+            </if>
+	        <if test="1==1">
+                inComaHour = #{inComaHour} ,
+            </if>
+	        <if test="1==1">
+                inComaMinute = #{inComaMinute} ,
+            </if>
+	        <if test="1==1">
+                inviabilityScore = #{inviabilityScore} ,
+            </if>
+	        <if test="1==1">
+                outviabilityScore = #{outviabilityScore} ,
+            </if>
+	        <if test="1==1">
+                babyAge = #{babyAge} ,
+            </if>
+	        <if test="1==1">
+                babyBornWeight = #{babyBornWeight} ,
+            </if>
+	        <if test="1==1">
+                babyWeightInHospital = #{babyWeightInHospital} ,
+            </if>
+	        <if test="1==1">
+                transfusion = #{transfusion} ,
+            </if>
+	        <if test="1==1">
+                respiratorUseTime = #{respiratorUseTime} ,
+            </if>
+	        <if test="1==1">
+                isAllergy = #{isAllergy} ,
+            </if>
+	        <if test="1==1">
+                allergyDesc = #{allergyDesc} ,
+            </if>
+	        <if test="1==1">
+                autopsy = #{isAut} ,
+            </if>
+	        <if test="1==1">
+                aboBlood = #{aboBlood} ,
+            </if>
+	        <if test="1==1">
+                rhBlood = #{rhBlood} ,
+            </if>
+	        <if test="1==1">
+                redBloodCell = #{redBloodCell} ,
+            </if>
+	        <if test="1==1">
+                platelet = #{platelet} ,
+            </if>
+	        <if test="1==1">
+                plasma = #{plasma} ,
+            </if>
+	        <if test="1==1">
+                wholeBlood = #{wholeBlood} ,
+            </if>
+	        <if test="1==1">
+                other = #{other} ,
+            </if>
+	        <if test="1==1">
+                pathologyNo = #{pathologyNo} ,
+            </if>
+	        <if test="1==1">
+                poisoningReason = #{poisoningReason} ,
+            </if>
+	        <if test="1==1">
+                poisoningDiseaseCode = #{poisoningDiseaseCode} ,
+            </if>
+	        <if test="1==1">
+                recHospitalName = #{recHospitalName} ,
+            </if>
+            <if test="1==1">
+                tumourPeriodization = #{tumourPeriodization} ,
+            </if>
+            tumourPeriodizationTId = #{tumourPeriodizationTId} ,
+            tumourPeriodizationNId = #{tumourPeriodizationNId} ,
+            tumourPeriodizationM1Id = #{tumourPeriodizationM1Id} ,
+            <if test="1==1">
+                tumourPeriodizationT = #{tumourPeriodizationT} ,
+            </if>
+	        <if test="1==1">
+                tumourPeriodizationN = #{tumourPeriodizationN} ,
+            </if>
+	        <if test="1==1">
+                tumourPeriodizationM1 = #{tumourPeriodizationM1} ,
+            </if>
+	        <if test="1==1">
+                tumourPeriodizationClinic = #{tumourPeriodizationClinic} ,
+            </if>
+            tumourPeriodizationClinicId = #{tumourPeriodizationClinicId} ,
+	        <if test="1==1">
+                pathologyDiagnosis = #{pathologyDiagnosis} ,
+            </if>
+	        <if test="1==1">
+                pathologyDiagnosisCode = #{pathologyDiagnosisCode} ,
+            </if>
+	        <if test="1==1">
+                householdZipCode = #{householdZipCode} ,
+            </if>
+	        <if test="1==1">
+                householdCountyCode = #{householdCountyCode} ,
+            </if>
+	        <if test="1==1">
+                householdAddress = #{householdAddress} ,
+            </if>
+	        <if test="1==1">
+                companyZipCode = #{companyZipCode} ,
+            </if>
+	        <if test="1==1">
+                companyCountyCode = #{companyCountyCode} ,
+            </if>
+	        <if test="1==1">
+                companyAddress = #{companyAddress} ,
+            </if>
+	        <if test="1==1">
+                liveZipCode = #{liveZipCode} ,
+            </if>
+	        <if test="1==1">
+                liveCountyCode = #{liveCountyCode} ,
+            </if>
+	        <if test="1==1">
+                liveAddress = #{liveAddress} ,
+            </if>
+	        <if test="1==1">
+                familyName = #{familyName} ,
+            </if>
+	        <if test="1==1">
+                patientRelation = #{patientRelation} ,
+            </if>
+	        <if test="1==1">
+                familyCountyCode = #{familyCountyCode} ,
+            </if>
+	        <if test="1==1">
+                familyAddress = #{familyAddress} ,
+            </if>
+	        <if test="1==1">
+                updateTime = NOW() ,
+            </if>
+            catalogState=2,
+            catalogDate = NOW(),
+            <if test="1==1">
+                nationalityId = #{nationalityId} ,
+            </if>
+            <if test="1==1">
+                nativePlaceCityCode = #{nativePlaceCityCode} ,
+            </if>
+            <if test="1==1">
+                nativePlaceAddress = #{nativePlaceAddress} ,
+            </if>
+            <if test="1==1">
+                companyTel = #{companyTel} ,
+            </if>
+            <if test="1==1">
+                liveTel = #{liveTel} ,
+            </if>
+            <if test="1==1">
+                familyTel = #{familyTel} ,
+            </if>
+            <if test="deathCause!=null">
+            	deathCause=#{deathCause},
+            </if>
+            <if test="deathTime!=null">
+            	deathTime=#{deathTime},
+            </if>
+            <if test="operatorId !=null">
+            	operatorId=#{operatorId},
+            </if>
+            <if test="operatorName !=null">
+            	operatorName=#{operatorName},
+            </if>
+        	<if test="treatmentRecord != null">
+        	treatmentRecord=#{treatmentRecord},
+        	</if>
+        	pathologyNo=#{pathologyNo},
+            inhospitalDeptName=#{inhospitalDeptName},
+        	outhospitalDeptName=#{outhospitalDeptName},
+        	hospitalName=#{hospitalName},
+        	adverseReactionWriteTime=#{adverseReactionWriteTime}
+        </set>
+        WHERE 
+	        inhospitalId = #{inhospitalId} 
+	</update>
+
+    <update id="deleteInhospitalDetail" >
+        UPDATE ei_inhospital_note 
+        <set>
+            deleteFlag = 0 
+        </set>
+        WHERE 
+	        inhospitalId = #{inhospitalId} 
+	</update>
+	
+	<!-- 修改诊断时，如果包含主要诊断，会把主要诊断更新到住院首页中  -->
+	<update id="updateInhospitalDetailSelective" parameterType="com.esuizhen.cloudservice.ehr.model.inhospital.TInhospitalDetailInfo">
+        UPDATE ei_inhospital_note 
+        <set>
+	        <if test="mainDiagnosis != null">
+                mainDiagnosis = #{mainDiagnosis} ,
+            </if>
+	        <if test="mainDiagnosisCode != null">
+                mainDiagnosisCode = #{mainDiagnosisCode} ,
+            </if>
+	        <if test="inhospitalCondition != null">
+                inhospitalCondition = #{inhospitalCondition},
+            </if>
+             tumourPeriodizationTId = #{tumourPeriodizationTId} ,
+            tumourPeriodizationNId = #{tumourPeriodizationNId} ,
+            tumourPeriodizationM1Id = #{tumourPeriodizationM1Id} ,
+                tumourPeriodizationT = #{tumourPeriodizationT} ,
+                tumourPeriodizationN = #{tumourPeriodizationN} ,
+                tumourPeriodizationM1 = #{tumourPeriodizationM1} ,
+                tumourPeriodizationClinic = #{tumourPeriodizationClinic} ,
+            <if test="tumourPeriodizationClinicId != null">
+            tumourPeriodizationClinicId = #{tumourPeriodizationClinicId} ,
+            </if>
+            updateTime = NOW() 
+        </set>
+        WHERE 
+	        inhospitalId = #{inhospitalId} 
+	</update>
+    
+    <select id="queryInhospitalDetailByInhospitalId" resultType="com.esuizhen.cloudservice.ehr.model.inhospital.TInhospitalDetailInfo">
+		SELECT 
+        	inhospitalId,
+        	inhospitalNo,
+        	deathCause,
+        	deathTime,
+        	emrId,
+        	patientId,
+        	patientNo,
+        	hospitalId,
+        	medicalPayType,
+        	healthCardNo,
+        	inhospitalWay,
+        	inhospitalDate,
+        	inhospitalDeptId,
+        	inhospitalWard,
+        	inhospitalTimes,
+        	turnDeptId,
+        	turnDept,
+        	turnDeptDate,
+        	outhospitalDate,
+        	outhospitalDeptId,
+        	outhospitalWard,
+        	outhoispitalWay,
+        	inhospitalDays,
+        	diagnose,
+        	diseaseCode,
+        	deptDoctor,
+        	deptDoctorName,
+        	directorDoctor,
+        	directorDoctorName,
+        	inchargeDoctor,
+        	inchargeDoctorName,
+        	inhospitalDoctor,
+        	inhospitalDoctorName,
+        	attendingDoctor,
+        	attendingDoctorName,
+        	dutyNurse,
+        	dutyNurseName,
+        	postgraduateDoctor,
+        	postgraduateDoctorName,
+        	internshipDoctor,
+        	internshipDoctorName,
+        	codePerson,
+        	codePersonName,
+        	medicalRecordsQuality,
+        	qualityControlDoctor,
+        	qualityControlDoctorName,
+        	qualityControlNurse,
+        	qualityControlNurseName,
+        	qualityControlDate,
+        	mainDiagnosis,
+        	mainDiagnosisCode,
+        	inhospitalCondition,
+        	syncflag,
+        	sourceflag,
+        	historyCuration,
+        	sourceCancerNum,
+        	age,
+        	occupationId,
+        	idType,
+        	identification,
+        	marriageStatus,
+        	outhospitalCondition,
+        	reInhospitalPlan31Days,
+        	reInhospitalTarget31Days,
+        	preComaHour,
+        	preComaMinute,
+        	inComaHour,
+        	inComaMinute,
+        	inviabilityScore,
+        	outviabilityScore,
+        	babyAge,
+        	babyBornWeight,
+        	babyWeightInHospital,
+        	transfusion,
+        	respiratorUseTime,
+        	isAllergy,
+        	allergyDesc,
+        	autopsy isAut,
+        	aboBlood,
+        	rhBlood,
+        	redBloodCell,
+        	platelet,
+        	plasma,
+        	wholeBlood,
+        	other,
+        	pathologyNo,
+        	poisoningReason,
+        	poisoningDiseaseCode,
+        	recHospitalName,
+        	CASE WHEN tumourPeriodization IS NULL THEN CONCAT(IFNULL(tumourPeriodizationT,''),IFNULL(tumourPeriodizationN,''),IFNULL(tumourPeriodizationM1,''),' ',IFNULL(tumourPeriodizationClinic,'')) ELSE tumourPeriodization END tumourPeriodization,
+        	tumourPeriodizationTId,
+        	tumourPeriodizationNId,
+        	tumourPeriodizationM1Id,
+        	tumourPeriodizationT,
+        	tumourPeriodizationN,
+        	tumourPeriodizationM1,
+        	tumourPeriodizationClinicId,
+        	tumourPeriodizationClinic,
+        	pathologyDiagnosis,
+        	pathologyDiagnosisCode,
+        	householdZipCode,
+        	householdCountyCode,
+        	<!-- (SELECT cityCode FROM user_db.meta_county WHERE countyCode=ei_inhospital_note.householdCountyCode) householdCityCode,
+        	(SELECT provinceCode FROM user_db.meta_county WHERE countyCode=ei_inhospital_note.householdCountyCode) householdProvinceCode,
+        	 -->householdAddress,
+        	companyZipCode,
+        	companyCountyCode,
+        	<!-- (SELECT cityCode FROM user_db.meta_county WHERE countyCode=ei_inhospital_note.companyCountyCode) companyCityCode,
+        	(SELECT provinceCode FROM user_db.meta_county WHERE countyCode=ei_inhospital_note.companyCountyCode) companyProvinceCode,
+        	 -->companyAddress,
+        	liveZipCode,
+        	liveCountyCode,
+        	<!-- (SELECT cityCode FROM user_db.meta_county WHERE countyCode=ei_inhospital_note.liveCountyCode) liveCityCode,
+        	(SELECT provinceCode FROM user_db.meta_county WHERE countyCode=ei_inhospital_note.liveCountyCode) liveProvinceCode,
+        	 -->liveAddress,
+        	familyName,
+        	patientRelation,
+        	familyCountyCode,
+        	<!-- (SELECT cityCode FROM user_db.meta_county WHERE countyCode=ei_inhospital_note.familyCountyCode) familyCityCode,
+        	(SELECT provinceCode FROM user_db.meta_county WHERE countyCode=ei_inhospital_note.familyCountyCode) familyProvinceCode,
+        	 -->familyAddress,
+        	(select nationId FROM user_db.u_patient it1 , user_db.u_user it2 WHERE it1.userId=it2.userId AND it1.patientId=ei_inhospital_note.patientId) nationId ,
+        	(select nation FROM user_db.u_patient it1 , user_db.u_user it2 WHERE it1.userId=it2.userId AND it1.patientId=ei_inhospital_note.patientId) nation ,
+        	(select it2.sex FROM user_db.u_patient it1 , user_db.u_user it2 WHERE it1.userId=it2.userId AND it1.patientId=ei_inhospital_note.patientId) sex ,
+        	(select occupationName FROM user_db.meta_occupation it1 WHERE occupationId=ei_inhospital_note.occupationId) occupationName ,
+        	(select birthPlaceCode FROM user_db.u_patient it1 , user_db.u_user it2 WHERE it1.userId=it2.userId AND it1.patientId=ei_inhospital_note.patientId) birthPlaceCountyCode ,
+        	<!-- (select it3.cityCode FROM user_db.u_patient it1 , user_db.u_user it2 , user_db.meta_county it3 WHERE it1.userId=it2.userId AND it2.birthPlaceCode = it3.countyCode AND it1.patientId=ei_inhospital_note.patientId) birthPlaceCityCode ,
+        	(select it3.provinceCode FROM user_db.u_patient it1 , user_db.u_user it2 , user_db.meta_county it3 WHERE it1.userId=it2.userId AND it2.birthPlaceCode = it3.countyCode AND it1.patientId=ei_inhospital_note.patientId) birthPlaceProvinceCode ,
+        	 -->(select birthPlaceAddress FROM user_db.u_patient it1 , user_db.u_user it2 WHERE it1.userId=it2.userId AND it1.patientId=ei_inhospital_note.patientId) birthPlaceAddress ,
+        	nationalityId,
+        	(select nationalityName FROM user_db.meta_nationality it1 WHERE nationalityId=ei_inhospital_note.nationalityId) nationalityName ,
+        	nativePlaceCityCode,
+        	<!-- (SELECT provinceCode FROM user_db.meta_county WHERE cityCode=ei_inhospital_note.nativePlaceCityCode LIMIT 1) nativePlaceProvinceCode,
+        	 -->nativePlaceAddress,
+        	inhospitalSource,
+        	companyTel,
+        	liveTel,
+        	familyTel,
+        	createTime,
+        	updateTime,
+        	syncTime,
+        	operatorId,
+        	operatorName,
+        	adverseReactionWriteTime,
+        	case when ei_inhospital_note.inhospitalDeptId is null then ei_inhospital_note.inhospitalDeptName else (select deptName from user_db.u_department where deptId=ei_inhospital_note.inhospitalDeptId) end inhospitalDeptName,
+        	case when ei_inhospital_note.outhospitalDeptId is null then ei_inhospital_note.outhospitalDeptName else (select deptName from user_db.u_department where deptId=ei_inhospital_note.outhospitalDeptId) end outhospitalDeptName,
+        	case when ei_inhospital_note.hospitalId is null then ei_inhospital_note.hospitalName else (select hospitalName from user_db.u_hospital where hospitalId=ei_inhospital_note.hospitalId) end hospitalName,
+        	treatmentRecord
+		FROM ei_inhospital_note
+	    WHERE deleteFlag=1
+	    AND   inhospitalId = #{inhospitalId} 
+	</select>
+	
+	<!-- 根据住院id查询住院信息 -->
+	<select id="queryInhospitalDetailByPrimaryKeyId" resultType="com.esuizhen.cloudservice.ehr.model.inhospital.TInhospitalDetailInfo">
+		SELECT 
+        	inhospitalId,
+        	inhospitalNo,
+        	deathCause,
+        	deathTime,
+        	emrId,
+        	patientId,
+        	patientNo,
+        	hospitalId,
+        	medicalPayType,
+        	healthCardNo,
+        	inhospitalWay,
+        	inhospitalDate,
+        	inhospitalDeptId,
+        	inhospitalWard,
+        	inhospitalTimes,
+        	turnDeptId,
+        	turnDept,
+        	turnDeptDate,
+        	outhospitalDate,
+        	outhospitalDeptId,
+        	outhospitalWard,
+        	outhoispitalWay,
+        	inhospitalDays,
+        	diagnose,
+        	diseaseCode,
+        	deptDoctor,
+        	deptDoctorName,
+        	directorDoctor,
+        	directorDoctorName,
+        	inchargeDoctor,
+        	inchargeDoctorName,
+        	inhospitalDoctor,
+        	inhospitalDoctorName,
+        	attendingDoctor,
+        	attendingDoctorName,
+        	dutyNurse,
+        	dutyNurseName,
+        	postgraduateDoctor,
+        	postgraduateDoctorName,
+        	internshipDoctor,
+        	internshipDoctorName,
+        	codePerson,
+        	codePersonName,
+        	medicalRecordsQuality,
+        	qualityControlDoctor,
+        	qualityControlDoctorName,
+        	qualityControlNurse,
+        	qualityControlNurseName,
+        	qualityControlDate,
+        	mainDiagnosis,
+        	mainDiagnosisCode,
+        	inhospitalCondition,
+        	syncflag,
+        	sourceflag,
+        	historyCuration,
+        	sourceCancerNum,
+        	age,
+        	occupationId,
+        	idType,
+        	identification,
+        	marriageStatus,
+        	outhospitalCondition,
+        	reInhospitalPlan31Days,
+        	reInhospitalTarget31Days,
+        	preComaHour,
+        	preComaMinute,
+        	inComaHour,
+        	inComaMinute,
+        	inviabilityScore,
+        	outviabilityScore,
+        	babyAge,
+        	babyBornWeight,
+        	babyWeightInHospital,
+        	transfusion,
+        	respiratorUseTime,
+        	isAllergy,
+        	allergyDesc,
+        	autopsy isAut,
+        	aboBlood,
+        	rhBlood,
+        	redBloodCell,
+        	platelet,
+        	plasma,
+        	wholeBlood,
+        	other,
+        	pathologyNo,
+        	poisoningReason,
+        	poisoningDiseaseCode,
+        	recHospitalName,
+        	CASE WHEN tumourPeriodization IS NULL THEN CONCAT(IFNULL(tumourPeriodizationT,''),IFNULL(tumourPeriodizationN,''),IFNULL(tumourPeriodizationM1,''),' ',IFNULL(tumourPeriodizationClinic,'')) ELSE tumourPeriodization END tumourPeriodization,
+        	tumourPeriodizationTId,
+        	tumourPeriodizationNId,
+        	tumourPeriodizationM1Id,
+        	tumourPeriodizationT,
+        	tumourPeriodizationN,
+        	tumourPeriodizationM1,
+        	tumourPeriodizationClinic,
+        	pathologyDiagnosis,
+        	pathologyDiagnosisCode,
+        	householdZipCode,
+        	householdCountyCode,
+        	(SELECT cityCode FROM user_db.meta_county WHERE countyCode=ei_inhospital_note.householdCountyCode) householdCityCode,
+        	(SELECT provinceCode FROM user_db.meta_county WHERE countyCode=ei_inhospital_note.householdCountyCode) householdProvinceCode,
+        	householdAddress,
+        	companyZipCode,
+        	companyCountyCode,
+        	(SELECT cityCode FROM user_db.meta_county WHERE countyCode=ei_inhospital_note.companyCountyCode) companyCityCode,
+        	(SELECT provinceCode FROM user_db.meta_county WHERE countyCode=ei_inhospital_note.companyCountyCode) companyProvinceCode,
+        	companyAddress,
+        	liveZipCode,
+        	liveCountyCode,
+        	(SELECT cityCode FROM user_db.meta_county WHERE countyCode=ei_inhospital_note.liveCountyCode) liveCityCode,
+        	(SELECT provinceCode FROM user_db.meta_county WHERE countyCode=ei_inhospital_note.liveCountyCode) liveProvinceCode,
+        	liveAddress,
+        	familyName,
+        	patientRelation,
+        	familyCountyCode,
+        	(SELECT cityCode FROM user_db.meta_county WHERE countyCode=ei_inhospital_note.familyCountyCode) familyCityCode,
+        	(SELECT provinceCode FROM user_db.meta_county WHERE countyCode=ei_inhospital_note.familyCountyCode) familyProvinceCode,
+        	familyAddress,
+        	(select nationId FROM user_db.u_patient it1 , user_db.u_user it2 WHERE it1.userId=it2.userId AND it1.patientId=ei_inhospital_note.patientId) nationId ,
+        	(select nation FROM user_db.u_patient it1 , user_db.u_user it2 WHERE it1.userId=it2.userId AND it1.patientId=ei_inhospital_note.patientId) nation ,
+        	(select it2.sex FROM user_db.u_patient it1 , user_db.u_user it2 WHERE it1.userId=it2.userId AND it1.patientId=ei_inhospital_note.patientId) sex ,
+        	(select occupationName FROM user_db.meta_occupation it1 WHERE occupationId=ei_inhospital_note.occupationId) occupationName ,
+        	(select birthPlaceCode FROM user_db.u_patient it1 , user_db.u_user it2 WHERE it1.userId=it2.userId AND it1.patientId=ei_inhospital_note.patientId) birthPlaceCountyCode ,
+        	(select it3.cityCode FROM user_db.u_patient it1 , user_db.u_user it2 , user_db.meta_county it3 WHERE it1.userId=it2.userId AND it2.birthPlaceCode = it3.countyCode AND it1.patientId=ei_inhospital_note.patientId) birthPlaceCityCode ,
+        	(select it3.provinceCode FROM user_db.u_patient it1 , user_db.u_user it2 , user_db.meta_county it3 WHERE it1.userId=it2.userId AND it2.birthPlaceCode = it3.countyCode AND it1.patientId=ei_inhospital_note.patientId) birthPlaceProvinceCode ,
+        	(select birthPlaceAddress FROM user_db.u_patient it1 , user_db.u_user it2 WHERE it1.userId=it2.userId AND it1.patientId=ei_inhospital_note.patientId) birthPlaceAddress ,
+        	nationalityId,
+        	(select nationalityName FROM user_db.meta_nationality it1 WHERE nationalityId=ei_inhospital_note.nationalityId) nationalityName ,
+        	nativePlaceCityCode,
+        	(SELECT provinceCode FROM user_db.meta_county WHERE cityCode=ei_inhospital_note.nativePlaceCityCode LIMIT 1) nativePlaceProvinceCode,
+        	nativePlaceAddress,
+        	inhospitalSource,
+        	companyTel,
+        	liveTel,
+        	familyTel,
+        	createTime,
+        	updateTime,
+        	syncTime,
+        	case when ei_inhospital_note.inhospitalDeptId is null then ei_inhospital_note.inhospitalDeptName else (select deptName from user_db.u_department where deptId=ei_inhospital_note.inhospitalDeptId) end inhospitalDeptName,
+        	case when ei_inhospital_note.outhospitalDeptId is null then ei_inhospital_note.outhospitalDeptName else (select deptName from user_db.u_department where deptId=ei_inhospital_note.outhospitalDeptId) end outhospitalDeptName,
+        	case when ei_inhospital_note.hospitalId is null then ei_inhospital_note.hospitalName else (select hospitalName from user_db.u_hospital where hospitalId=ei_inhospital_note.hospitalId) end hospitalName
+		FROM ei_inhospital_note
+	    WHERE inhospitalId = #{inhospitalId} 
+	</select>
+	
+	<select id="queryInhospitalTime" resultType="java.lang.Integer">
+		select inhospitalTimes from ei_inhospital_note where patientId = #{patientId} and DATE_FORMAT(inhospitalDate,'%Y-%m-%d %H') &lt; DATE_FORMAT(#{inhospitalDate},'%Y-%m-%d %H') order by inhospitalDate desc limit 1
+	</select>
+	<!-- 调用存储过程,刷新病种 IN textpatientid int,IN textInhospitalId int-->
+  <select id="freshPatientWideTable" statementType="CALLABLE" parameterType="java.lang.Long">
+  	<![CDATA[
+    	 {call user_db.insert_e_patient_wide_table(#{textpatientid,mode=IN})}
+	]]>
+  </select>
+</mapper>
+

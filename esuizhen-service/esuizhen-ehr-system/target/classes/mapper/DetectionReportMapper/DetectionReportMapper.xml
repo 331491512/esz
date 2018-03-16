@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_incre_db -->
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.DetectionReport.DetectionReportDao" >
+	<resultMap type="com.esuizhen.cloudservice.ehr.model.detection.DetectionReport" id="DetectionReportMap">
+		<result property="detectionTypeName" column="detectionTypeName" />
+		<collection property="resultData" ofType="com.esuizhen.cloudservice.ehr.model.detection.DetectionItem" >
+        	<result property="detectionReportId" column="detectionReportId" />
+        	<result property="reportTime" column="reportTime" />
+        	<result property="hospitalName" column="hospitalName" />
+		</collection>     
+  </resultMap>
+
+
+	<select id="findByDetectionReportId" resultType="com.esuizhen.cloudservice.ehr.bean.TDetectionReportDetailInfo">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM lis_db.eci_detection_report t1
+		WHERE t1.detectionReportId = #{detectionReportId}
+	</select>
+
+	<sql id="base_column_list">
+			detectionReportId, 
+			emrId, 
+			patientId,
+			patientName, 
+			patientNo, 
+			patientIdno, 
+			patientAddress, 
+			patientMobile, 
+			patientSex, 
+			outPatientFlag,
+			hospitalId,
+			detectionTypeId,
+			detectionTypeName, 
+			deptId,
+			deptName, 
+			applyDoctorId, 
+			applyDoctorNo, 
+			applyDoctorName, 
+			operateDoctorId,
+			operateDoctorNo, 
+			operateDoctorName, 
+			reportDoctorId, 
+			reportDoctorNo, 
+			reportDoctorName,
+			auditDoctorId,
+			auditDoctorNo, 
+			auditDoctorName,
+			applyTime,
+			sampleTime, 
+			acceptTime, 
+			reportTime
+	</sql>
+
+	<insert id="insert">
+		INSERT INTO lis_db.eci_detection_report(
+			detectionReportId, 
+			emrId, 
+			patientId,
+			patientName, 
+			patientNo, 
+			patientIdno, 
+			patientAddress, 
+			patientMobile, 
+			patientSex, 
+			outPatientFlag,
+			hospitalId,
+			hospitalName,
+			detectionTypeId,
+			detectionTypeName, 
+			deptId,
+			deptName, 
+			reportDoctorId, 
+			reportDoctorNo, 
+			reportDoctorName,
+			applyTime,
+			sampleTime, 
+			acceptTime, 
+			reportTime, 
+			state,
+			readFlag, 
+			createTime, 
+			updateTime
+		)VALUES(
+			#{detectionReportId},
+			#{emrId}, 
+			#{patientId}, 
+			#{patientName}, 
+			#{patientNo}, 
+			#{patientIdno}, 
+			#{patientAddress}, 
+			#{patientMobile}, 
+			#{patientSex},
+			#{outPatientFlag},
+			#{hospitalId},
+			#{hospitalName},
+			#{detectionTypeId}, 
+			#{detectionTypeName}, 
+			#{deptId},
+			#{deptName}, 
+			null, 
+			null, 
+			null, 
+			#{applyTime}, 
+			#{sampleTime}, 
+			null, 
+			#{reportTime}, 
+			#{state}, 
+			#{readFlag}, 
+			now(), 
+			now()
+		)
+	</insert>
+	
+	<delete id="deleteDetectionReport" parameterType="java.lang.String" >
+		DELETE FROM lis_db.eci_detection_report
+		WHERE detectionReportId=#{detectionReportId}
+	</delete>
+	
+	<select id="getAllReportGroupByType" parameterType="java.lang.Long" resultMap="DetectionReportMap">
+		SELECT
+			r.detectionTypeName,
+			r.detectionReportId,
+			r.reportTime,
+			IFNULL(h.hospitalName,IFNULL(r.hospitalName,'-')) hospitalName
+		FROM lis_db.eci_detection_report r
+		LEFT JOIN user_db.u_hospital h ON r.hospitalId=h.hospitalId
+		WHERE r.patientId=#{patientId}
+		ORDER BY r.reportTime DESC
+		<!-- Group By r.detectionTypeName -->
+	</select>
+	<select id="getSpecifyReportByReportId" parameterType="java.lang.String" resultType="java.util.HashMap">
+		SELECT
+			IFNULL(h.hospitalName,r.hospitalName) reportTitle,
+			r.detectionTypeName,
+			p.patientNo,
+			p.trueName patientName,
+			p.birthDate,
+			p.sex,
+			(year(IFNULL(DATE(r.reportTime),now()))-year(DATE(p.birthDate))-1) + ( DATE_FORMAT(DATE(p.birthDate), '%m%d') &lt;= DATE_FORMAT(IFNULL(DATE(r.reportTime),now()), '%m%d') ) as age,
+			r.diagnosis,
+			r.deptName,
+			r.wardArea,
+			r.bedNo,
+			r.remark,
+			DATE(r.applyTime) applyTime,
+			r.sampleNo,
+			r.sampleType,
+			r.sampleState,
+			r.applyDoctorId,
+			r.applyDoctorName,
+			r.operateDoctorId,
+			r.operateDoctorName,
+			r.auditDoctorId,
+			r.auditDoctorName,
+			r.reportDoctorId,
+			r.reportDoctorName,
+			DATE(r.sampleTime) sampleTime,
+			DATE(r.acceptTime) acceptTime,
+			DATE(r.reportTime) reportTime
+		FROM lis_db.eci_detection_report r
+		LEFT JOIN user_db.u_hospital h ON r.hospitalId=h.hospitalId
+		INNER JOIN user_db.u_patient p ON p.patientId=r.patientId
+		WHERE r.detectionReportId=#{detectionReportId}
+	</select>
+	
+	<select id="getApplyDoctorByReportId" parameterType="java.lang.String" resultType="com.westangel.common.bean.Doctor">
+		 select 
+	    	t1.applyDoctorId doctorId,
+	    	t2.userId
+	   	from lis_db.eci_detection_report t1
+	    JOIN user_db.u_doctor t2 on t1.applyDoctorId=t2.doctorId
+	    JOIN user_db.u_user t3 on t2.userId=t3.userId
+    	JOIN com_trade_db.product t4 on t3.userId=t4.vendor
+	    where
+	    	detectionReportId=#{reportId}
+	    and t3.role=2 
+    	and t3.appFlag=1
+    	and t4.productType=1
+    	and t4.state=1
+	</select>
+	
+	
+</mapper>

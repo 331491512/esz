@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.temp.TempInhospitalNoteDao" >
+    <!-- 向temp表推送数据 -->
+    <insert id="insert">
+		INSERT INTO server_sync_temp_db.ei_inhospital_note (
+			inhospitalId,inhospitalNo,opFlag,emrId,tempId,patientId,patientUuid,patientNo,
+			inpatientNo,inhospitalTimes,oldPatientNo,oldInhospitalTimes,hospitalId,medicalPayType,
+			flag,healthCardNo,inhospitalWay,inhospitalSource,inhospitalDate,inhospitalDeptId,
+			inhospitalDeptUuid,inhospitalWard,inhospitalLastTime,turnDeptId,turnDeptUuid,turnDeptDate,
+			turnDept,outhospitalDate,outhospitalDeptId,outhospitalDeptUuid,outhospitalWard,outhoispitalWay,
+			inhospitalDays,diagnose,diseaseCode,deptDoctor,deptDoctorUuid,deptDoctorName,directorDoctor,
+			directorDoctorUuid,directorDoctorName,inchargeDoctor,inchargeDoctorUuid,inchargeDoctorName,
+			inhospitalDoctor,inhospitalDoctorUuid,inhospitalDoctorName,attendingDoctor,attendingDoctorUuid,
+			attendingDoctorName,dutyNurse,dutyNurseUuid,dutyNurseName,postgraduateDoctor,postgraduateDoctorUuid,
+			postgraduateDoctorName,internshipDoctor,internshipDoctorUuid,internshipDoctorName,codePerson,
+			codePersonUuid,codePersonName,medicalRecordsQuality,qualityControlDoctor,qualityControlDoctorUuid,
+			qualityControlDoctorName,qualityControlNurse,qualityControlNurseUuid,qualityControlNurseName,
+			qualityControlDate,mainDiagnosis,mainDiagnosisCode,inhospitalCondition,sourceFlag,historyCuration,
+			sourceCancerNum,age,occupationId,idType,identification,marriageStatus,outhospitalCondition,
+			reInhospitalPlan31Days,reInhospitalTarget31Days,preComaHour,preComaMinute,inComaHour,
+			inComaMinute,inviabilityScore,outviabilityScore,babyAge,babyBornWeight,babyWeightInHospital,
+			transfusion,respiratorUseTime,isAllergy,allergyDesc,autopsy,aboBlood,rhBlood,redBloodCell,
+			platelet,plasma,wholeBlood,other,pathologyNo,poisoningReason,poisoningDiseaseCode,
+			recHospitalName,tumourPeriodizationT,tumourPeriodizationN,tumourPeriodizationM1,tumourPeriodizationM2,
+			tumourPeriodizationClinic,tumourPeriodization,pathologyDiagnosis,pathologyDiagnosisCode,nationalityId,
+			nativePlaceCityCode,nativePlaceAddress,householdZipCode,householdCountyCode,householdAddress,
+			companyZipCode,companyCountyCode,companyAddress,companyTel,liveZipCode,liveCountyCode,
+			liveAddress,liveTel,familyName,patientRelation,familyCountyCode,familyAddress,familyTel,
+			deathTime,deathCause,createTime,updateTime,deleteFlag,operatorId,operatorName,
+			catalogState,rawCreateTime,mergeFlag,mergeFrom,mergeFromUuid,mergeTarget,mergeTargetUuid,
+			mergeTime,oldinhospitalid,infoState,dataSource,batchId
+		)
+		VALUES(
+			#{inhospitalId},#{inhospitalNo},#{opFlag},#{emrId},#{tempId},#{patientId},#{patientUuid},#{patientNo},
+			#{inpatientNo},#{inhospitalTimes},#{oldPatientNo},#{oldInhospitalTimes},#{hospitalId},#{medicalPayType},
+			#{flag},#{healthCardNo},#{inhospitalWay},#{inhospitalSource},#{inhospitalDate},#{inhospitalDeptId},
+			#{inhospitalDeptUuid},#{inhospitalWard},#{inhospitalLastTime},#{turnDeptId},#{turnDeptUuid},#{turnDeptDate},
+			#{turnDept},#{outhospitalDate},#{outhospitalDeptId},#{outhospitalDeptUuid},#{outhospitalWard},#{outhoispitalWay},
+			#{inhospitalDays},#{diagnose},#{diseaseCode},#{deptDoctor},#{deptDoctorUuid},#{deptDoctorName},#{directorDoctor},
+			#{directorDoctorUuid},#{directorDoctorName},#{inchargeDoctor},#{inchargeDoctorUuid},#{inchargeDoctorName},
+			#{inhospitalDoctor},#{inhospitalDoctorUuid},#{inhospitalDoctorName},#{attendingDoctor},#{attendingDoctorUuid},
+			#{attendingDoctorName},#{dutyNurse},#{dutyNurseUuid},#{dutyNurseName},#{postgraduateDoctor},#{postgraduateDoctorUuid},
+			#{postgraduateDoctorName},#{internshipDoctor},#{internshipDoctorUuid},#{internshipDoctorName},#{codePerson},
+			#{codePersonUuid},#{codePersonName},#{medicalRecordsQuality},#{qualityControlDoctor},#{qualityControlDoctorUuid},
+			#{qualityControlDoctorName},#{qualityControlNurse},#{qualityControlNurseUuid},#{qualityControlNurseName},
+			#{qualityControlDate},#{mainDiagnosis},#{mainDiagnosisCode},#{inhospitalCondition},#{sourceFlag},#{historyCuration},
+			#{sourceCancerNum},#{age},#{occupationId},#{idType},#{identification},#{marriageStatus},#{outhospitalCondition},
+			#{reInhospitalPlan31Days},#{reInhospitalTarget31Days},#{preComaHour},#{preComaMinute},#{inComaHour},
+			#{inComaMinute},#{inviabilityScore},#{outviabilityScore},#{babyAge},#{babyBornWeight},#{babyWeightInHospital},
+			#{transfusion},#{respiratorUseTime},#{isAllergy},#{allergyDesc},#{autopsy},#{aboBlood},#{rhBlood},#{redBloodCell},
+			#{platelet},#{plasma},#{wholeBlood},#{other},#{pathologyNo},#{poisoningReason},#{poisoningDiseaseCode},
+			#{recHospitalName},#{tumourPeriodizationT},#{tumourPeriodizationN},#{tumourPeriodizationM1},#{tumourPeriodizationM2},
+			#{tumourPeriodizationClinic},#{tumourPeriodization},#{pathologyDiagnosis},#{pathologyDiagnosisCode},#{nationalityId},
+			#{nativePlaceCityCode},#{nativePlaceAddress},#{householdZipCode},#{householdCountyCode},#{householdAddress},
+			#{companyZipCode},#{companyCountyCode},#{companyAddress},#{companyTel},#{liveZipCode},#{liveCountyCode},
+			#{liveAddress},#{liveTel},#{familyName},#{patientRelation},#{familyCountyCode},#{familyAddress},#{familyTel},
+			#{deathTime},#{deathCause},#{createTime},#{updateTime},#{deleteFlag},#{operatorId},#{operatorName},
+			#{catalogState},#{rawCreateTime},#{mergeFlag},#{mergeFrom},#{mergeFromUuid},#{mergeTarget},#{mergeTargetUuid},
+			#{mergeTime},#{oldinhospitalid},#{infoState},#{dataSource},#{batchId}
+		)
+	</insert>
+
+	<select id="getSyncInhospitalNote" resultType="com.esuizhen.server.sync.bean.server.InhospitalNoteRes" parameterType="com.esuizhen.server.sync.bean.TBatchDetailInfo">
+		SELECT
+			t1.inhospitalId,t1.inhospitalNo,t1.emrId,t1.tempId,
+			IFNULL(t2.patientId,t21.patientId) patientId,
+			t1.patientUuid,t1.patientNo,t1.inpatientNo,t1.inhospitalTimes,
+			t1.oldPatientNo,t1.oldInhospitalTimes,t1.hospitalId,t1.medicalPayType,t1.flag,t1.healthCardNo,t1.inhospitalWay,t1.inhospitalSource,
+			t1.inhospitalDate,t3.deptId inhospitalDeptId,t1.inhospitalDeptUuid,t1.inhospitalWard,t1.inhospitalLastTime,
+			t4.deptId turnDeptId,t1.turnDeptUuid,t1.turnDeptDate,t1.turnDept,t1.outhospitalDate,t5.deptId outhospitalDeptId,t1.outhospitalDeptUuid,
+			t1.outhospitalWard,t1.outhoispitalWay,t1.inhospitalDays,t1.diagnose,t1.diseaseCode,
+			IFNULL(t6.doctorId,t61.doctorId) AS deptDoctor,
+			t1.deptDoctorUuid,t1.deptDoctorName,
+			IFNULL(t7.doctorId,t71.doctorId) AS directorDoctor,
+			t1.directorDoctorUuid,t1.directorDoctorName,
+			IFNULL(t8.doctorId,t81.doctorId) AS inchargeDoctor,
+			t1.inchargeDoctorUuid,t1.inchargeDoctorName,
+			IFNULL(t9.doctorId,t91.doctorId) AS inhospitalDoctor,
+			t1.inhospitalDoctorUuid,t1.inhospitalDoctorName,
+			IFNULL(t10.doctorId,t101.doctorId)  AS attendingDoctor,
+			t1.attendingDoctorUuid,t1.attendingDoctorName,
+			IFNULL(t11.doctorId,t111.doctorId)  AS dutyNurse,
+			t1.dutyNurseUuid,t1.dutyNurseName,
+			IFNULL(t12.doctorId,t121.doctorId)  AS postgraduateDoctor,
+			t1.postgraduateDoctorUuid,t1.postgraduateDoctorName,
+			IFNULL(t13.doctorId,t131.doctorId) AS internshipDoctor,
+			t1.internshipDoctorUuid,t1.internshipDoctorName,
+			IFNULL(t14.doctorId,t141.doctorId) AS codePerson,
+			t1.codePersonUuid,t1.codePersonName,t1.medicalRecordsQuality,
+			IFNULL(t15.doctorId,t151.doctorId) AS qualityControlDoctor,
+			t1.qualityControlDoctorUuid,t1.qualityControlDoctorName,
+			IFNULL(t16.doctorId,t161.doctorId)  AS qualityControlNurse,
+			t1.qualityControlNurseUuid,t1.qualityControlNurseName,
+			t1.qualityControlDate,t1.mainDiagnosis,t1.mainDiagnosisCode,t1.inhospitalCondition,
+			t1.sourceFlag,t1.historyCuration,t1.sourceCancerNum,t1.age,t1.occupationId,t1.idType,t1.identification,t1.marriageStatus,
+			t1.outhospitalCondition,t1.reInhospitalPlan31Days,t1.reInhospitalTarget31Days,t1.preComaHour,t1.preComaMinute,t1.inComaHour,t1.inComaMinute,
+			t1.inviabilityScore,t1.outviabilityScore,t1.babyAge,t1.babyBornWeight,t1.babyWeightInHospital,t1.transfusion,t1.respiratorUseTime,
+			t1.isAllergy,t1.allergyDesc,t1.autopsy,t1.aboBlood,t1.rhBlood,t1.redBloodCell,t1.platelet,t1.plasma,
+			t1.wholeBlood,t1.other,t1.pathologyNo,t1.poisoningReason,t1.poisoningDiseaseCode,t1.recHospitalName,t1.tumourPeriodizationT,
+			t1.tumourPeriodizationN,t1.tumourPeriodizationM1,t1.tumourPeriodizationM2,t1.tumourPeriodizationClinic,t1.tumourPeriodization,t1.pathologyDiagnosis,
+			t1.pathologyDiagnosisCode,t1.nationalityId,t1.nativePlaceCityCode,t1.nativePlaceAddress,t1.householdZipCode,t1.householdCountyCode,
+			t1.householdAddress,t1.companyZipCode,t1.companyCountyCode,t1.companyAddress,t1.companyTel,t1.liveZipCode,t1.liveCountyCode,t1.liveAddress,t1.liveTel,
+			t1.familyName,t1.patientRelation,t1.familyCountyCode,t1.familyAddress,t1.familyTel,t1.deathTime,t1.deathCause,t1.createTime,t1.updateTime,
+			t1.deleteFlag,t1.operatorId,t1.operatorName,t1.catalogState,t1.rawCreateTime,t1.mergeFlag,
+			t1.mergeFromUuid,t1.mergeTargetUuid,t1.mergeTime,t1.oldinhospitalid,t1.infoState,t1.dataSource,
+			if(t17.inhospitalId is null,1,2) opFlag
+		FROM
+			server_sync_temp_db.ei_inhospital_note t1
+		LEFT JOIN user_db.u_patient t2 ON t2.uuid=t1.patientUuid
+		LEFT JOIN user_db.r_uuid_patient_relationship t21 ON t1.patientUuid=t21.uuid
+		LEFT JOIN user_db.u_department t3 ON t3.uuid=t1.inhospitalDeptUuid
+		LEFT JOIN user_db.u_department t4 ON t4.uuid=t1.turnDeptUuid
+		LEFT JOIN user_db.u_department t5 ON t5.uuid=t1.outhospitalDeptUuid
+		LEFT JOIN user_db.u_doctor t6 ON t6.uuid=t1.deptDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t61 ON t1.deptDoctorUuid=t61.uuid
+		LEFT JOIN user_db.u_doctor t7 ON t7.uuid=t1.directorDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t71 ON t1.directorDoctorUuid=t71.uuid
+		LEFT JOIN user_db.u_doctor t8 ON t8.uuid=t1.inchargeDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t81 ON t1.inchargeDoctorUuid=t81.uuid
+		LEFT JOIN user_db.u_doctor t9 ON t9.uuid=t1.inhospitalDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t91 ON t1.inhospitalDoctorUuid=t91.uuid
+		LEFT JOIN user_db.u_doctor t10 ON t10.uuid=t1.attendingDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t101 ON t1.attendingDoctorUuid=t101.uuid
+		LEFT JOIN user_db.u_doctor t11 ON t11.uuid=t1.dutyNurseUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t111 ON t1.dutyNurseUuid=t111.uuid
+		LEFT JOIN user_db.u_doctor t12 ON t12.uuid=t1.postgraduateDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t121 ON t1.postgraduateDoctorUuid=t121.uuid
+		LEFT JOIN user_db.u_doctor t13 ON t13.uuid=t1.internshipDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t131 ON t1.internshipDoctorUuid=t131.uuid
+		LEFT JOIN user_db.u_doctor t14 ON t14.uuid=t1.codePersonUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t141 ON t1.codePersonUuid=t141.uuid
+		LEFT JOIN user_db.u_doctor t15 ON t15.uuid=t1.qualityControlDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t151 ON t1.qualityControlDoctorUuid=t151.uuid
+		LEFT JOIN user_db.u_doctor t16 ON t16.uuid=t1.qualityControlNurseUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t161 ON t1.qualityControlNurseUuid=t161.uuid
+		LEFT JOIN ehr_db.ei_inhospital_note t17 ON t17.inhospitalId=t1.inhospitalId
+		WHERE t1.batchId=#{batchId}
+	</select>
+</mapper>

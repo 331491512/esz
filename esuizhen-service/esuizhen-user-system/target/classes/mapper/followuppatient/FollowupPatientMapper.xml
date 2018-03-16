@@ -1,0 +1,2212 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.followuppatient.FollowupPatientDao" >
+  <resultMap id="BaseResultMap" type="com.westangel.common.bean.PatientProfile" >
+    <id column="patientId" property="patientId" jdbcType="BIGINT" />
+    <result column="patientNo" property="patientNo" jdbcType="VARCHAR" />
+    <result column="userId" property="userId" jdbcType="BIGINT" />
+    <result column="mobile" property="mobile" jdbcType="VARCHAR" />
+    <result column="trueName" property="trueName" jdbcType="VARCHAR" />
+    <result column="auditState" property="auditState" jdbcType="INTEGER" />
+    <result column="auditRemark" property="auditRemark" jdbcType="VARCHAR" />
+    <result column="sex" property="sex" jdbcType="INTEGER" />
+    <result column="birthDate" property="birthDate" jdbcType="DATE" />
+    <result column="patientRelation" property="patientRelation" jdbcType="INTEGER" />
+    <result column="familyName" property="familyName" jdbcType="VARCHAR" />
+    <result column="familyPhone" property="familyPhone" jdbcType="VARCHAR" />
+   <result column="wholeProcessFlag" property="wholeProcessFlag" jdbcType="VARCHAR" />
+   <result column="confirmedDateModCount" property="confirmedDateModCount" jdbcType="VARCHAR" />
+    <result column="liveStatus" property="liveStatus" jdbcType="INTEGER" />
+    <result column="deathDate" property="deathDate" jdbcType="DATE" />
+    <result column="causeOfDeath" property="causeOfDeath" jdbcType="VARCHAR" />
+    <result column="medicalPayType" property="medicalPayType" jdbcType="INTEGER" />
+    <result column="sourceDiagnosis" property="sourceDiagnosis" jdbcType="VARCHAR" />
+    <result column="sourceDiseaseCode" property="sourceDiseaseCode" jdbcType="VARCHAR" />
+    <result column="sourceDiseaseTypeId" property="sourceDiseaseTypeId" jdbcType="INTEGER" />
+    <result column="confirmedDate" property="confirmedDate" jdbcType="DATE" />
+    <result column="sourceDiagnosis2" property="sourceDiagnosis2" jdbcType="VARCHAR" />
+    <result column="sourceDiseaseCode2" property="sourceDiseaseCode2" jdbcType="VARCHAR" />
+    <result column="sourceDiseaseTypeId2" property="sourceDiseaseTypeId2" jdbcType="INTEGER" />
+    <result column="confirmedDate2" property="confirmedDate2" jdbcType="TIMESTAMP" />
+    <result column="sourceDiagnosis3" property="sourceDiagnosis3" jdbcType="VARCHAR" />
+    <result column="sourceDiseaseCode3" property="sourceDiseaseCode3" jdbcType="VARCHAR" />
+    <result column="sourceDiseaseTypeId3" property="sourceDiseaseTypeId3" jdbcType="INTEGER" />
+    <result column="confirmedDate3" property="confirmedDate3" jdbcType="TIMESTAMP" />
+    <result column="sourcePathologyDiagnosis" property="sourcePathologyDiagnosis" jdbcType="VARCHAR" />
+    <result column="sourcePathologyDiseaseCode" property="sourcePathologyDiseaseCode" jdbcType="VARCHAR" />
+    <result column="attendingDoctor" property="attendingDoctor" jdbcType="INTEGER" />
+    <result column="lostFollowupCause" property="lostFollowupCause" jdbcType="VARCHAR" />
+    <result column="nativePlace" property="nativePlace" jdbcType="VARCHAR" />
+    <result column="latestClinicDate" property="latestClinicDate"/>
+  </resultMap>
+  
+  <resultMap type="com.esuizhen.cloudservice.user.model.followuppatient.FollowupPatientProfile" id="DetailAndFimilyResultMap" extends="BaseResultMap">
+  	<result column="birthPlaceName" property="birthPlaceName" jdbcType="VARCHAR" />
+    <result column="professionName" property="professionName" jdbcType="VARCHAR" />
+    <result column="nationalityName" property="nationalityName" jdbcType="VARCHAR" />
+  	<collection property="patientFamilyList" column="{patientId=patientId}" select="com.esuizhen.cloudservice.user.dao.PatientFamilyDao.findByPatientId"/>
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    t.patientId, t.patientNo, t.userId, t.mobile, t.trueName,t.auditState,t.auditRemark,t.sex, t.birthDate,t.patientRelation,
+    t.familyName, t.familyPhone, t.liveStatus, t.deathDate, t.medicalPayType, t.sourceDiagnosis, t.sourceDiseaseCode,
+    t.sourceDiseaseTypeId,(SELECT mc.diseaseTypeName from ehr_db.meta_c_disease_type mc WHERE mc.diseaseTypeId=t.sourceDiseaseTypeId  LIMIT 1)sourceDiseaseTypeName,
+    t.confirmedDate,t.confirmedDateSource, t.sourceDiagnosis2, 
+    t.sourceDiseaseCode2, t.sourceDiseaseTypeId2, t.confirmedDate2, t.sourceDiagnosis3, t.sourceDiseaseCode3, 
+    t.sourceDiseaseTypeId3, t.confirmedDate3, t.sourcePathologyDiagnosis, t.sourcePathologyDiseaseCode, 
+    t.attendingDoctor, t.createTime, t.updateTime, t.codePerson, t.codePersonName,t.isInHospitalDeath,t.isTumourDeath,
+    t.lostFollowupCause,t.lostFollowupTime,IF(followupFlag=2,1,0) lostFollowupState,
+    CASE WHEN t.isInHospitalDeath=1 AND t.isTumourDeath=1 THEN '1' WHEN t.isInHospitalDeath=1 AND t.isTumourDeath=0 THEN '2' WHEN t.isInHospitalDeath=0 AND t.isTumourDeath=1 THEN '3' WHEN t.isInHospitalDeath=0 AND t.isTumourDeath=0 THEN '4' END causeOfDeath,
+    u.birthPlaceCode,CONCAT(IFNULL(t3.provinceName,''),IFNULL(t3.cityName,''),IFNULL(t3.countyName,''),IFNULL(u.birthPlaceAddress,'')) birthPlaceAddress,u.marriageStatus,u.company,
+    CASE WHEN u.marriageStatus=1 THEN '未婚' WHEN u.marriageStatus=2 THEN '已婚' WHEN u.marriageStatus=3 THEN '丧偶' WHEN u.marriageStatus=4 THEN '离婚' WHEN u.marriageStatus=9 THEN '其他' END marriageStatusName,
+    t.wholeProcessFlag,IFNULL(t.confirmedDateModCount,0)confirmedDateModCount,
+    <choose><when test="dataId != null and (dataId==4 or dataId==2)">CASE WHEN TRIM(u.identification)!='' THEN CONCAT(substring(u.identification,1,LENGTH(u.identification) - 4),'****') END identification,</when><otherwise>u.identification,</otherwise></choose>u.nativePlace,
+    (SELECT v1.nationalityName FROM user_db.meta_nationality v1 WHERE v1.nationalityId=u.nationalityId) country,u.nationalityId,u.nationId,
+    (SELECT v1.nationName FROM user_db.meta_nation v1 WHERE v1.nationId=u.nationId) nation,
+    t3.countyName birthPlaceName,
+    (select occupationName FROM user_db.meta_occupation WHERE occupationId=u.occupationId) profession,u.occupationId,
+    pm.latestClinicDate,pm.latestOutHospitalDate
+  </sql>
+  
+  <sql id="Simple_Base_Column_List" >
+    u.identification,u.weixinFlag,
+    t.patientId, t.patientNo, t.familyPhone mobile, t.trueName, CASE WHEN t.sex=1 THEN '男' WHEN t.sex=2 THEN '女' END sexText,
+    (SELECT mn.nationName FROM user_db.meta_nation mn WHERE mn.nationId=u.nationId LIMIT 1)nationName,
+    IF(t.outPatientFlag=1,2,t.inhospitalState)treatmentPlaceState,t.birthDate,t.sourceTumorFlag,
+    t.sourceDiagnosis, t.sourceDiseaseCode, t.sourceDiseaseTypeId, t.confirmedDate,t.sourcePathologyDiagnosis, t.sourcePathologyDiseaseCode,t.followupFlag,t.liveStatus,
+   	IF(t.liveStatus!=0 AND t.followupFlag!=0 AND t.followupFlag!=2 AND f.latestFollowupTime,CONCAT(datediff(now(),f.latestFollowupTime),'天'),'-') followupInterval,
+   	(select count(0) from followup_db.followup_result frt where frt.patientId=t.patientId AND frt.state=2) followupTotal,
+    (SELECT d.trueName FROM u_doctor d WHERE d.doctorId=t.inchargeDoctor) inchargeDoctorName,t.lostFollowupCause,t.lostFollowupTime,lostFollowupCauseResultValue,
+    (SELECT d.diseaseTypeName FROM ehr_db.meta_c_disease_type d WHERE d.diseaseTypeId=t.sourceDiseaseTypeId) sourceDiseaseTypeName,t.confirmedAge,t.deathDate,t.causeOfDeath,
+    <choose>
+    <!-- 点击类型指点击全部患者列表 -->
+    <when test="clickType != null and clickType==1">
+    	<choose>
+	    	<!-- 主要取：随访任务ID,随访任务分配ID -->
+	    	<when test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+	    		(
+			    	SELECT CONCAT_WS(',',ftp.followupTaskId,ftp.followupAssignId) 
+			    	FROM followup_db.r_followup_task_patient ftp,followup_db.followup_task ft 
+			    	WHERE ft.followupTaskId=ftp.followupTaskId AND t.patientId=ftp.patientId AND ft.state IN(0,1) AND ft.creator=#{operator} LIMIT 1
+			    ) followupTaskId,
+			</when>
+	    	<otherwise>
+	    		(
+			    	SELECT CONCAT_WS(',',ftp.followupTaskId,ftp.followupAssignId) FROM followup_db.r_followup_task_patient ftp,followup_db.followup_task ft WHERE ft.followupTaskId=ftp.followupTaskId AND t.patientId=ftp.patientId AND ft.state IN(0,1) 
+			    	UNION
+			    	(SELECT CONCAT_WS(',',v1.followupTaskId,v1.followupAssignId) FROM followup_db.followup_result v1 WHERE v1.patientId=t.patientId AND v1.followupTaskId IS NOT NULL GROUP BY v1.patientId ORDER BY v1.followupTime DESC)
+			    	LIMIT 1
+			    ) followupTaskId,
+	    	</otherwise>
+    	</choose>
+    
+    </when>
+    <!-- 刚进入列表执行 -->
+    <otherwise>f.followupTaskId,f.followupTaskName,</otherwise>
+    </choose>
+    f.latestFollowupTime lastFollowupDate,f.newVisitFlag,f.newContactFlag,
+    (SELECT fr.followupResultValueName FROM followup_db.meta_followup_result_value fr WHERE fr.followupResultValueId=f.followupResultValue) followupResultValueName,
+    pm.latestOutHospitalDate,t.mergeFlag,t.catalogState,
+    (SELECT 1 FROM user_db.uuid_patient_merge WHERE patientid=t.patientid AND repeatflag=1 AND cancelflag=0 LIMIT 1) patientType,
+    CASE WHEN t.catalogState=3 and 
+	((SELECT clinicMedicalId FROM ehr_db.ec_clinic_medical_note WHERE patientId=t.patientId AND t.catalogDate <![CDATA[<]]> createTime ) IS NOT NULL 
+	OR
+	(SELECT inhospitalId FROM ehr_db.ei_inhospital_note WHERE patientId=t.patientId AND t.catalogDate <![CDATA[<]]> createTime limit 1) IS NOT NULL) 
+	THEN 1 ELSE 0 END catalogWithUpdate
+  </sql>
+  
+  <sql id="Similar_Simple_Base_Column_List">
+  	u.identification,u.state,t.patientId, t.patientNo, t.familyPhone mobile, t.trueName, CASE WHEN t.sex=1 THEN '男' WHEN t.sex=2 THEN '女' END sexText,
+  	(SELECT mn.nationName FROM user_db.meta_nation mn WHERE mn.nationId=u.nationId LIMIT 1)nationName,t.birthDate,
+    t.sourceDiagnosis, t.sourceDiseaseCode, t.sourceDiseaseTypeId, t.confirmedDate,t.sourcePathologyDiagnosis, t.sourcePathologyDiseaseCode,t.liveStatus,t.followupFlag,
+    (SELECT d.diseaseTypeName FROM ehr_db.meta_c_disease_type d WHERE d.diseaseTypeId=t.sourceDiseaseTypeId) sourceDiseaseTypeName
+  </sql>
+  <!-- 患者来电列 字段 -->
+  <sql id="CallBack_Column_List" >
+    t.patientId, t.patientNo,t.trueName,pf.familyPhone,
+    (SELECT CONCAT_WS(',',ftp.followupTaskId,ftp.followupAssignId) FROM followup_db.r_followup_task_patient ftp,followup_db.followup_task ft WHERE ft.followupTaskId = ftp.followupTaskId AND ftp.patientId = t.patientId AND ft.state IN (0, 1) LIMIT 1) followupTaskId,
+    (SELECT CONCAT_WS('-',mph.province,mph.city) FROM meta_phone_home mph 
+    WHERE CASE WHEN SUBSTR(#{phone},1,1)='1' THEN mph.phone=SUBSTR(#{phone},1,7) WHEN SUBSTR(#{phone},2,1)='1' OR SUBSTR(#{phone},2,1)='2' THEN mph.code=SUBSTR(#{phone},1,3) ELSE mph.code=SUBSTR(#{phone},1,4) END
+    LIMIT 1) phoneHome
+  </sql>
+  
+  <sql id="join_data_privilege">
+  	<choose>
+		<!-- 数据权限1全院查询 -->
+		<when test="dataId!=null and dataId==1 and operator!=null">
+			select dp.patientId from r_doctor_patient dp where dp.doctorId=#{operator}
+			UNION
+			select hp.patientId from r_hospital_doctor hd join r_hospital_patient hp on hd.doctorId=#{operator} AND hd.hospitalId=hp.hospitalId
+		</when>
+		<!-- 数据权限4查询本医生 -->
+		<when test="dataId!=null and dataId==4 and operator!=null">
+			select t1.patientId from r_doctor_patient t1 where t1.doctorId=#{operator}
+		</when>
+		<!-- 云端默认查询本医生 -->
+		<when test="deployLocation != null and deployLocation==2 and operator!=null">
+			select t1.patientId from r_doctor_patient t1 
+			LEFT JOIN r_doctor t2 ON t1.doctorId = t2.doctorId AND t2.state = 1
+			where 1
+			<choose>
+				<when test="doctorLevel != null and doctorLevel==1">
+					AND t2.deanDoctorId=#{operator}
+				</when>
+				<when test="doctorLevel != null and doctorLevel==2">
+					AND t2.deptDoctorId=#{operator}
+				</when>
+				<when test="doctorLevel != null and doctorLevel==21">
+					AND t2.deptSecDoctorId=#{operator}
+				</when>
+				<when test="doctorLevel != null and doctorLevel==3">
+					AND t2.directorDoctorId=#{operator}
+				</when>
+				<when test="doctorLevel != null and doctorLevel==4">
+					AND t2.inchargeDoctorId=#{operator}
+				</when>
+				<otherwise>
+					AND t1.doctorId=#{operator}
+				</otherwise>
+			</choose>
+			GROUP BY t1.patientId
+			<if test="doctorLevel != null and doctorLevel==1">
+			UNION
+				SELECT
+					t1.patientId
+				FROM
+					r_hospital_patient t1
+				JOIN r_hospital_doctor t2 ON t1.hospitalId = t2.hospitalId
+				WHERE
+					t2.doctorId = #{operator}
+				GROUP BY t1.patientId
+			</if>
+		</when>
+	</choose>
+  </sql>
+  
+  <sql id="Patient_Where_Condition">
+  	<where>
+  		t.patientType=1 AND t.mergeFlag!=2
+  		<if test="outPatientFlag != null and outPatientFlag.size>0">
+  			AND t.outPatientFlag IN
+  			<foreach
+                collection="outPatientFlag"
+                item="item"
+                open="("
+                separator=","
+                close=")">
+                #{item}
+            </foreach>
+  		</if>
+  		<if test="sourceFlag != null">
+  			AND u.tobFlag=#{sourceFlag}
+  		</if>
+  		<if test="patientId != null">
+  			AND t.patientId=#{patientId}
+  		</if>
+  		<if test="patientRangeFlag!=null">
+  			<if test="followupRangeFlag==0">
+  				AND t.sourceTumorFlag
+  				<choose><when test="patientRangeFlag==1"> in </when><otherwise> not in </otherwise></choose>
+  				(1)
+  			</if>
+  			<if test="followupRangeFlag==1 and notMalignantTumorFlag!=null">
+				AND t.sourceTumorFlag <choose><when test="patientRangeFlag==1"> in</when><otherwise> not in</otherwise></choose> (${notMalignantTumorFlag})
+			</if>
+			<if test="followupRangeFlag==2">
+				AND t.sourceDiseaseTypeId<choose><when test="patientRangeFlag==1"> in</when><otherwise> not in</otherwise></choose>
+				(select diseaseTypeId from followup_db.conf_followup_range_disease_type)
+			</if>
+  			<if test="followupRangeFlag==3">
+  				AND 
+  				(
+  					<choose>
+	  					<when test="patientRangeFlag==1">
+		  					t.icdDiseaseTypeId in (select icdDiseaseTypeId from followup_db.conf_followup_range_icd where flag=1)
+		  					OR
+		  					t.sourceDiseaseCode in (select diseaseCode from followup_db.conf_followup_range_icd_code where flag=1)
+	  					</when>
+	  					<otherwise>
+	  						t.icdDiseaseTypeId not in (select icdDiseaseTypeId from followup_db.conf_followup_range_icd where flag=1)
+	  						and
+	  						t.sourceDiseaseCode not in (select diseaseCode from followup_db.conf_followup_range_icd_code where flag=1)
+	  					</otherwise>
+  					</choose>
+  				)
+  			</if>
+
+  		</if>
+  		<if test="patientNo != null">
+  			and (
+  				exists(
+	  				select pn.patientId from r_uuid_patientno pn where pn.patientId=t.patientId 
+	  				and (
+	  					pn.patientNo LIKE '%${patientNo}%'
+	  				) 
+  				) or 
+  				t.patientNo LIKE '%${patientNo}%'
+  			)
+  		</if>
+  		<if test="isHadRecordFlag==null||isHadRecordFlag!=1">
+  			<if test="batchPatientNo != null">
+  			and (
+	  			exists(
+	  				select pn.patientId from r_uuid_patientno pn where pn.patientId=t.patientId 
+	  				and (
+	  					pn.patientNo IN(${batchPatientNo}) 
+	  					<if test="originalBatchPatientNo != null">
+	  						or pn.patientNo IN(${originalBatchPatientNo}) 
+	  					</if>
+	  				)
+	  			)
+	  			or t.patientNo IN(${batchPatientNo}) 
+	  			or t.patientNo IN(${originalBatchPatientNo}) 
+	  		)
+  			</if>
+  		</if>
+  		<if test="mobile != null">
+  			AND t.patientId IN(SELECT patientId FROM user_db.u_patient_family WHERE familyPhone LIKE '%${mobile}%')
+  		</if>
+  		<if test="trueName != null">
+  			AND t.trueName LIKE '%${trueName}%'
+  		</if>
+  		<if test="treatmentPlaceState==2">
+  			AND t.outPatientFlag=1
+  		</if>
+  		<if test="treatmentPlaceState ==0 || treatmentPlaceState==1">
+  			AND t.inhospitalState=#{treatmentPlaceState}
+  		</if>
+  		<if test="sourceDiagnosis != null">
+  			AND t.sourceDiagnosis LIKE '%${sourceDiagnosis}%'
+  		</if>
+  		<if test="sourceDiseaseCode != null">
+  			AND t.sourceDiseaseCode LIKE '%${sourceDiseaseCode}%'
+  		</if>
+  		<if test="sourceDiseaseTypeId != null">
+  			AND t.sourceDiseaseTypeId=#{sourceDiseaseTypeId}
+  		</if>
+  		<if test="sourceDiseaseTypeIds != null and sourceDiseaseTypeIds.size>0">
+  			<foreach collection="sourceDiseaseTypeIds" open="AND t.sourceDiseaseTypeId IN (" close=")" item="item" separator=",">
+  				#{item}
+  			</foreach>
+  		</if>
+  		<if test="confirmedDateStart != null">
+  			AND t.confirmedDate <![CDATA[>=]]> DATE_FORMAT(#{confirmedDateStart},'%Y-%m-%d')
+  		</if>
+  		<if test="confirmedDateEnd != null">
+  			AND t.confirmedDate <![CDATA[<=]]>DATE_FORMAT(#{confirmedDateEnd},'%Y-%m-%d')
+  		</if>
+  		<if test="sourcePathologyDiagnosis != null">
+  			AND t.sourcePathologyDiagnosis LIKE '%${sourcePathologyDiagnosis}%'
+  		</if>
+  		<if test="sourcePathologyDiseaseCode != null">
+  			AND t.sourcePathologyDiseaseCode LIKE '%${sourcePathologyDiseaseCode}%'
+  		</if>
+  		<if test="dataValidFlag != null and dataValidFlag==1">
+  			AND (
+				t.patientNoDataFlag = 0
+				OR t.contactDataFlag IN (0 ,- 1)
+				OR t.diagnosisDataFlag = 0
+				OR t.diseaseCodeDataFlag IN (0 ,- 1)
+				OR t.IdentificationDataFlag IN (0 ,- 1)
+				OR t.trueNameDataFlag IN (0 ,- 1)
+				OR t.diseaseTypeDataFlag = 0
+			)
+  		</if>
+		<if test="faultType != null">
+			<!-- AND (
+				(t.patientNoDataFlag=0 
+				OR t.contactDataFlag IN(0,-1) 
+				OR t.diagnosisDataFlag=0 
+				OR t.diseaseCodeDataFlag IN(0,-1) 
+				OR t.IdentificationDataFlag IN(0,-1) 
+				OR t.trueNameDataFlag=-1 
+				OR diseaseTypeDataFlag=0 
+				OR t.treatmentTypeDataFlag=0
+				OR t.tumourPeriodizationDataFlag=0
+				OR t.pathologyDiseaseDataFlag=0
+				OR t.pathologyDiseaseCodeDataFlag=0)
+				OR EXISTS(SELECT COUNT(*) FROM followup_db.followup_result w1 WHERE w1.patientId=t.patientId AND w1.followupResultValue=4 GROUP BY w1.patientId HAVING COUNT(*)>1)
+				OR (t.liveStatus=0	AND EXISTS(SELECT 1 FROM followup_db.followup_result w1 WHERE w1.patientId=t.patientId AND w1.followupResultValue=4 AND w1.deathDate IS NULL))
+				OR EXISTS(SELECT 1 FROM followup_db.followup_result w1 WHERE w1.patientId=t.patientId AND w1.followupResultValue IN(1,2,3,15,16) AND EXISTS (SELECT 1 FROM followup_db.followup_result w2 WHERE w1.patientId=w2.patientId AND w1.followupTime>w2.deathDate))
+				OR EXISTS(
+					SELECT 1 FROM ehr_db.ec_clinic_medical_note w1 WHERE w1.patientId=t.patientId AND w1.visitTimes>1 AND NOT EXISTS (SELECT 1 FROM followup_db.followup_result w2 WHERE w1.patientId=w2.patientId AND w2.followupResultValue=15 AND w1.visitTime=w2.followupTime)
+					UNION
+					SELECT 1 FROM ehr_db.ei_inhospital_note w1 WHERE w1.patientId=t.patientId AND w1.inhospitalTimes>1 AND NOT EXISTS (SELECT 1 FROM followup_db.followup_result w2 WHERE w1.patientId=w2.patientId AND w2.followupResultValue=16 AND (w1.outhospitalDate=w2.followupTime OR w1.inhospitalDate=w2.followupTime))
+				)
+				OR (t.liveStatus=0 AND EXISTS(SELECT 1 FROM followup_db.followup_task w1 JOIN followup_db.r_followup_task_patient w2 ON w1.followupTaskId=w2.followupTaskId AND w1.state IN(0,1) AND w2.state=0 AND w1.finishTime IS NULL WHERE w2.patientId=t.patientId))
+				OR (t.followupFlag=2 AND EXISTS(SELECT 1 FROM followup_db.followup_task w1 JOIN followup_db.r_followup_task_patient w2 ON w1.followupTaskId=w2.followupTaskId AND w1.state IN(0,1) AND w2.state=0 AND w1.finishTime IS NULL WHERE w2.patientId=t.patientId))
+			) -->
+  		</if>
+  		<if test="missingType != null">
+			<if test="missingType == 4">
+				AND t.patientNoDataFlag=0
+			</if>
+			<if test="missingType == 3">
+				AND t.contactDataFlag=0
+			</if>
+			<if test="missingType == 1">
+				AND t.diagnosisDataFlag=0
+			</if>
+			<if test="missingType == 2">
+				AND diseaseCodeDataFlag=0
+			</if>
+			<if test="missingType == 5">
+				AND t.IdentificationDataFlag=0
+			</if>
+			<if test="missingType == 6">
+				AND t.diseaseTypeDataFlag=0
+			</if>
+			<!-- 263新增缺失标示 add by yuanwenming start -->
+			<if test="missingType == 7">
+				AND t.treatmentTypeDataFlag=0
+			</if>
+			<if test="missingType == 8">
+				AND t.tumourPeriodizationDataFlag=0
+			</if>
+			<if test="missingType == 9">
+				AND t.pathologyDiseaseDataFlag=0
+			</if>
+			<if test="missingType == 10">
+				AND t.pathologyDiseaseCodeDataFlag=0
+			</if>
+			<if test="missingType == 11">
+				AND t.trueNameDataFlag=0
+			</if>
+			<if test="missingType == 99">
+				AND (t.patientNoDataFlag=0 
+				OR t.contactDataFlag=0 
+				OR t.diagnosisDataFlag=0 
+				OR t.diseaseCodeDataFlag=0 
+				OR t.IdentificationDataFlag=0 
+				OR t.diseaseTypeDataFlag=0
+				OR t.treatmentTypeDataFlag=0
+				OR t.tumourPeriodizationDataFlag=0
+				OR t.pathologyDiseaseDataFlag=0
+				OR t.pathologyDiseaseCodeDataFlag=0
+				OR t.trueNameDataFlag=0
+				)
+			</if>
+			<!-- 263新增缺失标示 add by yuanwenming end -->
+  		</if>
+  		<if test="invalidType != null">
+			<if test="invalidType == 4">
+				AND t.trueNameDataFlag=-1
+			</if>
+			<if test="invalidType == 2">
+				AND t.contactDataFlag=-1
+			</if>
+			<if test="invalidType == 3">
+				AND t.IdentificationDataFlag=-1
+			</if>
+			<if test="invalidType == 1">
+				AND t.diseaseCodeDataFlag=-1
+			</if>
+			<if test="invalidType == 99">
+				AND (t.trueNameDataFlag =- 1 
+				OR t.contactDataFlag =- 1 
+				OR t.IdentificationDataFlag =- 1 
+				OR t.diseaseCodeDataFlag =- 1 
+				)
+			</if>
+  		</if>
+  		<if test="followupFlag != null and followupFlag==2">
+			AND t.followupFlag=#{followupFlag}
+			<if test="lostFollowupCauseResultValue != null and lostFollowupCauseResultValue.size()>0">
+				AND t.lostFollowupCauseResultValue IN
+	  			<foreach
+	                collection="lostFollowupCauseResultValue"
+	                item="item"
+	                open="("
+	                separator=","
+	                close=")">
+	                #{item}
+	            </foreach>
+			</if>
+  		</if>
+  		
+  		<!-- <if test="userRole !=null and userRole==1  and (clickType==1 or clickType==4)">
+  			AND (t.patientId IN(
+  				SELECT ftp.patientId FROM followup_db.r_followup_task_assign fta,followup_db.r_followup_task_patient ftp WHERE fta.followupAssignId=ftp.followupAssignId AND fta.followupTaskId=ftp.followupTaskId AND fta.operator=#{operator}
+  			) OR t.patientId IN(SELECT dp.patientId FROM r_doctor_patient dp WHERE dp.doctorId=#{operator}))
+  		</if>
+  		<if test="userRole !=null and userRole==3  and (clickType==1 or clickType==4)">
+  			AND t.patientId IN(
+  				SELECT ftp.patientId FROM followup_db.r_followup_task_assign fta,followup_db.r_followup_task_patient ftp WHERE fta.followupAssignId=ftp.followupAssignId AND fta.followupTaskId=ftp.followupTaskId AND fta.operator=#{operator}
+  			)
+  		</if> -->
+  		<if test="sourceTumorFlag != null">
+  			<choose>
+  				<when test="sourceTumorFlag==-2">
+  				AND (t.sourceTumorFlag=#{sourceTumorFlag} OR t.sourceDiseaseTypeId is null)
+  				</when>
+  				<otherwise>
+  				AND t.sourceTumorFlag=#{sourceTumorFlag}
+  				</otherwise>
+  			</choose>
+  		</if>
+  		<if test="followupTimes==null">
+  			<if test="(followupOperator!=null and followupOperator.size()>0) or followupTimeStart!=null or followupTimeEnd!=null or followupResultValue != null">
+  				AND t.patientId IN (SELECT fr.patientId FROM followup_db.followup_result fr WHERE 1=1
+  				 <if test="followupOperator!=null and followupOperator.size()>0">
+  				 	AND fr.operator IN
+		  			<foreach
+		                collection="followupOperator"
+		                item="item"
+		                open="("
+		                separator=","
+		                close=")">
+		                #{item}
+		            </foreach>
+  				 </if>
+  				 <if test="followupResultValue != null">
+  					AND fr.followupResultValue IN
+  					<foreach collection="followupResultValue" item="item" open="(" separator="," close=")">
+		                #{item}
+		            </foreach>
+  				</if>
+  				 <if test="followupTimeStart!=null">
+  				 	AND fr.followupTime <![CDATA[>=]]> #{followupTimeStart}
+  				 </if>
+  				 <if test="followupTimeEnd!=null">
+  				 	AND fr.followupTime <![CDATA[<=]]> #{followupTimeEnd}
+  				 </if>
+  				)
+  			</if>
+  		</if>
+  		<if test="followupTimes != null and followupTimes == 1">
+  			<if test="(followupOperator!=null and followupOperator.size()>0) or followupTimeStart!=null or followupTimeEnd!=null or followupResultValue != null">
+  				AND t.patientId IN (
+  					SELECT v1.patientId FROM followup_db.followup_result v1
+  					JOIN (SELECT patientId,MIN(followupTime) maxFollowupTime FROM followup_db.followup_result GROUP BY patientId) v2 ON v1.patientId=v2.patientId AND v1.followupTime=v2.maxFollowupTime
+  					WHERE 1=1
+  				 <if test="followupOperator!=null and followupOperator.size()>0">
+  				 	AND v1.operator IN
+		  			<foreach
+		                collection="followupOperator"
+		                item="item"
+		                open="("
+		                separator=","
+		                close=")">
+		                #{item}
+		            </foreach>
+  				 </if>
+  				 <if test="followupResultValue != null">
+  					AND v1.followupResultValue IN
+  					<foreach collection="followupResultValue" item="item" open="(" separator="," close=")">
+		                #{item}
+		            </foreach>
+  				</if>
+  				 <if test="followupTimeStart!=null">
+  				 	AND v1.followupTime <![CDATA[>=]]> #{followupTimeStart}
+  				 </if>
+  				 <if test="followupTimeEnd!=null">
+  				 	AND v1.followupTime <![CDATA[<=]]> #{followupTimeEnd}
+  				 </if>
+  				)
+  			</if>
+  		</if>
+  		<if test="followupTimes != null and followupTimes==-1">
+  			<if test="(followupOperator!=null and followupOperator.size()>0) or followupTimeStart!=null or followupTimeEnd!=null or followupResultValue != null">
+  				<if test="followupOperator!=null and followupOperator.size()>0">
+  					 AND f.followupOperator IN
+		  			<foreach  collection="followupOperator" item="item" open="(" separator="," close=")">
+		                #{item}
+		            </foreach>
+  				</if>
+  				<if test="followupResultValue != null">
+  					AND f.followupResultValue IN
+  					<foreach collection="followupResultValue" item="item" open="(" separator="," close=")">
+		                #{item}
+		            </foreach>
+  				</if>
+  				<if test="followupTimeStart!=null">
+  					 AND f.latestFollowupTime  <![CDATA[>=]]> #{followupTimeStart}
+  				</if>
+  				<if test="followupTimeEnd!=null">
+  					 AND f.latestFollowupTime  <![CDATA[<=]]> #{followupTimeEnd}
+  				</if>
+  			</if>
+  		</if>
+  		
+  		<if test="sex != null and sex.size() > 0">
+  			AND t.sex IN
+  			<foreach
+                collection="sex"
+                item="sexItem"
+                open="("
+                separator=","
+                close=")">
+                #{sexItem}
+            </foreach>
+  		</if>
+  		<if test="birthDateStart != null">
+  			<![CDATA[
+  				AND DATE_FORMAT(t.birthDate,'%Y-%m-%d')>=DATE_FORMAT(#{birthDateStart},'%Y-%m-%d')
+  			]]>
+  		</if>
+  		<if test="birthDateEnd != null">
+  			<![CDATA[
+  				AND DATE_FORMAT(t.birthDate,'%Y-%m-%d')<=DATE_FORMAT(#{birthDateEnd},'%Y-%m-%d')
+  			]]>
+  		</if>
+  		<if test="cityCode != null and cityCode.size() > 0">
+	  		AND EXISTS(
+	  			SELECT userId FROM user_db.u_user WHERE userId=t.userId AND birthPlaceCode IN
+	  			<foreach
+	                collection="cityCode"
+	                item="item"
+	                open="("
+	                separator=","
+	                close=")">
+	                #{item}
+	            </foreach>
+	  		)
+  		</if>
+  		<if test="treatmentTypeIds != null and treatmentTypeIds.size() > 0">
+  			AND EXISTS(
+  				SELECT patientId FROM ehr_db.eci_treatment_note WHERE patientId=t.patientId AND treatmentTypeId IN
+  				<foreach
+                collection="treatmentTypeIds"
+                item="treatmentTypeId"
+                open="("
+                separator=","
+                close=")">
+                #{treatmentTypeId}
+            </foreach>
+  			)
+  		</if>
+  		<if test="confirmedAgeStart != null">
+  			<![CDATA[
+  				AND t.confirmedAge>=#{confirmedAgeStart}
+  			]]>
+  		</if>
+  		<if test="confirmedAgeEnd != null">
+  			<![CDATA[
+  				AND t.confirmedAge<=#{confirmedAgeEnd}
+  			]]>
+  		</if>
+  		
+  		<if test="lostPatientChange != null">
+  			<if test="lostPatientChange == 1">
+  				AND EXISTS(SELECT patientId FROM followup_db.var_patient_followup WHERE patientId=t.patientId AND newVisitFlag=1)
+  			</if>
+  			<if test="lostPatientChange == 2">
+  				AND EXISTS(SELECT patientId FROM followup_db.var_patient_followup WHERE patientId=t.patientId AND newContactFlag=1)
+  			</if>
+  			<if test="lostPatientChange == 3">
+  				AND EXISTS(SELECT patientId FROM followup_db.var_patient_followup WHERE patientId=t.patientId AND newVisitFlag=1 AND newContactFlag=1)
+  			</if>
+  		</if>
+  		<!-- 263新增 随访数据错误 add by yuanwenming start -->
+  		<if test="followupInvliadType != null">
+  			<if test="followupInvliadType==1">
+  				AND t.moreDeathFollowupResultFlag = -1
+  			</if>
+  			<if test="followupInvliadType==2">
+  				AND t.deathNotFollowupResultFlag = -1
+  			</if>
+  			<if test="followupInvliadType==3">
+  				AND t.deathNotFollowupTimeFlag = -1
+  			</if>
+  			<if test="followupInvliadType==4">
+  				AND t.deathAfterHasFollowupResultFlag = -1
+  			</if>
+  			<if test="followupInvliadType==5">
+  				AND t.medicalRecordNotFollowupResultFlag = -1
+  			</if>
+  			<if test="followupInvliadType==6">
+  				AND t.deathPatientIntoTask = -1
+  			</if>
+  			<if test="followupInvliadType==7">
+  				AND t.lostPatientIntoTask = -1
+  			</if>
+  			<if test="followupInvliadType == 99">
+				AND (t.moreDeathFollowupResultFlag =- 1 
+				OR t.deathNotFollowupResultFlag =- 1 
+				OR t.deathNotFollowupTimeFlag =- 1 
+				OR t.deathAfterHasFollowupResultFlag =- 1 
+				OR t.medicalRecordNotFollowupResultFlag =- 1 
+				OR t.deathPatientIntoTask =- 1 
+				OR t.lostPatientIntoTask =- 1 
+				)
+			</if>
+  		</if>
+  		<!-- 263新增 随访数据错误 add by yuanwenming end -->
+  		<!-- 住院信息条件 -->
+  		<!-- 入院时间 -->
+  		<if test="inhospitalDateStart != null or inhospitalDateEnd != null or inhospitalTimes != null">
+  			AND t.patientId IN(SELECT note.patientId FROM ehr_db.ei_inhospital_note note 
+  			<if test="inhospitalTimes != null and inhospitalTimes == 9">
+  				JOIN user_db.u_patient v1 ON note.patientId=v1.patientId AND note.inhospitalId=v1.inhospitalId
+  			</if>
+  			where 1=1
+  			<if test="inhospitalTimes != null">
+  				<if test="inhospitalTimes == 1">
+  					AND note.inhospitalTimes = 1
+  				</if>
+  				<if test="inhospitalTimes == -1">
+  					AND note.inhospitalLastTime = 1
+  				</if>
+  			</if>
+  			<if test="inhospitalDateStart != null">
+  				AND note.inhospitalDate <![CDATA[>=]]> #{inhospitalDateStart}
+  			</if>
+  			<if test="inhospitalDateEnd != null">
+  				AND note.inhospitalDate <![CDATA[<=]]> CONCAT(DATE_FORMAT(#{inhospitalDateEnd}, '%Y-%m-%d'),' 23:59:59')
+  			</if>
+  			)
+  		</if>
+  		<!-- 出院时间 -->
+  		<if test="outhospitalDateStart != null or outhospitalDateEnd != null or outhospitalTimes != null">
+  			AND t.patientId IN(SELECT note.patientId FROM ehr_db.ei_inhospital_note note 
+  			<if test="outhospitalTimes != null and outhospitalTimes == 9">
+  				JOIN user_db.u_patient v1 ON note.patientId=v1.patientId AND note.inhospitalId=v1.inhospitalId
+  			</if>
+  			where 1=1
+  			<if test="outhospitalTimes != null">
+  				<if test="outhospitalTimes == 1">
+  					AND note.inhospitalTimes = 1
+  				</if>
+  				<if test="outhospitalTimes == -1">
+  					AND note.inhospitalLastTime = 1
+  				</if>
+  			</if>
+  			<if test="outhospitalDateStart != null">
+  				AND note.outhospitalDate <![CDATA[>=]]> #{outhospitalDateStart}
+  			</if>
+  			<if test="outhospitalDateEnd != null">
+  				AND note.outhospitalDate <![CDATA[<=]]> CONCAT(DATE_FORMAT(#{outhospitalDateEnd}, '%Y-%m-%d'),' 23:59:59')
+  			</if>
+  			)
+  		</if>
+  		<!-- 入院科室 -->
+  		<if test="(inhospitalDeptId != null and inhospitalDeptId.size() > 0) or inhospitalDeptTimes != null">
+  			AND t.patientId IN(SELECT note.patientId FROM ehr_db.ei_inhospital_note note 
+  			<if test="inhospitalDeptTimes != null and inhospitalDeptTimes == 9">
+  				JOIN user_db.u_patient v1 ON note.patientId=v1.patientId AND note.inhospitalId=v1.inhospitalId
+  			</if>
+  			where 1=1
+  			<if test="inhospitalDeptTimes != null">
+  				<if test="inhospitalDeptTimes == 1">
+  					AND note.inhospitalTimes = 1
+  				</if>
+  				<if test="inhospitalDeptTimes == -1">
+  					AND note.inhospitalLastTime = 1
+  				</if>
+  			</if>
+  			<if test="inhospitalDeptId != null and inhospitalDeptId.size() > 0">
+ 				AND note.inhospitalDeptId IN
+  				<foreach collection="inhospitalDeptId" item="inhospitalDeptIdItem"  open="(" separator="," close=")">
+	                #{inhospitalDeptIdItem}
+	            </foreach>
+ 			</if>
+  			)
+  		</if>
+  		<!-- 出院院科室 -->
+  		<if test="(outhospitalDeptId != null and outhospitalDeptId.size() > 0) or outHospitalDeptTimes != null">
+  			AND t.patientId IN(SELECT note.patientId FROM ehr_db.ei_inhospital_note note 
+  			<if test="outHospitalDeptTimes != null and outHospitalDeptTimes == 9">
+  				JOIN user_db.u_patient v1 ON note.patientId=v1.patientId AND note.inhospitalId=v1.inhospitalId
+  			</if>
+  			where 1=1
+  			<if test="outHospitalDeptTimes != null">
+  				<if test="outHospitalDeptTimes == 1">
+  					AND note.inhospitalTimes = 1
+  				</if>
+  				<if test="outHospitalDeptTimes == -1">
+  					AND note.inhospitalLastTime = 1
+  				</if>
+  			</if>
+  			<if test="outhospitalDeptId != null and outhospitalDeptId.size() > 0">
+ 				AND note.outhospitalDeptId IN
+  				<foreach collection="outhospitalDeptId"  item="outhospitalDeptIdItem"   open="(" separator="," close=")">
+	                #{outhospitalDeptIdItem}
+	            </foreach>
+ 			</if>
+  			)
+  		</if>
+  		<!-- 科主任 -->
+  		<if test="deptDoctor != null or deptDoctorTimes != null">
+  			AND EXISTS(SELECT 1 FROM ehr_db.ei_inhospital_note note 
+  			<if test="deptDoctorTimes != null and deptDoctorTimes == 9">
+  				JOIN user_db.u_patient v1 ON note.patientId=v1.patientId AND note.inhospitalId=v1.inhospitalId
+  			</if>
+  			where note.patientId=t.patientId
+  			<if test="deptDoctorTimes != null">
+  				<if test="deptDoctorTimes == 1">
+  					AND note.inhospitalTimes = 1
+  				</if>
+  				<if test="deptDoctorTimes == 2">
+  					AND note.inhospitalLastTime = 1
+  				</if>
+  			</if>
+  			<if test="deptDoctor != null">
+ 				AND note.deptDoctor=#{deptDoctor}
+ 			</if>
+  			)
+  		</if>
+  		<!-- 主任医师 -->
+  		<if test="directorDoctor != null or directorDoctorTimes != null">
+  			AND EXISTS(SELECT 1 FROM ehr_db.ei_inhospital_note note 
+  			<if test="directorDoctorTimes != null and directorDoctorTimes == 9">
+  				JOIN user_db.u_patient v1 ON note.patientId=v1.patientId AND note.inhospitalId=v1.inhospitalId
+  			</if>
+  			where note.patientId=t.patientId
+  			<if test="directorDoctorTimes != null">
+  				<if test="directorDoctorTimes == 1">
+  					AND note.inhospitalTimes = 1
+  				</if>
+  				<if test="directorDoctorTimes == 2">
+  					AND note.inhospitalLastTime = 1
+  				</if>
+  			</if>
+  			<if test="directorDoctor != null">
+ 				AND note.directorDoctor=#{directorDoctor}
+ 			</if>
+  			)
+  		</if>
+  		<!-- 主治医师 -->
+  		<if test="inchargeDoctor != null or inchargeDoctorTimes != null">
+  			AND EXISTS(SELECT 1 FROM ehr_db.ei_inhospital_note note 
+  			<if test="inchargeDoctorTimes != null and inchargeDoctorTimes == 9">
+  				JOIN user_db.u_patient v1 ON note.patientId=v1.patientId AND note.inhospitalId=v1.inhospitalId
+  			</if>
+  			where note.patientId=t.patientId
+  			<if test="inchargeDoctorTimes != null">
+  				<if test="inchargeDoctorTimes == 1">
+  					AND note.inhospitalTimes = 1
+  				</if>
+  				<if test="inchargeDoctorTimes == 2">
+  					AND note.inhospitalLastTime = 1
+  				</if>
+  			</if>
+  			<if test="inchargeDoctor != null">
+ 				AND note.inchargeDoctor=#{inchargeDoctor}
+ 			</if>
+  			)
+  		</if>
+  		<!-- 住院医师 -->
+  		<if test="inhospitalDoctor != null or inhospitalDoctorTimes != null">
+  			AND EXISTS(SELECT 1 FROM ehr_db.ei_inhospital_note note 
+  			<if test="inhospitalDoctorTimes != null and inhospitalDoctorTimes == 9">
+  				JOIN user_db.u_patient v1 ON note.patientId=v1.patientId AND note.inhospitalId=v1.inhospitalId
+  			</if>
+  			where note.patientId=t.patientId
+  			<if test="inhospitalDoctorTimes != null">
+  				<if test="inhospitalDoctorTimes == 1">
+  					AND note.inhospitalTimes = 1
+  				</if>
+  				<if test="inhospitalDoctorTimes == 2">
+  					AND note.inhospitalLastTime = 1
+  				</if>
+  			</if>
+  			<if test="inhospitalDoctor != null">
+ 				AND note.inhospitalDoctor=#{inhospitalDoctor}
+ 			</if>
+  			)
+  		</if>
+  		
+  		<if test="hospitalId != null">
+  			AND t.patientId IN(
+				SELECT t2.patientId FROM user_db.r_hospital_patient t2 WHERE t2.hospitalId=#{hospitalId}
+			)
+  		</if>
+  		<if test="catalogState != null">
+  			AND t.catalogState=#{catalogState}
+  		</if>
+  		<if test="catalogWithUpdate != null">
+  			<choose>
+  				<when test="catalogWithUpdate == 0">
+  					<![CDATA[
+  					AND NOT EXISTS(
+  						(SELECT 1 FROM ehr_db.ec_clinic_medical_note WHERE patientId=t.patientId and t.catalogState=3 AND t.catalogDate < createTime )
+						UNION
+						(SELECT 1 FROM ehr_db.ei_inhospital_note WHERE patientId=t.patientId and t.catalogState=3 AND t.catalogDate < createTime )
+  					)
+  					]]>
+  				</when>
+  				<otherwise>
+  					<![CDATA[
+  					and t.catalogState=3 
+  					AND EXISTS(
+  						(SELECT 1 FROM ehr_db.ec_clinic_medical_note WHERE patientId=t.patientId AND t.catalogDate < createTime )
+						UNION
+						(SELECT 1 FROM ehr_db.ei_inhospital_note WHERE patientId=t.patientId AND t.catalogDate < createTime )
+  					)
+  					]]>
+  				</otherwise>
+  			</choose>
+  		</if>
+  	</where>
+  </sql>
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from u_patient t
+    where patientId = #{patientId,jdbcType=BIGINT}
+  </select>
+  
+  <!-- 统计随访状态数量 -->
+  <select id="countFollowupStatusNum" resultType="com.esuizhen.cloudservice.user.model.followuppatient.TPatientSpreadItem" parameterType="java.util.HashMap">
+    SELECT
+    <if test="countType==1"> 
+    COUNT(0) totalCount,
+    (
+    	SELECT COUNT(DISTINCT v1.patientId) 
+    	FROM user_db.u_patient v1
+    	<choose>
+			<when test="cancerFilterFlag!=null and cancerFilterFlag==1">
+				WHERE v1.liveStatus=1 AND v1.sourceDiseaseTypeId IS NOT NULL AND v1.followupFlag=1 AND v1.sourceTumorFlag=1 AND v1.outPatientFlag=2 AND v1.patientType=1 AND v1.mergeFlag!=2
+				<!-- <if test="userRole !=null and userRole==1 and (countType==1 or countType==4)">
+		  			AND (v1.patientId IN(
+		  				SELECT ftp.patientId FROM followup_db.r_followup_task_assign fta,followup_db.r_followup_task_patient ftp WHERE fta.followupAssignId=ftp.followupAssignId AND fta.followupTaskId=ftp.followupTaskId AND fta.operator=#{operator}
+		  			) OR v1.patientId IN(SELECT dp.patientId FROM r_doctor_patient dp WHERE dp.doctorId=#{operator}))
+		  		</if>
+		  		<if test="userRole !=null and userRole==3  and (countType==1 or countType==4)">
+		  			AND v1.patientId IN(
+		  				SELECT ftp.patientId FROM followup_db.r_followup_task_assign fta,followup_db.r_followup_task_patient ftp WHERE fta.followupAssignId=ftp.followupAssignId AND fta.followupTaskId=ftp.followupTaskId AND fta.operator=#{operator}
+		  			)
+		  		</if> -->
+			</when>
+			<otherwise>
+				INNER JOIN ehr_db.meta_c_disease_type_icd v2 ON v1.icdDiseaseTypeId=v2.icdDiseaseTypeId
+				WHERE v1.liveStatus=1 AND v1.followupFlag=1 AND v1.outPatientFlag=2 AND v1.patientType=1 AND v1.mergeFlag!=2
+				<!-- <if test="userRole !=null and userRole==1 and (countType==1 or countType==4)">
+		  			AND (v1.patientId IN(
+		  				SELECT ftp.patientId FROM followup_db.r_followup_task_assign fta,followup_db.r_followup_task_patient ftp WHERE fta.followupAssignId=ftp.followupAssignId AND fta.followupTaskId=ftp.followupTaskId AND fta.operator=#{operator}
+		  			) OR v1.patientId IN(SELECT dp.patientId FROM r_doctor_patient dp WHERE dp.doctorId=#{operator}))
+		  		</if>
+		  		<if test="userRole !=null and userRole==3  and (countType==1 or countType==4)">
+		  			AND v1.patientId IN(
+		  				SELECT ftp.patientId FROM followup_db.r_followup_task_assign fta,followup_db.r_followup_task_patient ftp WHERE fta.followupAssignId=ftp.followupAssignId AND fta.followupTaskId=ftp.followupTaskId AND fta.operator=#{operator}
+		  			)
+		  		</if> -->
+			</otherwise>
+		</choose>
+    ) waitFollowupCount,
+	(
+		SELECT COUNT(DISTINCT ftp.patientId)
+		FROM
+			followup_db.followup_task ftk,
+			followup_db.r_followup_task_patient ftp
+		WHERE
+			ftp.followupTaskId = ftk.followupTaskId
+		AND ftk.state IN (0,1) 
+		<!-- <if test="userRole !=null and userRole==1 and (countType==1 or countType==4)">
+		AND (ftp.followupAssignId IN(SELECT fta.followupAssignId FROM followup_db.r_followup_task_assign fta WHERE fta.operator=#{operator}) OR ftp.patientId IN(SELECT dp.patientId FROM r_doctor_patient dp WHERE dp.doctorId=#{operator}))
+		</if>
+		<if test="userRole !=null and userRole==3  and (countType==1 or countType==4)">
+		AND ftp.followupAssignId IN(SELECT fta.followupAssignId FROM followup_db.r_followup_task_assign fta WHERE fta.operator=#{operator})
+		</if> -->
+	) followupingCount,
+	(
+		SELECT COUNT(DISTINCT v2.patientId) 
+		FROM followup_db.followup_task v1
+		INNER JOIN followup_db.r_followup_task_patient v2 ON v1.followupTaskId=v2.followupTaskId
+		<if test="cancerFilterFlag!=null and cancerFilterFlag != 1">
+			INNER JOIN user_db.u_patient v3 ON v2.patientId = v3.patientId AND v3.outPatientFlag=2 AND v3.patientType=1 AND v3.mergeFlag!=2
+			INNER JOIN ehr_db.meta_c_disease_type_icd v4 ON v3.icdDiseaseTypeId=v4.icdDiseaseTypeId
+		</if>
+		WHERE v1.finishTime <![CDATA[>=]]> DATE_ADD(NOW(),INTERVAL -#{followupCycle} DAY)
+		AND v2.patientId NOT IN(
+			SELECT v5.patientId FROM followup_db.var_patient_followup v5, user_db.u_patient v6 WHERE v5.patientId=v6.patientId AND v5.latestFollowupTime <![CDATA[<]]> DATE_ADD(NOW(), INTERVAL -#{followupCycle} DAY) AND v6.followupFlag=1 AND v6.liveStatus=1 AND v6.outPatientFlag=2 AND v6.patientType=1 AND v6.mergeFlag!=2
+		)
+	) hasCycleFinishTaskCount,
+	(
+		SELECT COUNT(DISTINCT v1.patientId) FROM user_db.u_patient v1
+		<choose>
+			<when test="cancerFilterFlag!=null and cancerFilterFlag==1">
+				WHERE v1.liveStatus=1 AND v1.sourceDiseaseTypeId IS NOT NULL AND v1.followupFlag=1 AND v1.sourceTumorFlag=1 AND v1.outPatientFlag=2 AND v1.patientType=1 AND v1.mergeFlag!=2
+				AND v1.patientId NOT IN(SELECT v4.patientId FROM followup_db.followup_task v3,followup_db.r_followup_task_patient v4 WHERE v3.followupTaskId=v4.followupTaskId AND v3.state IN(0,1))
+				AND v1.patientId NOT IN(SELECT DISTINCT v3.patientId FROM followup_db.var_patient_followup v3,followup_db.r_followup_task_patient v4 WHERE v3.patientId=v4.patientId AND v3.latestFollowupTime <![CDATA[>=]]> DATE_ADD(NOW(), INTERVAL -#{followupCycle} DAY))
+			</when>
+			<otherwise>
+				INNER JOIN ehr_db.meta_c_disease_type_icd v2 ON v1.icdDiseaseTypeId=v2.icdDiseaseTypeId
+				WHERE v1.liveStatus=1 AND v1.followupFlag=1 AND v1.outPatientFlag=2 AND v1.patientType=1 AND v1.mergeFlag!=2
+				AND v1.patientId NOT IN(SELECT v4.patientId FROM followup_db.followup_task v3,followup_db.r_followup_task_patient v4 WHERE v3.followupTaskId=v4.followupTaskId AND v3.state IN(0,1))
+				AND v1.patientId NOT IN(SELECT DISTINCT v3.patientId FROM followup_db.var_patient_followup v3,followup_db.r_followup_task_patient v4 WHERE v3.patientId=v4.patientId AND v3.latestFollowupTime <![CDATA[>=]]> DATE_ADD(NOW(), INTERVAL -#{followupCycle} DAY))
+			</otherwise>
+		</choose>
+	) unassignTaskCount,
+	(
+		SELECT COUNT(DISTINCT v3.patientId) 
+		FROM followup_db.followup_task v1,followup_db.r_followup_task_patient v2,user_db.u_patient v3 
+		WHERE v1.followupTaskId=v2.followupTaskId AND v2.patientId=v3.patientId AND v3.liveStatus=0 AND v3.outPatientFlag=2 AND v3.patientType=1 AND v3.mergeFlag!=2
+	) followupAfterDeathCount,
+	(
+		SELECT COUNT(DISTINCT v3.patientId) 
+		FROM followup_db.followup_task v1,followup_db.r_followup_task_patient v2,user_db.u_patient v3 
+		WHERE v1.followupTaskId=v2.followupTaskId AND v2.patientId=v3.patientId AND v3.followupFlag = 2 AND v3.liveStatus=1 AND v3.outPatientFlag=2 AND v3.patientType=1 AND v3.mergeFlag!=2
+	) followupAfterLostCount,
+	(
+		SELECT COUNT(DISTINCT v3.patientId) 
+		FROM followup_db.followup_task v1,followup_db.r_followup_task_patient v2,user_db.u_patient v3 
+		WHERE v1.followupTaskId=v2.followupTaskId AND v2.patientId=v3.patientId AND v3.followupFlag=3 AND v3.outPatientFlag=2 AND v3.patientType=1 AND v3.mergeFlag!=2
+	) followupAfterNotCount,
+
+	COUNT(
+		CASE
+		WHEN t.followupFlag = 2 THEN
+			t.patientId
+		END
+	) lostFollowupCount,
+	(SELECT
+		COUNT(0)
+	FROM
+		uuid_patient_merge t1, user_db.u_patient t2
+	WHERE t1.repeatflag = 1 AND t1.cancelflag=0 AND t1.patientid=t2.patientId AND t2.outPatientFlag=2 AND t2.patientType=1 AND t2.mergeFlag!=2
+  	)similarCount ,
+	COUNT(
+		CASE
+		WHEN t.patientNoDataFlag = 0
+		OR t.contactDataFlag IN (0 ,- 1)
+		OR t.diagnosisDataFlag = 0
+		OR t.diseaseCodeDataFlag IN (0 ,- 1)
+		OR t.IdentificationDataFlag IN (0 ,- 1)
+		OR t.trueNameDataFlag =- 1
+		OR diseaseTypeDataFlag = 0 THEN
+			t.patientId
+		END
+	) faultCount
+	</if>
+	<if test="countType==2">
+		COUNT(0) totalCount,
+		COUNT(CASE WHEN t.followupFlag=2 THEN t.patientId END) lostFollowupCount
+	</if>
+	<if test="countType==3">
+		COUNT(0) totalCount,
+		(SELECT
+			COUNT(0)
+		FROM
+			uuid_patient_merge t1, user_db.u_patient t2
+		WHERE t1.repeatflag = 1 AND t1.cancelflag=0  AND t1.patientid=t2.patientId AND t2.outPatientFlag=2 AND t2.patientType=1 AND t2.mergeFlag!=2
+	  )similarCount
+	</if>
+	<if test="countType==4">
+		COUNT(*) totalCount,
+		COUNT(CASE WHEN t.patientNoDataFlag=0 OR t.contactDataFlag IN(0,-1) OR t.diagnosisDataFlag=0 OR t.diseaseCodeDataFlag IN(0,-1) OR t.IdentificationDataFlag IN(0,-1) OR t.trueNameDataFlag=-1 OR diseaseTypeDataFlag=0 THEN t.patientId END) faultCount,
+		COUNT(CASE WHEN t.patientNoDataFlag=0 OR t.contactDataFlag=0 OR t.diagnosisDataFlag=0 OR t.diseaseCodeDataFlag=0 OR t.IdentificationDataFlag=0 OR diseaseTypeDataFlag=0 THEN t.patientId END) missingCount,
+		COUNT(CASE WHEN t.contactDataFlag=-1 OR t.diseaseCodeDataFlag=-1 OR t.IdentificationDataFlag=-1 OR t.trueNameDataFlag=-1 THEN t.patientId END) invalidCount
+	</if>
+	FROM u_patient t
+	<where>
+		t.outPatientFlag=2 AND t.patientType=1 AND t.mergeFlag!=2
+	</where>
+  </select>
+  
+  
+  <!-- 根据条件获取患者总数,这个总数用于插入到预查询搜索条件表中 -->
+  <select id="searchPatientSimpleInfoCount" resultType="java.lang.Integer" parameterType="java.util.HashMap" >
+	SELECT
+		COUNT(*)
+	FROM
+		u_patient t
+	<include refid="Patient_Where_Condition"></include>
+  </select>
+  
+  <!-- 根据条件获取患者列表,这个列表用于宽表的 -->
+  <select id="searchPatientIdList" resultType="java.lang.Long" parameterType="java.util.HashMap" >
+	SELECT
+		t.patientId
+	FROM
+		u_patient t 
+	<include refid="Patient_Where_Condition"></include>
+	LIMIT 0,100
+  </select>
+  
+  <!-- 分页查询患者信息   -->
+  <select id="queryPagePatientSimpleList" resultType="com.westangel.common.bean.PatientSimpleInfo" parameterType="java.util.HashMap" >
+	SELECT
+		<include refid="Simple_Base_Column_List" />
+	FROM
+		u_patient t 
+	INNER JOIN u_user u ON u.userId=t.userId
+	INNER JOIN (SELECT patientId FROM ${tableName} WHERE ${searchColumn} IS NOT NULL <if test="conditionId != null">AND ${searchColumn}=#{conditionId}</if>) vsp ON t.patientId=vsp.patientId
+	LEFT JOIN followup_db.var_patient_followup f ON f.patientId=t.patientId
+	LEFT JOIN ehr_db.var_patient_medical pm ON pm.patientId=t.patientId
+	WHERE 1
+	<if test="deployLocation == 1">
+		AND  t.outPatientFlag = 2
+	</if>
+	AND t.patientType=1 AND t.mergeFlag!=2 AND t.patientId NOT IN
+	(
+		SELECT t11.patientId FROM user_db.uuid_patient_merge t11 WHERE t11.repeatflag=1
+	)
+	ORDER BY t.confirmedAge DESC,t.patientNo
+	<if test="startRow != null">
+		LIMIT #{startRow},#{num}
+	</if>
+  </select>
+  
+  <!-- 分页查询患者信息(内部)   -->
+  <select id="queryInternalPagePatientSimpleList" resultType="com.westangel.common.bean.PatientSimpleInfo" parameterType="java.util.HashMap" >
+	SELECT
+		<include refid="Simple_Base_Column_List" />
+	FROM
+		user_db.u_patient t 
+		<!-- 权限控制 add by zhuguo -->
+		<if test="powerSql!=null">
+			JOIN (
+				${powerSql}
+			) a ON a.patientId = t.patientId
+		</if>
+		
+		JOIN user_db.u_user u ON u.userId=t.userId
+		LEFT JOIN followup_db.var_patient_followup f ON f.patientId=t.patientId
+		LEFT JOIN ehr_db.var_patient_medical pm ON pm.patientId=t.patientId
+	
+	<if test="sql != null">
+		JOIN (SElECT * FROM (
+		${sql}
+		<if test="lostPatientChange != null">
+  			<if test="lostPatientChange == 1">
+  				AND t.patientId IN(SELECT patientId FROM followup_db.var_patient_followup WHERE newVisitFlag=1)
+  			</if>
+  			<if test="lostPatientChange == 2">
+  				AND t.patientId IN(SELECT patientId FROM followup_db.var_patient_followup WHERE newContactFlag=1)
+  			</if>
+  			<if test="lostPatientChange == 3">
+  				AND t.patientId IN(SELECT patientId FROM followup_db.var_patient_followup WHERE newVisitFlag=1 AND newContactFlag=1)
+  			</if>
+  		</if>
+		) t GROUP BY t.patientId
+		) t99 ON t.patientId = t99.patientId
+	</if>
+	<include refid="Patient_Where_Condition"></include>
+	<if test="startRow != null">
+		LIMIT #{startRow},#{pageSize}
+	</if>
+  </select>
+  
+  <!-- 分页查询患者信息(内部)总数   -->
+  <select id="queryInternalPagePatientSimpleTotal" resultType="java.lang.Integer" parameterType="java.util.HashMap" >
+	SELECT
+		count(1)
+	FROM
+		u_patient t 
+		JOIN user_db.u_user u ON u.userId=t.userId
+		LEFT JOIN followup_db.var_patient_followup f ON f.patientId=t.patientId
+		<!-- 权限控制 add by zhuguo -->
+		<if test="powerSql!=null">
+			JOIN (
+				${powerSql}
+			) a ON a.patientId = t.patientId
+		</if>
+		<!--  
+		<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+			<choose>
+				<when test="operator!=null and (deployLocation != null and deployLocation==2)">
+					<choose>
+						<when test="userRole != null and (userRole == 55 or userRole == 56)"></when>
+						<otherwise>
+							JOIN (<include refid="join_data_privilege"></include>) t2 ON t.patientId=t2.patientId
+						</otherwise>
+					</choose>
+				</when>
+				<otherwise>
+					JOIN (<include refid="join_data_privilege"></include>) t2 ON t.patientId=t2.patientId
+				</otherwise>
+			</choose>
+		</if> -->
+	
+	<if test="sql != null">
+		JOIN (SElECT * FROM (
+		${sql}
+		<if test="lostPatientChange != null">
+  			<if test="lostPatientChange == 1">
+  				AND t.patientId IN(SELECT patientId FROM followup_db.var_patient_followup WHERE newVisitFlag=1)
+  			</if>
+  			<if test="lostPatientChange == 2">
+  				AND t.patientId IN(SELECT patientId FROM followup_db.var_patient_followup WHERE newContactFlag=1)
+  			</if>
+  			<if test="lostPatientChange == 3">
+  				AND t.patientId IN(SELECT patientId FROM followup_db.var_patient_followup WHERE newVisitFlag=1 AND newContactFlag=1)
+  			</if>
+  		</if>
+		) t GROUP BY t.patientId
+		) t99 ON t.patientId = t99.patientId
+	</if>
+	<include refid="Patient_Where_Condition"></include>
+  </select>
+  
+  <!-- 分页查询疑似重复患者信息   -->
+  <select id="queryPageSimilarPatientSimpleList" resultType="com.westangel.common.bean.PatientSimpleInfo"  parameterType="java.util.HashMap">
+	
+	SELECT
+			if(t.mergeFlag=2,1,t.mergeFlag) isMerge,
+			pm.goalpatientid,pm.remark auditRemark,
+			<include refid="Similar_Simple_Base_Column_List" />
+		FROM 
+		u_patient t 
+		INNER JOIN u_user u ON u.userId=t.userId
+		INNER JOIN uuid_patient_merge pm ON pm.patientid=t.patientId AND pm.repeatflag=1
+		where pm.goalpatientid in 
+		(select pn.goalpatientid from (SELECT distinct pm.goalpatientid
+		FROM u_patient t 
+		INNER JOIN u_user u ON u.userId=t.userId
+		INNER JOIN uuid_patient_merge pm ON pm.patientid=t.patientId AND pm.repeatflag=1
+		<include refid="Patient_Where_Condition"></include> ORDER BY pm.goalpatientid LIMIT #{startRow},#{num}) pn)
+		and t.outPatientFlag=2 AND t.patientType=1 AND t.mergeFlag!=2
+		and pm.cancelflag=0
+		ORDER BY pm.goalpatientid,t.patientId
+  </select>
+  
+  <select id="getGroupsOfPatientSortCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+  		SELECT
+			count(1)
+		FROM 
+		user_db.u_patient t 
+		
+		<!-- 权限控制 add by zhuguo -->
+		<if test="powerSql!=null">
+			JOIN (
+				${powerSql}
+			) a ON a.patientId = t.patientId
+		</if>
+		
+		INNER JOIN u_user u ON u.userId=t.userId
+		INNER JOIN uuid_patient_merge pm ON pm.patientid=t.patientId AND pm.repeatflag=1
+		where pm.goalpatientid in 
+		(select pn.goalpatientid from (SELECT distinct pm.goalpatientid
+		FROM u_patient t 
+		INNER JOIN u_user u ON u.userId=t.userId
+		INNER JOIN uuid_patient_merge pm ON pm.patientid=t.patientId AND pm.repeatflag=1
+		<include refid="Patient_Where_Condition"></include> ORDER BY pm.goalpatientid LIMIT #{startRow},#{num}) pn)
+		and t.outPatientFlag=2 AND t.patientType=1 AND t.mergeFlag!=2
+		and pm.cancelflag=0
+  </select>
+  
+  <!-- 合并患者列表 -->
+    <select id="queryPageMergePatientSimpleList" resultType="com.westangel.common.bean.PatientSimpleInfo"  parameterType="java.util.HashMap">
+
+		SELECT
+			if((select goalpatientid from uuid_patient_merge where patientId=t.patientId and repeatflag=1) is not null,1,0) isSimilar,
+			(SELECT mergereason FROM u_merge_log WHERE goalpatientid=t.patientId ORDER BY id DESC LIMIT 0,1) auditRemark,
+		    (CASE WHEN t1.syncFlag!=0 and t1.syncFlag!=-3 THEN 1 ELSE 0 END) isSync,
+			<include refid="Similar_Simple_Base_Column_List" />
+		FROM
+			u_patient t 
+		INNER JOIN u_user u ON u.userId=t.userId
+		LEFT JOIN sc_db.u_patient_sync_result_client t1 ON t1.uuid=t.uuid
+		<include refid="Patient_Where_Condition"></include>
+		and t.mergeFlag=1
+		order by t.patientNo
+  </select>
+  <!-- 通过姓名分组，获取疑似重复组数  -->
+  <select id="getGroupsOfPatientByName" resultType="java.lang.Integer" parameterType="java.util.HashMap" >
+	SELECT COUNT(1) FROM(
+	SELECT
+		pm.goalpatientid
+	FROM
+		user_db.u_patient t 
+		
+	<!-- 权限控制 add by zhuguo -->
+	<if test="powerSql!=null">
+		JOIN (
+			${powerSql}
+		) a ON a.patientId = t.patientId
+	</if>
+		
+	INNER JOIN uuid_patient_merge pm ON pm.patientid=t.patientId AND pm.repeatflag=1 and pm.cancelflag=0
+	<include refid="Patient_Where_Condition"></include>
+	GROUP BY pm.goalpatientid) v
+  </select>
+  
+  <!-- 根据条件获取患者条数  -->
+  <select id="countPatientSimpleNum" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+  	SELECT
+		COUNT(*)
+	FROM
+		u_patient t 
+	INNER JOIN ${tableName} vsp ON vsp.patientId=t.patientId  AND t.outPatientFlag=2 AND t.patientType=1 AND t.mergeFlag!=2 AND vsp.${searchColumn} IS NOT NULL <if test="conditionId != null">AND vsp.${searchColumn}=#{conditionId}</if>
+  </select>
+  <!-- 根据患者id获取患者明细以及患者家属  -->
+  <select id="getPatientProfileAndFimilyById" resultMap="DetailAndFimilyResultMap">
+    SELECT
+		<include refid="Base_Column_List" />
+	FROM
+		u_patient t
+		INNER JOIN u_user u ON t.userId = u.userId AND patientId = #{patientId,jdbcType=BIGINT}
+		LEFT JOIN ehr_db.var_patient_medical pm ON pm.patientId=t.patientId
+		LEFT JOIN user_db.meta_county t3 ON u.birthPlaceCode=t3.countyCode
+  </select>
+  
+  <select id="statisticsFaultPatient" parameterType="java.util.HashMap" resultType="com.esuizhen.cloudservice.user.model.followuppatient.TFaultSimilarPatientSpread">
+  	SELECT
+  		COUNT(1) patientTotal,<!-- add by fanpanwei  患者总数 -->
+		COUNT(CASE WHEN t.patientNoDataFlag=1 AND t.contactDataFlag=1 AND t.diseaseCodeDataFlag=1 AND t.diagnosisDataFlag=1 AND t.IdentificationDataFlag=1 AND t.trueNameDataFlag=1 AND t.diseaseTypeDataFlag=1  AND t.treatmentTypeDataFlag=1  AND t.tumourPeriodizationDataFlag=1  AND t.pathologyDiseaseDataFlag=1  AND t.pathologyDiseaseCodeDataFlag=1 THEN t.patientId END) correctCount,
+		COUNT(CASE WHEN 
+			t.trueNameDataFlag in (0,-1) 
+			OR t.IdentificationDataFlag in (0,-1)
+			OR t.diseaseCodeDataFlag in (0,-1)
+			OR t.contactDataFlag in (0,-1)
+			OR t.patientNoDataFlag = 0
+			OR t.diagnosisDataFlag = 0
+			OR t.diseaseTypeDataFlag = 0
+			THEN t.patientId END
+		) faultCount,
+		COUNT(CASE WHEN 
+			t.trueNameDataFlag = 0
+			OR t.IdentificationDataFlag = 0
+			OR t.diseaseCodeDataFlag = 0
+			OR t.contactDataFlag = 0
+			OR t.patientNoDataFlag = 0
+			OR t.diagnosisDataFlag = 0
+			OR t.diseaseTypeDataFlag = 0
+			OR t.treatmentTypeDataFlag=0
+			OR t.tumourPeriodizationDataFlag=0
+			OR t.pathologyDiseaseDataFlag=0
+			OR t.pathologyDiseaseCodeDataFlag=0 
+		THEN t.patientId END) missingCount,
+		COUNT(CASE WHEN 
+			t.trueNameDataFlag =-1 
+			OR t.IdentificationDataFlag =-1
+			OR t.diseaseCodeDataFlag =-1
+			OR t.contactDataFlag =-1 
+		THEN t.patientId END) invalidCount,
+		COUNT(CASE WHEN t.trueNameDataFlag = 0 THEN t.patientId END) missingTrueNameCount,
+		COUNT(CASE WHEN t.diagnosisDataFlag=0 THEN t.patientId END) missingSourceDiagnosisCount,
+		COUNT(CASE WHEN t.diseaseCodeDataFlag=0 THEN t.patientId END) missingSourceDiseaseCodeCount,
+		COUNT(CASE WHEN t.contactDataFlag=0 THEN t.patientId END) missingPhoneCount,
+		COUNT(CASE WHEN t.patientNoDataFlag=0 THEN t.patientId END) missingPatientNoCount,
+		COUNT(CASE WHEN t.IdentificationDataFlag=0 THEN t.patientId END) missingIdentificationCount,
+		COUNT(CASE WHEN t.diseaseTypeDataFlag=0 THEN t.patientId END) missingDiseaseCount,
+		COUNT(CASE WHEN t.treatmentTypeDataFlag=0 THEN t.patientId END) missingTreatmentTypeCount,
+		COUNT(CASE WHEN t.tumourPeriodizationDataFlag=0 THEN t.patientId END) missingTumourPeriodizationCount,
+		COUNT(CASE WHEN t.pathologyDiseaseDataFlag=0 THEN t.patientId END) missingPathologyDiseaseCount,
+		COUNT(CASE WHEN t.pathologyDiseaseCodeDataFlag=0 THEN t.patientId END) missingPathologyDiseaseCodeCount,
+		COUNT(CASE WHEN t.contactDataFlag=-1 THEN t.patientId END) invalidPhoneCount,
+		COUNT(CASE WHEN t.diseaseCodeDataFlag=-1 THEN t.patientId END) invalidSourceDiseaseCodeCount,
+		COUNT(CASE WHEN t.IdentificationDataFlag=-1 THEN t.patientId END) invalidIdentificationCount,
+		COUNT(CASE WHEN t.trueNameDataFlag=-1 THEN t.patientId END) invalidTrueNameCount,
+		<!-- 随访错误数据统计 add by yuanwenming start -->
+		COUNT(CASE WHEN t.moreDeathFollowupResultFlag = -1 THEN t.patientId END) moreDeathFollowupResultFlagCount,
+		COUNT(CASE WHEN t.deathNotFollowupResultFlag=-1 THEN t.patientId END) deathNotFollowupResultFlagCount,
+		COUNT(CASE WHEN t.deathNotFollowupTimeFlag=-1 THEN t.patientId END) deathNotFollowupTimeFlagCount,
+		COUNT(CASE WHEN t.deathAfterHasFollowupResultFlag=-1 THEN t.patientId END) deathAfterHasFollowupResultFlagCount,
+		COUNT(CASE WHEN t.medicalRecordNotFollowupResultFlag=-1 THEN t.patientId END) medicalRecordNotFollowupResultFlagCount,
+		COUNT(CASE WHEN t.deathPatientIntoTask=-1 THEN t.patientId END) deathPatientIntoTaskCount,
+		COUNT(CASE WHEN t.lostPatientIntoTask=-1 THEN t.patientId END) lostPatientIntoTaskCount,
+		COUNT(CASE WHEN 
+			t.moreDeathFollowupResultFlag =-1 
+			OR t.deathNotFollowupResultFlag =-1
+			OR t.deathNotFollowupTimeFlag =-1
+			OR t.deathAfterHasFollowupResultFlag =-1
+			OR t.medicalRecordNotFollowupResultFlag =-1
+			OR t.deathPatientIntoTask =-1
+			OR t.lostPatientIntoTask =-1
+		THEN t.patientId END) invalidFollowupDataCount
+		<!-- 随访错误数据统计 add by yuanwenming end -->
+	FROM u_patient t
+	<if test="searchId != null">
+		INNER JOIN ${tableName} vsp ON vsp.patientId=t.patientId AND vsp.${searchColumn} IS NOT NULL  <if test="conditionId != null">AND vsp.${searchColumn}=#{conditionId}</if>
+	</if>
+	WHERE t.outPatientFlag=2 AND t.patientType=1 AND t.mergeFlag!=2
+  </select>
+  
+  <!-- 调用存储过程合并疑似重复患者 -->
+  <select id="mergePatientWithProcedure" statementType="CALLABLE" parameterType="java.util.HashMap">
+  	<![CDATA[
+    	 {call merge_data()}
+	]]>
+  </select>
+  
+  <!-- 查询患者来电信息 -->
+  <select id="queryPatientCallBackInfo" resultType="com.esuizhen.cloudservice.user.model.followuppatient.PatientCallBackInfo">
+  	<!-- SELECT <include refid="CallBack_Column_List"></include> FROM u_patient t 
+	INNER JOIN u_patient_family pf ON pf.patientId=t.patientId AND t.outPatientFlag=2 AND t.patientType=1 AND t.mergeFlag!=2 AND pf.familyPhone=#{phone} -->
+	
+	<!-- add by zhuguo -->
+	SELECT
+		t.patientId,
+		pf.familyPhone,
+		(
+			SELECT
+				CONCAT_WS('-', mph.province, mph.city)
+			FROM
+				meta_phone_home mph
+			WHERE
+				CASE
+			WHEN SUBSTR(#{phone}, 1, 1) = '1' THEN
+				mph.phone = SUBSTR(#{phone}, 1, 7)
+			WHEN SUBSTR(#{phone}, 2, 1) = '1'
+			OR SUBSTR(#{phone}, 2, 1) = '2' THEN
+				mph. CODE = SUBSTR(#{phone}, 1, 3)
+			ELSE
+				mph. CODE = SUBSTR(#{phone}, 1, 4)
+			END
+			LIMIT 1
+		) phoneHome,
+		t.trueName,
+		t.patientNo,
+		a.followupTaskId,
+		a.followupAssignId,
+		a.followupTaskName,
+		mcdt.diseaseTypeName sourceDiseaseTypeName,
+		t.sourceDiagnosis
+	FROM
+		u_patient t
+	LEFT JOIN ehr_db.meta_c_disease_type mcdt ON mcdt.diseaseTypeId = t.sourceDiseaseTypeId
+	LEFT JOIN (
+		SELECT
+			ftp.followupTaskId,
+			ftp.followupAssignId,
+			ftp.patientId,
+			ft.followupTaskName
+		FROM
+			followup_db.r_followup_task_patient ftp,
+			followup_db.followup_task ft
+		WHERE
+			ft.followupTaskId = ftp.followupTaskId
+		AND ft.state IN (0, 1)
+	) a ON a.patientId = t.patientId
+	INNER JOIN u_patient_family pf ON pf.patientId = t.patientId
+	AND t.outPatientFlag = 2
+	AND t.patientType = 1
+	AND t.mergeFlag != 2
+	AND pf.familyPhone = #{phone};
+	<!-- end -->
+  </select>
+  
+  <!-- 根据手机号查询归属地 add by zhuguo -->
+  <select id="queryPhoneHomeByPhone" parameterType="java.lang.String" resultType="java.lang.String">
+	SELECT
+		(
+			SELECT
+				CONCAT_WS('-', mph.province, mph.city)
+			FROM
+				meta_phone_home mph
+			WHERE
+				CASE
+			WHEN SUBSTR(#{phone}, 1, 1) = '1' THEN
+				mph.phone = SUBSTR(#{phone}, 1, 7)
+			WHEN SUBSTR(#{phone}, 2, 1) = '1'
+			OR SUBSTR(#{phone}, 2, 1) = '2' THEN
+				mph. CODE = SUBSTR(#{phone}, 1, 3)
+			ELSE
+				mph. CODE = SUBSTR(#{phone}, 1, 4)
+			END
+			LIMIT 1
+		) phoneHome
+	FROM
+		DUAL
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from u_patient
+    where patientId = #{patientId,jdbcType=BIGINT}
+  </delete>
+  
+  <insert id="insert" parameterType="com.westangel.common.bean.PatientProfile" >
+    insert into u_patient (patientId, patientNo, userId, 
+      uuid, syncFlag, mobile, 
+      trueName, preTrueName, auditState, 
+      auditRemark, nickName, hasVisibleMedicalRecord, 
+      sex, birthDate, userPictureUrl, 
+      patientRelation, familyName, familyPhone, 
+      liveStatus, deathDate, causeOfDeath, 
+      bloodType, bloodTypeRH, bodyHeight, 
+      disabilityStatus, geneticDiseaseHistory, 
+      drugAllergyHistory, medicalPayType, sourceDiagnosis, 
+      sourceDiseaseCode, sourceDiseaseTypeId, 
+      confirmedDate, sourceDiagnosis2, sourceDiseaseCode2, 
+      sourceDiseaseTypeId2, confirmedDate2, 
+      sourceDiagnosis3, sourceDiseaseCode3, sourceDiseaseTypeId3, 
+      confirmedDate3, sourcePathologyDiagnosis, 
+      sourcePathologyDiseaseCode, attendingDoctor, 
+      createTime, updateTime, codePerson, 
+      codePersonName)
+    values (#{patientId,jdbcType=BIGINT}, #{patientNo,jdbcType=VARCHAR}, #{userId,jdbcType=BIGINT}, 
+      #{uuid,jdbcType=VARCHAR}, #{syncFlag,jdbcType=INTEGER}, #{mobile,jdbcType=VARCHAR}, 
+      #{trueName,jdbcType=VARCHAR}, #{preTrueName,jdbcType=VARCHAR}, #{auditState,jdbcType=INTEGER}, 
+      #{auditRemark,jdbcType=VARCHAR}, #{nickName,jdbcType=VARCHAR}, #{hasVisibleMedicalRecord,jdbcType=INTEGER}, 
+      #{sex,jdbcType=INTEGER}, #{birthDate,jdbcType=DATE}, #{userPictureUrl,jdbcType=VARCHAR}, 
+      #{patientRelation,jdbcType=INTEGER}, #{familyName,jdbcType=VARCHAR}, #{familyPhone,jdbcType=VARCHAR}, 
+      #{liveStatus,jdbcType=INTEGER}, #{deathDate,jdbcType=DATE}, #{causeOfDeath,jdbcType=VARCHAR}, 
+      #{bloodType,jdbcType=VARCHAR}, #{bloodTypeRH,jdbcType=INTEGER}, #{bodyHeight,jdbcType=INTEGER}, 
+      #{disabilityStatus,jdbcType=VARCHAR}, #{geneticDiseaseHistory,jdbcType=VARCHAR}, 
+      #{drugAllergyHistory,jdbcType=VARCHAR}, #{medicalPayType,jdbcType=INTEGER}, #{sourceDiagnosis,jdbcType=VARCHAR}, 
+      #{sourceDiseaseCode,jdbcType=VARCHAR}, #{sourceDiseaseTypeId,jdbcType=INTEGER}, 
+      #{confirmedDate,jdbcType=DATE}, #{sourceDiagnosis2,jdbcType=VARCHAR}, #{sourceDiseaseCode2,jdbcType=VARCHAR}, 
+      #{sourceDiseaseTypeId2,jdbcType=INTEGER}, #{confirmedDate2,jdbcType=TIMESTAMP}, 
+      #{sourceDiagnosis3,jdbcType=VARCHAR}, #{sourceDiseaseCode3,jdbcType=VARCHAR}, #{sourceDiseaseTypeId3,jdbcType=INTEGER}, 
+      #{confirmedDate3,jdbcType=TIMESTAMP}, #{sourcePathologyDiagnosis,jdbcType=VARCHAR}, 
+      #{sourcePathologyDiseaseCode,jdbcType=VARCHAR}, #{attendingDoctor,jdbcType=INTEGER}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{codePerson,jdbcType=INTEGER}, 
+      #{codePersonName,jdbcType=VARCHAR})
+  </insert>
+  
+  <insert id="insertSelective" parameterType="com.westangel.common.bean.PatientProfile" >
+    insert into u_patient
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="patientId != null" >
+        patientId,
+      </if>
+      <if test="patientNo != null" >
+        patientNo,
+      </if>
+      <if test="userId != null" >
+        userId,
+      </if>
+      <if test="uuid != null" >
+        uuid,
+      </if>
+      <if test="syncFlag != null" >
+        syncFlag,
+      </if>
+      <if test="mobile != null" >
+        mobile,
+      </if>
+      <if test="trueName != null" >
+        trueName,
+      </if>
+      <if test="preTrueName != null" >
+        preTrueName,
+      </if>
+      <if test="auditState != null" >
+        auditState,
+      </if>
+      <if test="auditRemark != null" >
+        auditRemark,
+      </if>
+      <if test="nickName != null" >
+        nickName,
+      </if>
+      <if test="hasVisibleMedicalRecord != null" >
+        hasVisibleMedicalRecord,
+      </if>
+      <if test="sex != null" >
+        sex,
+      </if>
+      <if test="birthDate != null" >
+        birthDate,
+      </if>
+      <if test="userPictureUrl != null" >
+        userPictureUrl,
+      </if>
+      <if test="patientRelation != null" >
+        patientRelation,
+      </if>
+      <if test="familyName != null" >
+        familyName,
+      </if>
+      <if test="familyPhone != null" >
+        familyPhone,
+      </if>
+      <if test="liveStatus != null" >
+        liveStatus,
+      </if>
+      <if test="deathDate != null" >
+        deathDate,
+      </if>
+      <if test="causeOfDeath != null" >
+        causeOfDeath,
+      </if>
+      <if test="bloodType != null" >
+        bloodType,
+      </if>
+      <if test="bloodTypeRH != null" >
+        bloodTypeRH,
+      </if>
+      <if test="bodyHeight != null" >
+        bodyHeight,
+      </if>
+      <if test="disabilityStatus != null" >
+        disabilityStatus,
+      </if>
+      <if test="geneticDiseaseHistory != null" >
+        geneticDiseaseHistory,
+      </if>
+      <if test="drugAllergyHistory != null" >
+        drugAllergyHistory,
+      </if>
+      <if test="medicalPayType != null" >
+        medicalPayType,
+      </if>
+      <if test="sourceDiagnosis != null" >
+        sourceDiagnosis,
+      </if>
+      <if test="sourceDiseaseCode != null" >
+        sourceDiseaseCode,
+      </if>
+      <if test="sourceDiseaseTypeId != null" >
+        sourceDiseaseTypeId,
+      </if>
+      <if test="confirmedDate != null" >
+        confirmedDate,
+      </if>
+      <if test="sourceDiagnosis2 != null" >
+        sourceDiagnosis2,
+      </if>
+      <if test="sourceDiseaseCode2 != null" >
+        sourceDiseaseCode2,
+      </if>
+      <if test="sourceDiseaseTypeId2 != null" >
+        sourceDiseaseTypeId2,
+      </if>
+      <if test="confirmedDate2 != null" >
+        confirmedDate2,
+      </if>
+      <if test="sourceDiagnosis3 != null" >
+        sourceDiagnosis3,
+      </if>
+      <if test="sourceDiseaseCode3 != null" >
+        sourceDiseaseCode3,
+      </if>
+      <if test="sourceDiseaseTypeId3 != null" >
+        sourceDiseaseTypeId3,
+      </if>
+      <if test="confirmedDate3 != null" >
+        confirmedDate3,
+      </if>
+      <if test="sourcePathologyDiagnosis != null" >
+        sourcePathologyDiagnosis,
+      </if>
+      <if test="sourcePathologyDiseaseCode != null" >
+        sourcePathologyDiseaseCode,
+      </if>
+      <if test="attendingDoctor != null" >
+        attendingDoctor,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+      <if test="updateTime != null" >
+        updateTime,
+      </if>
+      <if test="codePerson != null" >
+        codePerson,
+      </if>
+      <if test="codePersonName != null" >
+        codePersonName,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="patientId != null" >
+        #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="uuid != null" >
+        #{uuid,jdbcType=VARCHAR},
+      </if>
+      <if test="syncFlag != null" >
+        #{syncFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mobile != null" >
+        #{mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="trueName != null" >
+        #{trueName,jdbcType=VARCHAR},
+      </if>
+      <if test="preTrueName != null" >
+        #{preTrueName,jdbcType=VARCHAR},
+      </if>
+      <if test="auditState != null" >
+        #{auditState,jdbcType=INTEGER},
+      </if>
+      <if test="auditRemark != null" >
+        #{auditRemark,jdbcType=VARCHAR},
+      </if>
+      <if test="nickName != null" >
+        #{nickName,jdbcType=VARCHAR},
+      </if>
+      <if test="hasVisibleMedicalRecord != null" >
+        #{hasVisibleMedicalRecord,jdbcType=INTEGER},
+      </if>
+      <if test="sex != null" >
+        #{sex,jdbcType=INTEGER},
+      </if>
+      <if test="birthDate != null" >
+        #{birthDate,jdbcType=DATE},
+      </if>
+      <if test="userPictureUrl != null" >
+        #{userPictureUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="patientRelation != null" >
+        #{patientRelation,jdbcType=INTEGER},
+      </if>
+      <if test="familyName != null" >
+        #{familyName,jdbcType=VARCHAR},
+      </if>
+      <if test="familyPhone != null" >
+        #{familyPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="liveStatus != null" >
+        #{liveStatus,jdbcType=INTEGER},
+      </if>
+      <if test="deathDate != null" >
+        #{deathDate,jdbcType=DATE},
+      </if>
+      <if test="causeOfDeath != null" >
+        #{causeOfDeath,jdbcType=VARCHAR},
+      </if>
+      <if test="bloodType != null" >
+        #{bloodType,jdbcType=VARCHAR},
+      </if>
+      <if test="bloodTypeRH != null" >
+        #{bloodTypeRH,jdbcType=INTEGER},
+      </if>
+      <if test="bodyHeight != null" >
+        #{bodyHeight,jdbcType=INTEGER},
+      </if>
+      <if test="disabilityStatus != null" >
+        #{disabilityStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="geneticDiseaseHistory != null" >
+        #{geneticDiseaseHistory,jdbcType=VARCHAR},
+      </if>
+      <if test="drugAllergyHistory != null" >
+        #{drugAllergyHistory,jdbcType=VARCHAR},
+      </if>
+      <if test="medicalPayType != null" >
+        #{medicalPayType,jdbcType=INTEGER},
+      </if>
+      <if test="sourceDiagnosis != null" >
+        #{sourceDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDiseaseCode != null" >
+        #{sourceDiseaseCode,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDiseaseTypeId != null" >
+        #{sourceDiseaseTypeId,jdbcType=INTEGER},
+      </if>
+      <if test="confirmedDate != null" >
+        #{confirmedDate,jdbcType=DATE},
+      </if>
+      <if test="sourceDiagnosis2 != null" >
+        #{sourceDiagnosis2,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDiseaseCode2 != null" >
+        #{sourceDiseaseCode2,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDiseaseTypeId2 != null" >
+        #{sourceDiseaseTypeId2,jdbcType=INTEGER},
+      </if>
+      <if test="confirmedDate2 != null" >
+        #{confirmedDate2,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sourceDiagnosis3 != null" >
+        #{sourceDiagnosis3,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDiseaseCode3 != null" >
+        #{sourceDiseaseCode3,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDiseaseTypeId3 != null" >
+        #{sourceDiseaseTypeId3,jdbcType=INTEGER},
+      </if>
+      <if test="confirmedDate3 != null" >
+        #{confirmedDate3,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sourcePathologyDiagnosis != null" >
+        #{sourcePathologyDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="sourcePathologyDiseaseCode != null" >
+        #{sourcePathologyDiseaseCode,jdbcType=VARCHAR},
+      </if>
+      <if test="attendingDoctor != null" >
+        #{attendingDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="codePerson != null" >
+        #{codePerson,jdbcType=INTEGER},
+      </if>
+      <if test="codePersonName != null" >
+        #{codePersonName,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  
+  <update id="updateByPrimaryKeySelective" parameterType="com.westangel.common.bean.PatientProfile" >
+    update u_patient
+    <set>
+      <if test="uuid != null" >
+        uuid = #{uuid,jdbcType=VARCHAR},
+      </if>
+      <if test="syncFlag != null" >
+        syncFlag = #{syncFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mobile != null" >
+        mobile = #{mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="trueName != null" >
+        trueName = #{trueName,jdbcType=VARCHAR},
+      </if>
+      <if test="wholeProcessFlag != null" >
+        wholeProcessFlag = #{wholeProcessFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="preTrueName != null" >
+        preTrueName = #{preTrueName,jdbcType=VARCHAR},
+      </if>
+      <if test="auditState != null" >
+        auditState = #{auditState,jdbcType=INTEGER},
+      </if>
+      <if test="auditRemark != null" >
+        auditRemark = #{auditRemark,jdbcType=VARCHAR},
+      </if>
+      <if test="nickName != null" >
+        nickName = #{nickName,jdbcType=VARCHAR},
+      </if>
+      <if test="hasVisibleMedicalRecord != null" >
+        hasVisibleMedicalRecord = #{hasVisibleMedicalRecord,jdbcType=INTEGER},
+      </if>
+      <if test="sex != null" >
+        sex = #{sex,jdbcType=INTEGER},
+      </if>
+      <if test="birthDate != null" >
+        birthDate = #{birthDate,jdbcType=DATE},
+      </if>
+      <if test="userPictureUrl != null" >
+        userPictureUrl = #{userPictureUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="patientRelation != null" >
+        patientRelation = #{patientRelation,jdbcType=INTEGER},
+      </if>
+      <if test="familyName != null" >
+        familyName = #{familyName,jdbcType=VARCHAR},
+      </if>
+      <if test="familyPhone != null" >
+        familyPhone = #{familyPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="liveStatus != null" >
+        liveStatus = #{liveStatus,jdbcType=INTEGER},
+      </if>
+      <if test="deathDate != null" >
+        deathDate = #{deathDate,jdbcType=DATE},
+      </if>
+      <if test="causeOfDeath != null" >
+        causeOfDeath = #{causeOfDeath,jdbcType=VARCHAR},
+      </if>
+      <if test="medicalPayType != null" >
+        medicalPayType = #{medicalPayType,jdbcType=INTEGER},
+      </if>
+      <if test="sourceDiagnosis != null" >
+        sourceDiagnosis = #{sourceDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDiseaseCode != null" >
+        sourceDiseaseCode = #{sourceDiseaseCode,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDiseaseTypeId != null" >
+        sourceDiseaseTypeId = #{sourceDiseaseTypeId,jdbcType=INTEGER},
+      </if>
+      <if test="confirmedDate != null" >
+        confirmedDate = #{confirmedDate,jdbcType=DATE},
+      </if>
+      <if test="sourceDiagnosis2 != null" >
+        sourceDiagnosis2 = #{sourceDiagnosis2,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDiseaseCode2 != null" >
+        sourceDiseaseCode2 = #{sourceDiseaseCode2,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDiseaseTypeId2 != null" >
+        sourceDiseaseTypeId2 = #{sourceDiseaseTypeId2,jdbcType=INTEGER},
+      </if>
+      <if test="confirmedDate2 != null" >
+        confirmedDate2 = #{confirmedDate2,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sourceDiagnosis3 != null" >
+        sourceDiagnosis3 = #{sourceDiagnosis3,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDiseaseCode3 != null" >
+        sourceDiseaseCode3 = #{sourceDiseaseCode3,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceDiseaseTypeId3 != null" >
+        sourceDiseaseTypeId3 = #{sourceDiseaseTypeId3,jdbcType=INTEGER},
+      </if>
+      <if test="confirmedDate3 != null" >
+        confirmedDate3 = #{confirmedDate3,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sourcePathologyDiagnosis != null" >
+        sourcePathologyDiagnosis = #{sourcePathologyDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="sourcePathologyDiseaseCode != null" >
+        sourcePathologyDiseaseCode = #{sourcePathologyDiseaseCode,jdbcType=VARCHAR},
+      </if>
+      <if test="attendingDoctor != null" >
+        attendingDoctor = #{attendingDoctor,jdbcType=INTEGER},
+      </if>
+      updateTime=NOW()
+    </set>
+    where patientId = #{patientId,jdbcType=BIGINT}
+  </update>
+  
+  <update id="updateByPrimaryKey" parameterType="com.westangel.common.bean.PatientProfile" >
+    update u_patient
+    set 
+    <if test="mobile!=null and mobile!=''">
+    mobile = #{mobile,jdbcType=VARCHAR},
+    </if>
+      trueName = #{trueName,jdbcType=VARCHAR},
+      sex = #{sex,jdbcType=INTEGER},
+      birthDate = #{birthDate,jdbcType=DATE},
+      liveStatus = #{liveStatus,jdbcType=INTEGER},
+      auditRemark=#{auditRemark,jdbcType=VARCHAR},
+      <if test="causeOfDeath == null or causeOfDeath=='' ">
+      	isInHospitalDeath=NULL,
+      	isTumourDeath=NULL,
+      	causeOfDeath = NULL,
+      </if>
+      <if test="wholeProcessFlag != null" >
+        wholeProcessFlag = #{wholeProcessFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="causeOfDeath == 1">
+      	isInHospitalDeath=1,
+      	isTumourDeath=1,
+      	causeOfDeath = '在院肿瘤死亡',
+      	deathDate = #{deathDate,jdbcType=DATE},
+      </if>
+      <if test="causeOfDeath == 2">
+      	isInHospitalDeath=1,
+      	isTumourDeath=0,
+      	causeOfDeath = '在院非肿瘤死亡',
+      	deathDate = #{deathDate,jdbcType=DATE},
+      </if>
+      <if test="causeOfDeath == 3">
+      	isInHospitalDeath=0,
+      	isTumourDeath=1,
+      	causeOfDeath = '非在院肿瘤死亡',
+      	deathDate = #{deathDate,jdbcType=DATE},
+      </if>
+      <if test="causeOfDeath == 4">
+      	isInHospitalDeath=0,
+      	isTumourDeath=0,
+      	causeOfDeath = '非在院非肿瘤死亡',
+      	deathDate = #{deathDate,jdbcType=DATE},
+      </if>
+      patientRelation=#{patientRelation},
+      familyName=#{familyName},
+      familyPhone=#{familyPhone},
+      updateTime = NOW()
+    where patientId = #{patientId,jdbcType=BIGINT}
+  </update>
+  
+  <!-- 撤销失访 -->
+  <update id="updateLostFollowupPatientState" parameterType="java.lang.Long" >
+	UPDATE user_db.u_patient t1,
+	 followup_db.var_patient_followup t2
+	SET 
+	 t1.oldFollowupFlag = t1.followupFlag,
+	 t1.oldLostFollowupCause = t1.lostFollowupCause,
+	 t1.oldLostFollowupCauseResultValue = t1.lostFollowupCauseResultValue,
+	 t1.oldLostFollowupTime = t1.lostFollowupTime,
+	 t1.followupFlag = 1,
+	 t1.lostFollowupCause = NULL,
+	 t1.lostFollowupCauseResultValue = NULL,
+	 t1.lostFollowupTime = NULL,
+	 t1.cancelLostFollowupFlag=2,
+	 t1.cancelLostFollowupTime=NOW(),
+	 t2.newVisitFlag = NULL,
+	 t2.newContactFlag = NULL
+	WHERE
+		t1.patientId = t2.patientId
+	AND t1.patientId = #{patientId,jdbcType=BIGINT}
+  </update>
+  
+  <!-- 更新患者最近门诊时间  -->
+  <update id="updateLatestClinicDate" parameterType="java.util.HashMap" >
+    update ehr_db.var_patient_medical set latestClinicDate = #{latestClinicDate}
+    where patientId = #{patientId,jdbcType=BIGINT}
+  </update>
+  
+  <update id="updateMergeflag" parameterType="java.lang.String">
+    update uuid_patient_merge set repeatflag=0,mergeflag=1,goalpatientid=#{goalpatientid}
+    where repeatflag=1 and patientId IN(${patientIds})
+  </update>
+  <!-- 撤销疑似重复患者 -->
+  <update id="revokeSimilarPatient" parameterType="java.lang.Long">
+    update uuid_patient_merge set repeatflag=0
+    where repeatflag=1 and patientId=#{patientId}
+  </update>
+  <!-- 导出患者信息 -->
+  <select id="queryPatientInfoBySql" resultType="java.util.LinkedHashMap">
+  		${sql}
+  </select>
+  <!-- 获取可导出随访表记录的患者数 -->
+  <select id="getfollowupTabTotalBySql" resultType="java.lang.Integer">
+  	SELECT COUNT(1) FROM user_db.u_patient p
+  	INNER JOIN ehr_db.e_diagnosis_info d ON d.diagnosisId=p.diagnosisId AND d.isSourceDiagnosis=1 AND ((d.diseasecode>'C00' AND d.diseasecode &lt;'C98') OR (d.diseasecode>'D32' AND d.diseasecode &lt; 'D34'))
+  	${sql}
+  </select>
+  <!-- 获取患者总数 -->
+  <select id="countDataNum" resultType="java.lang.Integer">
+		${sql}
+  </select>
+  
+  <!-- 调用存储过程,刷新病种 IN textpatientid int,IN textInhospitalId int-->
+  <select id="freshPatientWideTable" statementType="CALLABLE" parameterType="java.lang.Long">
+  	<![CDATA[
+    	 {call user_db.insert_e_patient_wide_table(#{textpatientid,mode=IN})}
+	]]>
+  </select>
+  
+  <!-- 按诊断名称分病种统计患者  -->
+  <select id="statisticsPatientByDiseaseType" resultType="java.lang.Integer" parameterType="java.util.HashMap" >
+	SELECT COUNT(*) FROM user_db.u_patient t WHERE t.outPatientFlag=2 AND t.patientType=1 AND t.mergeFlag!=2 AND EXISTS (SELECT 1 FROM ehr_db.e_diagnosis_info WHERE patientId=t.patientId AND eszCode IS NOT NULL)
+  </select>
+  
+  <select id="reversePatientByPatientId" resultType="java.lang.Long">
+  	SELECT patientid FROM user_db.uuid_patient_merge 
+  	WHERE repeatflag IN(SELECT repeatflag FROM user_db.uuid_patient_merge WHERE patientid=#{patientId})
+  </select>
+  
+	
+	<!-- 查询符合随访任务查询的凝似重复患者列表 -->
+	<select id="findDemandMightRepeatPatientList" resultType="com.westangel.common.bean.PatientSimpleInfo">
+		SELECT
+			f1.*
+		FROM(
+			SELECT
+				<include refid="task_similar_simple_base_column_list" />,
+				1 flag
+			FROM ${req.searchTableName} t1
+				INNER JOIN user_db.uuid_patient_merge t2 ON t2.patientid = t1.patientId
+				INNER JOIN user_db.u_patient t3 ON t3.patientId = t2.patientid
+				INNER JOIN user_db.u_user t4 ON t4.userId = t3.userId
+			WHERE t3.outPatientFlag=2 AND t3.patientType=1 AND t3.mergeFlag!=2 AND t2.goalpatientid IN(
+				<foreach collection="params" item="item" index="index" separator=",">
+					#{item.goalpatientid}
+				</foreach>
+				)
+				AND t2.goalpatientid IS NOT NULL
+				AND t1.${req.searchColumn} IS NOT NULL
+		
+			UNION
+		
+			SELECT
+				<include refid="task_similar_simple_base_column_list" />,
+				0 flag
+			FROM ${req.searchTableName} t1
+				INNER JOIN user_db.uuid_patient_merge t2 ON t2.patientid = t1.patientId
+				INNER JOIN user_db.u_patient t3 ON t3.patientId = t2.patientid
+				INNER JOIN user_db.u_user t4 ON t4.userId = t3.userId
+			WHERE t3.outPatientFlag=2 AND t3.patientType=1 AND t3.mergeFlag!=2 AND t2.goalpatientid IN(
+				<foreach collection="params" item="item" index="index" separator=",">
+					#{item.goalpatientid}
+				</foreach>
+				)
+				AND t2.goalpatientid IS NOT NULL
+				AND t1.${req.searchColumn} IS NULL
+		) f1
+		ORDER BY f1.goalpatientid ASC, f1.flag DESC
+	</select>
+	
+	<sql id="task_similar_simple_base_column_list">
+		t4.identification,
+		t4.state,
+		t3.patientId,
+		t3.patientNo,
+		t3.familyPhone mobile,
+		t3.trueName,
+		CASE WHEN t4.sex=1 THEN '男' WHEN t4.sex=2 THEN '女' END sexText,
+		t3.birthDate,
+	    t3.sourceDiagnosis, 
+	    t3.sourceDiseaseCode, 
+	    t3.sourceDiseaseTypeId, 
+	    t3.confirmedDate,
+	    t3.sourcePathologyDiagnosis, 
+	    t3.sourcePathologyDiseaseCode,
+	    (SELECT d.diseaseTypeName FROM ehr_db.meta_c_disease_type d WHERE d.diseaseTypeId=t3.sourceDiseaseTypeId) sourceDiseaseTypeName,
+	    t2.remark auditRemark,
+		t2.goalpatientid,
+		(
+			SELECT
+				i1.followupTime
+			FROM followup_db.followup_result i1
+			WHERE i1.patientId = t2.patientid
+			ORDER BY i1.followupTime DESC
+			LIMIT 1
+		) lastFollowupDate,
+		(
+			SELECT
+				i1.followupResultValue
+			FROM followup_db.followup_result i1
+			WHERE i1.patientId = t2.patientid
+			ORDER BY i1.followupTime DESC
+			LIMIT 1
+		) followupResultValue,
+		(
+			SELECT
+				i2.followupResultValueName
+			FROM followup_db.followup_result i1
+				INNER JOIN followup_db.meta_followup_result_value i2 ON i2.followupResultValueId = i1.followupResultValue
+			WHERE i1.patientId = t2.patientid
+			ORDER BY i1.followupTime DESC
+			LIMIT 1
+		) followupResultValueName
+	</sql>
+	
+	<!-- 查询符合随访任务查询的凝似重复患者组列表 -->
+	<select id="findDemandMightRepeatPatientGroupList" resultType="com.westangel.common.bean.PatientSimpleInfo">
+		SELECT
+			t2.goalpatientid
+		FROM ${searchTableName} t1
+			INNER JOIN user_db.uuid_patient_merge t2 ON t2.patientid = t1.patientId
+		WHERE t1.${searchColumn} = 7
+		GROUP BY t2.goalpatientid
+	</select>
+	
+	<!-- 失访患者批量撤销 -->
+	<update id="batchRevokeLostFollowPatient" parameterType="java.util.Map">
+		UPDATE user_db.u_patient t1,
+		 followup_db.var_patient_followup t2
+		SET 
+		 t1.oldFollowupFlag = t1.followupFlag,
+		 t1.oldLostFollowupCause = t1.lostFollowupCause,
+		 t1.oldLostFollowupCauseResultValue = t1.lostFollowupCauseResultValue,
+		 t1.oldLostFollowupTime = t1.lostFollowupTime,
+		 t1.followupFlag = 1,
+		 t1.lostFollowupCause = NULL,
+		 t1.lostFollowupCauseResultValue = NULL,
+		 t1.lostFollowupTime = NULL,
+		 t1.cancelLostFollowupFlag=2,
+		 t1.cancelLostFollowupTime=NOW(),
+		 t2.newVisitFlag = NULL,
+		 t2.newContactFlag = NULL
+		WHERE
+			t1.patientId = t2.patientId
+		AND t1.patientId IN
+		<foreach
+            collection="patientIds"
+            item="patientId"
+            open="("
+            separator=","
+            close=")">
+            #{patientId}
+        </foreach>
+	</update>
+	<!-- 置var_patient_followup newContactFlag=1 -->
+	<update id="updateContactFlag" parameterType="java.lang.Long">
+		UPDATE user_db.u_patient t1,followup_db.var_patient_followup t2 SET t2.newContactFlag=1 WHERE t1.patientId=t2.patientId AND t1.followupFlag=2 AND t1.patientId=#{patientId}
+	</update>
+	
+	<!-- 插入查询中间表 院际医生工作站  add by yuan_wm 20170217 start -->
+	<insert id="insertSearchPatient" parameterType="java.util.Map">
+		INSERT INTO
+		<choose>
+			<when test="searchTableName!=null">
+				${searchTableName}	
+			</when>
+			<otherwise>
+				ods_db.var_search_patient
+			</otherwise>
+		</choose> 
+		(searchId,patientId,conditionId)
+		SELECT #{searchId},t.patientId,0
+		FROM user_db.u_patient t
+		<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+			<choose>
+				<when test="operator!=null and (deployLocation != null and deployLocation==2)">
+					<choose>
+						<when test="userRole != null and (userRole == 55 or userRole == 56)"></when>
+						<otherwise>
+							JOIN (<include refid="join_data_privilege"></include>) t2 ON t.patientId=t2.patientId
+						</otherwise>
+					</choose>
+				</when>
+				<otherwise>
+					JOIN (<include refid="join_data_privilege"></include>) t2 ON t.patientId=t2.patientId
+				</otherwise>
+			</choose>
+		</if>
+		JOIN u_user u ON u.userId=t.userId
+		LEFT JOIN followup_db.var_patient_followup f ON f.patientId=t.patientId 
+		<include refid="Patient_Where_Condition"></include>
+	</insert>
+	<!-- 插入查询中间表 院际医生工作站  add by yuan_wm 20170217 end -->
+	
+	<!-- add by fanpanwei 20170704 -->
+	<select id="getMergePatientNos" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+			CONCAT('(',Group_Concat(p.patientNo SEPARATOR ','),')') mergedPatientNo,
+			ifnull(m.newPatientNo,'空') goalPatientNo
+		FROM user_db.u_patient p
+		LEFT JOIN user_db.r_uuid_patientno m ON p.patientNo=m.patientNo
+		WHERE p.mergeFlag=2 and p.patientNo in (${originalBatchPatientNo})
+		Group By goalPatientNo
+	</select>
+	<select id="getHadRecordPatientNos" resultType="java.lang.String" parameterType="java.util.HashMap" >
+	SELECT
+		distinct(IFNULL(rup.patientNo,t.patientNo)) patientNo
+	FROM u_patient t 
+		<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+			JOIN (<include refid="join_data_privilege"></include>) t2 ON t.patientId=t2.patientId
+		</if>
+		JOIN u_user u ON u.userId=t.userId
+		INNER JOIN user_db.r_uuid_patientno rup ON rup.patientId=t.patientId 
+	  				and (rup.patientNo IN(${batchPatientNo}) or rup.patientNo IN(${originalBatchPatientNo})) 
+	<include refid="Patient_Where_Condition"></include>
+  </select>
+  
+	<!-- 修改患者的确诊时间和状态 add by zhuguo -->
+	<update id="patientConfirmedDateModify"
+		parameterType="com.esuizhen.cloudservice.user.bean.followuppatient.PatientConfirmedDateReq">
+		update user_db.u_patient
+		<set>
+			<if test="confirmedDate != null">
+				confirmedDate = #{confirmedDate},
+			</if>
+			<if test="confirmedDateSource != null">
+				confirmedDateSource = #{confirmedDateSource},
+			</if>
+			<if test="confirmedDateModCount == 1">
+				confirmedDateModCount =
+				IF (
+					confirmedDateModCount IS NULL,
+					0,
+					confirmedDateModCount
+				) + 1,
+			</if>
+			updateTime=NOW()
+		</set>
+		where patientId = #{patientId}
+	</update>
+
+	<!-- 根据操作员id，查询操作员姓名 -->
+	<select id="queryOperatorNameByOperatorId"
+		resultType="com.esuizhen.cloudservice.user.bean.followuppatient.PatientConfirmedDateReq"
+		parameterType="com.esuizhen.cloudservice.user.bean.followuppatient.PatientConfirmedDateReq">
+		SELECT
+			trueName operatorName
+		FROM
+			user_db.u_doctor
+		WHERE
+			doctorId = #{operatorId}
+	</select>
+	
+	<!-- 插入操作日志 -->
+	<insert id="insertOperationHistory" parameterType="com.esuizhen.cloudservice.user.model.OperationHistory">
+		<selectKey resultType="long" keyProperty="operationId"
+			order="AFTER">
+			SELECT LAST_INSERT_ID() as operationId
+		</selectKey>
+		INSERT INTO user_db.s_operation_history (
+			operationName,
+			description,
+			actionType,
+			operatorId,
+			operationCount,
+			createTime
+		)
+		VALUES
+			(
+				'患者确诊时间修改',
+				#{description},
+				'1',
+				#{operatorId},
+				'1',
+				now()
+			)
+	</insert>
+	<!-- end -->
+  
+</mapper>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.crf.TCrfSymptomInfoDao">
+
+	<insert id="insertCrfObservationClinicSymptomOptions" parameterType="com.esuizhen.cloudservice.research.model.crf.TCrfSymptomInfo">
+        INSERT INTO crf_observation_clinic_symptom_options (
+        	crfObserveItemId ,
+        	crfObserveId ,
+        	subjectElementId ,
+        	symptomId ,
+        	slightDescription ,
+        	mediumDescription ,
+        	severeDescription ,
+        	`index` ,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{crfObserveItemId} ,
+        	#{crfObserveId} ,
+        	#{subjectElementId} ,
+        	#{symptomId} ,
+        	#{slightDescription} ,
+        	#{mediumDescription} ,
+        	#{severeDescription} ,
+        	#{index} ,
+        	NOW() ,
+        	NOW() 
+        )
+	</insert>
+    
+    <insert id="insertCrfObservationClinicSymptomOptionsList" parameterType="java.util.List">
+        INSERT INTO crf_observation_clinic_symptom_options (
+        	crfObserveItemId ,
+        	crfObserveId ,
+        	subjectElementId ,
+        	symptomId ,
+        	slightDescription ,
+        	mediumDescription ,
+        	severeDescription ,
+        	`index`,
+        	createTime ,
+        	updateTime 
+        ) VALUES 
+        <foreach collection="list" item="item" index="index" separator=",">
+        (
+        	#{item.crfObserveItemId} ,
+        	#{item.crfObserveId} ,
+        	#{item.subjectElementId} ,
+        	#{item.symptomId} ,
+        	#{item.slightDescription} ,
+        	#{item.mediumDescription} ,
+        	#{item.severeDescription} ,
+        	#{item.index} ,
+        	NOW() ,
+        	NOW() 
+        )
+        </foreach>
+	</insert>
+	
+	<update id="updateCrfObservationClinicSymptomOptions" parameterType="com.esuizhen.cloudservice.research.model.crf.TCrfSymptomInfo">
+        UPDATE crf_observation_clinic_symptom_options 
+        <set>
+	        <if test="subjectElementId != null">
+                subjectElementId = #{subjectElementId} ,
+            </if>
+	        <if test="symptomId != null">
+                symptomId = #{symptomId} ,
+            </if>
+	        <if test="slightDescription != null">
+                slightDescription = #{slightDescription} ,
+            </if>
+	        <if test="mediumDescription != null">
+                mediumDescription = #{mediumDescription} ,
+            </if>
+	        <if test="severeDescription != null">
+                severeDescription = #{severeDescription} ,
+            </if>
+	        <if test="1==1">
+                updateTime = NOW() ,
+            </if>
+        </set>
+        WHERE 
+	        crfObserveItemId = #{crfObserveItemId} 
+	</update>
+
+    <delete id="deleteCrfObservationClinicSymptomOptions">
+        DELETE FROM crf_observation_clinic_symptom_options WHERE crfObserveItemId = #{crfObserveItemId} 
+    </delete>
+    
+    <delete id="deleteCrfObservationClinicSymptomOptionsByCrfObserveId">
+        DELETE FROM crf_observation_clinic_symptom_options WHERE crfObserveId = #{crfObserveId} 
+    </delete>
+    
+    <select id="queryCrfObservationClinicSymptomOptionsById" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfSymptomInfo">
+		SELECT 
+        	crfObserveItemId,
+        	crfObserveId,
+        	subjectElementId,
+        	symptomId,
+        	slightDescription,
+        	mediumDescription,
+        	severeDescription,
+        	createTime,
+        	updateTime
+		FROM crf_observation_clinic_symptom_options 
+	    WHERE 
+	        crfObserveItemId = #{crfObserveItemId} 
+	</select>
+	
+	<select id="queryByCrfObserveId" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfSymptomInfo">
+		SELECT 
+        	crfObserveItemId,
+        	crfObserveId,
+        	subjectElementId,
+        	symptomId,
+        	(SELECT symptomName FROM ehr_db.meta_e_clinic_symptom WHERE symptomId=t1.symptomId) symptomName ,
+        	slightDescription,
+        	mediumDescription,
+        	severeDescription,
+        	createTime,
+        	updateTime
+		FROM crf_observation_clinic_symptom_options t1 
+	    WHERE 
+	        crfObserveId = #{crfObserveId} 
+	    ORDER BY t1.`index` ASC
+	</select>
+</mapper>
+

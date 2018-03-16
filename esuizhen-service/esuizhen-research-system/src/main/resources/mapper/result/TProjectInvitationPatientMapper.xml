@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TProjectInvitationPatientDao">
+
+	<select id="searchInProjectPatients" resultType="com.westangel.common.bean.PatientSimpleInfo">
+		SELECT
+			*
+		FROM(
+			SELECT
+				t1.patientId,
+				t1.trueName,
+				t1.sex,
+				t1.mobile,
+				t1.sourceDiseaseTypeId,
+				t8.diseaseTypeName sourceDiseaseTypeName,
+				t1.sourceDiseaseCode,
+				t1.sourceDiagnosis,
+				t1.confirmedDate,
+				t2.trueName attendingDoctorName,
+				(SELECT MAX(r1.followupTime) followupTime FROM followup_db.followup_result r1 WHERE t1.patientId = r1.patientId) lastFollowupDate,
+				(SELECT f1.followupResultValue FROM followup_db.followup_result f1 WHERE f1.patientId = t1.patientId ORDER BY f1.followupTime DESC LIMIT 1) followupResultValue,
+				(SELECT f1.followupResultValueName FROM followup_db.meta_followup_result_value f1 WHERE f1.followupResultValueId = followupResultValue) followupResultValueName,
+				(CASE WHEN t3.openId IS NOT NULL THEN 1 ELSE 0 END) weixinFlag
+			FROM user_db.u_patient t1
+				LEFT JOIN user_db.u_doctor t2 ON t1.attendingDoctor = t2.doctorId
+				LEFT JOIN user_db.u_thirdparty t3 ON t1.userId = t3.userId
+				INNER JOIN pro_db.project_invitation_patient t4 ON t1.patientId = t4.invitee
+				INNER JOIN pro_db.r_subcenter_patient t5 ON t1.patientId = t5.patientId AND t4.projectId = t5.projectId
+				<!-- 
+				LEFT JOIN ehr_db.e_diagnosis_info t6 ON t1.patientId = t6.patientId AND t6.diagnosisTypeId = 1
+				 -->
+				LEFT JOIN followup_db.followup_result t7 ON t1.patientId = t7.patientId
+				LEFT JOIN ehr_db.meta_c_disease_type t8 ON t8.diseaseTypeId = t1.sourceDiseaseTypeId
+				LEFT JOIN pro_db.project t9 ON t4.projectId = t9.projectId AND t9.mainDiseaseTypeId = t1.sourceDiseaseTypeId
+			WHERE t4.projectId = #{projectId}
+			<if test="trueName != null">
+				<bind name="patternTrueName" value="'%' + trueName + '%'" />
+				AND t1.trueName LIKE #{patternTrueName}
+			</if>
+			<choose>
+				<when test="sex == 1 or sex == 2">
+					AND t1.sex = #{sex}
+				</when>
+				<when test="sex == 0">
+					AND (t1.sex = 0 OR t1.sex IS NULl)
+				</when>
+			</choose>
+			<if test="mobile != null">
+				<bind name="patternMobile" value="'%' + mobile + '%'" />
+				AND t1.mobile LIKE #{patternMobile}
+			</if>
+			<if test="doctorId != null">
+				AND t4.inviter = #{doctorId}
+			</if>
+			<if test="subcenterId != null">
+				AND t5.subcenterId = #{subcenterId}
+			</if>
+			<if test="groupId != null">
+				AND t5.groupId = #{groupId}
+			</if>
+			<if test="mainDiagnosisName != null">
+				<bind name="patternMainDiagnosisName" value="'%' + mainDiagnosisName + '%'" />
+				AND t1.sourceDiagnosis LIKE #{patternMainDiagnosisName}
+			</if>
+			<if test="attendingDoctorId != null">
+				AND t1.attendingDoctor = #{attendingDoctorId}
+			</if>
+			<if test="followupResultId != null">
+				AND t7.followupResultValue = #{followupResultId}
+			</if>
+			<if test="conditionStartDate != null">
+				AND t1.confirmedDate >= #{conditionStartDate}
+			</if>
+			<if test="conditionEndDate != null">
+				<![CDATA[
+					AND t1.confirmedDate <= #{conditionEndDate}
+				]]>
+			</if>
+			<choose>
+				<when test="inside == 1">
+					AND t4.state != 2
+				</when>
+				<otherwise>
+					AND t4.state = 2
+				</otherwise>
+			</choose>
+			ORDER BY t1.confirmedDate ASC, t7.updateTime DESC
+			) f1
+		GROUP BY f1.patientId
+		<if test="orderBy != null">
+			<choose>
+				<when test="orderBy == 'confirmedDate'">
+					ORDER BY f1.confirmedDate
+				</when>
+				<when test="orderBy == 'lastFollowupDate'">
+					ORDER BY f1.lastFollowupDate
+				</when>
+			</choose>
+			<if test="orderType != null">
+				<choose>
+					<when test="orderType == 'DESC'">
+						DESC
+					</when>
+					<otherwise>
+						ASC
+					</otherwise>
+				</choose>
+			</if>
+		</if>
+	</select>
+
+	<select id="findCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(0)
+		FROM pro_db.project_invitation_patient t1
+		WHERE
+			t1.projectId = #{projectId}
+			AND t1.state != 2
+			<if test="subcenterId != null">
+				AND t1.subcenterId = #{subcenterId}
+			</if>
+			<if test="doctorId != null">
+				AND t1.inviter = #{doctorId}
+			</if>
+	</select>
+
+	<select id="findInvitaionInfo" resultType="com.esuizhen.cloudservice.research.model.result.TProjectInvitationPatient">
+		SELECT
+			t1.id,
+			t1.subcenterId,
+			t1.projectId,
+			t1.inviter,
+			t1.invitee,
+			t1.description,
+			t1.state,
+			t1.groupId,
+			t1.confirmSource,
+			t1.invitationContent,
+			t1.createTime,
+			t1.updateTime
+		FROM pro_db.project_invitation_patient t1
+		WHERE t1.projectId = #{projectId}
+			<if test="subcenterId != null">
+				AND t1.subcenterId = #{subcenterId}
+			</if>
+			<if test="groupId != null">
+				AND t1.groupId = #{groupId}
+			</if>
+			AND t1.inviter = #{doctorId}
+			AND t1.invitee = #{patientId}
+	</select>
+	
+	<select id="findById" resultType="com.esuizhen.cloudservice.research.model.result.TProjectInvitationPatient">
+		SELECT
+			t1.id,
+			t1.subcenterId,
+			t1.projectId,
+			t1.inviter,
+			t1.invitee,
+			t1.description,
+			t1.state,
+			t1.groupId,
+			t1.confirmSource,
+			t1.invitationContent,
+			t1.createTime,
+			t1.updateTime
+		FROM pro_db.project_invitation_patient t1
+		WHERE t1.id = #{id}
+	</select>
+
+	<insert id="insertByBatch">
+		INSERT INTO pro_db.project_invitation_patient(
+			subcenterId, 
+			projectId, 
+			inviter, 
+			invitee, 
+			description, 
+			state, 
+			groupId,
+			createTime, 
+			updateTime
+		)VALUES
+		<foreach collection="patientSimpleInfos" item="patientSimpleInfo" index="index" separator=",">
+			(
+				#{projectInvitationPatient.subcenterId}, 
+				#{projectInvitationPatient.projectId},
+				#{projectInvitationPatient.inviter},
+				#{patientSimpleInfo.patientId}, 
+				#{projectInvitationPatient.description}, 
+				#{projectInvitationPatient.state}, 
+				#{projectInvitationPatient.groupId}, 
+				NOW(), 
+				NOW()
+			)
+		</foreach>
+	</insert>
+	
+	<update id="updatePatientsState">
+		UPDATE pro_db.project_invitation_patient
+		<set>
+			<if test="projectInvitationPatient.state != null">
+				state = #{projectInvitationPatient.state},
+			</if>
+			updateTime = NOW()
+		</set>
+		WHERE id IN
+		<foreach collection="patientSimpleInfos" item="item" index="index" open="(" separator="," close=")">
+			#{item.id}
+		</foreach>
+		AND projectId = #{projectInvitationPatient.projectId}
+	</update>
+	
+	<update id="confirmJoinProjectInvitation">
+		UPDATE pro_db.project_invitation_patient
+		<set>
+			state = #{state},
+			confirmSource = #{confirmSource},
+			updateTime = NOW()
+		</set>
+		WHERE projectId = #{projectId}
+			AND inviter = #{doctorId}
+			AND invitee = #{patientId}
+	</update>
+	
+	<update id="recordInvitationContent">
+		UPDATE pro_db.project_invitation_patient
+		<set>
+			<if test="state != null">
+				state = #{state},
+			</if>
+			invitationContent = #{invitationContent},
+			updateTime = NOW()
+		</set>
+		WHERE projectId = #{projectId}
+			AND inviter = #{doctorId}
+			AND invitee = #{patientId}
+			<if test="subcenterId != null">
+				AND subcenterId = #{subcenterId}
+			</if>
+			<if test="groupId != null">
+				AND groupId = #{groupId}
+			</if>
+	</update>
+	
+	<update id="updatePatientIntoGroup">
+		UPDATE pro_db.project_invitation_patient
+		<set>
+			groupId = #{groupId},
+			updateTime = NOW()
+		</set>
+		WHERE projectId = #{projectId}
+	</update>
+	
+	<update id="updateInvitationPatientState">
+		UPDATE pro_db.project_invitation_patient
+		<set>
+			state = #{state},
+			updateTime = NOW()
+		</set>
+		WHERE invitee IN(
+			SELECT
+				t1.patientId
+			FROM user_db.u_patient t1
+			WHERE t1.mobile = #{mobile}
+		)
+		AND state = #{beforState}
+		AND DATE_ADD(createTime,INTERVAL 24 HOUR) >= NOW()
+	</update>
+	
+	<delete id="deletePendingPatients">
+		DELETE FROM pro_db.project_invitation_patient
+		WHERE id IN
+		<foreach collection="patientSimpleInfos" item="item" index="index" open="(" separator="," close=")">
+			#{item.id}
+		</foreach>
+		AND projectId = #{projectInvitationPatient.projectId}
+	</delete>
+	
+	<delete id="deleteProjectPatients">
+		DELETE FROM pro_db.project_invitation_patient
+		WHERE invitee IN
+		<foreach collection="patientSimpleInfos" item="patientSimpleInfo" index="index" open="(" separator="," close=")">
+			#{patientSimpleInfo.patientId}
+		</foreach>
+		AND projectId = #{projectId}
+	</delete>
+	
+	<delete id="deleteByDoctorId">
+		DELETE
+		FROM
+			pro_db.project_invitation_patient
+		WHERE
+			projectId = #{projectId}
+		AND inviter = #{doctorId}
+	</delete>
+	
+	<delete id="deleteBySubcenterId">
+		DELETE
+			t1.*
+		FROM pro_db.project_invitation_patient t1,
+			pro_db.project_subcenter t2
+		WHERE t1.inviter = t2.subcenterDirector
+			AND t2.subcenterId = #{subcenterId}
+	</delete>
+	
+	<delete id="deleteByGroupId">
+		DELETE FROM pro_db.project_invitation_patient
+		WHERE groupId = #{groupId}
+	</delete>
+	
+	<delete id="deleteByProjectId">
+		DELETE FROM pro_db.project_invitation_patient WHERE projectId = #{projectId}
+	</delete>
+	
+</mapper>

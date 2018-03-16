@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.temp.TempEciSurgeryNoteDao" >
+    <!-- 向temp表推送数据 -->
+    <insert id="insert">
+		INSERT INTO server_sync_temp_db.eci_surgery_note (
+			surgeryId,inhospitalId,emrId,mainID,tempId,patientId,patientNo,oldPatientNo,
+			inhospitalTimes,oldInhospitalTimes,inhospitalNo,patientUuid,hospitalId,deptId,deptUuid,
+			bedNo,opCode,treatmentSchemeId,treatmentSchemeName,opLevel,surgeryName,surgeryDoctor,
+			surgeryDoctorUuid,surgeryDoctorName,surgeryAssistant1,surgeryAssistant1Uuid,surgeryAssistant1Name,
+			surgeryAssistant2,surgeryAssistant2Uuid,surgeryAssistant2Name,surgeryDate,surgeryBeginTime,
+			surgeryEndTime,anesthesiaDoctor,anesthesiaDoctorUuid,anesthesiaDoctorName,anesthesiaWay,
+			preOperativeDiagnosis,inOperativeDiagnosis,bodyPosture,transfusion,surgeryNurses,
+			surgeryNursesUuid,operativeApproach,operativeProbe,operativeMeasures,operativeSituation,
+			woundClosureWay,incisionBandagedWay,operatorName,remark,createTime,updateTime,incisionHealing,
+			serialNum,incisionHealingId,rawCreateTime,mergeFlag,mergeFrom,mergeFromUuid,
+			mergeTarget,mergeTargetUuid,mergeTime,batchId,sourceFlag,
+			incisionGroup,incisionHealLevel,rawAnesthesiaWayId,anesthesiaWayId
+		)
+		VALUES(
+			#{surgeryId},#{inhospitalId},#{emrId},#{mainID},#{tempId},#{patientId},#{patientNo},#{oldPatientNo},
+			#{inhospitalTimes},#{oldInhospitalTimes},#{inhospitalNo},#{patientUuid},#{hospitalId},#{deptId},#{deptUuid},
+			#{bedNo},#{opCode},#{treatmentSchemeId},#{treatmentSchemeName},#{opLevel},#{surgeryName},#{surgeryDoctor},
+			#{surgeryDoctorUuid},#{surgeryDoctorName},#{surgeryAssistant1},#{surgeryAssistant1Uuid},#{surgeryAssistant1Name},
+			#{surgeryAssistant2},#{surgeryAssistant2Uuid},#{surgeryAssistant2Name},#{surgeryDate},#{surgeryBeginTime},
+			#{surgeryEndTime},#{anesthesiaDoctor},#{anesthesiaDoctorUuid},#{anesthesiaDoctorName},#{anesthesiaWay},
+			#{preOperativeDiagnosis},#{inOperativeDiagnosis},#{bodyPosture},#{transfusion},#{surgeryNurses},
+			#{surgeryNursesUuid},#{operativeApproach},#{operativeProbe},#{operativeMeasures},#{operativeSituation},
+			#{woundClosureWay},#{incisionBandagedWay},#{operatorName},#{remark},#{createTime},#{updateTime},#{incisionHealing},
+			#{serialNum},#{incisionHealingId},#{rawCreateTime},#{mergeFlag},#{mergeFrom},#{mergeFromUuid},
+			#{mergeTarget},#{mergeTargetUuid},#{mergeTime},#{batchId},#{sourceFlag},
+			#{incisionGroup},#{incisionHealLevel},#{rawAnesthesiaWayId},#{anesthesiaWayId}
+		)
+	</insert>
+
+	<select id="getSyncSurgeryNote" resultType="com.esuizhen.server.sync.bean.server.SurgeryNoteRes" parameterType="com.esuizhen.server.sync.bean.TBatchDetailInfo">
+		SELECT
+			t1.surgeryId,t1.inhospitalId,t1.emrId,t1.mainID,t1.tempId,
+			IFNULL(t4.patientId,t41.patientId) patientId,
+			t1.patientNo,t1.oldPatientNo,t1.inhospitalTimes,
+			t1.oldInhospitalTimes,t1.inhospitalNo,t1.patientUuid,t1.hospitalId,t10.deptId,t1.bedNo,t1.opCode,t1.treatmentSchemeId,
+			t1.treatmentSchemeName,t1.opLevel,t1.surgeryName,
+			IFNULL(t5.doctorId,t51.doctorId) surgeryDoctor,
+			t1.surgeryDoctorUuid,t1.surgeryDoctorName,
+			IFNULL(t6.doctorId,t61.doctorId) surgeryAssistant1,
+			t1.surgeryAssistant1Uuid,t1.surgeryAssistant1Name,
+			IFNULL(t7.doctorId,t71.doctorId) surgeryAssistant2,
+			t1.surgeryAssistant2Uuid,t1.surgeryAssistant2Name,
+			t1.surgeryDate,t1.surgeryBeginTime,t1.surgeryEndTime,
+			IFNULL(t8.doctorId,t81.doctorId) anesthesiaDoctor,
+			t1.anesthesiaDoctorUuid,t1.anesthesiaDoctorName,t1.anesthesiaWay,
+			t1.preOperativeDiagnosis,t1.inOperativeDiagnosis,t1.bodyPosture,t1.transfusion,
+			IFNULL(t9.doctorId,t91.doctorId) surgeryNurses,
+			t1.surgeryNursesUuid,t1.operativeApproach,t1.operativeProbe,t1.operativeMeasures,t1.operativeSituation,t1.woundClosureWay,t1.incisionBandagedWay,
+			t1.operatorName,t1.remark,t1.createTime,t1.updateTime,t1.incisionHealing,t1.serialNum,t1.incisionHealingId,
+			t1.rawCreateTime,t1.mergeFlag,t1.mergeFromUuid,t1.mergeTargetUuid,t1.mergeTime,
+			if(t2.surgeryId IS NULL ,1,2) opFlag,
+			t1.deptUuid,
+			t1.sourceFlag,
+			t1.incisionGroup,
+    		t1.incisionHealLevel,
+    		t1.rawAnesthesiaWayId,
+    		t1.anesthesiaWayId
+		FROM
+		     server_sync_temp_db.eci_surgery_note t1
+		LEFT JOIN ehr_db.eci_surgery_note t2 ON t2.surgeryId=t1.surgeryId
+		LEFT JOIN user_db.u_patient t4 ON t4.uuid=t1.patientUuid
+		LEFT JOIN user_db.r_uuid_patient_relationship t41 ON t1.patientUuid=t41.uuid
+		LEFT JOIN user_db.u_doctor t5 ON t5.uuid=t1.surgeryDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t51 ON t1.surgeryDoctorUuid=t51.uuid
+		LEFT JOIN user_db.u_doctor t6 ON t6.uuid=t1.surgeryAssistant1Uuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t61 ON t1.surgeryAssistant1Uuid=t61.uuid
+		LEFT JOIN user_db.u_doctor t7 ON t7.uuid=t1.surgeryAssistant2Uuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t71 ON t1.surgeryAssistant2Uuid=t71.uuid
+		LEFT JOIN user_db.u_doctor t8 ON t8.uuid=t1.anesthesiaDoctorUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t81 ON t1.anesthesiaDoctorUuid=t81.uuid
+		LEFT JOIN user_db.u_doctor t9 ON t9.uuid=t1.surgeryNursesUuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t91 ON t1.surgeryNursesUuid=t91.uuid
+		LEFT JOIN user_db.u_department t10 ON t1.deptUuid=t10.uuid
+		WHERE t1.batchId=#{batchId}
+	</select>
+</mapper>

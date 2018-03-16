@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.westangel.timertask.dao.OpPushResultQueueDao">
+
+	<insert id="insertOpPushResultQueue" useGeneratedKeys="true" parameterType="com.westangel.timertask.model.OpPushResultQueue">
+		<selectKey resultType="long" keyProperty="id" order="AFTER" >
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+        INSERT INTO operation_db.op_push_result_queue (
+        	pushResultQueueId ,
+        	pushRuleId ,
+        	patientId ,
+        	allPushArticleIdJson ,
+        	pushAtricleIdJson ,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{pushResultQueueId} ,
+        	#{pushRuleId} ,
+        	#{patientId} ,
+        	#{allPushArticleIdJson} ,
+        	#{pushAtricleIdJson} ,
+        	NOW() ,
+        	NOW() 
+        )
+	</insert>
+    
+	<update id="updateOpPushResultQueue" parameterType="com.westangel.timertask.model.OpPushResultQueue">
+        UPDATE operation_db.op_push_result_queue 
+        <set>
+	        <if test="pushRuleId != null">
+                pushRuleId = #{pushRuleId} ,
+            </if>
+	        <if test="patientId != null">
+                patientId = #{patientId} ,
+            </if>
+	        <if test="allPushArticleIdJson != null">
+                allPushArticleIdJson = #{allPushArticleIdJson} ,
+            </if>
+	        <if test="pushAtricleIdJson != null">
+                pushAtricleIdJson = #{pushAtricleIdJson} ,
+            </if>
+	        <if test="updateTime != null">
+                updateTime = NOW() ,
+            </if>
+        </set>
+        WHERE 
+	        pushResultQueueId = #{pushResultQueueId} 
+	</update>
+
+    <delete id="deleteOpPushResultQueue">
+        DELETE FROM operation_db.op_push_result_queue WHERE pushResultQueueId = #{pushResultQueueId} 
+    </delete>
+    
+    <select id="queryOpPushResultQueueById" resultType="com.westangel.timertask.model.OpPushResultQueue">
+		SELECT 
+        	pushResultQueueId,
+        	pushRuleId,
+        	patientId,
+        	allPushArticleIdJson,
+        	pushAtricleIdJson,
+        	createTime,
+        	updateTime
+		FROM operation_db.op_push_result_queue 
+	    WHERE 
+	        pushResultQueueId = #{pushResultQueueId} 
+	</select>
+	
+	<select id="queryOpPushResultQueueByPatientId" resultType="com.westangel.timertask.model.OpPushResultQueue">
+		SELECT 
+        	pushResultQueueId,
+        	pushRuleId,
+        	patientId,
+        	allPushArticleIdJson,
+        	pushAtricleIdJson,
+        	createTime,
+        	updateTime
+		FROM operation_db.op_push_result_queue 
+	    WHERE 
+	        pushRuleId = #{pushRuleId} 
+	    AND patientId = #{patientId}
+	</select>
+	
+</mapper>
+

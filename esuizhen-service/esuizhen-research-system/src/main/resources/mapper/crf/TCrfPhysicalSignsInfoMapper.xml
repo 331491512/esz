@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.crf.TCrfPhysicalSignsDao">
+
+	<insert id="insertCrfObservationPhysicalSignsOptions" parameterType="com.esuizhen.cloudservice.research.model.crf.TCrfPhysicalSignsInfo">
+        INSERT INTO crf_observation_physical_signs_options 
+        (
+        	crfObserveItemId ,
+        	crfObserveId ,
+        	subjectElementId ,
+        	physicalSignsId ,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{crfObserveItemId} ,
+        	#{crfObserveId} ,
+        	#{subjectElementId} ,
+        	#{physicalSignsId} ,
+        	NOW() ,
+        	NOW() 
+        )
+	</insert>
+    
+    <insert id="insertCrfObservationPhysicalSignsOptionsList" parameterType="java.util.List">
+        INSERT INTO crf_observation_physical_signs_options 
+        (
+        	crfObserveItemId ,
+        	crfObserveId ,
+        	subjectElementId ,
+        	physicalSignsId ,
+        	createTime ,
+        	updateTime 
+        ) VALUES 
+        <foreach collection="list" index="index" item="item" separator=",">
+        (
+        	#{item.crfObserveItemId} ,
+        	#{item.crfObserveId} ,
+        	#{item.subjectElementId} ,
+        	#{item.physicalSignsId} ,
+        	NOW() ,
+        	NOW() 
+        )
+        </foreach>
+	</insert>
+	
+	<update id="updateCrfObservationPhysicalSignsOptions" parameterType="com.esuizhen.cloudservice.research.model.crf.TCrfPhysicalSignsInfo">
+        UPDATE crf_observation_physical_signs_options 
+        <set>
+	        <if test="subjectElementId != null">
+                subjectElementId = #{subjectElementId} ,
+            </if>
+	        <if test="physicalSignsId != null">
+                physicalSignsId = #{physicalSignsId} ,
+            </if>
+	        <if test="1==1">
+                updateTime = NOW() ,
+            </if>
+        </set>
+        WHERE 
+	        crfObserveItemId = #{crfObserveItemId} 
+	</update>
+
+    <delete id="deleteCrfObservationPhysicalSignsOptions">
+        DELETE FROM crf_observation_physical_signs_options WHERE crfObserveItemId = #{crfObserveItemId} 
+    </delete>
+    
+    <delete id="deleteCrfObservationPhysicalSignsOptionsByCrfObserveId">
+        DELETE FROM crf_observation_physical_signs_options WHERE crfObserveId = #{crfObserveId} 
+    </delete>
+    
+    <select id="queryCrfObservationPhysicalSignsOptionsById" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfPhysicalSignsInfo">
+		SELECT 
+        	crfObserveItemId,
+        	crfObserveId,
+        	subjectElementId,
+        	physicalSignsId,
+        	createTime,
+        	updateTime
+		FROM crf_observation_physical_signs_options 
+	    WHERE 
+	        crfObserveItemId = #{crfObserveItemId} 
+	</select>
+	
+	<select id="queryCrfObservationPhysicalSignsOptionsByCrfObserveId" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfPhysicalSignsInfo">
+		SELECT 
+        	t1.crfObserveItemId,
+        	t1.crfObserveId,
+        	t1.subjectElementId,
+        	t1.physicalSignsId,
+        	t2.physicalSignsName , 
+        	t2.creator ,
+        	t1.createTime,
+        	t1.updateTime
+		FROM crf_observation_physical_signs_options t1 , ehr_db.meta_e_physical_signs t2
+	    WHERE 
+	        t1.physicalSignsId=t2.physicalSignsId
+	    AND t1.crfObserveId = #{crfObserveId} 
+	</select>
+	
+</mapper>
+

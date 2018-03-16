@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.server.TFollowupResultDao" >
+
+  <insert id="insertSelective" parameterType="com.esuizhen.server.sync.bean.server.FollowupResultRes" >
+    insert into followup_db.followup_result
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="followupResultId != null" >
+        followupResultId,
+      </if>
+      <if test="followupTaskId != null" >
+        followupTaskId,
+      </if>
+      <if test="followupAssignId != null" >
+        followupAssignId,
+      </if>
+      <if test="patientId != null" >
+        patientId,
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId,
+      </if>
+      <if test="operator != null" >
+        operator,
+      </if>
+      <if test="followupResultValue != null" >
+        followupResultValue,
+      </if>
+      <if test="relapseParts != null" >
+        relapseParts,
+      </if>
+      <if test="relapseDate != null" >
+        relapseDate,
+      </if>
+      <if test="transferParts != null" >
+        transferParts,
+      </if>
+      <if test="transferDate != null" >
+        transferDate,
+      </if>
+      <if test="deathDate != null" >
+        deathDate,
+      </if>
+      <if test="isInHospitalDeath != null" >
+        isInHospitalDeath,
+      </if>
+      <if test="isTumourDeath != null" >
+        isTumourDeath,
+      </if>
+      <if test="deathCause != null" >
+        deathCause,
+      </if>
+      <if test="otherCause != null" >
+        otherCause,
+      </if>
+      <if test="followupWay != null" >
+        followupWay,
+      </if>
+      <if test="contentTemplateId != null" >
+        contentTemplateId,
+      </if>
+      <if test="followupResultPhone != null" >
+        followupResultPhone,
+      </if>
+      <if test="followupTime != null" >
+        followupTime,
+      </if>
+      <if test="phoneRecordUrl != null" >
+        phoneRecordUrl,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="syncFlag != null" >
+        syncFlag,
+      </if>
+      <if test="sourceFlag != null" >
+        sourceFlag,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+      <if test="updateTime != null" >
+        updateTime,
+      </if>
+      <if test="state != null" >
+        state,
+      </if>
+      <if test="lostFollowupFlag != null" >
+        lostFollowupFlag,
+      </if>
+      <if test="lostFollowupCauseResultValue != null" >
+        lostFollowupCauseResultValue,
+      </if>
+      <if test="oldLostFollowupFlag != null" >
+        oldLostFollowupFlag,
+      </if>
+      <if test="oldLostFollowupCauseResultValue != null" >
+        oldLostFollowupCauseResultValue,
+      </if>
+      <if test="mergeFlag != null" >
+        mergeFlag,
+      </if>
+      <if test="mergeFrom != null" >
+        mergeFrom,
+      </if>
+      <if test="mergeTarget != null" >
+        mergeTarget,
+      </if>
+      <if test="mergeTime != null" >
+        mergeTime,
+      </if>
+      <if test="updateOperator != null" >
+        updateOperator,
+      </if>
+      <if test="updateOperatorName != null" >
+        updateOperatorName,
+      </if>
+      <if test="mergeFromUuid != null" >
+        mergeFromUuid,
+      </if>
+      <if test="mergeTargetUuid != null" >
+        mergeTargetUuid,
+      </if>
+      <if test="tempId != null" >
+        tempId,
+      </if>
+      <if test="patientUuid != null" >
+        patientUuid,
+      </if>
+      <if test="operatorUuid != null" >
+        operatorUuid,
+      </if>
+      <if test="updateOperatorUuid != null" >
+        updateOperatorUuid,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="followupResultId != null" >
+        #{followupResultId,jdbcType=VARCHAR},
+      </if>
+      <if test="followupTaskId != null" >
+        #{followupTaskId,jdbcType=VARCHAR},
+      </if>
+      <if test="followupAssignId != null" >
+        #{followupAssignId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="operator != null" >
+        #{operator,jdbcType=BIGINT},
+      </if>
+      <if test="followupResultValue != null" >
+        #{followupResultValue,jdbcType=INTEGER},
+      </if>
+      <if test="relapseParts != null" >
+        #{relapseParts,jdbcType=VARCHAR},
+      </if>
+      <if test="relapseDate != null" >
+        #{relapseDate,jdbcType=DATE},
+      </if>
+      <if test="transferParts != null" >
+        #{transferParts,jdbcType=VARCHAR},
+      </if>
+      <if test="transferDate != null" >
+        #{transferDate,jdbcType=DATE},
+      </if>
+      <if test="deathDate != null" >
+        #{deathDate,jdbcType=DATE},
+      </if>
+      <if test="isInHospitalDeath != null" >
+        #{isInHospitalDeath,jdbcType=INTEGER},
+      </if>
+      <if test="isTumourDeath != null" >
+        #{isTumourDeath,jdbcType=INTEGER},
+      </if>
+      <if test="deathCause != null" >
+        #{deathCause,jdbcType=VARCHAR},
+      </if>
+      <if test="otherCause != null" >
+        #{otherCause,jdbcType=VARCHAR},
+      </if>
+      <if test="followupWay != null" >
+        #{followupWay,jdbcType=INTEGER},
+      </if>
+      <if test="contentTemplateId != null" >
+        #{contentTemplateId,jdbcType=INTEGER},
+      </if>
+      <if test="followupResultPhone != null" >
+        #{followupResultPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="followupTime != null" >
+        #{followupTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="phoneRecordUrl != null" >
+        #{phoneRecordUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="syncFlag != null" >
+        #{syncFlag,jdbcType=INTEGER},
+      </if>
+      <if test="sourceFlag != null" >
+        #{sourceFlag,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="state != null" >
+        #{state},
+      </if>
+      <if test="lostFollowupFlag != null" >
+        #{lostFollowupFlag},
+      </if>
+      <if test="lostFollowupCauseResultValue != null" >
+        #{lostFollowupCauseResultValue},
+      </if>
+      <if test="oldLostFollowupFlag != null" >
+        #{oldLostFollowupFlag},
+      </if>
+      <if test="oldLostFollowupCauseResultValue != null" >
+        #{oldLostFollowupCauseResultValue},
+      </if>
+      <if test="mergeFlag != null" >
+        #{mergeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mergeFrom != null" >
+        #{mergeFrom,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTarget != null" >
+        #{mergeTarget,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTime != null" >
+        #{mergeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateOperator != null" >
+        #{updateOperator,jdbcType=BIGINT},
+      </if>
+      <if test="updateOperatorName != null" >
+        #{updateOperatorName,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeFromUuid != null" >
+        #{mergeFromUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeTargetUuid != null" >
+        #{mergeTargetUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="tempId != null" >
+        #{tempId,jdbcType=INTEGER},
+      </if>
+      <if test="patientUuid != null" >
+        #{patientUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="operatorUuid != null" >
+        #{operatorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="updateOperatorUuid != null" >
+        #{updateOperatorUuid,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.server.sync.bean.server.FollowupResultRes" >
+    update followup_db.followup_result
+    <set>
+      <if test="followupTaskId != null" >
+        followupTaskId = #{followupTaskId,jdbcType=VARCHAR},
+      </if>
+      <if test="followupAssignId != null" >
+        followupAssignId = #{followupAssignId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        patientId = #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="operator != null" >
+        operator = #{operator,jdbcType=BIGINT},
+      </if>
+      <if test="followupResultValue != null" >
+        followupResultValue = #{followupResultValue,jdbcType=INTEGER},
+      </if>
+      <if test="relapseParts != null" >
+        relapseParts = #{relapseParts,jdbcType=VARCHAR},
+      </if>
+      <if test="relapseDate != null" >
+        relapseDate = #{relapseDate,jdbcType=DATE},
+      </if>
+      <if test="transferParts != null" >
+        transferParts = #{transferParts,jdbcType=VARCHAR},
+      </if>
+      <if test="transferDate != null" >
+        transferDate = #{transferDate,jdbcType=DATE},
+      </if>
+      <if test="deathDate != null" >
+        deathDate = #{deathDate,jdbcType=DATE},
+      </if>
+      <if test="isInHospitalDeath != null" >
+        isInHospitalDeath = #{isInHospitalDeath,jdbcType=INTEGER},
+      </if>
+      <if test="isTumourDeath != null" >
+        isTumourDeath = #{isTumourDeath,jdbcType=INTEGER},
+      </if>
+      <if test="deathCause != null" >
+        deathCause = #{deathCause,jdbcType=VARCHAR},
+      </if>
+      <if test="otherCause != null" >
+        otherCause = #{otherCause,jdbcType=VARCHAR},
+      </if>
+      <if test="followupWay != null" >
+        followupWay = #{followupWay,jdbcType=INTEGER},
+      </if>
+      <if test="contentTemplateId != null" >
+        contentTemplateId = #{contentTemplateId,jdbcType=INTEGER},
+      </if>
+      <if test="followupResultPhone != null" >
+        followupResultPhone = #{followupResultPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="followupTime != null" >
+        followupTime = #{followupTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="phoneRecordUrl != null" >
+        phoneRecordUrl = #{phoneRecordUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="syncFlag != null" >
+        syncFlag = #{syncFlag,jdbcType=INTEGER},
+      </if>
+      <if test="sourceFlag != null" >
+        sourceFlag = #{sourceFlag,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="state != null" >
+       	state=  #{state},
+      </if>
+      <if test="lostFollowupFlag != null" >
+        lostFollowupFlag = #{lostFollowupFlag},
+      </if>
+      <if test="lostFollowupCauseResultValue != null" >
+        lostFollowupCauseResultValue = #{lostFollowupCauseResultValue},
+      </if>
+      <if test="oldLostFollowupFlag != null" >
+        oldLostFollowupFlag = #{oldLostFollowupFlag},
+      </if>
+      <if test="oldLostFollowupCauseResultValue != null" >
+        oldLostFollowupCauseResultValue = #{oldLostFollowupCauseResultValue},
+      </if>
+      <if test="mergeFlag != null" >
+        mergeFlag = #{mergeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mergeFrom != null" >
+        mergeFrom = #{mergeFrom,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTarget != null" >
+        mergeTarget = #{mergeTarget,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTime != null" >
+        mergeTime = #{mergeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateOperator != null" >
+        updateOperator = #{updateOperator,jdbcType=BIGINT},
+      </if>
+      <if test="updateOperatorUuid != null" >
+        updateOperatorUuid = #{updateOperatorUuid,jdbcType=BIGINT},
+      </if>
+      <if test="updateOperatorName != null" >
+        updateOperatorName = #{updateOperatorName,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeFromUuid != null" >
+        mergeFromUuid = #{mergeFromUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeTargetUuid != null" >
+        mergeTargetUuid = #{mergeTargetUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="tempId != null" >
+        tempId = #{tempId,jdbcType=INTEGER},
+      </if>
+      <if test="patientUuid != null" >
+        patientUuid = #{patientUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="operatorUuid != null" >
+        operatorUuid = #{operatorUuid,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where followupResultId = #{followupResultId,jdbcType=VARCHAR}
+  </update>
+
+</mapper>

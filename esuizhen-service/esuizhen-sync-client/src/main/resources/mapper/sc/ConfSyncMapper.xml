@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.client.sync.dao.sc.ConfSyncDao" >	
+	<!-- 获取全局控制信息 -->           
+	<select id="getConfSyncInfo" resultType="com.esuizhen.client.sync.model.ConfSyncInfo">
+       	select hospitalId,serverApiUrl,ctlFlag,ctlPushFlag,ctlGetFlag FROM sc_db.conf_sync limit 1;
+  	</select>
+  	<!-- 获取需要同步的库表 -->
+  	<select id="getConfTableInfoList" resultType="com.esuizhen.client.sync.model.ConfTableInfo">
+  		SELECT t2.tableId,t2.tableCode,t2.syncSize FROM sc_db.conf_sync_db t1
+		JOIN sc_db.conf_sync_table t2 ON t1.dbId=t2.dbId 
+		WHERE t1.ctlFlag=1 AND t2.ctlFlag=1
+		ORDER BY t1.sortIndex asc,t2.sortIndex ASC
+  	</select>  	
+</mapper>

@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_match_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.match.MatchPatientDao" >
+	<sql id="base_column_list" >
+    	t1.patientId,
+		t1.uuid,
+		t1.patientNo,
+		t1.userId,
+		t1.medicareCardNo,
+		t1.trueName,
+		t1.nickName,
+		t1.mobile,
+		t1.familyName,
+		t1.familyPhone,
+		t1.sex,
+		t1.birthDate,
+		t1.userPictureUrl,
+		t1.patientRelation,
+		t1.liveStatus,
+		t1.deathDate,
+		t1.causeOfDeath,
+		t1.isInHospitalDeath,
+		t1.isTumourDeath,
+		t1.bloodType,
+		t1.bloodTypeRH,
+		t1.bodyHeight,
+		t1.bodyWeight,
+		t1.disabilityStatus,
+		t1.geneticDiseaseHistory,
+		t1.drugAllergyHistory,
+		t1.medicalPayType,
+		t1.medicalCareAreaId,
+		t1.medicalCarePlace,
+		t1.sourceDiagnosis,
+		t1.sourceDiagnosis2,
+		t1.sourceDiseaseCode,
+		t1.sourceDiseaseCode2,
+		t1.sourceDiseaseTypeId,
+		t1.sourceDiseaseTypeId2,
+		t1.sourceDiseaseTypeName,
+		t1.sourceDiseaseTypeName2,
+		t1.icdDiseaseTypeId,
+		t1.icdDiseaseTypeId2,
+		t1.sourceTumorFlag,
+		t1.sourceTumorFlag2,
+		t1.diagnosisType,
+		t1.diagnosisType2,
+		t1.diagnosisId,
+		t1.diagnosisId2,
+		t1.inhospitalId,
+		t1.inhospitalId2,
+		t1.confirmedDate,
+		t1.confirmedDate2,
+		t1.confirmedAge,
+		t1.confirmedAge2,
+		t1.sourcePathologyDiagnosis,
+		t1.sourcePathologyDiagnosis2,
+		t1.sourcePathologyDiseaseCode,
+		t1.sourcePathologyDiseaseCode2,
+		t1.attendingDoctor,
+		t1.attendingDoctorUuid,
+		t1.inchargeDoctor,
+		t1.inchargeDoctorUuid,
+		t1.secondaryDiagnosis,
+		t1.secondaryDiseaseCode,
+		t1.secondaryPathologyDiagnosis,
+		t1.secondaryPathologyDiseaseCode,
+		t1.outPatientFlag,
+		t1.followupFlag,
+		t1.lostFollowupCauseResultValue,
+		t1.lostFollowupCause,
+		t1.lostFollowupTime,
+		t1.patientType,
+		t1.infoState,
+		t1.clinicNo,
+		t1.rawCreateTime,
+		t1.createTime,
+		t1.updateTime,
+		t1.patientCode,
+		t1.inpatientNo,
+		t1.preTrueName,
+		t1.auditState,
+		t1.auditRemark,
+		t1.hasVisibleMedicalRecord,
+		t1.underlyCausesOfDeath,
+		t1.sourceDiagnosis3,
+		t1.sourceDiseaseCode3,
+		t1.sourceDiseaseTypeId3,
+		t1.sourceDiseaseTypeName3,
+		t1.confirmedDate3,
+		t1.famZipCode,
+		t1.lastAttendingDate,
+		t1.cancelLostFollowupFlag,
+		t1.cancelLostFollowupTime,
+		t1.stafferType,
+		t1.deathPatientIntoTask,
+		t1.lostPatientIntoTask,
+		t1.otherHospital,
+		t1.syncTime
+	</sql>
+	
+	<select id="findByUserId" resultType="com.westangel.common.bean.Patient" parameterType="java.lang.Long" >
+    	SELECT
+    		<include refid="base_column_list" />
+    	FROM cloud_sync_match_db.u_patient t1 where t1.userId=#{userId,jdbcType=BIGINT}
+  	</select>
+  	
+	<select id="findByUuid" resultType="com.westangel.common.bean.Patient" >
+    	SELECT
+    		<include refid="base_column_list" />
+    	FROM cloud_sync_match_db.u_patient t1
+    	where t1.uuid = #{uuid}
+  	</select>
+  	
+  	<select id="selectNopushPatients" resultType="com.westangel.common.bean.user.TTobeconfirmedPatient">
+  		SELECT
+			mr.targetUserId userId,mr.targetPatientId patientId,mr.matchType, 
+			mr.matchUuid uuid, IFNULL(m4.mobile,m1.mobile) mobile,
+			IFNULL(m1.identification,t1.identification) identification,
+			IFNULL(m1.trueName,t1.trueName) trueName,
+			IFNULL(m1.sex,t1.sex) sex,
+			IFNULL(m1.birthDate,t1.birthDate),
+			IFNULL(m3.hospitalName,t3.hospitalName) hospitalName,
+			IFNULL(m2.patientNo,t2.patientNo) patientNo,
+			m2.inhospitalDate,t6.diseaseTypeName
+			,(SELECT MAX(productId) FROM user_db.u_thirdparty t WHERE t.userId = t1.userId AND t.state=1 ) productId
+		FROM user_db.r_match_patient mr
+			JOIN user_db.u_user m1 ON m1.userId = mr.matchUserId
+			LEFT JOIN user_db.r_hospital_patient m2 ON m2.patientId = mr.matchPatientId
+			LEFT JOIN user_db.u_hospital m3 ON m2.hospitalId = m3.hospitalId
+			LEFT JOIN user_db.u_patient m4 ON m2.patientId = m4.patientId
+			JOIN user_db.u_user t1 ON mr.targetUserId = t1.userId
+			LEFT JOIN user_db.r_hospital_patient t2 ON t2.patientId = mr.targetPatientId
+			LEFT JOIN user_db.u_hospital t3 ON t2.hospitalId = t3.hospitalId
+			JOIN user_db.u_thirdparty t4  ON t4.userId = t1.userId
+			JOIN user_db.u_patient t5 ON t5.userId = t1.userId 
+			LEFT JOIN ehr_db.meta_c_disease_type t6 ON t5.sourceDiseaseTypeId=t6.diseaseTypeId
+		WHERE mr.pushFlag!=1
+		GROUP BY userId
+  	</select>
+  	
+  	<select id="findNotCombinedDiagnosis" resultType="com.westangel.common.bean.Patient">
+  		SELECT
+			t1.emrId,
+			t1.diagnosisId,
+			t2.uuid,
+			t3.userId,
+			t3.patientId
+		FROM cloud_sync_match_db.e_diagnosis_info t1
+			INNER JOIN user_db.u_user t2 ON t1.patientUuid = t2.uuid
+			INNER JOIN user_db.u_patient t3 ON t2.userId = t3.userId
+		WHERE t2.uuid IS NOT NULL AND t2.role = 1
+		GROUP BY t2.userId
+		
+		UNION ALL
+		
+		SELECT
+			t1.emrId,
+			t1.diagnosisId,
+			t3.uuid,
+			t4.userId,
+			t4.patientId
+		FROM
+			cloud_sync_match_db.e_diagnosis_info t1
+		INNER JOIN user_db.r_uuid_relationship t2 ON t1.patientUuid = t2.uuid
+		INNER JOIN user_db.u_user t3 ON t2.uuidFinal = t3.uuid
+		INNER JOIN user_db.u_patient t4 ON t3.userId = t4.userId
+		WHERE t3.uuid IS NOT NULL AND t3.role = 1
+		GROUP BY t3.uuid
+  	</select>
+  	
+  	<select id="findNotCombinedSurgery" resultType="com.westangel.common.bean.Patient">
+  		SELECT
+			t1.emrId,
+			t1.surgeryId,
+			t2.uuid,
+			t3.userId,
+			t3.patientId
+		FROM
+			cloud_sync_match_db.eci_surgery_note t1
+		INNER JOIN user_db.u_user t2 ON t1.patientUuid = t2.uuid
+		INNER JOIN user_db.u_patient t3 ON t2.userId = t3.userId
+		WHERE t2.uuid IS NOT NULL AND t2.role = 1
+		GROUP BY t2.userId
+		
+		UNION ALL
+		
+		SELECT
+			t1.emrId,
+			t1.surgeryId,
+			t3.uuid,
+			t4.userId,
+			t4.patientId
+		FROM
+			cloud_sync_match_db.eci_surgery_note t1
+		INNER JOIN user_db.r_uuid_relationship t2 ON t1.patientUuid = t2.uuid
+		INNER JOIN user_db.u_user t3 ON t2.uuidFinal = t3.uuid
+		INNER JOIN user_db.u_patient t4 ON t3.userId = t4.userId
+		WHERE t3.uuid IS NOT NULL AND t3.role = 1
+		GROUP BY t3.userId
+  	</select>
+  	
+  	<select id="findNotCombinedInhospital" resultType="com.westangel.common.bean.Patient">
+  		SELECT
+			t1.emrId,
+			t1.inhospitalId,
+			t2.uuid,
+			t3.userId,
+			t3.patientId
+		FROM
+			cloud_sync_match_db.ei_inhospital_note t1
+		INNER JOIN user_db.u_user t2 ON t1.patientUuid = t2.uuid
+		INNER JOIN user_db.u_patient t3 ON t2.userId = t3.userId
+		WHERE t2.uuid IS NOT NULL AND t2.role = 1
+		GROUP BY t2.userId
+		
+		UNION ALL
+		
+		SELECT
+			t1.emrId,
+			t1.inhospitalId,
+			t3.uuid,
+			t4.userId,
+			t4.patientId
+		FROM
+			cloud_sync_match_db.ei_inhospital_note t1
+		INNER JOIN user_db.r_uuid_relationship t2 ON t1.patientUuid = t2.uuid
+		INNER JOIN user_db.u_user t3 ON t2.uuidFinal = t3.uuid
+		INNER JOIN user_db.u_patient t4 ON t3.userId = t4.userId
+		WHERE t3.uuid IS NOT NULL AND t3.role = 1
+		GROUP BY t3.userId
+  	</select>
+  	
+  	<select id="findNotCombinedFollowupResult" resultType="com.westangel.common.bean.Patient">
+  		SELECT
+			t1.followupResultBuffId,
+			t3.uuid,
+			t4.userId,
+			t4.patientId
+		FROM
+			cloud_sync_match_db.followup_result_buff t1
+		INNER JOIN user_db.r_uuid_relationship t2 ON t1.patientUuid = t2.uuid
+		INNER JOIN user_db.u_user t3 ON t2.uuidFinal = t3.uuid
+		INNER JOIN user_db.u_patient t4 ON t3.userId = t4.userId
+		WHERE
+			t3.uuid IS NOT NULL
+		AND t3.role = 1
+  	</select>
+	
+	 <insert id="insert" parameterType="com.westangel.common.bean.Patient" >
+	   	<selectKey resultType="long" keyProperty="patientId" order="AFTER" >
+			SELECT LAST_INSERT_ID() as patientId
+		</selectKey>
+		insert into cloud_sync_match_db.u_patient(
+			uuid,
+			patientNo,
+			userId,
+			medicareCardNo,
+			trueName,
+			nickName,
+			mobile,
+			familyName,
+			familyPhone,
+			sex,
+			birthDate,
+			userPictureUrl,
+			patientRelation,
+			liveStatus,
+			deathDate,
+			causeOfDeath,
+			isInHospitalDeath,
+			isTumourDeath,
+			bloodType,
+			bloodTypeRH,
+			bodyHeight,
+			bodyWeight,
+			disabilityStatus,
+			geneticDiseaseHistory,
+			drugAllergyHistory,
+			medicalPayType,
+			medicalCareAreaId,
+			medicalCarePlace,
+			sourceDiagnosis,
+			sourceDiagnosis2,
+			sourceDiseaseCode,
+			sourceDiseaseCode2,
+			sourceDiseaseTypeId,
+			sourceDiseaseTypeId2,
+			sourceDiseaseTypeName,
+			sourceDiseaseTypeName2,
+			icdDiseaseTypeId,
+			icdDiseaseTypeId2,
+			sourceTumorFlag,
+			sourceTumorFlag2,
+			diagnosisType,
+			diagnosisType2,
+			diagnosisId,
+			diagnosisId2,
+			inhospitalId,
+			inhospitalId2,
+			confirmedDate,
+			confirmedDate2,
+			confirmedAge,
+			confirmedAge2,
+			sourcePathologyDiagnosis,
+			sourcePathologyDiagnosis2,
+			sourcePathologyDiseaseCode,
+			sourcePathologyDiseaseCode2,
+			attendingDoctor,
+			attendingDoctorUuid,
+			inchargeDoctor,
+			inchargeDoctorUuid,
+			secondaryDiagnosis,
+			secondaryDiseaseCode,
+			secondaryPathologyDiagnosis,
+			secondaryPathologyDiseaseCode,
+			outPatientFlag,
+			followupFlag,
+			lostFollowupCause,
+			lostFollowupCauseResultValue,
+			lostFollowupTime,
+			clinicNo,
+			patientType,
+			infoState,
+			syncFlag,
+			rawCreateTime,
+			createTime,
+			updateTime,
+			patientCode,
+			inpatientNo,
+			preTrueName,
+			auditState,
+			auditRemark,
+			hasVisibleMedicalRecord,
+			underlyCausesOfDeath,
+			sourceDiagnosis3,
+			sourceDiseaseCode3,
+			sourceDiseaseTypeId3,
+			sourceDiseaseTypeName3,
+			confirmedDate3,
+			famZipCode,
+			lastAttendingDate,
+			cancelLostFollowupFlag,
+			cancelLostFollowupTime,
+			stafferType,
+			deathPatientIntoTask,
+			lostPatientIntoTask,
+			otherHospital,
+			syncTime
+		)values(
+			#{uuid},
+			#{patientNo},
+			#{userId},
+			#{medicareCardNo},
+			#{trueName},
+			#{nickName},
+			#{mobile},
+			#{familyName},
+			#{familyPhone},
+			#{sex},
+			#{birthDate},
+			#{userPictureUrl},
+			#{patientRelation},
+			#{liveStatus},
+			#{deathDate},
+			#{causeOfDeath},
+			#{isInHospitalDeath},
+			#{isTumourDeath},
+			#{bloodType},
+			#{bloodTypeRH},
+			#{bodyHeight},
+			#{bodyWeight},
+			#{disabilityStatus},
+			#{geneticDiseaseHistory},
+			#{drugAllergyHistory},
+			#{medicalPayType},
+			#{medicalCareAreaId},
+			#{medicalCarePlace},
+			#{sourceDiagnosis},
+			#{sourceDiagnosis2},
+			#{sourceDiseaseCode},
+			#{sourceDiseaseCode2},
+			#{sourceDiseaseTypeId},
+			#{sourceDiseaseTypeId2},
+			#{sourceDiseaseTypeName},
+			#{sourceDiseaseTypeName2},
+			#{icdDiseaseTypeId},
+			#{icdDiseaseTypeId2},
+			#{sourceTumorFlag},
+			#{sourceTumorFlag2},
+			#{diagnosisType},
+			#{diagnosisType2},
+			#{diagnosisId},
+			#{diagnosisId2},
+			#{inhospitalId},
+			#{inhospitalId2},
+			#{confirmedDate},
+			#{confirmedDate2},
+			#{confirmedAge},
+			#{confirmedAge2},
+			#{sourcePathologyDiagnosis},
+			#{sourcePathologyDiagnosis2},
+			#{sourcePathologyDiseaseCode},
+			#{sourcePathologyDiseaseCode2},
+			#{attendingDoctor},
+			#{attendingDoctorUuid},
+			#{inchargeDoctor},
+			#{inchargeDoctorUuid},
+			#{secondaryDiagnosis},
+			#{secondaryDiseaseCode},
+			#{secondaryPathologyDiagnosis},
+			#{secondaryPathologyDiseaseCode},
+			#{outPatientFlag},
+			#{followupFlag},
+			#{lostFollowupCause},
+			#{lostFollowupCauseResultValue},
+			#{lostFollowupTime},
+			#{clinicNo},
+			#{patientType},
+			#{infoState},
+			#{syncFlag},
+			#{rawCreateTime},
+			#{createTime},
+			#{updateTime},
+			#{patientCode},
+			#{inpatientNo},
+			#{preTrueName},
+			#{auditState},
+			#{auditRemark},
+			#{hasVisibleMedicalRecord},
+			#{underlyCausesOfDeath},
+			#{sourceDiagnosis3},
+			#{sourceDiseaseCode3},
+			#{sourceDiseaseTypeId3},
+			#{sourceDiseaseTypeName3},
+			#{confirmedDate3},
+			#{famZipCode},
+			#{lastAttendingDate},
+			#{cancelLostFollowupFlag},
+			#{cancelLostFollowupTime},
+			#{stafferType},
+			#{deathPatientIntoTask},
+			#{lostPatientIntoTask},
+			#{otherHospital},
+			NOW()
+		)
+	</insert>
+	 
+	<delete id="delete">
+	 	DELETE FROM cloud_sync_match_db.u_patient WHERE patientId=#{patientId,jdbcType=BIGINT}
+	</delete>
+	
+	<update id="setNotifyPatientAgain">
+	 	<![CDATA[
+	 	UPDATE user_db.r_match_patient 
+	 	SET pushFlag=0 
+	 	WHERE 
+		(DATE_SUB(CURDATE(),INTERVAL 7 DAY)>=pushTime OR pushTime IS NULL)
+		AND pushFlag=1 AND affirm =0 AND pushTimes<4
+		]]>
+	 </update>
+	 
+	 <select id="findAffirmByMatchUuid" resultType="java.lang.Integer">
+	 	select affirm from user_db.r_match_patient WHERE matchUuid= #{matchUuid} order by id desc limit 1	
+	 </select>
+	 
+	 <update id="updatePushFlag">
+	 	UPDATE user_db.r_match_patient
+	 	<set>
+	 		pushFlag=#{pushFlag},
+	 		pushTimes=pushTimes+1,
+	 		pushTime=NOW(),
+	 		updateTime=NOW()
+	 	</set>
+	 	WHERE matchUuid IN
+	 	(
+			<foreach collection="matchUuids" item="uuid" index="index" separator=",">
+				#{uuid}
+			</foreach>
+		)
+	 </update>
+	 
+	 <update id="setAffirm">
+	 	UPDATE user_db.r_match_patient
+	 	<set>
+	 		affirm=#{affirm}
+	 	</set>
+	 	WHERE targetUserId=#{targetUserId} AND matchUuid=#{matchUuid}
+	 </update>
+</mapper>

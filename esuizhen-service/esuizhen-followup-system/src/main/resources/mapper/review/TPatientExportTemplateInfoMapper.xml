@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.review.TPatientExportTemplateInfoDao" >
+  <resultMap id="BaseResultMap" type="com.esuizhen.cloudservice.followup.model.review.TPatientExportTemplateInfo" >
+    <result column="exportTemplateId" property="exportTemplateId" jdbcType="VARCHAR" />
+    <result column="templateType" property="templateType" jdbcType="INTEGER" />
+    <result column="operator" property="operator" jdbcType="BIGINT" />
+    <result column="heads" property="heads" jdbcType="VARCHAR" />
+    <result column="fields" property="fields" jdbcType="VARCHAR" />
+    <result column="exportSort" property="exportSort" jdbcType="VARCHAR" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="sqlContent" property="sqlContent" jdbcType="VARCHAR" />
+    <result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  
+  <sql id="Base_Column_List">
+  	exportTemplateId,templateType,operator,heads,fields,exportSort,title,sqlContent,createTime,updateTime
+  </sql>
+  
+  <select id="getPatientExportTemplateById" resultMap="BaseResultMap" parameterType="java.lang.String">
+  	SELECT <include refid="Base_Column_List"></include> FROM user_db.u_patient_export_template WHERE exportTemplateId=#{exportTemplateId}
+  </select>
+</mapper>

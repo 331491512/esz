@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followupRecords.FollowupConventionRecordsDao">
+	<select id="getFCQIdBypatientId" parameterType="java.lang.Integer" resultType="java.lang.Long">
+		SELECT q.followupConvQuestionId FROM followup_db.followup_conv_question q 
+		WHERE q.patientId=#{patientId}
+	</select>
+	
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupConvQuestionReq">
+		<selectKey resultType="java.lang.Long" keyProperty="followupConvQuestionId" order="AFTER">
+			SELECT
+			LAST_INSERT_ID() as followupConvQuestionId
+		</selectKey>
+		INSERT INTO followup_db.followup_conv_question (
+			<!-- followupConvQuestionId, -->
+			patientId,
+			lastFollowupResultId,
+			lastOperator,
+			createTime,
+			updateTime
+		)VALUES(
+			<!-- followupConvQuestionId, -->
+			#{patientId},
+			(SELECT followupResultId from followup_db.followup_result WHERE patientId=#{patientId} ORDER BY followupTime DESC LIMIT 1),
+			#{operatorId},
+			NOW(),
+			NOW()
+		)
+	</insert>
+	
+	<delete id="deleteByPatientId" parameterType="java.lang.Integer">
+		DELETE FROM followup_db.followup_conv_question WHERE patientId=#{patientId};
+	</delete>
+</mapper>

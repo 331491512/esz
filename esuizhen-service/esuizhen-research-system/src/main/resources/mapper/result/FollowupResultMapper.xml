@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.FollowupResultDao">
+	<select id="findFollowupResults" resultType="com.esuizhen.cloudservice.research.bean.FollowupRecordInfo">
+		SELECT
+			t1.followupTime followupDate, t3.followupResultValueName followupResultName, t4.followupWayName,
+			t5.doctorId, t5.trueName doctorName, t1.followupResultPhone followupMobile, t2.sourceDiagnosis mainDiagnosisName
+		FROM followup_db.followup_result t1
+			INNER JOIN user_db.u_patient t2 ON t1.patientId = t2.patientId
+			INNER JOIN followup_db.meta_followup_result_value t3 ON t1.followupResultValue = t3.followupResultValueId
+			INNER JOIN followup_db.meta_followup_way t4 ON t1.followUpWay = t4.followupWayId
+			LEFT JOIN user_db.u_doctor t5 ON t1.operator = t5.doctorId
+		WHERE t1.patientId = #{patientId}
+		<if test="orderBy == 'followupDate'">
+			ORDER BY t1.followupTime
+			<choose>
+				<when test="orderType == 'ASC'">
+					ASC
+				</when>
+				<otherwise>
+					DESC
+				</otherwise>
+			</choose>
+		</if>
+	</select>
+	
+	<!-- 
+	<insert id="insert">
+		INSERT INTO followup_db.followup_result(
+			followupResultId,
+			patientId,
+			hospitalId,
+			operator,
+			followupResultValue,
+			relapseParts,
+			relapseDate,
+			transferParts,
+			transferDate,
+			deathDate,
+			isTumourDeath,
+			deathCause,
+			followUpWay,
+			followupResultPhone,
+			followupTime,
+			lostFollowupFlag,
+			lostFollowupCauseResultValue,
+			remark,
+			sourceFlag,
+			createTime
+		)VALUES(
+			#{followupResultId},
+			#{patientId},
+			#{hospitalId},
+			#{operator},
+			#{followupResultValue},
+			#{relapseParts},
+			#{relapseDate},
+			#{transferParts},
+			#{transferDate},
+			#{deathDate},
+			#{isTumourDeath},
+			#{deathCause},
+			#{followUpWay},
+			#{followupResultPhone},
+			#{followupTime},
+			#{lostFollowupFlag},
+			#{lostFollowupCauseResultValue},
+			#{remark},
+			4,
+			NOW()
+		)
+	</insert>
+	 -->
+</mapper>

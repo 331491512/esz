@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TCrfResultPhysicalSignsDao">
+	<resultMap type="com.esuizhen.cloudservice.research.model.result.TCrfResultMainInfo" id="baseTCrfResultMainInfoResultMap">
+		<id column="crfResultId" property="crfResultId"/>
+		<result column="crfObserveId" property="crfObserveId"/>
+		<result column="subjectElementId" property="subjectElementId"/>
+		<result column="projectId" property="projectId"/>
+		<result column="crfCourseItemTime" property="crfCourseItemTime"/>
+		<result column="creatorId" property="creatorId"/>
+		<result column="patientId" property="patientId"/>
+		<result column="checkDate" property="checkDate"/>
+	</resultMap>
+	
+	<resultMap type="com.esuizhen.cloudservice.research.model.result.TCrfResultMainInfo" id="baseTCrfResultMainInfoCrfResultPhysicalSignsResultMap">
+		<id column="crfResultId" property="crfResultId"/>
+		<result column="crfObserveId" property="crfObserveId"/>
+		<result column="subjectElementId" property="subjectElementId"/>
+		<result column="projectId" property="projectId"/>
+		<result column="crfCourseItemTime" property="crfCourseItemTime"/>
+		<result column="creatorId" property="creatorId"/>
+		<result column="patientId" property="patientId"/>
+		
+		<collection property="crfResult" javaType="ArrayList" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultPhysicalSigns">
+			<id column="crfPhysicalSignsResultId" property="crfPhysicalSignsResultId"/>
+			<result column="crfResultId" property="crfResultId"/>
+			<result column="physicalSignsId" property="physicalSignsId"/>
+			<result column="physicalSignsName" property="physicalSignsName"/>
+			<result column="checkDate" property="checkDate"/>
+			<result column="signsStatus" property="signsStatus"/>
+			<result column="description" property="description"/>
+			<result column="createTime" property="createTime"/>
+			<result column="updateTime" property="updateTime"/>
+		</collection>
+	</resultMap>
+
+	<select id="findCrfResultPhysicalSignsRecord" resultMap="baseTCrfResultMainInfoResultMap">
+		SELECT
+			t2.crfObserveId,
+			t2.subjectElementId,
+			t2.projectId,
+			t2.crfCourseItemTime,
+			t2.creatorId,
+			t2.patientId,
+			DATE_FORMAT(t1.checkDate, '%Y-%m-%d') checkDate
+		FROM pro_db.crf_result_physical_signs t1
+			INNER JOIN pro_db.crf_result_main t2 ON t1.crfResultId=t2.crfResultId
+		WHERE t2.projectId = #{projectId} AND t2.patientId = #{patientId}
+		GROUP BY DATE_FORMAT(t1.checkDate, '%Y-%m-%d')
+		ORDER BY t1.checkDate DESC
+	</select>
+	
+	<select id="findCrfResultPhysicalSignsRecordByCheckDate" resultType="com.esuizhen.cloudservice.research.model.result.TCrfResultPhysicalSigns">
+		SELECT * FROM(
+			SELECT
+				<include refid="base_column_list"></include>
+			FROM pro_db.crf_result_physical_signs t1
+				INNER JOIN pro_db.crf_result_main t2 ON t1.crfResultId=t2.crfResultId
+				INNER JOIN pro_db.crf_observation_subject_element t3 ON t2.crfObserveId=t3.crfObserveId
+			WHERE DATE_FORMAT(t1.checkDate, '%Y-%m-%d') = DATE_FORMAT(#{checkDate}, '%Y-%m-%d') AND t2.patientId = #{patientId}
+			ORDER BY t1.createTime DESC
+		) f1
+		GROUP BY f1.physicalSignsId
+	</select>
+	
+	<select id="findCrfResultPhysicalSigns" resultMap="baseTCrfResultMainInfoCrfResultPhysicalSignsResultMap">
+		SELECT
+			t2.crfObserveId, t2.subjectElementId, t2.projectId, t2.crfCourseItemTime, t2.creatorId, t2.patientId,
+			<include refid="base_column_list"></include>
+		FROM pro_db.crf_result_physical_signs t1
+			INNER JOIN pro_db.crf_result_main t2 ON t1.crfResultId=t2.crfResultId
+			INNER JOIN pro_db.crf_observation_subject_element t3 ON t2.crfObserveId=t3.crfObserveId
+		WHERE t2.patientId = #{patientId}
+		AND t3.crfObserveId = #{crfObserveId}
+		ORDER BY t1.`index` ASC
+	</select>
+
+	<sql id="base_column_list">
+		t1.crfPhysicalSignsResultId,
+		t1.crfResultId,
+		t1.physicalSignsId,
+		t1.physicalSignsName,
+		t1.checkDate,
+		t1.signsStatus,
+		t1.description,
+		t1.createTime,
+		t1.updateTime
+	</sql>
+	
+	<insert id="insert">
+		INSERT INTO pro_db.crf_result_physical_signs(
+			crfPhysicalSignsResultId, crfResultId, physicalSignsId, physicalSignsName, checkDate, signsStatus, description, createTime, updateTime
+		)VALUES(
+			#{crfPhysicalSignsResultId}, #{crfResultId}, #{physicalSignsId}, #{physicalSignsName}, #{checkDate}, #{signsStatus}, #{description}, NOW(), NOW()
+		)
+	</insert>
+	
+	<insert id="insertByBatch">
+		INSERT INTO pro_db.crf_result_physical_signs(
+			crfPhysicalSignsResultId, 
+			crfResultId,
+			physicalSignsId,
+			physicalSignsName,
+			checkDate,
+			signsStatus,
+			description,
+        	`index`,
+			createTime,
+			updateTime
+		)VALUES
+		<foreach collection="crfResultPhysicalSignss" item="crfResultPhysicalSigns" index="index" separator=",">
+			(
+				#{crfResultPhysicalSigns.crfPhysicalSignsResultId},
+				#{crfResultPhysicalSigns.crfResultId},
+				#{crfResultPhysicalSigns.physicalSignsId},
+				#{crfResultPhysicalSigns.physicalSignsName},
+				#{crfResultPhysicalSigns.checkDate},
+				#{crfResultPhysicalSigns.signsStatus},
+				#{crfResultPhysicalSigns.description},
+        		#{crfResultPhysicalSigns.index},
+				NOW(),
+				NOW()
+			)
+		</foreach>
+	</insert>
+	
+	<delete id="deleteByCrfObserveIdAndPatientId">
+		DELETE FROM pro_db.crf_result_physical_signs
+		WHERE crfResultId IN(SELECT crfResultId FROM pro_db.crf_result_main WHERE crfObserveId = #{crfObserveId} AND patientId = #{patientId})
+	</delete>
+	
+	<delete id="deleteByProjectId">
+		DELETE
+			i6.*
+		FROM pro_db.crf_result_main i1,
+			pro_db.crf_observation_subject_element i2,
+			pro_db.crf_course_detail i3,
+			pro_db.crf_course i4,
+			pro_db.r_crftemplate_project i5,
+			pro_db.crf_result_physical_signs i6
+		WHERE i1.crfObserveId = i2.crfObserveId
+			AND i2.crfCourseItemId = i3.crfCourseItemId
+			AND i3.crfCourseId = i4.crfCourseId
+			AND i4.crfTemplateId = i5.crfTemplateId
+			AND i5.projectId = #{projectId}
+	</delete>
+</mapper>

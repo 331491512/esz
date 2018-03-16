@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.timertask.dao.TimerTaskDao">
+
+	<!-- 查询患者随访计划详情 -->
+	<select id="queryFollowupPlanDetailInfo" resultType="java.util.LinkedHashMap">
+		SELECT
+		t1.followupId , t1.followupName , t1.followupDescrption ,
+		t1.confirmedDate , t1.followupType , t1.patientId ,t1.followupSource,
+		t2.followupItemId ,
+		(SELECT userId FROM user_db.u_patient  WHERE patientId=t1.patientId) userId ,
+		(SELECT trueName FROM user_db.u_patient  WHERE patientId=t1.patientId) trueName ,
+		t2.actionType , (CASE WHEN t2.actionType=0 THEN '随访计划开启' WHEN t2.actionType=1 THEN
+		'康复知识' WHEN t2.actionType=2 THEN '复查提醒' ELSE '随访问卷' END )
+		actionTypeName ,
+		t2.intervalMonths , t2.intervalDays , '' intervalDaysTips , t2.content , t2.followupDate , t2.isAlertSent
+		, t2.isSurveryFeedback ,
+		'' questionnaireUrl , '' questionnaireResultUrl
+		FROM followup_db.followup_plan
+		t1 , followup_db.followup_plan_detail t2
+		WHERE t1.followupId=t2.followupId AND t2.actionType=0
+		AND t1.followupId=#{followupId}
+	</select>
+
+	<select id="queryTaskCount" resultType="Integer" parameterType="java.util.LinkedHashMap">
+		SELECT
+			COUNT(*)
+		FROM com_sys_db.timertask 
+		<where>     
+        <if test="1==1">   
+        	serviceTargetId = #{serviceTargetId} 
+        </if>     
+        <if test="serviceType!=null">     
+            AND serviceType = #{serviceType}      
+        </if>  
+        <if test="taskTag!=null">     
+            AND taskTag = #{taskTag}      
+        </if>    
+    </where>   
+		
+	</select>
+	
+	<!-- 查询患者随访计划详情 -->
+	<select id="queryProductServiceApplyDetailInfo" resultType="java.util.LinkedHashMap">
+		SELECT
+		    vendor userId ,
+		    (SELECT trueName FROM user_db.u_patient WHERE userId = buyer) trueName ,
+		    (SELECT trueName FROM user_db.u_doctor WHERE userId = vendor) doctorTrueName ,
+		    (SELECT doctorId FROM user_db.u_doctor WHERE userId = vendor) doctorId ,
+		    (SELECT mobile FROM user_db.u_doctor WHERE userId = vendor) mobile ,
+		    (SELECT mobile FROM user_db.u_patient WHERE userId = buyer) patientMobile ,
+		    (SELECT mobile FROM user_db.u_doctor WHERE userId = agentApplicant) agentMobile,
+		    contactMobile ,
+		    (SELECT userPictureUrl FROM user_db.u_user WHERE userId=buyer) patientPictureUrl ,
+		    (CASE WHEN periodFeeType = 2 THEN '包月' WHEN periodFeeType=3 THEN '包年' ELSE periodFeeType END) periodFeeType ,
+			buyer patientUserId ,agentApplicant,
+			productApplyId ,
+			productType , 
+			consultOrderTime , 
+			idleCancelTime ,
+			createTime,
+			inPackage,
+			wxProductId,
+			expireTime 
+		FROM hds_db.s_product_service_apply 
+		WHERE productApplyId = #{productApplyId}
+		LIMIT 1
+	</select>
+	
+</mapper>

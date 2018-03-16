@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.meta.TMetaInfoDiagnosisBasisDao">
+<!-- <cache type="org.mybatis.caches.ehcache.LoggingEhcache" readOnly="true"></cache> -->
+    <sql id="base_column_list">
+       	diagnosisBasisId,
+		diagnosisBasisCode,
+		diagnosisBasisName
+    </sql>
+	<select id="getSpecialDiseaseDiagnosisMeta" parameterType="java.util.HashMap" resultType="com.esuizhen.cloudservice.ehr.model.meta.SpecialDiseaseDiagnosisMeta">
+		SELECT 
+        	a.specialDiseaseDiagnosisId,a.specialDiseaseDiagnosisName
+		FROM ehr_db.meta_special_disease_diagnosis a
+		WHERE 
+	        a.specialDiseaseDiagnosisId LIKE '${searchItem}' OR a.specialDiseaseDiagnosisName LIKE '${searchItem}'
+	    limit 0,50
+	</select>
+</mapper>
+

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_incre_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.CloudOutHospitalNoteDao" >
+	<insert id="insert">
+		INSERT INTO ehr_db.ei_outhospital_note (
+			outhospitalId, inhospitalId, inhospitalNo, emrId, patientId, patientNo, 
+			hospitalId, inhospitalDate, outhospitalDate, inhospitalDays, symptomSummary, 
+			inhospitalDiagnosis, treatmentSummary, outhospitalDiagnosis, outhospitalDoctorAdvice, 
+			summaryContent,rawContent,createTime, updateTime,
+			<!-- start by fanpanwei -->
+			mainID,inhospitalTimes,outhospitalSummary,
+			contentType,rawCreateTime,syncTime
+			<!-- end by fanpanwei -->
+			)  
+	VALUES(
+		#{outhospitalId}, #{inhospitalId}, #{inhospitalNo}, #{emrId}, 
+		#{patientId},
+		#{patientNo}, #{hospitalId}, #{inhospitalDate}, #{outhospitalDate}, 
+		#{inhospitalDays}, #{symptomSummary},#{inhospitalDiagnosis}, 
+		#{treatmentSummary}, #{outhospitalDiagnosis}, #{outhospitalDoctorAdvice}, 
+		#{summaryContent},#{rawContent},#{createTime}, #{updateTime},<!-- ,1 -->
+		<!-- start by fanpanwei -->
+		#{mainID},#{inhospitalTimes},#{outhospitalSummary},
+		#{contentType},#{rawCreateTime},now()
+		<!-- end by fanpanwei -->
+		)
+	</insert>
+</mapper>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.westangel.commonservice.trade.dao.UserDao">
+	
+	
+	
+	<!-- 获取OpenID信息 -->
+	<select id="getOpenId"
+		resultType="java.lang.String">
+		SELECT
+			openId
+		FROM
+			user_db.u_thirdparty
+		WHERE
+			userId = #{userId}
+			<choose>
+				<when test="productId!=null">
+					AND productId=#{productId}
+				</when>
+				<otherwise>
+					AND productId=2
+				</otherwise>
+			</choose> 
+		     
+	</select>	 
+
+	<!-- 获取用户名称 -->
+	<select id="getUserTrueName"
+		resultType="java.lang.String">
+		SELECT
+			trueName
+		FROM
+			user_db.u_user
+		WHERE
+			userId =#{userId}
+	</select>
+
+	<select id="findPatientByUserId" resultType="java.lang.Integer">
+		select icdDiseaseTypeId from user_db.u_patient where userId=#{buyer}
+	</select>
+</mapper>

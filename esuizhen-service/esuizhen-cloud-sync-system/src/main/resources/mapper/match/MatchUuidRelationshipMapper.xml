@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_match_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.match.MatchUuidRelationshipDao" >
+	<resultMap type="com.westangel.common.bean.sync.UuidRelationship"  id="baseResultMap">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="userId" property="userId" jdbcType="BIGINT" />
+		<result column="uuidFinal" property="uuidFinal" jdbcType="VARCHAR" />
+		<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+		<result column="hospitalId" property="hospitalId" jdbcType="INTEGER" />
+		<result column="syncFlag" property="syncFlag" jdbcType="INTEGER" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<sql id="base_column_list">
+		id, userId, uuidFinal, uuid, hospitalId, syncFlag, createTime
+	</sql>
+	
+	<select id="findByUuid" resultMap="baseResultMap" parameterType="java.lang.String">
+		SELECT <include refid="base_column_list" /> FROM user_db.r_uuid_relationship WHERE uuid=#{uuidFinal,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="findUuidFinalByUuid" resultType="java.lang.String" parameterType="java.lang.String">
+		SELECT uuidFinal FROM user_db.r_uuid_relationship WHERE uuid=#{uuidFinal,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="findUuidFinalByUserId" resultType="java.lang.String" parameterType="java.lang.Long">
+		SELECT uuidFinal FROM user_db.r_uuid_relationship WHERE userId=#{userId,jdbcType=BIGINT} GROUP BY uuidFinal
+	</select>
+	
+	<select id="find" resultType="java.lang.Integer">
+		SELECT COUNT(0) FROM user_db.r_uuid_relationship
+		WHERE uuid=#{uuid,jdbcType=VARCHAR} AND uuidFinal=#{uuidFinal,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="findByFinalUuid" resultMap="baseResultMap" parameterType="java.lang.String">
+		SELECT <include refid="base_column_list" /> FROM user_db.r_uuid_relationship
+		WHERE uuidFinal=#{finalUuid,jdbcType=VARCHAR}
+	</select>
+
+	<insert id="insert" parameterType="com.westangel.common.bean.sync.UuidRelationship" >
+		<selectKey resultType="long" keyProperty="id" order="AFTER" >
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO user_db.r_uuid_relationship(
+			userId,
+			uuidFinal,
+			uuid,
+			hospitalId,
+			syncFlag,
+			createTime,
+			updateTime
+		)values(
+			#{userId,jdbcType=BIGINT}, 
+			#{uuidFinal,jdbcType=VARCHAR}, 
+			#{uuid,jdbcType=VARCHAR}, 
+			#{hospitalId,jdbcType=INTEGER}, 
+			#{syncFlag,jdbcType=INTEGER},
+			NOW(),
+			NOW()
+		)
+	 </insert>
+	 
+	 <update id="update">
+	 	UPDATE user_db.r_uuid_relationship
+	 	<set>
+	 		<if test="userId != null">
+	 			userId=#{userId,jdbcType=BIGINT},
+	 		</if>
+	 		<if test="uuidFinal != null">
+	 			uuidFinal=#{uuidFinal,jdbcType=VARCHAR},
+	 		</if>
+	 		<if test="uuid != null">
+	 			uuid=#{uuid,jdbcType=VARCHAR},
+	 		</if>
+	 		<if test="hospitalId != null">
+	 			hospitalId=#{hospitalId,jdbcType=INTEGER},
+	 		</if>
+	 		<if test="syncFlag != null">
+	 			syncFlag=#{syncFlag,jdbcType=INTEGER},
+	 		</if>
+	 		updateTime=NOW()
+	 	</set>
+	 	WHERE id=#{id,jdbcType=BIGINT}
+	 </update>
+	 
+	 <delete id="delete">
+	 	DELETE FROM user_db.r_uuid_relationship WHERE id=#{id,jdbcType=BIGINT}
+	 </delete>
+</mapper>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.conf.FollowupRangeIcdDao">
+
+	<!-- 处理ICD编码文本 -->
+	<select id="queryAllFollowupRangeIcdCodeText" resultType="com.esuizhen.cloudservice.followup.bean.TFollowupRangeIcdCodeText">
+		select 
+		      id,diseaseCodeStart,diseaseCodeEnd,type
+		from conf_followup_range_icd_code_text
+	</select>
+	<insert id="batchInsertFollowupRangeIcdCodeText" parameterType="java.util.List">
+		<selectKey resultType="Integer" keyProperty="id" order="AFTER">  
+	        SELECT  
+	        LAST_INSERT_ID()  
+	    </selectKey>  
+	    insert into conf_followup_range_icd_code_text 
+	    (diseaseCodeStart,diseaseCodeEnd,type)
+	    values
+	    <foreach collection="followupRangeIcdCodeTextList" item="item" index="index" separator=",">
+	    	(#{item.diseaseCodeStart},#{item.diseaseCodeEnd},#{item.type})
+	    </foreach>
+	</insert>
+	
+	<delete id="deleteAllFollowupRangeIcdCodeText">
+		delete from conf_followup_range_icd_code_text
+	</delete>
+	
+	
+	
+	<!-- 处理ICD病种 -->
+	<select id="queryDiseaseTypeIcdByCode" parameterType="String" resultType="java.util.Map">
+		select * from ehr_db.meta_c_disease_type_icd where diseaseCodePrefix=#{diseaseCode}
+	</select>
+	
+	<insert id="batchInsertFollowupRangeIcd" parameterType="com.esuizhen.cloudservice.followup.bean.TFollowupRangeIcdCodeText">
+		insert into conf_followup_range_icd(icdDiseaseTypeId,icdDiseaseTypeName,diseaseCodePrefix,tumorFlag,flag)
+		SELECT
+			t1.icdDiseaseTypeId,
+			t1.icdDiseaseTypeName,
+			t1.diseaseCodePrefix,
+			t1.tumorFlag,
+			1
+		FROM
+			ehr_db.meta_c_disease_type_icd t1
+		<where>
+		 not EXISTS
+		(
+			SELECT 0 FROM followup_db.conf_followup_range_icd c1 where t1.icdDiseaseTypeId=c1.icdDiseaseTypeId
+		)
+		<if test="type ==1">
+			AND t1.diseaseCodePrefix <![CDATA[>=]]> #{diseaseCodeStart} and t1.diseaseCodePrefix <![CDATA[<=]]> #{diseaseCodeEnd}
+		</if>
+		<if test="type ==0">
+			AND t1.diseaseCodePrefix = #{diseaseCodeStart} 
+		</if>
+		</where>
+	</insert>
+	
+	<delete id="deleteAllFollowupRangeIcd">
+		delete from conf_followup_range_icd
+	</delete>
+	
+	
+	
+	<!-- 处理ICD编码 -->
+	<insert id="batchInsertFollowupRangeIcdCode" parameterType="com.esuizhen.cloudservice.followup.bean.TFollowupRangeIcdCodeText">
+		insert into conf_followup_range_icd_code(diseaseCode,diseaseName,tumorFlag,flag)
+		SELECT
+			t1.diseaseCode,
+			t1.diseaseName,
+			t2.tumorFlag,
+			1
+		FROM
+			ehr_db.meta_e_icd_10 t1
+			left JOIN ehr_db.meta_c_disease_type_icd t2 ON LOCATE(
+			t2.diseaseCodePrefix,
+			t1.diseaseCode
+		)
+		LEFT JOIN followup_db.conf_followup_range_icd_code t3 ON t1.diseaseCode = t3.diseaseCode
+		<where>
+			t3.id IS NULL
+		<if test="type ==1">
+			AND t1.diseaseCode <![CDATA[>=]]> #{diseaseCodeStart} and t1.diseaseCode <![CDATA[<=]]> #{diseaseCodeEnd}
+		</if>
+		<if test="type ==0">
+			AND t1.diseaseCode = #{diseaseCodeStart} 
+		</if>
+		</where>
+	</insert>
+	
+	<delete id="deleteAllFollowupRangeIcdCode">
+		delete from conf_followup_range_icd_code
+	</delete>
+</mapper>

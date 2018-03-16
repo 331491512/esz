@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.ProjectInvitationDao">
+	<insert id="insert">
+		INSERT INTO pro_db.project_invitation(
+			subcenterId,
+			projectId,
+			inviter,
+			invitee,
+			description,
+			state,
+			createTime,
+			updateTime
+		)VALUES(
+			#{subcenterId},
+			#{projectId},
+			#{inviter},
+			#{invitee},
+			#{description},
+			#{state},
+			NOW(),
+			NOW()
+		)
+	</insert>
+	
+	<delete id="deleteByInvitee">
+		DELETE FROM pro_db.project_invitation
+		WHERE projectId = #{projectId}
+		AND invitee = #{doctorId}
+	</delete>
+	
+	<delete id="deleteByProjectId">
+		DELETE FROM pro_db.project_invitation WHERE projectId = #{projectId}
+	</delete>
+</mapper>

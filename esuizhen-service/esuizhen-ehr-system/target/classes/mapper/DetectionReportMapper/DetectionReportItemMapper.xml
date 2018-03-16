@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_incre_db -->
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.DetectionReport.DetectionReportItemDao" >
+
+	<resultMap type="com.esuizhen.cloudservice.ehr.model.detection.DetectionItemDetail" id="itemDetailMap">
+		<result property="detectionTypeName" column="detectionTypeName" />
+		<result property="detectionItemId" column="detectionItemId" />
+		<result property="detectionItemName" column="detectionItemName" />
+		<result property="detectionItemEnglishName" column="detectionItemEnglishName" />
+		<result property="refrenceRangeMax" column="refrenceRangeMax" />
+		<result property="refrenceRangeMin" column="refrenceRangeMin" />
+		<result property="refrenceRange" column="refrenceRange" />
+		<result property="unit" column="unit" />
+		
+		<collection property="detectionResults" ofType="com.esuizhen.cloudservice.ehr.model.detection.DetectionResult" >
+        	<result property="detectionReportId" column="detectionReportId" />
+        	<result property="value" column="detectionResult" />
+        	<result property="promptType" column="promptType" />
+        	<result property="prompt" column="prompt" />
+		</collection>     
+  	</resultMap>
+  	
+	<select id="findByDetectionDetailId" resultType="com.esuizhen.cloudservice.ehr.bean.TDetectionItemInfo">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM lis_db.eci_detection_detail t1
+		WHERE t1.detectionDetailId=#{detectionDetailId}
+	</select>
+	
+	<sql id="base_column_list">
+			detectionDetailId, 
+			detectionReportId, 
+			patientId, 
+			patientNo, 
+			detectionTypeName, 
+			detectionItemId,
+			detectionItemName,
+			detectionItemEnglishName, 
+			detectionResult,
+			unit, 
+			refrenceRangeMin, 
+			refrenceRangeMax,
+			refrenceRange, 
+			promptType
+	</sql>
+
+	<insert id="insert">
+		INSERT INTO lis_db.eci_detection_detail(
+			detectionDetailId, 
+			detectionReportId, 
+			patientId, 
+			patientNo, 
+			detectionTypeName, 
+			detectionItemId,
+			detectionItemName,
+			detectionItemEnglishName, 
+			detectionResult,
+			unit, 
+			refrenceRangeMin, 
+			refrenceRangeMax,
+			refrenceRange,
+			promptType,
+			createTime, 
+			updateTime
+		)
+			SELECT 
+			#{detectionDetailId},
+			#{detectionReportId},
+			#{patientId},
+			#{patientNo}, 
+			#{detectionTypeName},
+			<if test="detectionItemId!=null">
+				m.detectionItemId,
+				m.detectionItemName,
+				m.detectionItemEnglishName,
+			</if>
+			<if test="detectionItemId==null">
+				NULL,
+				#{detectionItemName},
+				NULL,
+			</if>
+			#{detectionResult},
+			#{unit}, 
+			#{refrenceRangeMin}, 
+			#{refrenceRangeMax},
+			#{refrenceRange},
+			#{promptType},
+			now(), 
+			now()
+			FROM ehr_db.meta_e_detection_item m
+			WHERE 1=1
+			<if test="detectionItemId!=null">
+				AND m.detectionItemId=#{detectionItemId}
+			</if>
+			 limit 1
+	</insert>
+	
+	<delete id="deleteDetectionReportDetail" parameterType="java.lang.String">
+		DELETE FROM lis_db.eci_detection_detail
+		WHERE detectionReportId=#{detectionReportId}
+	</delete>
+	
+	<select id="getAllDetailGroupByType" resultMap="itemDetailMap">
+		SELECT
+			d0.detectionTypeName,
+			d0.detectionItemId,
+			d0.detectionItemName,
+			d0.detectionItemEnglishName,
+			d0.refrenceRangeMax,
+			d0.refrenceRangeMin,
+			d0.refrenceRange,
+			d0.unit,
+			
+			d.detectionReportId,
+			d.detectionResult,
+			d.prompt,
+			d.promptType
+		FROM lis_db.eci_detection_detail d
+		INNER JOIN lis_db.eci_detection_report r ON r.detectionReportId=d.detectionReportId AND r.patientId=#{patientId} AND r.detectionTypeName=#{detectionTypeName}
+		INNER JOIN (SELECT * FROM (SELECT 
+			rp.detectionTypeName,
+			d1.detectionReportId,
+			d1.detectionItemId,
+			d1.detectionItemName,
+			d1.detectionItemEnglishName,
+			d1.refrenceRangeMax,
+			d1.refrenceRangeMin,
+			d1.refrenceRange,
+			d1.unit,
+			d1.patientId
+			FROM lis_db.eci_detection_detail d1
+
+			INNER JOIN lis_db.eci_detection_report rp ON rp.detectionReportId=d1.detectionReportId AND rp.patientId=#{patientId} AND rp.detectionTypeName=#{detectionTypeName}
+			WHERE d1.patientId=#{patientId}
+			ORDER BY d1.createTime DESC) d2 GROUP BY d2.detectionItemName) d0
+			ON d0.patientId=d.patientId AND d0.detectionItemName=d.detectionItemName
+
+			AND d0.detectionItemName=d.detectionItemName
+	</select>
+	
+	<select id="getSpecifyDetailByReportId" parameterType="java.lang.String" resultType="java.util.HashMap">
+		SELECT
+			detectionItemName,
+			detectionItemEnglishName,
+			detectionResult,
+			unit,
+			refrenceRangeMin,
+			refrenceRangeMax,
+			refrenceRange,
+			prompt,
+			promptType
+		FROM lis_db.eci_detection_detail t1
+		WHERE t1.detectionReportId=#{detectionReportId}
+	</select>
+</mapper>

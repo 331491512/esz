@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.ThirdPartyDao">
+	<resultMap id="BaseResultMap" type="com.westangel.common.bean.ThirdParty">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="userId" property="userId" jdbcType="BIGINT" />
+		<result column="openId" property="openId" jdbcType="VARCHAR" />
+		<result column="thirdPartyType" property="thirdPartyType"
+			jdbcType="INTEGER" />
+		<result column="productId" property="productId"
+			jdbcType="INTEGER" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, userId, openId, thirdPartyType,productId, createTime
+	</sql>
+	<select id="searchThirdPartyByOpenId" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from u_thirdparty where openId = #{openId,jdbcType=VARCHAR}
+	</select>
+	<select id="findByUserId" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from u_thirdparty where userId=#{userId,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from u_thirdparty where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.westangel.common.bean.ThirdParty">
+		INSERT INTO u_thirdparty
+			(
+				userId, 
+				openId,
+				businessId,
+				productId,
+				thirdPartyType,
+				createTime
+			)
+		VALUES
+			(
+				#{userId,jdbcType=BIGINT},
+			 	#{openId,jdbcType=VARCHAR},
+			 	#{businessId,jdbcType=INTEGER},
+			 	#{productId,jdbcType=INTEGER},
+				#{thirdPartyType,jdbcType=INTEGER}, 
+				#{createTime,jdbcType=TIMESTAMP}
+			)
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.westangel.common.bean.ThirdParty">
+		update u_thirdparty
+		<set>
+			userId = #{userId,jdbcType=BIGINT},
+			openId = #{openId,jdbcType=VARCHAR},
+			thirdPartyType = #{thirdPartyType,jdbcType=INTEGER},
+			createTime = #{createTime,jdbcType=TIMESTAMP}
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+</mapper>

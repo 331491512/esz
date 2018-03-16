@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.westangel.common.dao.search.ConfGlobalDao">
+	<!-- 查询全局配置表 -->
+	<select id="queryConfGlobal" resultType="com.westangel.common.bean.search.ConfGlobal">
+		select 
+		      *
+		from followup_db.conf_global
+	</select>
+</mapper>
+

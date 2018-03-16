@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followupresult.FollowupSmsSendCountDao">
+    
+    <select id="queryFollowupSmsSendCount" parameterType="java.util.Map" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupSmsSendCountInfo">
+		select * from followup_sms_send_count ssc
+		<where>
+			<if test="patientId !=null">
+				and ssc.patientId=#{patientId}
+			</if>
+			<if test="patientFamilyId !=null">
+				and ssc.patientFamilyId=#{patientFamilyId}
+			</if>
+			<if test="mobile !=null">
+				and ssc.mobile=#{mobile}
+			</if>
+		</where>
+    </select>
+    
+	<insert id="insertFollowupSmsSendCount"  parameterType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupSmsSendCountInfo" keyProperty="id" useGeneratedKeys="true">
+	INSERT INTO followup_sms_send_count (
+		patientId,
+		patientFamilyId,
+		mobile,
+		lastSendFailTime,
+		lastSendSuccessTime,
+		currSendCount,
+		createTime,
+		updateTime
+	) VALUES (
+		#{patientId},
+		#{patientFamilyId},
+		#{mobile},
+		#{lastSendFailTime},
+		#{lastSendSuccessTime},
+		#{currSendCount},
+		now() ,
+		now()
+	)
+	</insert>
+    
+	<update id="updateFollowupSmsSendCount" parameterType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupSmsSendCountInfo">
+        UPDATE followup_sms_send_count 
+        <set>
+	        <if test="mobile != null">
+                mobile = #{mobile} ,
+            </if>
+	        <if test="sendFailCount != null">
+                sendFailCount = #{sendFailCount} ,
+            </if>
+	        <if test="lastSendFailTime != null">
+                lastSendFailTime = now() ,
+            </if>
+	        <if test="sendSuccessCount != null">
+                sendSuccessCount = #{sendSuccessCount} ,
+            </if>
+	        <if test="lastSendSuccessTime != null">
+                lastSendSuccessTime = now() ,
+            </if>
+	        <if test="currSendCount != null">
+                currSendCount = #{currSendCount} ,
+            </if>
+          	  	updateTime=now()
+        </set>
+        <where>
+        	<if test="patientId !=null">
+				and patientId=#{patientId}
+			</if>
+			<if test="patientFamilyId !=null">
+				and patientFamilyId=#{patientFamilyId}
+			</if>
+			<if test="mobile !=null">
+				and mobile=#{mobile}
+			</if>
+        </where>
+	</update>
+	
+</mapper>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_incre_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.incre.IncreOutHospitalNoteDao" >
+	<insert id="savecOutHospitalInfo">
+		INSERT INTO cloud_sync_incre_db.ei_outhospital_note (
+			outhospitalId, inhospitalId, inhospitalNo, emrId, patientuuId, patientNo, 
+			hospitalId, inhospitalDate, outhospitalDate, inhospitalDays, symptomSummary, 
+			inhospitalDiagnosis, treatmentSummary, outhospitalDiagnosis, outhospitalDoctorAdvice, 
+			summaryContent,rawContent,createTime, updateTime,
+			mainID,inhospitalTimes,outhospitalSummary,
+			contentType,rawCreateTime,syncTime
+			)  
+	VALUES(
+		#{outhospitalId}, #{inhospitalId}, #{inhospitalNo}, #{emrId}, 
+		#{patientUuid},
+		#{patientNo}, #{hospitalId}, #{inhospitalDate}, #{outhospitalDate}, 
+		#{inhospitalDays}, #{symptomSummary},#{inhospitalDiagnosis}, 
+		#{treatmentSummary}, #{outhospitalDiagnosis}, #{outhospitalDoctorAdvice}, 
+		#{summaryContent},#{rawContent},#{createTime}, #{updateTime},<!-- ,1 -->
+		<!-- start by fanpanwei -->
+		#{mainID},#{inhospitalTimes},#{outhospitalSummary},
+		#{contentType},#{rawCreateTime},now()
+		<!-- end by fanpanwei -->
+		)
+	</insert>
+</mapper>

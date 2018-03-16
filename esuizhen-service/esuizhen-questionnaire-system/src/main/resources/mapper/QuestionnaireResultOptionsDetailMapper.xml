@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.questionnaire.dao.QuestionnaireResultOptionsDetailDao">
+
+	<insert id="insertQuestionnaireResultOptionsDetail" parameterType="com.esuizhen.cloudservice.questionnaire.model.TQuestionnaireResultOptionsDetail">
+        INSERT INTO questionnaire_result_options_detail (
+        	questionnaireResultOptionId ,
+        	questionnaireResultStemId ,
+        	questionnaireResultId ,
+        	questionnaireOptionId ,
+        	questionnaireStemId ,
+        	stemCode ,
+        	questionnaireId ,
+        	optionIndex ,
+        	contentType ,
+        	content ,
+        	indicateValue ,
+        	nextStemCode ,
+        	parentOptionId ,
+        	level ,
+        	title ,
+        	questionType ,
+        	fillFlag ,
+        	fillContent ,
+        	fillContent2 ,
+        	fillContentType ,
+        	fillContentType2 ,
+        	isChecked ,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{questionnaireResultOptionId} ,
+        	#{questionnaireResultStemId} ,
+        	#{questionnaireResultId} ,
+        	#{questionnaireOptionId} ,
+        	#{questionnaireStemId} ,
+        	#{stemCode} ,
+        	#{questionnaireId} ,
+        	#{optionIndex} ,
+        	#{contentType} ,
+        	#{content} ,
+        	#{indicateValue} ,
+        	#{nextStemCode} ,
+        	#{parentOptionId} ,
+        	#{level} ,
+        	#{title} ,
+        	#{questionType} ,
+        	#{fillFlag} ,
+        	#{fillContent} ,
+        	#{fillContent2} ,
+        	#{fillContentType} ,
+        	#{fillContentType2} ,
+        	#{isChecked} ,
+        	NOW() ,
+        	NOW() 
+        )
+	</insert>
+    
+	<update id="updateQuestionnaireResultOptionsDetail" parameterType="com.esuizhen.cloudservice.questionnaire.model.TQuestionnaireResultOptionsDetail">
+        UPDATE questionnaire_result_options_detail 
+        <set>
+	        <if test="questionnaireResultStemId != null">
+                questionnaireResultStemId = #{questionnaireResultStemId} ,
+            </if>
+	        <if test="questionnaireResultId != null">
+                questionnaireResultId = #{questionnaireResultId} ,
+            </if>
+	        <if test="questionnaireOptionId != null">
+                questionnaireOptionId = #{questionnaireOptionId} ,
+            </if>
+	        <if test="questionnaireStemId != null">
+                questionnaireStemId = #{questionnaireStemId} ,
+            </if>
+	        <if test="stemCode != null">
+                stemCode = #{stemCode} ,
+            </if>
+	        <if test="questionnaireId != null">
+                questionnaireId = #{questionnaireId} ,
+            </if>
+	        <if test="optionIndex != null">
+                optionIndex = #{optionIndex} ,
+            </if>
+	        <if test="contentType != null">
+                contentType = #{contentType} ,
+            </if>
+	        <if test="content != null">
+                content = #{content} ,
+            </if>
+	        <if test="indicateValue != null">
+                indicateValue = #{indicateValue} ,
+            </if>
+	        <if test="nextStemCode != null">
+                nextStemCode = #{nextStemCode} ,
+            </if>
+	        <if test="parentOptionId != null">
+                parentOptionId = #{parentOptionId} ,
+            </if>
+	        <if test="level != null">
+                level = #{level} ,
+            </if>
+	        <if test="title != null">
+                title = #{title} ,
+            </if>
+	        <if test="questionType != null">
+                questionType = #{questionType} ,
+            </if>
+	        <if test="fillFlag != null">
+                fillFlag = #{fillFlag} ,
+            </if>
+	        <if test="fillContent != null">
+                fillContent = #{fillContent} ,
+            </if>
+            <if test="fillContent2 != null">
+                fillContent2 = #{fillContent2} ,
+            </if>
+	        <if test="fillContentType != null">
+                fillContentType = #{fillContentType} ,
+            </if>
+            <if test="fillContentType2 != null">
+                fillContentType2 = #{fillContentType2} ,
+            </if>
+	        <if test="isChecked != null">
+                isChecked = #{isChecked} ,
+            </if>
+	        <if test="createTime != null">
+                createTime = #{createTime} ,
+            </if>
+	        <if test="updateTime != null">
+                updateTime = #{updateTime} ,
+            </if>
+        </set>
+        WHERE 
+	        questionnaireResultOptionId = #{questionnaireResultOptionId} 
+	</update>
+
+    <delete id="deleteQuestionnaireResultOptionsDetail">
+        DELETE FROM questionnaire_result_options_detail WHERE
+        questionnaireResultOptionId = #{id} 
+    </delete>
+    
+    <!-- 根据ID查询问卷结果选项 -->
+    <select id="queryQuestionnaireResultOptionsDetailById" resultType="com.esuizhen.cloudservice.questionnaire.model.TQuestionnaireResultOptionsDetail">
+		SELECT 
+        	questionnaireResultOptionId,
+        	questionnaireResultStemId,
+        	questionnaireResultId,
+        	questionnaireOptionId,
+        	questionnaireStemId,
+        	stemCode,
+        	questionnaireId,
+        	optionIndex,
+        	contentType,
+        	content,
+        	indicateValue,
+        	nextStemCode,
+        	parentOptionId,
+        	level,
+        	title,
+        	questionType,
+        	fillFlag,
+        	fillContent,
+        	fillContentType,
+        	fillContent2,
+        	fillContentType2,
+        	isChecked,
+        	createTime,
+        	updateTime
+		FROM questionnaire_result_options_detail 
+	    WHERE 
+	        questionnaireResultOptionId = #{id} 
+	</select>
+	
+	<!-- 根据结果题干查询结果问题选项 -->
+	<select id="queryResultOptionsDetailByResultStemId" resultType="com.esuizhen.cloudservice.questionnaire.model.TQuestionnaireResultOptionsDetail">
+		SELECT 
+        	questionnaireResultOptionId,
+        	questionnaireResultStemId,
+        	questionnaireResultId,
+        	questionnaireOptionId,
+        	questionnaireStemId,
+        	stemCode,
+        	questionnaireId,
+        	optionIndex,
+        	contentType,
+        	content,
+        	indicateValue,
+        	nextStemCode,
+        	parentOptionId,
+        	level,
+        	title,
+        	questionType,
+        	fillFlag,
+        	fillContent,
+        	fillContentType,
+        	fillContent2,
+        	fillContentType2,
+        	isChecked,
+        	createTime,
+        	updateTime
+		FROM questionnaire_result_options_detail 
+	    WHERE 
+	        questionnaireResultStemId = #{questionnaireResultStemId} 
+	    AND level=0
+	</select>
+
+	<!-- 根据父选项ID查询子选项 -->
+	<select id="queryResultOptionsDetailByParentOptionId" resultType="com.esuizhen.cloudservice.questionnaire.model.TQuestionnaireResultOptionsDetail">
+		SELECT 
+        	questionnaireResultOptionId,
+        	questionnaireResultStemId,
+        	questionnaireResultId,
+        	questionnaireOptionId,
+        	questionnaireStemId,
+        	stemCode,
+        	questionnaireId,
+        	optionIndex,
+        	contentType,
+        	content,
+        	indicateValue,
+        	nextStemCode,
+        	parentOptionId,
+        	level,
+        	title,
+        	questionType,
+        	fillFlag,
+        	fillContent,
+        	fillContentType,
+        	fillContent2,
+        	fillContentType2,
+        	isChecked,
+        	createTime,
+        	updateTime
+		FROM questionnaire_result_options_detail 
+	    WHERE 
+	        parentOptionId = #{parentOptionId} 
+	</select>
+	
+	<insert id="batchInsertQuestionnaireResultOptionsDetail">
+        INSERT INTO questionnaire_result_options_detail (
+        	questionnaireResultOptionId ,
+        	questionnaireResultStemId ,
+        	questionnaireResultId ,
+        	questionnaireOptionId ,
+        	questionnaireStemId ,
+        	stemCode ,
+        	questionnaireId ,
+        	optionIndex ,
+        	contentType ,
+        	content ,
+        	indicateValue ,
+        	nextStemCode ,
+        	parentOptionId ,
+        	level ,
+        	title ,
+        	questionType ,
+        	fillFlag ,
+        	fillContent ,
+        	fillContent2 ,
+        	fillContentType ,
+        	fillContentType2 ,
+        	isChecked ,
+        	createTime ,
+        	updateTime 
+        ) VALUES 
+        <foreach collection="questionnaireResultOptions" item="item" separator=",">
+    		(
+    		#{item.questionnaireResultOptionId} ,
+        	#{item.questionnaireResultStemId} ,
+        	#{item.questionnaireResultId} ,
+        	#{item.questionnaireOptionId} ,
+        	#{item.questionnaireStemId} ,
+        	#{item.stemCode} ,
+        	#{item.questionnaireId} ,
+        	#{item.optionIndex} ,
+        	#{item.contentType} ,
+        	#{item.content} ,
+        	#{item.indicateValue} ,
+        	#{item.nextStemCode} ,
+        	#{item.parentOptionId} ,
+        	#{item.level} ,
+        	#{item.title} ,
+        	#{item.questionType} ,
+        	#{item.fillFlag} ,
+        	#{item.fillContent} ,
+        	#{item.fillContent2} ,
+        	#{item.fillContentType} ,
+        	#{item.fillContentType2} ,
+        	#{item.isChecked} ,
+        	NOW() ,
+        	NOW()
+            )
+    	</foreach>
+	</insert>
+</mapper>
+

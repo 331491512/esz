@@ -1,0 +1,678 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.server.TDetectionDetailDao" >
+
+  <insert id="insertSelective" parameterType="com.esuizhen.server.sync.bean.server.DetectionDetailRes" >
+    insert into lis_db.eci_detection_detail
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="detectionDetailId != null" >
+        detectionDetailId,
+      </if>
+      <if test="detectionReportId != null" >
+        detectionReportId,
+      </if>
+      <if test="patientId != null" >
+        patientId,
+      </if>
+      <if test="patientNo != null" >
+        patientNo,
+      </if>
+      <if test="seqNo != null" >
+        seqNo,
+      </if>
+      <if test="detectionTypeName != null" >
+        detectionTypeName,
+      </if>
+      <if test="detectionItemId != null" >
+        detectionItemId,
+      </if>
+      <if test="detectionItemCode != null" >
+        detectionItemCode,
+      </if>
+      <if test="detectionItemName != null" >
+        detectionItemName,
+      </if>
+      <if test="detectionItemEnglishName != null" >
+        detectionItemEnglishName,
+      </if>
+      <if test="detectionResult != null" >
+        detectionResult,
+      </if>
+      <if test="prompt != null" >
+        prompt,
+      </if>
+      <if test="promptType != null" >
+        promptType,
+      </if>
+      <if test="resultType != null" >
+        resultType,
+      </if>
+      <if test="unit != null" >
+        unit,
+      </if>
+      <if test="refrenceRange != null" >
+        refrenceRange,
+      </if>
+      <if test="patientUuid != null" >
+        patientUuid,
+      </if>
+      <if test="refrenceRangeMin != null" >
+        refrenceRangeMin,
+      </if>
+      <if test="refrenceRangeMax != null" >
+        refrenceRangeMax,
+      </if>
+      <if test="detectionMethod != null" >
+        detectionMethod,
+      </if>
+      <if test="reagentBrand != null" >
+        reagentBrand,
+      </if>
+      <if test="instrument != null" >
+        instrument,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+      <if test="updateTime != null" >
+        updateTime,
+      </if>
+      <if test="syncTime != null" >
+        syncTime,
+      </if>
+      <if test="rawDetectionItemCode != null" >
+        rawDetectionItemCode,
+      </if>
+      <if test="detailID != null" >
+        detailID,
+      </if>
+      <if test="mainID != null" >
+        mainID,
+      </if>
+      <if test="syncflag != null" >
+        syncflag,
+      </if>
+      <if test="rawCreateTime != null" >
+        rawCreateTime,
+      </if>
+      <if test="mergeFlag != null" >
+        mergeFlag,
+      </if>
+      <if test="mergeFrom != null" >
+        mergeFrom,
+      </if>
+      <if test="mergeTarget != null" >
+        mergeTarget,
+      </if>
+      <if test="mergeTime != null" >
+        mergeTime,
+      </if>
+      <if test="mergeFromUuid != null" >
+        mergeFromUuid,
+      </if>
+      <if test="mergeTargetUuid != null" >
+        mergeTargetUuid,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="detectionDetailId != null" >
+        #{detectionDetailId,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionReportId != null" >
+        #{detectionReportId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="seqNo != null" >
+        #{seqNo,jdbcType=INTEGER},
+      </if>
+      <if test="detectionTypeName != null" >
+        #{detectionTypeName,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionItemId != null" >
+        #{detectionItemId,jdbcType=INTEGER},
+      </if>
+      <if test="detectionItemCode != null" >
+        #{detectionItemCode,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionItemName != null" >
+        #{detectionItemName,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionItemEnglishName != null" >
+        #{detectionItemEnglishName,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionResult != null" >
+        #{detectionResult,jdbcType=VARCHAR},
+      </if>
+      <if test="prompt != null" >
+        #{prompt,jdbcType=VARCHAR},
+      </if>
+      <if test="promptType != null" >
+        #{promptType,jdbcType=INTEGER},
+      </if>
+      <if test="resultType != null" >
+        #{resultType,jdbcType=INTEGER},
+      </if>
+      <if test="unit != null" >
+        #{unit,jdbcType=VARCHAR},
+      </if>
+      <if test="refrenceRange != null" >
+        #{refrenceRange,jdbcType=VARCHAR},
+      </if>
+      <if test="patientUuid != null" >
+        #{patientUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="refrenceRangeMin != null" >
+        #{refrenceRangeMin,jdbcType=VARCHAR},
+      </if>
+      <if test="refrenceRangeMax != null" >
+        #{refrenceRangeMax,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionMethod != null" >
+        #{detectionMethod,jdbcType=CHAR},
+      </if>
+      <if test="reagentBrand != null" >
+        #{reagentBrand,jdbcType=CHAR},
+      </if>
+      <if test="instrument != null" >
+        #{instrument,jdbcType=CHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncTime != null" >
+        #{syncTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="rawDetectionItemCode != null" >
+        #{rawDetectionItemCode,jdbcType=VARCHAR},
+      </if>
+      <if test="detailID != null" >
+        #{detailID,jdbcType=BIGINT},
+      </if>
+      <if test="mainID != null" >
+        #{mainID,jdbcType=BIGINT},
+      </if>
+      <if test="syncflag != null" >
+        #{syncflag,jdbcType=INTEGER},
+      </if>
+      <if test="rawCreateTime != null" >
+        #{rawCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFlag != null" >
+        #{mergeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mergeFrom != null" >
+        #{mergeFrom,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTarget != null" >
+        #{mergeTarget,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTime != null" >
+        #{mergeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFromUuid != null" >
+        #{mergeFromUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeTargetUuid != null" >
+        #{mergeTargetUuid,jdbcType=VARCHAR},
+      </if>
+    </trim>
+    ON DUPLICATE KEY UPDATE
+    createTime = VALUES(createTime)
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.server.sync.bean.server.DetectionDetailRes" >
+    update lis_db.eci_detection_detail
+    <set>
+      <if test="detectionReportId != null" >
+        detectionReportId = #{detectionReportId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        patientId = #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        patientNo = #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="seqNo != null" >
+        seqNo = #{seqNo,jdbcType=INTEGER},
+      </if>
+      <if test="detectionTypeName != null" >
+        detectionTypeName = #{detectionTypeName,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionItemId != null" >
+        detectionItemId = #{detectionItemId,jdbcType=INTEGER},
+      </if>
+      <if test="detectionItemCode != null" >
+        detectionItemCode = #{detectionItemCode,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionItemName != null" >
+        detectionItemName = #{detectionItemName,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionItemEnglishName != null" >
+        detectionItemEnglishName = #{detectionItemEnglishName,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionResult != null" >
+        detectionResult = #{detectionResult,jdbcType=VARCHAR},
+      </if>
+      <if test="prompt != null" >
+        prompt = #{prompt,jdbcType=VARCHAR},
+      </if>
+      <if test="promptType != null" >
+        promptType = #{promptType,jdbcType=INTEGER},
+      </if>
+      <if test="resultType != null" >
+        resultType = #{resultType,jdbcType=INTEGER},
+      </if>
+      <if test="unit != null" >
+        unit = #{unit,jdbcType=VARCHAR},
+      </if>
+      <if test="refrenceRange != null" >
+        refrenceRange = #{refrenceRange,jdbcType=VARCHAR},
+      </if>
+      <if test="patientUuid != null" >
+        patientUuid = #{patientUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="refrenceRangeMin != null" >
+        refrenceRangeMin = #{refrenceRangeMin,jdbcType=VARCHAR},
+      </if>
+      <if test="refrenceRangeMax != null" >
+        refrenceRangeMax = #{refrenceRangeMax,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionMethod != null" >
+        detectionMethod = #{detectionMethod,jdbcType=CHAR},
+      </if>
+      <if test="reagentBrand != null" >
+        reagentBrand = #{reagentBrand,jdbcType=CHAR},
+      </if>
+      <if test="instrument != null" >
+        instrument = #{instrument,jdbcType=CHAR},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncTime != null" >
+        syncTime = #{syncTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="rawDetectionItemCode != null" >
+        rawDetectionItemCode = #{rawDetectionItemCode,jdbcType=VARCHAR},
+      </if>
+      <if test="detailID != null" >
+        detailID = #{detailID,jdbcType=BIGINT},
+      </if>
+      <if test="mainID != null" >
+        mainID = #{mainID,jdbcType=BIGINT},
+      </if>
+      <if test="syncflag != null" >
+        syncflag = #{syncflag,jdbcType=INTEGER},
+      </if>
+      <if test="rawCreateTime != null" >
+        rawCreateTime = #{rawCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFlag != null" >
+        mergeFlag = #{mergeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mergeFrom != null" >
+        mergeFrom = #{mergeFrom,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTarget != null" >
+        mergeTarget = #{mergeTarget,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTime != null" >
+        mergeTime = #{mergeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFromUuid != null" >
+        mergeFromUuid = #{mergeFromUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeTargetUuid != null" >
+        mergeTargetUuid = #{mergeTargetUuid,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where detectionDetailId = #{detectionDetailId,jdbcType=VARCHAR}
+  </update>
+
+  <insert id="insertRealtimeSelective" parameterType="com.esuizhen.server.sync.bean.server.DetectionDetailRes" >
+    insert into lis_realtime_db.eci_detection_detail
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="detectionDetailId != null" >
+        detectionDetailId,
+      </if>
+      <if test="detectionReportId != null" >
+        detectionReportId,
+      </if>
+      <if test="patientId != null" >
+        patientId,
+      </if>
+      <if test="patientNo != null" >
+        patientNo,
+      </if>
+      <if test="seqNo != null" >
+        seqNo,
+      </if>
+      <if test="detectionTypeName != null" >
+        detectionTypeName,
+      </if>
+      <if test="detectionItemId != null" >
+        detectionItemId,
+      </if>
+      <if test="detectionItemCode != null" >
+        detectionItemCode,
+      </if>
+      <if test="detectionItemName != null" >
+        detectionItemName,
+      </if>
+      <if test="detectionItemEnglishName != null" >
+        detectionItemEnglishName,
+      </if>
+      <if test="detectionResult != null" >
+        detectionResult,
+      </if>
+      <if test="prompt != null" >
+        prompt,
+      </if>
+      <if test="promptType != null" >
+        promptType,
+      </if>
+      <if test="resultType != null" >
+        resultType,
+      </if>
+      <if test="unit != null" >
+        unit,
+      </if>
+      <if test="refrenceRange != null" >
+        refrenceRange,
+      </if>
+      <if test="patientUuid != null" >
+        patientUuid,
+      </if>
+      <if test="refrenceRangeMin != null" >
+        refrenceRangeMin,
+      </if>
+      <if test="refrenceRangeMax != null" >
+        refrenceRangeMax,
+      </if>
+      <if test="detectionMethod != null" >
+        detectionMethod,
+      </if>
+      <if test="reagentBrand != null" >
+        reagentBrand,
+      </if>
+      <if test="instrument != null" >
+        instrument,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+      <if test="updateTime != null" >
+        updateTime,
+      </if>
+      <if test="syncTime != null" >
+        syncTime,
+      </if>
+      <if test="rawDetectionItemCode != null" >
+        rawDetectionItemCode,
+      </if>
+      <if test="detailID != null" >
+        detailID,
+      </if>
+      <if test="mainID != null" >
+        mainID,
+      </if>
+      <if test="syncflag != null" >
+        syncflag,
+      </if>
+      <if test="rawCreateTime != null" >
+        rawCreateTime,
+      </if>
+      <if test="mergeFlag != null" >
+        mergeFlag,
+      </if>
+      <if test="mergeFrom != null" >
+        mergeFrom,
+      </if>
+      <if test="mergeTarget != null" >
+        mergeTarget,
+      </if>
+      <if test="mergeTime != null" >
+        mergeTime,
+      </if>
+      <if test="mergeFromUuid != null" >
+        mergeFromUuid,
+      </if>
+      <if test="mergeTargetUuid != null" >
+        mergeTargetUuid,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="detectionDetailId != null" >
+        #{detectionDetailId,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionReportId != null" >
+        #{detectionReportId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="seqNo != null" >
+        #{seqNo,jdbcType=INTEGER},
+      </if>
+      <if test="detectionTypeName != null" >
+        #{detectionTypeName,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionItemId != null" >
+        #{detectionItemId,jdbcType=INTEGER},
+      </if>
+      <if test="detectionItemCode != null" >
+        #{detectionItemCode,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionItemName != null" >
+        #{detectionItemName,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionItemEnglishName != null" >
+        #{detectionItemEnglishName,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionResult != null" >
+        #{detectionResult,jdbcType=VARCHAR},
+      </if>
+      <if test="prompt != null" >
+        #{prompt,jdbcType=VARCHAR},
+      </if>
+      <if test="promptType != null" >
+        #{promptType,jdbcType=INTEGER},
+      </if>
+      <if test="resultType != null" >
+        #{resultType,jdbcType=INTEGER},
+      </if>
+      <if test="unit != null" >
+        #{unit,jdbcType=VARCHAR},
+      </if>
+      <if test="refrenceRange != null" >
+        #{refrenceRange,jdbcType=VARCHAR},
+      </if>
+      <if test="patientUuid != null" >
+        #{patientUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="refrenceRangeMin != null" >
+        #{refrenceRangeMin,jdbcType=VARCHAR},
+      </if>
+      <if test="refrenceRangeMax != null" >
+        #{refrenceRangeMax,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionMethod != null" >
+        #{detectionMethod,jdbcType=CHAR},
+      </if>
+      <if test="reagentBrand != null" >
+        #{reagentBrand,jdbcType=CHAR},
+      </if>
+      <if test="instrument != null" >
+        #{instrument,jdbcType=CHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncTime != null" >
+        #{syncTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="rawDetectionItemCode != null" >
+        #{rawDetectionItemCode,jdbcType=VARCHAR},
+      </if>
+      <if test="detailID != null" >
+        #{detailID,jdbcType=BIGINT},
+      </if>
+      <if test="mainID != null" >
+        #{mainID,jdbcType=BIGINT},
+      </if>
+      <if test="syncflag != null" >
+        #{syncflag,jdbcType=INTEGER},
+      </if>
+      <if test="rawCreateTime != null" >
+        #{rawCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFlag != null" >
+        #{mergeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mergeFrom != null" >
+        #{mergeFrom,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTarget != null" >
+        #{mergeTarget,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTime != null" >
+        #{mergeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFromUuid != null" >
+        #{mergeFromUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeTargetUuid != null" >
+        #{mergeTargetUuid,jdbcType=VARCHAR},
+      </if>
+    </trim>
+    ON DUPLICATE KEY UPDATE
+    createTime = VALUES(createTime)
+  </insert>
+  <update id="updateRealtimeByPrimaryKeySelective" parameterType="com.esuizhen.server.sync.bean.server.DetectionDetailRes" >
+    update lis_realtime_db.eci_detection_detail
+    <set>
+      <if test="detectionReportId != null" >
+        detectionReportId = #{detectionReportId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        patientId = #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        patientNo = #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="seqNo != null" >
+        seqNo = #{seqNo,jdbcType=INTEGER},
+      </if>
+      <if test="detectionTypeName != null" >
+        detectionTypeName = #{detectionTypeName,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionItemId != null" >
+        detectionItemId = #{detectionItemId,jdbcType=INTEGER},
+      </if>
+      <if test="detectionItemCode != null" >
+        detectionItemCode = #{detectionItemCode,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionItemName != null" >
+        detectionItemName = #{detectionItemName,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionItemEnglishName != null" >
+        detectionItemEnglishName = #{detectionItemEnglishName,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionResult != null" >
+        detectionResult = #{detectionResult,jdbcType=VARCHAR},
+      </if>
+      <if test="prompt != null" >
+        prompt = #{prompt,jdbcType=VARCHAR},
+      </if>
+      <if test="promptType != null" >
+        promptType = #{promptType,jdbcType=INTEGER},
+      </if>
+      <if test="resultType != null" >
+        resultType = #{resultType,jdbcType=INTEGER},
+      </if>
+      <if test="unit != null" >
+        unit = #{unit,jdbcType=VARCHAR},
+      </if>
+      <if test="refrenceRange != null" >
+        refrenceRange = #{refrenceRange,jdbcType=VARCHAR},
+      </if>
+      <if test="patientUuid != null" >
+        patientUuid = #{patientUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="refrenceRangeMin != null" >
+        refrenceRangeMin = #{refrenceRangeMin,jdbcType=VARCHAR},
+      </if>
+      <if test="refrenceRangeMax != null" >
+        refrenceRangeMax = #{refrenceRangeMax,jdbcType=VARCHAR},
+      </if>
+      <if test="detectionMethod != null" >
+        detectionMethod = #{detectionMethod,jdbcType=CHAR},
+      </if>
+      <if test="reagentBrand != null" >
+        reagentBrand = #{reagentBrand,jdbcType=CHAR},
+      </if>
+      <if test="instrument != null" >
+        instrument = #{instrument,jdbcType=CHAR},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncTime != null" >
+        syncTime = #{syncTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="rawDetectionItemCode != null" >
+        rawDetectionItemCode = #{rawDetectionItemCode,jdbcType=VARCHAR},
+      </if>
+      <if test="detailID != null" >
+        detailID = #{detailID,jdbcType=BIGINT},
+      </if>
+      <if test="mainID != null" >
+        mainID = #{mainID,jdbcType=BIGINT},
+      </if>
+      <if test="syncflag != null" >
+        syncflag = #{syncflag,jdbcType=INTEGER},
+      </if>
+      <if test="rawCreateTime != null" >
+        rawCreateTime = #{rawCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFlag != null" >
+        mergeFlag = #{mergeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mergeFrom != null" >
+        mergeFrom = #{mergeFrom,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTarget != null" >
+        mergeTarget = #{mergeTarget,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTime != null" >
+        mergeTime = #{mergeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFromUuid != null" >
+        mergeFromUuid = #{mergeFromUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeTargetUuid != null" >
+        mergeTargetUuid = #{mergeTargetUuid,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where detectionDetailId = #{detectionDetailId,jdbcType=VARCHAR}
+  </update>
+</mapper>

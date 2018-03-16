@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.MetaDao">
+
+	<!-- 查询职业元数据 -->
+	<select id="queryMetaInfoOccupationList" resultType="com.esuizhen.cloudservice.user.model.TMetaInfoOccupation">
+		SELECT
+			t1.occupationId,
+			t1.occupationCode,
+			t1.occupationName,
+			t1.description,
+			t1.parentCode
+		FROM user_db.meta_occupation t1
+		<if test="occupationName != null">
+			WHERE t1.occupationName = #{occupationName}
+		</if>
+	</select>
+	<!-- 查询民族元数据 -->
+	<select id="queryMetaInfoNationList" resultType="com.esuizhen.cloudservice.user.model.TMetaInfoNation">
+		SELECT
+			t1.nationId,
+			t1.nationCode,
+			t1.nationName,
+			t1.pyCode,
+			t1.romeCode
+		FROM user_db.meta_nation t1
+		<if test="nationName != null">
+			WHERE t1.nationName = #{nationName}
+		</if>
+	</select>
+	
+	<!-- 查询国籍元数据 -->
+	<select id="queryMetaInfoNationalityList" resultType="com.esuizhen.cloudservice.user.model.TMetaInfoNationality">
+		SELECT
+			t1.nationalityId,
+			t1.nationalityCode,
+			t1.nationalityName
+		FROM user_db.meta_nationality t1
+		<if test="nationalityName != null">
+			WHERE t1.nationalityName = #{nationalityName}
+		</if>
+	</select>
+
+	<!-- 查询城市 -->
+	<select id="queryCity" resultType="com.esuizhen.cloudservice.user.bean.TCityInfo">
+		select cityId,cityCode,cityName from user_db.meta_city
+		where 1=1
+		<if test="cityCode != null">
+			and cityCode like #{cityCode}
+		</if>
+		<if test="notCityCode!=null">
+			and cityCode not like #{notCityCode}
+		</if>
+	</select>
+	<select id="queryMetaInfoRelativesList" resultType="com.esuizhen.cloudservice.user.model.TMetaInfoRelatives">
+		SELECT
+			t1.relationId,
+			t1.relationName
+		FROM user_db.meta_relation t1
+	</select>
+	<select id="queryMetaInfoRelatives" parameterType="Integer" resultType="com.esuizhen.cloudservice.user.model.TMetaInfoRelatives">
+		SELECT
+			t1.relationId,
+			t1.relationName
+		FROM user_db.meta_relation t1 where t1.relationId=#{relationId}
+	</select>
+	
+	<select id="queryMetaInfoMissingTypeList" resultType="com.esuizhen.cloudservice.user.model.TMetaInfoFaultType">
+		SELECT
+			t1.id,
+			t1.code,
+			t1.name
+		FROM user_db.meta_data_missing_type t1
+	</select>
+	<select id="queryMetaInfoInvalidTypeList" resultType="com.esuizhen.cloudservice.user.model.TMetaInfoFaultType">
+		SELECT
+			t1.id,
+			t1.code,
+			t1.name
+		FROM user_db.meta_data_invalid_type t1
+	</select>
+	
+</mapper>

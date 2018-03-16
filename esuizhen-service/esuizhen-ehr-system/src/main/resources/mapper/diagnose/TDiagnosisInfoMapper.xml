@@ -1,0 +1,665 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.diagnose.TDiagnosisInfoDao">
+    <sql id="base_column_list">
+       	di.diagnosisId,
+       	di.seq,
+		di.emrId,
+		di.inhospitalId,
+		di.clinicMedicalId,
+		di.patientId,
+		di.patientNo,
+		di.diseaseTypeId,
+		di.diagnosisTypeId,
+		di.diagnosis,
+		di.diseaseCode AS diagnosisCode,
+		di.pathologyDiagnosis,
+		di.pathologyDiagnosisCode,
+		di.inHospitalCondition,
+		di.diagnosisBasisId,
+		di.disagnosisPeriodizationId,
+		di.diagnosisExplain,
+		di.organCode,
+		(select meta.organName from meta_e_icd_o meta WHERE meta.organCode=di.organCode) organName,
+		<!-- add by zhuguo -->
+		di.organCode1,
+		(select meta.organName from meta_e_icd_o meta WHERE meta.organCode=di.organCode1) organName1,
+		di.organCode2,
+		(select meta.organName from meta_e_icd_o meta WHERE meta.organCode=di.organCode2) organName2,
+		<!-- end -->
+		di.isFollowup,
+		di.sourceCancerCount,
+		di.treatmentHistory,
+		di.isSourceDiagnosis,
+		di.outhospitalCondition,
+		di.remark,
+		di.visitTime,
+		di.operatorId,
+		(SELECT u.trueName FROM user_db.u_user u WHERE u.userId=di.operatorId) operatorName,
+		di.createTime,
+		di.updateTime,
+		di.suspectedDiagnosisFlag,di.surgeryFlag,di.firstdiagnosisHospitalId,di.firstdiagnosisHospitalName,di.firstdiagnosisTime,di.specialDiseaseDiagnosisId,di.diagnosisDoctorId,di.diagnosisDoctorName,
+		di.outhospitalDeptId,
+		<!-- 
+		h.tumourPeriodizationTId,
+		h.tumourPeriodizationNId,
+		h.tumourPeriodizationM1Id,
+		h.tumourPeriodizationT,
+		h.tumourPeriodizationN,
+		h.tumourPeriodizationM1,
+		 -->
+		di.tumourPeriodizationT,
+		di.tumourPeriodizationN,
+		di.tumourPeriodizationM1,
+		di.tumourPeriodizationClinic,di.tumourPeriodization,di.outhospitalDiagnosisCode,di.outhospitalDiagnosis,di.clinicNo,di.specialDiseaseRegisterId
+    </sql>
+    
+    <insert id="createDiagnosisInfo" parameterType="com.esuizhen.cloudservice.ehr.model.diagnose.TDiagnosisInfo" useGeneratedKeys="true" keyProperty="diagnosisId">
+    	INSERT INTO e_diagnosis_info
+    	<trim prefix="(" suffix=")" suffixOverrides=",">
+	    	<if test="diagnosisId != null">
+	    		diagnosisId,
+	    	</if>
+	    	seq,
+	    	<if test="emrId != null">
+	    		emrId,
+	    	</if>
+	    	<if test="inhospitalId != null">
+	    		inhospitalId,
+	    	</if>
+	    	<if test="clinicMedicalId != null">
+	    		clinicMedicalId,
+	    	</if>
+	    	<if test="patientId != null">
+	    		patientId,
+	    	</if>
+	    	<if test="patientNo != null">
+	    		patientNo,
+	    	</if>
+	    	<if test="diseaseTypeId != null">
+	    		diseaseTypeId,
+	    	</if>
+	    	<if test="diagnosisTypeId != null">
+	    		diagnosisTypeId,
+	    	</if>
+	    	<if test="diagnosis != null">
+	    		diagnosis,
+	    	</if>
+	    	<if test="diagnosisCode != null">
+	    		diseaseCode,
+	    	</if>
+	    	<if test="pathologyDiagnosis != null">
+	    		pathologyDiagnosis,
+	    	</if>
+	    	<if test="pathologyDiagnosisCode != null">
+	    		pathologyDiagnosisCode,
+	    	</if>
+	    	<if test="inHospitalCondition != null">
+	    		inHospitalCondition,
+	    	</if>
+	    	<if test="diagnosisBasisId != null">
+	    		diagnosisBasisId,
+	    	</if>
+	    	<if test="diseaseBasis != null">
+	    		diseaseBasis,
+	    	</if>
+	    	<if test="disagnosisPeriodizationId != null">
+	    		disagnosisPeriodizationId,
+	    	</if>
+	    	<if test="diagnosisExplain != null">
+	    		diagnosisExplain,
+	    	</if>
+	    	<if test="organCode != null">
+	    		organCode,
+	    	</if>
+	    	<if test="organName != null">
+	    		organName,
+	    	</if>
+	    	<!-- add by zhuguo -->
+	    	<if test="organCode1 != null">
+	    		organCode1,
+	    	</if>
+	    	<if test="organCode2 != null">
+	    		organCode2,
+	    	</if>
+	    	<!-- end -->
+	    	<if test="isFollowup != null">
+	    		isFollowup,
+	    	</if>
+	    	<if test="sourceCancerCount != null">
+	    		sourceCancerCount,
+	    	</if>
+	    	<if test="treatmentHistory != null">
+	    		treatmentHistory,
+	    	</if>
+	    	<if test="isSourceDiagnosis != null">
+	    		isSourceDiagnosis,
+	    	</if>
+	    	<if test="outhospitalCondition != null">
+	    		outhospitalCondition,
+	    	</if>
+	    	<if test="remark != null">
+	    		remark,
+	    	</if>
+	    	<if test="visitTime != null">
+	    		visitTime,
+	    	</if>
+	    	<if test="suspectedDiagnosisFlag != null">
+	    		suspectedDiagnosisFlag,
+	    	</if>
+	    	<if test="surgeryFlag != null">
+	    		surgeryFlag,
+	    	</if>
+	    	<if test="firstdiagnosisHospitalId != null">
+	    		firstdiagnosisHospitalId,
+	    	</if>
+	    	<if test="firstdiagnosisHospitalName != null">
+	    		firstdiagnosisHospitalName,
+	    	</if>
+	    	<if test="firstdiagnosisTime != null">
+	    		firstdiagnosisTime,
+	    	</if>
+	    	<if test="specialDiseaseDiagnosisId != null">
+	    		specialDiseaseDiagnosisId,
+	    	</if>
+	    	<if test="diagnosisDoctorId != null">
+	    		diagnosisDoctorId,
+	    	</if>
+	    	<if test="diagnosisDoctorName != null">
+	    		diagnosisDoctorName,
+	    	</if>
+	    	<if test="operatorId != null">
+                operatorId ,
+            </if>
+	    	<if test="creator != null">
+	    		creator,
+	    	</if>
+	    	<if test="outhospitalDeptId != null">
+	    		outhospitalDeptId,
+	    	</if>
+	    		tumourPeriodizationT,
+	    		tumourPeriodizationN,
+	    		tumourPeriodizationM1,
+	    		tumourPeriodizationClinic,
+	    	<if test="tumourPeriodizationT != null or tumourPeriodizationN != null or tumourPeriodizationM1 != null or tumourPeriodizationClinic != null">
+	    		tumourPeriodization,
+	    	</if>
+	    	<if test="outhospitalDiagnosisCode != null">
+                outhospitalDiagnosisCode,
+            </if>
+            <if test="outhospitalDiagnosis != null">
+                outhospitalDiagnosis,
+            </if>
+            <if test="clinicNo != null">
+                clinicNo,
+            </if>
+	    	<if test="createTime != null">
+	    		createTime,
+	    	</if>
+	    	<if test="updateTime != null">
+                updateTime,
+            </if>
+            <if test="specialDiseaseRegisterId != null">
+                specialDiseaseRegisterId
+            </if>
+    	</trim> 
+    	<trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+			<if test="diagnosisId != null">
+	    		#{diagnosisId} ,
+	    	</if>
+	    	(select tmp.seq from (select max(seq)+1 seq from e_diagnosis_info where patientId=#{patientId} and inhospitalId=#{inhospitalId}) tmp),
+			<if test="emrId != null">
+                #{emrId} ,
+            </if>
+	        <if test="inhospitalId != null">
+                #{inhospitalId} ,
+            </if>
+            <if test="clinicMedicalId != null">
+                #{clinicMedicalId} ,
+            </if>
+	        <if test="patientId != null">
+                #{patientId} ,
+            </if>
+	        <if test="patientNo != null">
+                #{patientNo} ,
+            </if>
+	        <if test="diseaseTypeId != null">
+                #{diseaseTypeId} ,
+            </if>
+	        <if test="diagnosisTypeId != null">
+                #{diagnosisTypeId} ,
+            </if>
+	        <if test="diagnosis != null">
+                #{diagnosis} ,
+            </if>
+	        <if test="diagnosisCode != null">
+                #{diagnosisCode} ,
+            </if>
+	        <if test="pathologyDiagnosis != null">
+                #{pathologyDiagnosis} ,
+            </if>
+	        <if test="pathologyDiagnosisCode != null">
+                #{pathologyDiagnosisCode} ,
+            </if>
+	        <if test="inHospitalCondition != null">
+                #{inHospitalCondition} ,
+            </if>
+	        <if test="diagnosisBasisId != null">
+                #{diagnosisBasisId} ,
+            </if>
+            <if test="diseaseBasis != null">
+	    		#{diseaseBasis},
+	    	</if>
+	        <if test="disagnosisPeriodizationId != null">
+                #{disagnosisPeriodizationId} ,
+            </if>
+	        <if test="diagnosisExplain != null">
+                #{diagnosisExplain} ,
+            </if>
+	        <if test="organCode != null">
+                #{organCode} ,
+            </if>
+            <if test="organName != null">
+                #{organName} ,
+            </if>
+            <!-- add by zhuguo -->
+	        <if test="organCode1 != null">
+                #{organCode1} ,
+            </if>
+	        <if test="organCode2 != null">
+                #{organCode2} ,
+            </if>
+            <!-- end -->
+	        <if test="isFollowup != null">
+                #{isFollowup} ,
+            </if>
+	        <if test="sourceCancerCount != null">
+                #{sourceCancerCount} ,
+            </if>
+	        <if test="treatmentHistory != null">
+                #{treatmentHistory} ,
+            </if>
+	        <if test="isSourceDiagnosis != null">
+                #{isSourceDiagnosis} ,
+            </if>
+            <if test="outhospitalCondition != null">
+                #{outhospitalCondition} ,
+            </if>
+	        <if test="remark != null">
+                #{remark} ,
+            </if>
+	        <if test="visitTime != null">
+                #{visitTime} ,
+            </if>
+            <if test="suspectedDiagnosisFlag != null">
+	    		#{suspectedDiagnosisFlag},
+	    	</if>
+	    	<if test="surgeryFlag != null">
+	    		#{surgeryFlag},
+	    	</if>
+	    	<if test="firstdiagnosisHospitalId != null">
+	    		#{firstdiagnosisHospitalId},
+	    	</if>
+	    	<if test="firstdiagnosisHospitalName != null">
+	    		#{firstdiagnosisHospitalName},
+	    	</if>
+	    	<if test="firstdiagnosisTime != null">
+	    		#{firstdiagnosisTime},
+	    	</if>
+	    	<if test="specialDiseaseDiagnosisId != null">
+	    		#{specialDiseaseDiagnosisId},
+	    	</if>
+	    	<if test="diagnosisDoctorId != null">
+	    		#{diagnosisDoctorId},
+	    	</if>
+	    	<if test="diagnosisDoctorName != null">
+	    		#{diagnosisDoctorName},
+	    	</if>
+            <if test="operatorId != null">
+                #{operatorId} ,
+            </if>
+            <if test="creator != null">
+	    		#{creator},
+	    	</if>
+	    	<if test="outhospitalDeptId != null">
+	    		#{outhospitalDeptId},
+	    	</if>
+	    	
+	    		#{tumourPeriodizationT},
+	    		#{tumourPeriodizationN},
+	    		#{tumourPeriodizationM1},
+	    		#{tumourPeriodizationClinic},
+	    	<if test="tumourPeriodizationT != null or tumourPeriodizationN != null or tumourPeriodizationM1 != null or tumourPeriodizationClinic != null">
+	    		CONCAT(IFNULL(#{tumourPeriodizationT},''),IFNULL(#{tumourPeriodizationN},''),IFNULL(#{tumourPeriodizationM1},''),IFNULL(#{tumourPeriodizationClinic},'')),
+	    	</if>
+	    	<if test="outhospitalDiagnosisCode != null">
+                #{outhospitalDiagnosisCode},
+            </if>
+            <if test="outhospitalDiagnosis != null">
+                #{outhospitalDiagnosis},
+            </if>
+            <if test="clinicNo != null">
+                #{clinicNo},
+            </if>
+	    	<if test="createTime != null">
+	    		#{createTime},
+	    	</if>
+	    	<if test="updateTime != null">
+                #{updateTime},
+            </if>
+            <if test="specialDiseaseRegisterId != null">
+                #{specialDiseaseRegisterId}
+            </if>
+    	</trim>
+    	
+    </insert>
+    <insert id="batchInsertTDiagnosisInfo" useGeneratedKeys="true" keyProperty="diagnosisId">
+    	INSERT INTO e_diagnosis_info(
+    		diagnosisId,
+    		emrId,
+    		inhospitalId,
+    		clinicMedicalId,
+    		patientId,
+    		patientNo,
+    		diseaseTypeId,
+    		diagnosisTypeId,
+    		diagnosis,
+    		diseaseCode,
+    		pathologyDiagnosis,
+    		pathologyDiagnosisCode,
+    		inHospitalCondition,
+    		diagnosisBasisId,
+    		diseaseBasis,
+    		disagnosisPeriodizationId,
+    		diagnosisExplain,
+    		organCode,
+    		organName,
+    		isFollowup,
+    		sourceCancerCount,
+    		treatmentHistory,
+    		isSourceDiagnosis,
+    		outhospitalCondition,
+    		remark,
+    		visitTime,
+    		suspectedDiagnosisFlag,
+    		surgeryFlag,
+    		firstdiagnosisHospitalId,
+    		firstdiagnosisHospitalName,
+    		firstdiagnosisTime,
+    		specialDiseaseDiagnosisId,
+    		diagnosisDoctorId,
+    		diagnosisDoctorName,
+            operatorId,
+    		creator,
+    		outhospitalDeptId,
+    		tumourPeriodizationT,
+    		tumourPeriodizationN,
+    		tumourPeriodizationM1,
+    		tumourPeriodizationClinic,
+    		tumourPeriodization,
+            outhospitalDiagnosisCode,
+            outhospitalDiagnosis,
+            clinicNo,
+    		createTime,
+            updateTime
+    	)  VALUES 
+    	<foreach collection="diagnosisList" item="item" separator=",">
+    		(#{item.diagnosisId},
+    		0,
+    		#{item.inhospitalId},
+    		#{item.clinicMedicalId},
+    		#{item.patientId},
+    		#{item.patientNo},
+    		#{item.diseaseTypeId},
+    		#{item.diagnosisTypeId},
+    		#{item.diagnosis},
+    		#{item.diagnosisCode},
+    		#{item.pathologyDiagnosis},
+    		#{item.pathologyDiagnosisCode},
+    		#{item.inHospitalCondition},
+    		#{item.diagnosisBasisId},
+    		#{item.diseaseBasis},
+    		#{item.disagnosisPeriodizationId},
+    		#{item.diagnosisExplain},
+    		#{item.organCode},
+    		#{item.organName},
+    		#{item.isFollowup},
+    		#{item.sourceCancerCount},
+    		#{item.treatmentHistory},
+    		#{item.isSourceDiagnosis},
+    		#{item.outhospitalCondition},
+    		#{item.remark},
+    		#{item.visitTime},
+    		#{item.suspectedDiagnosisFlag},
+    		#{item.surgeryFlag},
+    		#{item.firstdiagnosisHospitalId},
+    		#{item.firstdiagnosisHospitalName},
+    		#{item.firstdiagnosisTime},
+    		#{item.specialDiseaseDiagnosisId},
+    		#{item.diagnosisDoctorId},
+    		#{item.diagnosisDoctorName},
+            #{item.operatorId},
+    		#{item.creator},
+    		#{item.outhospitalDeptId},
+    		#{item.tumourPeriodizationT},
+    		#{item.tumourPeriodizationN},
+    		#{item.tumourPeriodizationM1},
+    		#{item.tumourPeriodizationClinic},
+    		#{item.tumourPeriodization},
+            #{item.outhospitalDiagnosisCode},
+            #{item.outhospitalDiagnosis},
+            #{item.clinicNo},
+    		NOW(),
+            NOW())
+    	</foreach>
+    </insert>
+	
+	<update id="updateDiagnosisInfo" parameterType="com.esuizhen.cloudservice.ehr.model.diagnose.TDiagnosisInfo">
+        UPDATE e_diagnosis_info 
+        <set>
+	        <if test="emrId != null">
+                emrId = #{emrId} ,
+            </if>
+	        <if test="inhospitalId != null">
+                inhospitalId = #{inhospitalId} ,
+            </if>
+            <if test="clinicMedicalId != null">
+                clinicMedicalId = #{clinicMedicalId} ,
+            </if>
+	        <if test="patientId != null">
+                patientId = #{patientId} ,
+            </if>
+	        <if test="patientNo != null">
+                patientNo = #{patientNo} ,
+            </if>
+	        <if test="diseaseTypeId != null">
+                diseaseTypeId = #{diseaseTypeId} ,
+            </if>
+	        <if test="diagnosisTypeId != null">
+                diagnosisTypeId = #{diagnosisTypeId} ,
+            </if>
+	        <if test="diagnosis != null">
+                diagnosis = #{diagnosis} ,
+            </if>
+	        <if test="diagnosisCode != null">
+                diseaseCode = #{diagnosisCode} ,
+            </if>
+	        <if test="pathologyDiagnosis != null">
+                pathologyDiagnosis = #{pathologyDiagnosis} ,
+            </if>
+	        <if test="pathologyDiagnosisCode != null">
+                pathologyDiagnosisCode = #{pathologyDiagnosisCode} ,
+            </if>
+	        <if test="inHospitalCondition != null">
+                inHospitalCondition = #{inHospitalCondition} ,
+            </if>
+	        <if test="diagnosisBasisId != null">
+                diagnosisBasisId = #{diagnosisBasisId} ,
+            </if>
+	        <if test="disagnosisPeriodizationId != null">
+                disagnosisPeriodizationId = #{disagnosisPeriodizationId} ,
+            </if>
+	        <if test="diagnosisExplain != null">
+                diagnosisExplain = #{diagnosisExplain} ,
+            </if>
+	        <if test="organCode != null">
+                organCode = #{organCode} ,
+            </if>
+	        <if test="isFollowup != null">
+                isFollowup = #{isFollowup} ,
+            </if>
+	        <if test="sourceCancerCount != null">
+                sourceCancerCount = #{sourceCancerCount} ,
+            </if>
+	        <if test="treatmentHistory != null">
+                treatmentHistory = #{treatmentHistory} ,
+            </if>
+	        <if test="isSourceDiagnosis != null">
+                isSourceDiagnosis = #{isSourceDiagnosis} ,
+            </if>
+            <if test="outhospitalCondition != null">
+                outhospitalCondition = #{outhospitalCondition} ,
+            </if>
+	        <if test="remark != null">
+                remark = #{remark} ,
+            </if>
+	        <if test="visitTime != null">
+                visitTime = #{visitTime} ,
+            </if>
+	        <if test="operatorId != null">
+                operatorId = #{operatorId} ,
+            </if>
+            	tumourPeriodizationT=#{tumourPeriodizationT},
+            	tumourPeriodizationN=#{tumourPeriodizationN},
+            	tumourPeriodizationM1=#{tumourPeriodizationM1},
+            	tumourPeriodizationClinic=#{tumourPeriodizationClinic},
+            	tumourPeriodization=#{tumourPeriodization},
+            <if test="tumourPeriodization != null">
+            </if>
+            <!-- add by zhuguo -->
+            <if test="organCode1 != null">
+                organCode1 = #{organCode1} ,
+            </if>
+            <if test="organCode2 != null">
+                organCode2 = #{organCode2} ,
+            </if>
+            <if test="suspectedDiagnosisFlag != null">
+                suspectedDiagnosisFlag = #{suspectedDiagnosisFlag} ,
+            </if>
+            <!-- end -->
+            updateTime = NOW() 
+        </set>
+        WHERE 
+	        diagnosisId = #{diagnosisId}
+	</update>
+
+    <delete id="deleteDiagnosisInfoById" parameterType="java.lang.String">
+        DELETE FROM e_diagnosis_info WHERE diagnosisId = #{diagnosisId} 
+    </delete>
+    
+    <delete id="deleteDiagnosisInfoByInhospitalId">
+        DELETE FROM e_diagnosis_info WHERE inhospitalId=#{inhospitalId}
+    </delete>
+    
+    <delete id="deleteDiagnosisInfo">
+        DELETE FROM e_diagnosis_info 
+        <where>
+        	<choose>
+        		<when test="inhospitalId != null">
+        			AND inhospitalId=#{inhospitalId}
+        		</when>
+        		<when test="clinicMedicalId != null">
+        			AND clinicMedicalId=#{clinicMedicalId}
+        		</when>
+        		<otherwise>
+        			AND patientId=#{patientId}
+        		</otherwise>
+        	</choose>
+        	<if test="specialDiseaseRegisterId != null">
+        		AND specialDiseaseRegisterId=#{specialDiseaseRegisterId}
+        	</if>
+        </where>
+    </delete>
+    
+    <select id="queryDiagnosisInfoById" resultType="com.esuizhen.cloudservice.ehr.model.diagnose.TDiagnosisInfo">
+		SELECT 
+        	<include refid="base_column_list"/>
+		FROM e_diagnosis_info di
+		LEFT JOIN ehr_db.ei_inhospital_note h ON h.inhospitalId=di.inhospitalId
+	    WHERE 
+	        di.diagnosisId = #{diagnosisId} 
+	</select>
+	
+	<select id="queryDiagnosisInfoBySelective" resultType="com.esuizhen.cloudservice.ehr.model.diagnose.TDiagnosisInfo">
+		SELECT <include refid="base_column_list"/> 
+		FROM e_diagnosis_info di
+		LEFT JOIN ehr_db.ei_inhospital_note h ON h.inhospitalId=di.inhospitalId
+		WHERE diagnosisTypeId = 1 
+		<include refid="DiagnosisTypeSql"/>
+		UNION
+		(
+		SELECT <include refid="base_column_list"/> 
+		FROM e_diagnosis_info di
+		LEFT JOIN ehr_db.ei_inhospital_note h ON h.inhospitalId=di.inhospitalId
+		WHERE diagnosisTypeId != 1 
+		<include refid="DiagnosisTypeSql"/>
+		<if test="diagnosisNoSort != null">
+        	order by seq ASC
+        </if>
+        )
+        order by seq ASC
+	</select>
+	<sql id="DiagnosisTypeSql">
+		<choose>
+			<when test="inhospitalId != null">
+				AND di.inhospitalId=#{inhospitalId}
+			</when>
+			<when test="clinicMedicalId != null">
+       			AND clinicMedicalId=#{clinicMedicalId}
+       		</when>
+			<otherwise>
+				AND di.patientId=#{patientId}
+			</otherwise>
+		</choose>
+		<if test="specialDiseaseRegisterId != null">
+			AND di.specialDiseaseRegisterId=#{specialDiseaseRegisterId}
+		</if>
+		<if test="patientType != null">
+        	AND EXISTS(
+        		SELECT 1 FROM user_db.u_patient t2 WHERE di.patientId=t2.patientId AND t2.patientType=#{patientType}
+        	)
+        </if>
+	</sql>
+	<!-- 根据患者id获取第一原发 -->
+	<select id="queryDiagnosisInfoByPatientId" resultType="com.esuizhen.cloudservice.ehr.model.diagnose.TDiagnosisInfo">
+		<!-- SELECT 
+        	<include refid="base_column_list"/>
+		FROM e_diagnosis_info di 
+	    WHERE 
+	        di.patientId = #{patientId} AND di.isSourceDiagnosis=1
+	    ORDER BY di.visitTime LIMIT 1 -->
+	    
+	    SELECT s1.* from (
+		SELECT t.* from (
+    	SELECT s.* from (
+			SELECT d.patientId,d.inhospitalId,d.visitTime,d.diagnosisId,d.diseaseTypeId,d.icdDiseaseTypeId,d.diagnosisTypeId,d.diagnosis,d.diseaseCode AS diagnosisCode,mt.tumorFlag,mt.sourceDiagnosisFlag,d.pathologyDiagnosis,d.pathologyDiagnosisCode
+      		from ehr_db.meta_c_disease_type_icd mt
+			JOIN ehr_db.e_diagnosis_info d  ON d.icdDiseaseTypeId=mt.icdDiseaseTypeId
+			JOIN ehr_db.meta_e_diagnosis_type md ON d.diagnosisTypeId=md.diagnosisTypeId
+      		WHERE d.patientId=#{patientId} AND md.flag=1
+     		ORDER BY mt.tumorFlag desc,mt.sourceDiagnosisFlag desc,d.diagnosisTypeId asc
+      	) s GROUP BY s.inhospitalId
+		) t  ORDER BY t.tumorFlag desc,t.sourceDiagnosisFlag desc,t.visitTime asc) s1 GROUP BY s1.patientId
+	</select>
+	<!-- 调用存储过程,刷新病种 IN textpatientid int,IN textInhospitalId int-->
+  <select id="freshPatientDiseases" statementType="CALLABLE" parameterType="java.util.HashMap">
+  	<!-- {call freshPatientDiseases(#{textpatientid,mode=IN},#{textInhospitalId,mode=IN})} -->
+  	<![CDATA[
+    	 {call user_db.freshPatientDiseasesByPatientId(#{textpatientid,mode=IN},#{error,mode=OUT,jdbcType=INTEGER})}
+	]]>
+  </select>
+</mapper>
+

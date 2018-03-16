@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.report.InspectionReportDao">
+    <resultMap id="detectionReportDetailInfoMap" type="com.esuizhen.cloudservice.ehr.bean.TDetectionReportDetailInfo">
+    	<result column="reportTitle" property="reportTitle" />
+    	<result column="diagnosis" property="diagnosis" />
+    	<result column="deptName" property="deptName" />
+    	<result column="applyTime" property="applyTime" />
+    	<result column="patientNo" property="patientNo" />
+    	<result column="sampleType" property="sampleType" />
+    	<result column="sampleTime" property="sampleTime" />
+    	<result column="reportTime" property="reportTime" />
+		<result column="hospitalId" property="hospitalId" />
+    	<result column="detectionTypeName" property="detectionTypeName" />
+    	<result column="auditDoctorName" property="auditDoctorName" />
+    	<collection property="detectionItemDetails" ofType="com.esuizhen.cloudservice.ehr.bean.TDetectionItemInfo" >
+    		<result column="detectionItemName" property="detectionItemName" />
+    		<result column="detectionResult" property="detectionResult" />
+    		<result column="unit" property="unit" />
+    		<result column="refrenceRange" property="refrenceRange" />
+    		<result column="refrenceRangeMin" property="refrenceRangeMin" />
+    		<result column="refrenceRangeMax" property="refrenceRangeMax" />
+    		<result column="prompt" property="prompt" />
+         </collection>
+    </resultMap>
+	
+	<select id="queryReportList" resultType="com.esuizhen.cloudservice.ehr.bean.TReportSimpleInfo">
+		SELECT * from 
+		(
+		SELECT
+			detectionReportId reportId,
+			applyTime,
+			2 reportType,
+			detectionTypeName inspectionContent
+		FROM
+			lis_db.eci_detection_report
+		WHERE
+		patientId=#{patientId}
+		AND
+		hospitalId=#{hospitalId}
+		<choose>
+			<when test="resultFlag!=null and resultFlag==0">
+				AND state !=3
+			</when>
+			<otherwise>
+				AND state =3
+			</otherwise>
+		</choose>
+		UNION
+			SELECT
+				examReportId reporId,
+				applyTime,
+				1 reportType,
+				examTypeName inspectionContent
+			FROM
+				lis_db.eci_exam_report
+		WHERE
+		patientId=#{patientId}
+		AND
+		hospitalId=#{hospitalId}
+		<choose>
+			<when test="resultFlag!=null and resultFlag==0">
+				AND state !=3
+			</when>
+			<otherwise>
+				AND state =3
+			</otherwise>
+		</choose>
+		)t
+		<choose>
+			<when test="sortFlag!=null and sortFlag==0">
+				order by applyTime ASC
+			</when>
+			<otherwise>
+				order by applyTime DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 查看检查报告 -->
+	<select id="queryExamReportInfoByReportId"
+		resultType="com.esuizhen.cloudservice.ehr.bean.TExamReportDetailInfo">
+	<![CDATA[
+SELECT
+	CONCAT(
+		(
+			CASE
+			WHEN ISNULL(t4.hospitalId) THEN
+				''
+			WHEN ISNULL(t4.nickName) || LENGTH(trim(t4.nickName)) < 1 THEN
+				t4.hospitalName
+			ELSE
+				t4.nickName
+			END
+		),
+		'检查报告'
+	) reportTitle,
+	examFinding,
+	CASE
+WHEN LOCATE("\\rtf1", examConclusion) > 0 THEN
+	''
+ELSE
+	examConclusion
+END examConclusion,
+ picFileUrls picFileUrl,
+ t1.hospitalId,
+ applyTime,
+ reportTime,
+ excuteTime,
+ t1.auditDoctorName,
+ t1.deptName,
+ t1.examTypeName
+FROM
+	lis_db.eci_exam_report t1
+LEFT JOIN user_db.u_hospital t4 ON t4.hospitalId = t1.hospitalId
+WHERE
+	examReportId = #{examReportId}
+		 ]]>
+	</select>
+	
+	<!-- 修改检查报告 -->
+	<update id="updateExamReportIsRead">
+		update lis_db.eci_exam_report
+		<set>
+			readFlag = 1
+		</set>
+		where
+		examReportId=#{examReportId}
+	</update>
+	
+	<!-- 查看检验报告 -->
+	<select id="queryDetectionReportInfoByReportId" resultMap="detectionReportDetailInfoMap">
+	<![CDATA[
+SELECT
+	CONCAT(
+		(
+			CASE
+			WHEN ISNULL(t4.hospitalId) THEN
+				''
+			WHEN ISNULL(t4.nickName) || LENGTH(trim(t4.nickName)) < 1 THEN
+				t4.hospitalName
+			ELSE
+				t4.nickName
+			END
+		),
+		'检验报告'
+	) reportTitle,
+	t1.hospitalId,
+	t1.diagnosis,
+	t1.deptName,
+	t1.detectionTypeName,
+	t1.applyTime,
+	t1.sampleTime,
+	t1.reportTime,
+	t2.detectionItemName,
+	t2.detectionResult,
+	t2.unit,
+	t2.refrenceRange,
+	t2.refrenceRangeMin,
+	t2.refrenceRangeMax,
+	(
+		CASE t2.prompt
+		WHEN '↓' THEN
+			'↓'
+		WHEN '↑' THEN
+			'↑'
+		ELSE
+			(
+				CASE t2.promptType
+				WHEN 3 THEN
+					'↑'
+				WHEN 4 THEN
+					'↓'
+				END
+			)
+		END
+	) prompt,
+	t1.auditDoctorName,
+	t1.sampleType
+FROM
+	lis_db.eci_detection_report t1
+LEFT JOIN lis_db.eci_detection_detail t2 ON t2.detectionReportId = t1.detectionReportId
+LEFT JOIN user_db.u_hospital t4 ON t4.hospitalId = t1.hospitalId
+WHERE
+	t1.detectionReportId = #{detectionReportId}
+		 ]]>
+	</select>
+	
+	<!-- 修改检验报告 -->
+	<update id="updateDetectionReportIsRead">
+		update lis_db.eci_detection_report
+		<set>
+			readFlag = 1
+		</set>
+		where
+		detectionReportId=#{detectionReportId}
+	</update>
+</mapper>
+

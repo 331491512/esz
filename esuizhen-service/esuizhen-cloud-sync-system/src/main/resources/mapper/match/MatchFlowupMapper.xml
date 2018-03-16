@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_match_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.match.MatchFlowupDao">
+	
+	<resultMap type="com.esuizhen.cloudservice.sync.bean.TPatientFollowupResultDetailInfo" id="baseResultMap">
+		<id column="followupResultBuffId" property="followupResultBuffId" jdbcType="VARCHAR" />
+		<result column="followupResultId" property="followupResultId" jdbcType="VARCHAR" />
+		<result column="followupTaskId" property="followupTaskId" jdbcType="VARCHAR" />
+		<result column="patientId" property="patientId" jdbcType="BIGINT" />
+		<result column="patientUuid" property="patientUuid" jdbcType="VARCHAR" />
+		<result column="operator" property="operator" jdbcType="BIGINT" />
+		<result column="operatorUuid" property="operatorUuid" jdbcType="VARCHAR" />
+		<result property="followupAssignId" column="followupAssignId" />
+		<result property="lostFollowupFlag" column="lostFollowupFlag" />
+		<result property="lostFollowupCauseResultValue" column="lostFollowupCauseResultValue" />
+		<result property="state" column="state" />
+		<result property="seq" column="seq" />
+		
+		<result column="followupResultValue" property="followupResultValue" jdbcType="INTEGER" />
+		<result column="relapseParts" property="relapseParts" jdbcType="VARCHAR" />
+		<result column="relapseDate" property="relapseDate" jdbcType="VARCHAR" />
+		<result column="transferParts" property="transferParts" jdbcType="VARCHAR" />
+		<result column="transferDate" property="transferDate" jdbcType="TIMESTAMP" />
+		<result column="deathDate" property="deathDate" jdbcType="TIMESTAMP" />
+		<result column="isInHospitalDeath" property="isInHospitalDeath" jdbcType="INTEGER" />
+		<result column="isTumourDeath" property="isTumourDeath" jdbcType="INTEGER" />
+		<result column="deathCause" property="deathCause" jdbcType="TIMESTAMP" />
+		<result column="otherCause" property="otherCause" jdbcType="VARCHAR" />
+		<result column="followUpWay" property="followUpWay" jdbcType="INTEGER" />
+		<result column="contentTemplateId" property="contentTemplateId" jdbcType="VARCHAR" />
+		<result column="followupResultPhone" property="followupResultPhone" jdbcType="VARCHAR" />
+		<result column="followupTime" property="followupTime" jdbcType="TIMESTAMP" />
+		<result column="phoneRecordUrl" property="phoneRecordUrl" jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="syncFlag" property="syncFlag" jdbcType="INTEGER" />
+		<result column="sourceFlag" property="sourceFlag" jdbcType="INTEGER" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<sql id="base_column_list">
+		t1.followupResultBuffId,t1.followupResultId,t1.followupTaskId,t1.patientId,t1.operator,
+		t1.followupAssignId,
+		t1.lostFollowupFlag,
+		t1.lostFollowupCauseResultValue,
+		t1.state,
+		t1.seq,
+		t1.followupResultValue,
+		t1.relapseParts,t1.relapseDate,t1.transferParts,t1.transferDate,
+		t1.deathDate,t1.isInHospitalDeath,t1.isTumourDeath,t1.deathCause,t1.otherCause,
+		t1.followUpWay,t1.contentTemplateId,t1.followupResultPhone,t1.followupTime,t1.phoneRecordUrl,
+		t1.remark,t1.syncFlag,t1.sourceFlag,t1.createTime,t1.updateTime,t1.patientUuid,t1.operatorUuid
+	</sql>
+	
+	<select id="findByPatientUuid" parameterType="java.lang.String" resultMap="baseResultMap">
+		SELECT <include refid="base_column_list"></include> FROM cloud_sync_match_db.followup_result_buff t1
+		WHERE t1.patientUuid=#{patientUuid}
+	</select>
+
+	<!-- 添加到匹配库 -->
+	<insert id="addResultRecord2Match"
+		parameterType="com.esuizhen.cloudservice.sync.bean.TPatientFollowupResultDetailInfo">
+		INSERT INTO cloud_sync_match_db.followup_result_buff(
+			followupResultBuffId,
+			followupResultId,
+			followupTaskId,
+			patientId,
+			operator,
+			followupAssignId,
+			lostFollowupFlag,
+			lostFollowupCauseResultValue,
+			state,
+			seq,
+			followupResultValue,
+			relapseParts,
+			relapseDate,
+			transferParts,
+			transferDate,
+			deathDate,
+			isInHospitalDeath,
+			isTumourDeath,
+			deathCause,
+			otherCause,
+			followUpWay,
+			contentTemplateId,
+			followupResultPhone,
+			followupTime,
+			phoneRecordUrl,
+			remark,
+			syncFlag,
+			sourceFlag,
+			createTime,syncTime,
+			updateTime,
+			patientUuid,
+			operatorUuid
+		)VALUES(
+			#{followupResultBuffId},
+			#{followupResultId},
+			#{followupTaskId},
+			#{patientId},
+			#{operator},
+			#{followupAssignId},
+			#{lostFollowupFlag},
+			#{lostFollowupCauseResultValue},
+			#{state},
+			#{seq},
+			#{followupResultValue},
+			#{relapseParts},
+			#{relapseDate},
+			#{transferParts},
+			#{transferDate},
+			#{deathDate},
+			#{isInHospitalDeath},
+			#{isTumourDeath},
+			#{deathCause},
+			#{otherCause},
+			#{followUpWay},
+			#{contentTemplateId},
+			#{followupResultPhone},
+			#{followupTime},
+			#{phoneRecordUrl},
+			#{remark},
+			#{syncFlag},
+			#{sourceFlag},
+			#{createTime},now(),
+			#{updateTime},
+			#{patientUuid},
+			#{operatorUuid}
+		)
+		ON DUPLICATE KEY UPDATE 
+			followupResultId = VALUES(followupResultId),
+			followupTaskId = VALUES(followupTaskId),
+			patientId = VALUES(patientId),
+			operator = VALUES(operator),
+			followupAssignId=VALUES(followupAssignId),
+			lostFollowupFlag=VALUES(lostFollowupFlag),
+			lostFollowupCauseResultValue=VALUES(lostFollowupCauseResultValue),
+			state=VALUES(state),
+			seq=VALUES(seq),
+			followupResultValue = VALUES(followupResultValue),
+			relapseParts = VALUES(relapseParts),
+			relapseDate = VALUES(relapseDate),
+			transferParts = VALUES(transferParts),
+			transferDate = VALUES(transferDate),
+			deathDate = VALUES(deathDate),
+			isInHospitalDeath = VALUES(isInHospitalDeath),
+			isTumourDeath = VALUES(isTumourDeath),
+			deathCause = VALUES(deathCause),
+			otherCause = VALUES(otherCause),
+			followUpWay = VALUES(followUpWay),
+			contentTemplateId = VALUES(contentTemplateId),
+			followupResultPhone = VALUES(followupResultPhone),
+			followupTime = VALUES(followupTime),
+			phoneRecordUrl = VALUES(phoneRecordUrl),
+			remark = VALUES(remark),
+			syncFlag = VALUES(syncFlag),
+			sourceFlag = VALUES(sourceFlag),
+			createTime = now(),
+			updateTime = VALUES(updateTime),
+			patientUuid = VALUES(patientUuid),
+			operatorUuid  = VALUES(operatorUuid)
+	</insert>
+	
+	<update id="updatePatientUuid">
+		UPDATE cloud_sync_match_db.followup_result_buff
+		<set>
+			<if test="uuidFinal != null">
+				patientUuid=#{uuidFinal}
+			</if>
+		</set>
+		WHERE patientUuid IN
+		(
+			<foreach collection="uuidRelationships" item="uuidRelationship" index="index" separator=",">
+				#{uuidRelationship.uuid,jdbcType=VARCHAR}
+			</foreach>
+		)
+	</update>
+	
+	<delete id="delete" parameterType="java.lang.String">
+		DELETE FROM cloud_sync_match_db.followup_result_buff WHERE followupResultBuffId=#{followupResultBuffId}
+	</delete>
+	<!-- 判断记录是否存在  -->
+	<select id="isExistsResult" resultType="java.lang.Integer" parameterType="com.esuizhen.cloudservice.sync.bean.TPatientFollowupResultDetailInfo">
+		SELECT 1 FROM cloud_sync_match_db.followup_result f
+		WHERE f.patientUuid=#{patientUuid} AND f.followupResultValue=#{followupResultValue}
+		AND f.followUpTime=#{followupTime} AND f.followUpWay=#{followUpWay}
+	</select>
+</mapper>

@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.esuizhen.cloudservice.business.dao.business.mdt.SMDTApplyDao">
+	<select id="findByProductApplyId" resultType="com.esuizhen.cloudservice.business.model.business.SMDTApply">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM hds_db.s_mdt_apply t1
+		WHERE t1.productApplyId = #{productApplyId}
+	</select>
+	
+	<select id="findSMdtAppleByUserId" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM hds_db.s_mdt_apply t1 , r_mdt_apply_doctor t2 , hds_db.meta_mdt_flow_state t3
+		WHERE t1.productApplyId=t2.productApplyId
+		AND t1.mdtFlowStateId=t3.mdtFlowStateId
+		AND doctorUserId=#{userId}
+		AND (t2.groupType+2)=t3.sortIndex
+	</select>
+	
+	<sql id="base_column_list">
+		t1.productApplyId,
+		t1.id,
+		t1.productType,
+		t1.diseaseEvaluationFlag,
+		t1.diagnosis,
+		t1.pathologyDiagnosis,
+		t1.goal,
+		t1.recommendedDoctorMobile,
+		t1.applyHospitalId,
+		t1.deptId,
+		t1.consultHospitalId,
+		t1.emrChildTypes,
+		t1.mdtFlowStateId,
+		t1.pathologySectionFlag,
+		t1.sectionCount,
+		t1.sealWaxFlag,
+		t1.sampleNo,
+		t1.packExpressFlag,
+		t1.expressCompany,
+		t1.expressNo,
+		t1.clinicImpression,
+		t1.specimenIntactFlag,
+		t1.needRadiateFlag,
+		t1.specimenSource,
+		t1.specimenName,
+		t1.createTime,
+		t1.updateTime
+	</sql>
+
+	<insert id="insert">
+		INSERT INTO hds_db.s_mdt_apply(
+			productApplyId,
+			productType,
+			diseaseEvaluationFlag,
+			diagnosis,
+			pathologyDiagnosis,
+			goal,
+			recommendedDoctorMobile,
+			applyHospitalId,
+			deptId,
+			consultHospitalId,
+			emrChildTypes,
+			mdtFlowStateId,
+			pathologySectionFlag,
+			sectionCount,
+			sealWaxFlag,
+			sampleNo,
+			packExpressFlag,
+			expressCompany,
+			expressNo,
+			clinicImpression,
+			specimenIntactFlag,
+			needRadiateFlag,
+			specimenSource,
+			specimenName,
+			createTime,
+			updateTime
+		)VALUES(
+			#{productApplyId},
+			#{productType},
+			#{diseaseEvaluationFlag},
+			#{diagnosis},
+			#{pathologyDiagnosis},
+			#{goal},
+			#{recommendedDoctorMobile},
+			#{applyHospitalId},
+			#{deptId},
+			#{consultHospitalId},
+			#{emrChildTypes},
+			#{mdtFlowStateId},
+			#{pathologySectionFlag},
+			#{sectionCount},
+			#{sealWaxFlag},
+			#{sampleNo},
+			#{packExpressFlag},
+			#{expressCompany},
+			#{expressNo},
+			#{clinicImpression},
+			#{specimenIntactFlag},
+			#{needRadiateFlag},
+			#{specimenSource},
+			#{specimenName},
+			NOW(),
+			NOW()
+		) 
+	</insert>
+	
+	<update id="update">
+		UPDATE hds_db.s_mdt_apply
+		<set>
+			<if test="productType != null">
+				productType = #{productType},
+			</if>
+			<if test="diseaseEvaluationFlag != null">
+				diseaseEvaluationFlag = #{diseaseEvaluationFlag},
+			</if>
+			<if test="diagnosis != null">
+				diagnosis = #{diagnosis},
+			</if>
+			<if test="pathologyDiagnosis != null">
+				pathologyDiagnosis = #{pathologyDiagnosis},
+			</if>
+			<if test="goal != null">
+				goal = #{goal},
+			</if>
+			<if test="recommendedDoctorMobile != null">
+				recommendedDoctorMobile = #{recommendedDoctorMobile},
+			</if>
+			<if test="applyHospitalId != null">
+				applyHospitalId = #{applyHospitalId},
+			</if>
+			<if test="deptId != null">
+				deptId = #{deptId},
+			</if>
+			<if test="subDeptId != null">
+				subDeptId = #{subDeptId},
+			</if>
+			<if test="consultHospitalId != null">
+				consultHospitalId = #{consultHospitalId},
+			</if>
+			<if test="emrChildTypes != null">
+				emrChildTypes = #{emrChildTypes},
+			</if>
+			<if test="mdtFlowStateId != null">
+				mdtFlowStateId = #{mdtFlowStateId},
+			</if>
+			<if test="pathologySectionFlag != null">
+				pathologySectionFlag = #{pathologySectionFlag},
+			</if>
+			<if test="sectionCount != null">
+				sectionCount = #{sectionCount},
+			</if>
+			<if test="sealWaxFlag != null">
+				sealWaxFlag = #{sealWaxFlag},
+			</if>
+			<if test="sampleNo != null">
+				sampleNo = #{sampleNo},
+			</if>
+			<if test="packExpressFlag != null">
+				packExpressFlag = #{packExpressFlag},
+			</if>
+			<if test="expressCompany != null">
+				expressCompany = #{expressCompany},
+			</if>
+			<if test="expressNo != null">
+				expressNo = #{expressNo},
+			</if>
+			<if test="clinicImpression != null">
+				clinicImpression = #{clinicImpression},
+			</if>
+			<if test="specimenIntactFlag != null">
+				specimenIntactFlag = #{specimenIntactFlag},
+			</if>
+			<if test="needRadiateFlag != null">
+				needRadiateFlag = #{needRadiateFlag},
+			</if>
+			<if test="radiateUserId != null">
+				radiateUserId = #{radiateUserId},
+			</if>
+			<if test="basicPathologyUserId != null">
+				basicPathologyUserId = #{basicPathologyUserId},
+			</if>
+			
+			<if test="specimenName != null">
+				specimenName = #{specimenName},
+			</if>
+			
+			<if test="specimenSource != null">
+				specimenSource = #{specimenSource},
+			</if>
+			updateTime = NOW()
+		</set>
+		WHERE productApplyId = #{productApplyId}
+	</update>
+</mapper>

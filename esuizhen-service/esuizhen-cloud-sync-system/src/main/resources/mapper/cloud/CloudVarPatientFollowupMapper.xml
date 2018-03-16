@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- hds_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.CloudVarPatientFollowupDao" >
+	<update id="setPatientDeathStatus">
+		UPDATE followup_db.var_patient_followup
+		<set>
+			followupState=#{followupState},
+			updateTime=NOW()
+		</set>
+		WHERE patientId=#{patientId}
+	</update>
+	
+	<!-- 插入动态表数据 -->
+	<insert id="insertVarPatientFollowup" useGeneratedKeys="true">
+        <selectKey resultType="long" keyProperty="id" order="AFTER" >
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+        INSERT INTO var_patient_followup (
+        	patientId ,
+        	latestFollowupTime ,
+        	currFollowupPerformDays ,
+        	followupFlag ,
+        	followupState ,
+        	projectFollowupState ,
+        	followupAssignFlag ,
+        	followupResultValue ,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{patientId} ,
+        	#{latestFollowupTime} ,
+        	#{currFollowupPerformDays},
+        	#{followupFlag} ,
+        	#{followupState} ,
+        	#{projectFollowupState} ,
+        	#{followupAssignFlag} ,
+        	#{followupResultValue} ,
+        	NOW() ,
+        	NOW() 
+        )
+	</insert>
+	
+	
+	<!-- 更新动态表信息 -->
+	<update id="updateVarPatientFollowup">
+        UPDATE var_patient_followup 
+        <set>
+	        <if test="latestFollowupTime != null">
+                latestFollowupTime = #{latestFollowupTime} ,
+            </if>
+	        <if test="currFollowupPerformDays != null">
+                currFollowupPerformDays = #{currFollowupPerformDays} ,
+            </if>
+	        <if test="followupState != null">
+                followupState = #{followupState} ,
+            </if>
+	        <if test="followupAssignFlag != null">
+                followupAssignFlag = #{followupAssignFlag} ,
+            </if>
+            <if test="followupResultValue != null">
+                followupResultValue = #{followupResultValue} ,
+            </if>
+	        <if test="followupValidResultValue != null">
+                followupValidResultValue = #{followupValidResultValue} ,
+            </if>
+	        <if test="latestValidFollowupTime != null">
+                latestValidFollowupTime = #{latestValidFollowupTime} ,
+            </if>
+	        <if test="liveDay != null">
+                liveDay = #{liveDay} ,
+            </if>
+	        <if test="liveMonth != null">
+                liveMonth = #{liveMonth} ,
+            </if>
+	        <if test="followupOperator != null">
+                followupOperator = #{followupOperator} ,
+            </if>
+	        <if test="followupOperatorName != null">
+                followupOperatorName = #{followupOperatorName} ,
+            </if>
+	        <if test="followupWay != null">
+                followupWay = #{followupWay} ,
+            </if>
+	        <if test="followupWayName != null">
+                followupWayName = #{followupWayName} ,
+            </if>
+	        <if test="relapseParts != null">
+                relapseParts = #{relapseParts} ,
+            </if>
+	        <if test="relapseDate != null">
+                relapseDate = #{relapseDate} ,
+            </if>
+	        <if test="transferParts != null">
+                transferParts = #{transferParts} ,
+            </if>
+	        <if test="transferDate != null">
+                transferDate = #{transferDate} ,
+            </if>
+	        <if test="followupRemark != null">
+                followupRemark = #{followupRemark} ,
+            </if>
+	        <if test="followupTaskId != null">
+                followupTaskId = #{followupTaskId} ,
+            </if>
+	        <if test="followupTaskName != null">
+                followupTaskName = #{followupTaskName} ,
+            </if>
+            updateTime = now()
+        </set>
+        WHERE 
+	        patientId = #{patientId} 
+	</update>
+	
+	<!-- 获取动态表信息 -->
+	<select id="queryVarPatientFollowupByPatientId" resultType="com.westangel.common.bean.followup.TVarPatientFollowup">
+		SELECT 
+        	id,
+        	patientId,
+        	latestFollowupTime,
+        	currFollowupPerformDays,
+        	followupFlag,
+        	followupState,
+        	projectFollowupState,
+        	followupAssignFlag,
+        	followupResultValue,
+        	createTime,
+        	updateTime
+		FROM var_patient_followup 
+	    WHERE 
+	        patientId = #{patientId} 
+	</select>
+</mapper>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.meta.TMetaInfoIncisionHealingDao" >
+  <resultMap id="BaseResultMap" type="com.esuizhen.cloudservice.ehr.model.meta.TMetaInfoIncisionHealing" >
+    <id column="incisionHealingId" property="incisionHealingId" jdbcType="INTEGER" />
+    <result column="incisionHealingGroup" property="incisionHealingGroup" jdbcType="VARCHAR" />
+    <result column="incisionHealingLevel" property="incisionHealingLevel" jdbcType="VARCHAR" />
+    <result column="incisionHealing" property="incisionHealing" jdbcType="VARCHAR" />
+    <result column="incisionHealingDesc" property="incisionHealingDesc" jdbcType="VARCHAR" />
+    <result column="incisionHealingPy" property="incisionHealingPy" jdbcType="VARCHAR" />
+    <result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    incisionHealingId, incisionHealingGroup, incisionHealingLevel, CONCAT(incisionHealingGroup,'/',incisionHealingLevel) incisionHealing,incisionHealingDesc, incisionHealingPy, createTime
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from meta_e_incision_healing
+    where incisionHealingId = #{incisionHealingId,jdbcType=INTEGER}
+  </select>
+  
+  <select id="selectByListAll" resultMap="BaseResultMap" >
+    select 
+    <include refid="Base_Column_List" />
+    from meta_e_incision_healing
+  </select>
+</mapper>

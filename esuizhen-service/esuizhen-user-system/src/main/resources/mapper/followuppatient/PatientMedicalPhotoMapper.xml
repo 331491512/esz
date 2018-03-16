@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.followuppatient.PatientMedicalPhotoDao" >
+  <resultMap type="com.esuizhen.cloudservice.user.model.followuppatient.TMedicalPicInfo" id="BaseResultMap">
+  	<id column="emrId" property="emrId"/>
+    <result column="medicalTime" property="medicalTime"/>
+    <result column="emrTypeName" property="emrTypeName"/>
+    <result column="emrSubTypeName" property="emrSubTypeName"/>
+  	<collection property="picFileUrls" column="{emrId=emrId}" select="com.esuizhen.cloudservice.user.dao.followuppatient.PatientMedicalPhotoDao.queryEMRPhotoList"/>
+  </resultMap>
+  <sql id="Base_Column_List">
+  	t1.emrId,
+  	t1.visitTime medicalTime,
+  	t3.emrTypeName,
+  	t4.emrSubTypeName
+  </sql>
+  
+  <sql id="Where_Condition">
+  	<where>
+  		t1.patientId=#{patientId} AND t1.emrType IN(1,2,6)
+  	</where>
+  </sql>
+  
+  <select id="queryList" resultMap="BaseResultMap" parameterType="java.util.Map">
+  	SELECT <include refid="Base_Column_List"></include> 
+  	FROM ehr_db.e_medical_record t1 
+  	JOIN (SELECT emrId FROM ehr_db.e_medical_photo_ocrs GROUP BY emrId) t2 ON t1.emrId=t2.emrId
+  	JOIN ehr_db.meta_e_emr_type t3 ON t1.emrType=t3.emrType
+  	JOIN ehr_db.meta_e_emr_subtype t4 ON t1.emrSubType=t4.emrSubType
+  	<include refid="Where_Condition"></include>
+  	ORDER BY t1.visitTime DESC,t1.createTime DESC
+  	<if test="startRow != null">
+		LIMIT #{startRow},#{pageSize}
+	</if>
+  </select>
+  
+  <select id="queryEMRPhotoList" resultType="java.lang.String">
+  	SELECT  t1.picFileUrl
+  	FROM ehr_db.e_medical_photo_ocrs t1 
+  	WHERE t1.emrId=#{emrId}
+  </select>
+</mapper>

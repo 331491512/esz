@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_incre_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.incre.IncreHospitalDoctorDao" >
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.sync.model.HospitalDoctor">
+		INSERT INTO cloud_sync_incre_db.r_hospital_doctor(
+			hospitalId,
+			hospitalUuid,
+			deptUuid,
+			doctorUuid,
+			staffNo,
+			positionTitle,
+			createTime
+		)values(
+			#{hospitalId,jdbcType=INTEGER},
+			#{hospitalUuid,jdbcType=VARCHAR},
+			#{deptUuid,jdbcType=VARCHAR},
+			#{doctorUuid,jdbcType=VARCHAR},
+			#{staffNo,jdbcType=INTEGER},
+			#{positionTitle,jdbcType=INTEGER},
+			#{createTime}
+		)
+	</insert>
+</mapper>

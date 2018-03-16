@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.client.sync.dao.DetectionDetailDao" >	
+	
+	<select id="getBatchSyncDetectionDetail" resultType="java.util.LinkedHashMap" parameterType="com.esuizhen.client.sync.model.TBatchDetailInfo">
+		SELECT
+			t1.detectionDetailId,t3.detectionReportId,t2.patientId,t2.uuid AS patientUuid,t1.patientNo,t1.seqNo,t1.detectionTypeName,
+			t1.detectionItemId,t1.detectionItemCode,t1.detectionItemName,t1.detectionItemEnglishName,t1.detectionResult,
+			t1.prompt,t1.promptType,t1.resultType,t1.unit,t1.refrenceRange,t1.refrenceRangeMin,t1.refrenceRangeMax,
+			t1.detectionMethod,t1.reagentBrand,t1.instrument,t1.createTime,t1.updateTime,t1.rawDetectionItemCode,
+			t1.mainID,t1.detailID,t1.rawCreateTime,t1.mergeFlag,
+			t1.mergeFrom,
+			IFNULL(t1.mergeFromUuid,(SELECT uuid FROM user_db.u_patient WHERE patientId =t1.mergeFrom)) AS mergeFromUuid,
+			t1.mergeTarget,
+			IFNULL(t1.mergeTargetUuid,(SELECT uuid FROM user_db.u_patient WHERE patientId =t1.mergeTarget)) AS mergeTargetUuid,
+			t1.mergeTime,3 as sourceFlag
+		FROM
+		     lis_db.eci_detection_detail t1
+		JOIN user_db.u_patient t2 ON t1.patientId = t2.patientId
+		JOIN sc_db.u_patient_sync_result_client t22 ON t2.uuid = t22.uuid 
+		join sc_db.eci_detection_detail_sync_result_client t11 ON  t1.detectionDetailId = t11.detectionDetailId
+		JOIN lis_db.eci_detection_report t3 ON t1.detectionReportId = t3.detectionReportId
+		JOIN sc_db.eci_detection_report_sync_result_client t33 ON t3.detectionReportId = t33.detectionReportId
+		WHERE
+			t22.syncFlag=1 AND t11.syncFlag = 0 AND t33.syncFlag=1
+	    LIMIT #{detailInfo.syncSize}
+  	</select>
+  	
+  	<update id="updateDetectionDetailSyncflag" parameterType="java.lang.String">
+		UPDATE sc_db.eci_detection_detail_sync_result_client t1
+		SET t1.opFlag=IF(t1.syncFlag=0,1,2),t1.syncFlag = 9 , t1.syncTime=NOW(),t1.updateTime = NOW()
+		WHERE
+			t1.detectionDetailId IN (${detectionDetailIds})
+	</update>  	
+	
+	<update id="updateSyncResult" parameterType="com.esuizhen.client.sync.bean.TBatchDataResultInfo">
+		UPDATE sc_db.eci_detection_detail_sync_result_client t1
+		SET 
+		    t1.batchId = #{tBatchDataResultInfo.batchId},
+		    t1.syncFlag = #{tBatchDataResultInfo.syncFlag},
+			t1.cause = #{tBatchDataResultInfo.cause},
+			t1.updateTime = NOW()
+		WHERE
+			t1.detectionDetailId = #{tBatchDataResultInfo.resultId} and t1.syncFlag = 9
+	</update>
+</mapper>

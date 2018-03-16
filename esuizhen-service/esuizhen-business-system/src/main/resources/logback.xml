@@ -1,0 +1,61 @@
+<configuration >
+
+	<!-- 日志输出格式(提示信息) -->
+	<property name="FILE_LOG_PATTERN"
+		value="%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level  %class:%line %logger - %msg%n " />
+
+	<!-- 日志输出格式(错误信息) -->
+	<property name="ERROR_LOG_PATTERN"
+		value="%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level  %class:%line - %msg%n " />
+		
+	<!-- 控制台日志格式 -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<Pattern>${FILE_LOG_PATTERN}</Pattern>
+		</encoder>
+	</appender>
+	
+	
+	
+	<!-- 全部日志-->
+	<appender name="ALL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<encoder>
+			<Pattern>${FILE_LOG_PATTERN}</Pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>/var/logs/log/business/%d{yyyy-MM-dd}.log</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+	</appender>
+	
+	
+	<!-- ERROR级别的日志处理-->
+	<appender name="ERRORLOG" class="ch.qos.logback.core.rolling.RollingFileAppender" level="ERROR">
+		<encoder>
+			<Pattern>${ERROR_LOG_PATTERN}</Pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>/var/logs/error/business/%d{yyyy-MM-dd}.log</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+	</appender>
+	
+	<!-- 全部错误日志-->
+	<logger name="error" level="ERROR">
+		<appender-ref ref="ERRORLOG" />
+	</logger>
+
+		
+	<!-- 第三方框架日志输出控制 -->
+	<logger name="org.springframework" level="WARN"/>    
+	<logger name="com.opensymphony" level="WARN"/>    
+	<logger name="org.apache" level="WARN"/>
+	<logger name="com.taobao" level="ERROR"/>
+	
+	<!-- 根logger -->
+	<root level="DEBUG">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="ALL" />
+	</root>
+
+</configuration>

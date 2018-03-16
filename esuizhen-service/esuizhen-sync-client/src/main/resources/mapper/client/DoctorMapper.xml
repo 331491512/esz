@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.client.sync.dao.DoctorDao" >	
+	
+	<select id="getBatchSyncDoctor" resultType="java.util.LinkedHashMap" parameterType="com.esuizhen.client.sync.model.TBatchDetailInfo">
+        SELECT
+	    	t1.doctorId,t1.userId,IF(t11.syncFlag=2,1,t11.syncFlag) AS opFlag,t1.parentId,t3.uuid as parentUuid,t1.uuid,t1.mobile,t1.trueName,
+			t1.auditState,t1.nickName,t1.sex,t1.birthDate,t1.userPictureUrl,t1.professionCredence,
+			t1.registerCredence,t1.workCredence,t1.professionCredencePicUrl,t1.registerCredencePicUrl,t1.workCredencePicUrl,
+			t1.isExpert,t1.skills,t1.tagIds,t1.tags,t1.positionTitle,t1.professionalRank,t1.qrcodeUrl,t1.tel,t1.introduction,
+			t1.auditRemark,t1.recommendFlag,t1.createTime,t1.staffNo,
+			(SELECT hospitalId FROM sc_db.conf_sync LIMIT 1) AS hospitalId,
+			t22.deptId, t22.uuid AS deptUuid
+		FROM
+		     user_db.u_doctor t1 
+		JOIN sc_db.u_doctor_sync_result_client t11 ON t1.uuid = t11.uuid
+		LEFT JOIN user_db.r_hospital_doctor t2 ON t1.doctorId = t2.doctorId
+		LEFT JOIN user_db.u_department t22 ON t22.deptId = t2.deptId 
+		LEFT JOIN user_db.u_doctor t3 ON t1.parentId = t3.doctorId
+		WHERE
+		    t11.syncFlag in (0,2)
+		AND t1.uuid IS NOT NULL 
+		<!-- AND (t1.mobile IS NOT NULL OR t1.staffNo IS NOT NULL OR t2.deptId IS NOT NULL)  -->
+		LIMIT #{detailInfo.syncSize}
+  	</select>
+  	
+  	<select id="getBatchSyncUserByDoctorUserId" resultType="java.util.LinkedHashMap" parameterType="java.lang.String">
+	 	SELECT
+			t1.userId,t3.uuid,t1.userName,t1.role,t1.accountType,t1.infoState,t1.trueName,t1.createTime,t1.firstLoginTime,t1.updateTime,
+			t1.cryptPasswd,t1.nickName,t1.mobile,t1.sex,t1.birthDate,t1.userPictureUrl,t1.email,t1.nationId,t1.nation,t1.nationalityId,
+			t1.country,t1.cityId,t1.cityCode,t1.city,t1.address,t1.nativePlace,t1.birthPlaceCode,t1.birthPlaceAddress,
+			t1.occupationId,t1.profession,t1.company,t1.idType,t1.identification,t1.marriageStatus,t1.signature,t1.education,
+			t1.school,t1.interest,t1.idFileUrl,t1.state,t1.subroles,t1.points,t1.lastLoginTime,t1.sourceFlag,t1.userFlag,t1.migrateFlag,
+			t1.relatedUserId,t1.lastLogoutTime,t1.appFlag,t1.weixinFlag,t1.pcFlag,t1.patientNo,t1.clinicNo,
+			t1.staffNo,t1.companyTel,t1.comZipCode,t1.rawCreateTime,t1.mergeFlag,t1.mergeFrom,
+	        IFNULL(t1.mergeFromUuid,(SELECT uuid FROM user_db.u_patient WHERE patientId =t1.mergeFrom)) AS mergeFromUuid,
+			t1.mergeTarget,
+			IFNULL(t1.mergeTargetUuid,(SELECT uuid FROM user_db.u_patient WHERE patientId =t1.mergeTarget)) AS mergeTargetUuid,
+			t1.mergeTime,t1.tobFlag,t1.rawOccupationId,t1.rawProfession
+		FROM
+			user_db.u_user t1 
+		JOIN user_db.u_doctor t3 ON t1.userId = t3.userId 
+		WHERE
+			t1.userId in (${userIds})
+	</select>
+  	
+  	<update id="updateDoctorSyncflag" parameterType="java.lang.String">
+		UPDATE sc_db.u_doctor_sync_result_client t1
+		JOIN user_db.u_doctor t2 ON t1.uuid = t2.uuid
+		SET t1.opFlag=IF(t1.syncFlag=0,1,2),t1.syncFlag = 9 , t1.syncTime=NOW(),t1.updateTime = NOW()
+		WHERE
+			t2.doctorId IN (${doctorIds})
+	</update>
+	
+	<update id="updateSyncResult" parameterType="com.esuizhen.client.sync.bean.TBatchDataResultInfo">
+		UPDATE sc_db.u_doctor_sync_result_client t1
+		SET 
+		    t1.batchId = #{tBatchDataResultInfo.batchId},
+		    t1.syncFlag = #{tBatchDataResultInfo.syncFlag},
+			t1.cause = #{tBatchDataResultInfo.cause},
+			t1.updateTime = NOW()
+		WHERE
+			t1.uuid = #{tBatchDataResultInfo.resultId} and t1.syncFlag = 9
+	</update>
+</mapper>

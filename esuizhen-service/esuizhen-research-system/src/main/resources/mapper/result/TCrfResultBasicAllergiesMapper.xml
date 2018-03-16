@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TCrfResultBasicAllergiesDao">
+	<resultMap type="com.esuizhen.cloudservice.research.model.result.TCrfResultMainInfo" id="baseTCrfResultMainInfoCrfResultBasicAllergiesResultMap">
+		<id column="crfResultId" property="crfResultId"/>
+		<result column="crfObserveId" property="crfObserveId"/>
+		<result column="subjectElementId" property="subjectElementId"/>
+		<result column="projectId" property="projectId"/>
+		<result column="crfCourseItemTime" property="crfCourseItemTime"/>
+		<result column="creatorId" property="creatorId"/>
+		<result column="patientId" property="patientId"/>
+		
+		<collection property="crfResult" javaType="ArrayList" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultBasicAllergies">
+			<id column="crfAllergyResultId" property="crfAllergyResultId"/>
+			<result column="crfResultId" property="crfResultId"/>
+			<result column="allergyName" property="allergyName"/>
+			<result column="allergySource" property="allergySource"/>
+			<result column="allergySymptom" property="allergySymptom"/>
+			<result column="allergyMedicinesName" property="allergyMedicinesName"/>
+			<result column="allergyLevel" property="allergyLevel"/>
+			<result column="allergyTypeId" property="allergyTypeId"/>
+			<result column="createTime" property="createTime"/>
+			<result column="updateTime" property="updateTime"/>
+		</collection>
+	</resultMap>
+
+	<resultMap type="com.esuizhen.cloudservice.research.model.result.TCrfResultBasicAllergies" id="baseCrfResultBasicAllergiesResultMap">
+		<id column="crfAllergyResultId" property="crfAllergyResultId"/>
+		<result column="crfResultId" property="crfResultId"/>
+		<result column="allergyName" property="allergyName"/>
+		<result column="allergySource" property="allergySource"/>
+		<result column="allergySymptom" property="allergySymptom"/>
+		<result column="allergyMedicinesName" property="allergyMedicinesName"/>
+		<result column="allergyLevel" property="allergyLevel"/>
+		<result column="allergyTypeId" property="allergyTypeId"/>
+		<result column="createTime" property="createTime"/>
+		<result column="updateTime" property="updateTime"/>
+	</resultMap>
+
+	<select id="findCrfResultBasicAllergies" resultMap="baseTCrfResultMainInfoCrfResultBasicAllergiesResultMap">
+		SELECT
+			t2.crfObserveId, t2.subjectElementId, t2.projectId, t2.crfCourseItemTime, t2.creatorId, t2.patientId,
+			<include refid="base_column_list"></include>
+		FROM pro_db.crf_result_main t2
+			LEFT JOIN pro_db.crf_result_basic_allergies t1 ON t1.crfResultId = t2.crfResultId
+			LEFT JOIN pro_db.crf_observation_subject_element t3 ON t2.crfObserveId = t3.crfObserveId
+		WHERE t3.crfObserveId = #{crfObserveId} AND t2.patientId = #{patientId}
+		ORDER BY t1.`index`
+	</select>
+
+	<sql id="base_column_list">
+		t1.crfAllergyResultId, t1.crfResultId, t1.allergyName, t1.allergySource, t1.allergySymptom,
+		t1.allergyMedicinesName, t1.allergyLevel, t1.allergyTypeId, t1.createTime, t1.updateTime
+	</sql>
+
+	<insert id="insert">
+		INSERT INTO pro_db.crf_result_basic_allergies(
+			crfAllergyResultId, crfResultId, allergyName, allergySource, allergySymptom,
+			allergyMedicinesName, allergyLevel, allergyTypeId, `index`, createTime, updateTime
+		)
+		VALUES(
+			#{crfAllergyResultId}, #{crfResultId}, #{allergyName}, #{allergySource}, #{allergySymptom},
+			#{allergyMedicinesName}, #{allergyLevel}, #{allergyTypeId}, #{index}, NOW(), NOW()
+		)
+	</insert>
+	
+	<insert id="insertByBatch">
+		INSERT INTO pro_db.crf_result_basic_allergies(
+			crfAllergyResultId,
+			crfResultId,
+			allergyName,
+			allergySource,
+			allergySymptom,
+			allergyMedicinesName,
+			allergyLevel,
+			allergyTypeId,
+			`index`,
+			createTime, updateTime
+		)
+		VALUES
+		<foreach collection="crfResultBasicAllergieses" item="crfResultBasicAllergies" index="index" separator=",">
+			(
+				#{crfResultBasicAllergies.crfAllergyResultId},
+				#{crfResultBasicAllergies.crfResultId},
+				#{crfResultBasicAllergies.allergyName},
+				#{crfResultBasicAllergies.allergySource},
+				#{crfResultBasicAllergies.allergySymptom},
+				#{crfResultBasicAllergies.allergyMedicinesName},
+				#{crfResultBasicAllergies.allergyLevel},
+				#{crfResultBasicAllergies.allergyTypeId},
+				#{crfResultBasicAllergies.index},
+				NOW(), NOW()
+			)
+		</foreach>
+	</insert>
+	
+	<update id="update">
+		UPDATE pro_db.crf_result_basic_allergies
+		<set>
+			<if test="crfResultId != null">
+				crfResultId = #{crfResultId},
+			</if>
+			<if test="allergyName != null">
+				allergyName = #{allergyName},
+			</if>
+			<if test="allergySource != null">
+				allergySource = #{allergySource},
+			</if>
+			<if test="allergySymptom != null">
+				allergySymptom = #{allergySymptom},
+			</if>
+			<if test="allergyMedicinesName != null">
+				allergyMedicinesName = #{allergyMedicinesName},
+			</if>
+			<if test="allergyLevel != null">
+				allergyLevel = #{allergyLevel},
+			</if>
+			<if test="allergyTypeId != null">
+				allergyTypeId = #{allergyTypeId},
+			</if>
+			<if test="index != null">
+				`index` = #{index}
+			</if>
+			updateTime = NOW()
+		</set>
+		WHERE crfAllergyResultId=#{crfAllergyResultId}
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM pro_db.crf_result_basic_allergies WHERE crfAllergyResultId=#{crfAllergyResultId}
+	</delete>
+	
+	<delete id="deleteByCrfResultIdAndPatientId">
+		DELETE FROM pro_db.crf_result_basic_allergies WHERE crfResultId = #{crfResultId}
+	</delete>
+	
+	<delete id="deleteByProjectId">
+		DELETE
+			i6.*
+		FROM pro_db.crf_result_main i1,
+			pro_db.crf_observation_subject_element i2,
+			pro_db.crf_course_detail i3,
+			pro_db.crf_course i4,
+			pro_db.r_crftemplate_project i5,
+			pro_db.crf_result_basic_allergies i6
+		WHERE i1.crfObserveId = i2.crfObserveId
+			AND i2.crfCourseItemId = i3.crfCourseItemId
+			AND i3.crfCourseId = i4.crfCourseId
+			AND i4.crfTemplateId = i5.crfTemplateId
+			AND i5.projectId = #{projectId}
+	</delete>
+</mapper>

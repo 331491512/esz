@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followupdo.FollowupCallIncomingDao">
+
+	<!-- add by zhuguo 判断60秒内是否有重复的数据假如，如果有则不添加数据-->
+	<select id="queryRepeatCallIncoming"
+		parameterType="com.esuizhen.cloudservice.followup.bean.FollowupPhoneCallIncomingQueryReq"
+		resultType="java.lang.Integer">
+		
+		SELECT
+			COUNT(*)
+		FROM
+			followup_db.followup_call_incoming a
+		WHERE
+			a.patientNo = #{patientNo}
+		AND a.telphone = #{telphone}
+		AND a.localPhone = #{localPhone}
+		AND timestampdiff(
+			SECOND,
+			a.callTime,
+			#{callTime}
+		) &lt;= 60
+		
+	</select>
+	
+	<insert id="insertFollowupCallIncoming"  parameterType="com.esuizhen.cloudservice.followup.model.followupdo.TFollowupPhoneCallIncomingInfo" keyProperty="incomingCallId" useGeneratedKeys="true">
+        INSERT INTO followup_db.followup_call_incoming (
+        	followupTaskId ,
+        	followupAssignId,
+        	hospitalId,
+        	patientId,
+        	callTime,
+        	trueName,
+        	telphone,
+        	telLocale,
+        	localPhone,
+        	patientNo,
+        	state,
+        	followupResultBuffId,
+        	followupResultId,
+        	resultProcessState,
+        	operator,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{followupTaskId} ,
+        	#{followupAssignId},
+        	#{hospitalId},
+        	#{patientId},
+        	#{callTime},
+        	#{trueName},
+        	#{telphone},
+        	#{telLocale},
+        	#{localPhone},
+        	#{patientNo},
+        	#{state},
+        	#{followupResultBuffId},
+        	#{followupResultId},
+        	#{resultProcessState},
+        	#{operator},
+        	now(),
+        	now()
+        )
+	</insert>
+	
+	<select id="queryFollowupCallIncoming" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupPhoneCallIncomingQueryReq" resultType="com.esuizhen.cloudservice.followup.model.followupdo.TFollowupPhoneCallIncomingInfo">
+		<!-- select * from followup_call_incoming ci
+		LEFT JOIN r_followup_task_assign assign on assign.followupAssignId=ci.followupAssignId and assign.followupTaskId=ci.followupTaskId -->
+        
+        <!-- add by zhuguo -->
+		SELECT
+			ci.*, ft.followupTaskName
+		FROM
+			followup_db.followup_call_incoming ci
+		LEFT JOIN followup_db.r_followup_task_assign assign ON assign.followupAssignId = ci.followupAssignId
+		AND assign.followupTaskId = ci.followupTaskId
+		LEFT JOIN followup_db.followup_task ft ON ft.followupTaskId = ci.followupTaskId
+        <!-- end -->
+        
+        <if test="sql != null and sql != '' and userRole != 6 and userRole != 5 and userRole != 12 and userRole != 3">
+			join 
+			(
+			${sql}
+			) s on (s.doctorId = assign.operator or s.doctorId=ci.operator)
+		</if>
+        <where>
+        	<if test="callTimeStart != null">
+               and ci.callTime &gt;= #{callTimeStart} 
+            </if>
+        	<if test="callTimeEnd != null">
+               and ci.callTime &lt;= #{callTimeEnd} 
+            </if>
+            <if test="userRole != null and userRole==3">
+            	and (assign.operator=#{operator} or ci.operator=#{operator})
+            </if>
+			<!-- 
+			<if test="operator != null">
+			   and assign.operator = #{operator} 
+			</if>
+			-->
+			<if test="(userRole == 6 or userRole == 5 or userRole == 12) and hospitalId != null">
+				and ci.hospitalId=#{hospitalId}
+			</if>
+             
+			<!-- add by zhuguo -->
+			<if test="resultProcessState != null">
+				and ci.resultProcessState=#{resultProcessState}
+			</if>
+        </where>
+        group by ci.incomingCallId
+        order by ci.callTime desc
+	</select>
+	
+	
+	<!-- 修改来电患者的状态 add by zhuguo -->
+	<update id="patienPhoneCallIncomingStateModify" parameterType="java.util.HashMap">
+		UPDATE followup_db.followup_call_incoming a,
+		 followup_db.followup_call_incoming b
+		<set>
+		 a.resultProcessState = '2',
+		 b.resultProcessState = '2',
+		 a.updateTime = NOW(),
+		 b.updateTime = NOW()
+		</set>
+		WHERE
+		IF (
+			a.followupTaskId IS NOT NULL,
+			a.patientId = b.patientId
+		AND a.followupTaskId = b.followupTaskId,
+		 a.incomingCallId = b.incomingCallId
+		)
+		AND b.incomingCallId = #{incomingCallId}
+	</update>
+	
+</mapper>
+

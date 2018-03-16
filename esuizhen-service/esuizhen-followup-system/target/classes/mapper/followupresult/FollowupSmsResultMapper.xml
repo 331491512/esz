@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followupresult.FollowupSmsResultDao">
+    <!-- 数据权限范围示例 -->
+	<sql id="DataPrivilege_Where_Condition">
+		<choose>
+			<!-- 数据权限1全院查询 -->
+			<when test="dataId!=null and dataId==1 and operator!=null">
+				and exists (
+					select 1 from user_db.r_doctor_patient dp where dp.doctorId=#{operator} and patient.patientId=dp.patientId and assign.operator=#{operator}
+					UNION
+					select 1 from user_db.r_hospital_doctor hd join user_db.r_hospital_patient hp on hd.hospitalId=hp.hospitalId where hd.doctorId=#{operator} and patient.patientId=hp.patientId and assign.operator=#{operator}
+				)
+			</when>
+			<!-- 数据权限4查询本医生 -->
+			<when test="dataId!=null and dataId==4 and operator!=null">
+				and exists (
+					select 1 from user_db.r_doctor_patient dp where dp.doctorId=#{operator} and patient.patientId=dp.patientId and assign.operator=#{operator}
+				)
+			</when>
+			<!-- 云端默认查询本医生 -->
+			<when test="deployLocation==2 and operator!=null">
+				and exists (
+					select 1 from user_db.r_doctor_patient dp where dp.doctorId=#{operator} and patient.patientId=dp.patientId and assign.operator=#{operator}
+				)
+			</when>
+		</choose>
+	</sql>
+	
+    <!-- 短信随访结果统计查询 -->
+    <select id="queryFollowupResultStatis" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupResultReq" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultStatisInfo">
+    	SELECT
+			DATE_FORMAT(smsreq.sendTime, '%Y-%m-%d') sendTime,
+			count(1) sendCount,
+			template.contentTemplateId,
+			template.content,
+			(
+				SELECT
+					count(1) noFeedbackCount
+				FROM
+					followup_sms_req r1
+				WHERE DATE_FORMAT(r1.sendTime, '%Y%m%d')=DATE_FORMAT(smsreq.sendTime, '%Y%m%d') and r1.templateId=smsreq.templateId and r1.replyState=0
+				GROUP BY
+					DATE_FORMAT(r1.sendTime, '%Y%m%d'),r1.templateId
+			) noFeedbackCount
+		FROM
+			followup_sms_req smsreq
+		LEFT JOIN followup_content_template template ON smsreq.templateId = template.contentTemplateId
+		LEFT JOIN r_followup_task_assign assign on assign.followupAssignId=smsreq.followupAssignId and assign.followupTaskId=smsreq.followupTaskId
+		<if test="sql != null and sql != ''">
+			join 
+			(
+			${sql}
+			) s on s.doctorId = assign.operator
+		</if>
+		<where>
+			smsreq.mergeFlag!=2
+			<if test="templateId!=null">
+				and smsreq.templateId=#{templateId}
+			</if>
+			<if test="startSendTime!=null">
+				and DATE_FORMAT(smsreq.sendTime, '%Y-%m-%d') &gt;=#{startSendTime}
+			</if>
+			<if test="endSendTime!=null">
+				and DATE_FORMAT(smsreq.sendTime, '%Y-%m-%d') &lt;=#{endSendTime}
+			</if>
+			<!-- 
+			<if test="operator !=null">
+				and assign.operator =#{operator}
+			</if>
+			
+			 -->
+		</where>
+		GROUP BY
+			DATE_FORMAT(smsreq.createTime, '%Y-%m-%d'),smsreq.templateId
+		order by smsreq.sendTime desc
+    </select>
+    
+    <!-- 短信随访结果反馈查询 -->
+    <select id="queryFollowupResultDetail" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupResultDetailQueryReq" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultDetailInfo">
+    	SELECT
+			smsreq.reqId,
+			smsreq.trueName,
+			smsreq.createTime sendTime,
+			smsreq.replyTime,
+		    smsreq.replyContent
+		FROM
+			followup_sms_req smsreq
+			LEFT JOIN r_followup_task_assign assign on assign.followupAssignId=smsreq.followupAssignId and assign.followupTaskId=smsreq.followupTaskId
+			<if test="sql != null and sql != ''">
+				join 
+				(
+				${sql}
+				) s on s.doctorId = assign.operator
+			</if>
+		<where>
+			smsreq.mergeFlag!=2
+			<if test="templateId !=null">
+				and smsreq.templateId=#{templateId}
+			</if>
+			<if test="sendTime !=null">
+				AND DATE_FORMAT(smsreq.createTime, '%Y-%m-%d') = DATE_FORMAT(#{sendTime}, '%Y-%m-%d')
+			</if>
+			<if test="startSendTime!=null">
+				and DATE_FORMAT(smsreq.sendTime, '%Y-%m-%d') &gt;=#{startSendTime}
+			</if>
+			<if test="endSendTime!=null">
+				and DATE_FORMAT(smsreq.sendTime, '%Y-%m-%d') &lt;=#{endSendTime}
+			</if>
+			<!-- 
+			<if test="operator !=null">
+				and assign.operator =#{operator}
+			</if>
+			 -->
+		</where>
+		group by smsreq.reqId
+		order by smsreq.sendTime desc 
+    </select>
+    
+    <!-- 短信随访结果统计 -->
+    <select id="statisFollowupResult" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupResultStatisReq" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultValueInfo">
+    	SELECT
+			metaResult.*, count(1) count
+		FROM
+			followup_sms_req smsreq
+		LEFT JOIN followup_result_buff r ON smsreq.followupResultBuffId = r.followupResultBuffId
+		LEFT JOIN meta_followup_result_value metaResult ON metaResult.followupResultValueId = r.followupResultValue
+		LEFT JOIN r_followup_task_assign assign on assign.followupAssignId=smsreq.followupAssignId and assign.followupTaskId=smsreq.followupTaskId
+		<where>
+			smsreq.mergeFlag!=2
+			<if test="templateId !=null">
+				and smsreq.templateId=#{templateId}
+			</if>
+			<if test="sendTime !=null">
+				AND DATE_FORMAT(smsreq.sendTime, '%Y-%m-%d') = DATE_FORMAT(#{sendTime},'%Y-%m-%d') 
+			</if>
+			<if test="startSendTime !=null">
+				and DATE_FORMAT(smsreq.sendTime, '%Y-%m-%d') &gt;=#{startSendTime}
+			</if>
+			<if test="endSendTime !=null">
+				and DATE_FORMAT(smsreq.sendTime, '%Y-%m-%d') &lt;=#{endSendTime}
+			</if>
+			<if test="replyState !=null">
+				and smsreq.replyState=#{replyState}
+			</if>
+			<if test="operator !=null">
+				and assign.operator =#{operator}
+			</if>
+		</where>
+		GROUP BY r.followupResultValue
+    </select>
+    
+    <!-- 短信随访结果总数统计 -->
+    <select id="statisFollowupResultTotal" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupResultStatisReq" resultType="Long">
+    	SELECT
+			count(1) count
+		FROM
+			followup_sms_req smsreq
+		LEFT JOIN followup_result_buff r ON smsreq.followupResultBuffId = r.followupResultBuffId
+		LEFT JOIN r_followup_task_assign assign on assign.followupAssignId=smsreq.followupAssignId and assign.followupTaskId=smsreq.followupTaskId
+		<where>
+			smsreq.mergeFlag!=2
+			<if test="templateId !=null">
+				and smsreq.templateId=#{templateId}
+			</if>
+			<if test="startSendTime !=null">
+				and DATE_FORMAT(smsreq.sendTime, '%Y-%m-%d') &gt;=#{startSendTime}
+			</if>
+			<if test="endSendTime !=null">
+				and DATE_FORMAT(smsreq.sendTime, '%Y-%m-%d') &lt;=#{endSendTime}
+			</if>
+			<if test="operator !=null">
+				and assign.operator =#{operator}
+			</if>
+		</where>
+    </select>
+    
+    <!-- 短信下发新增 -->
+	<insert id="insertFollowupSmsReq"  parameterType="com.esuizhen.cloudservice.followup.model.followupdo.TFollowupSmsReqInfo" keyProperty="reqId" useGeneratedKeys="true">
+        INSERT INTO followup_sms_req (
+			templateId,
+			followupTaskId,
+			followupAssignId,
+			hospitalId,
+			patientId,
+			mobile,
+			messageId,
+			sendTime,
+			trueName,
+			state,
+			replyTime,
+			resultType,
+			replyContent,
+			followupResultBuffId,
+			followupResultId,
+			createTime,
+			updateTime
+        ) VALUES (
+        	#{templateId},
+			#{followupTaskId},
+			#{followupAssignId},
+			#{hospitalId},
+			#{patientId},
+			#{mobile},
+			#{messageId},
+			#{sendTime},
+			#{trueName},
+			#{state},
+			#{replyTime},
+			#{resultType},
+			#{replyContent},
+			#{followupResultBuffId},
+			#{followupResultId},
+        	now() ,
+        	now()
+        )
+	</insert>
+    
+    <!-- 更新短信结果 -->
+	<update id="updateFollowupSmsReq" parameterType="com.esuizhen.cloudservice.followup.model.followupdo.TFollowupSmsReqInfo">
+        UPDATE followup_sms_req 
+        <set>
+	        <if test="followupResultId != null">
+                followupResultId = #{followupResultId} ,
+            </if>
+	        <if test="followupResultBuffId != null">
+                followupResultBuffId = #{followupResultBuffId} ,
+            </if>
+	        <if test="replyState != null">
+                replyState = #{replyState} ,
+            </if>
+	        <if test="replyContent != null">
+                replyContent = #{replyContent} ,
+            </if>
+	        <if test="replyTime != null">
+                replyTime = #{replyTime} ,
+            </if>
+	        <if test="resultType != null">
+                resultType = #{resultType} ,
+            </if>
+	        <if test="resultProcessState != null">
+                resultProcessState = #{resultProcessState},
+            </if>
+	        <if test="state != null">
+                state = #{state}
+            </if>
+        </set>
+        WHERE 
+	        reqId = #{reqId} 
+	</update>
+	
+	<select id="getFollowupSmsReqCount" parameterType="java.util.Map" resultType="Integer">
+		SELECT
+			count(1)
+		FROM
+			followup_sms_req sms
+		<where>
+			sms.mergeFlag!=2
+			<if test="followupTaskId != null">
+                and sms.followupTaskId = #{followupTaskId}
+            </if>
+	        <if test="followupAssignId != null">
+                and sms.followupAssignId = #{followupAssignId}
+            </if>
+			<if test="templateId !=null">
+				and sms.templateId =#{templateId}
+			</if>
+			<if test="state !=null">
+				and sms.state =#{state}
+			</if>
+		</where>
+	</select>
+	
+	<select id="queryFollowupSmsReply" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupSmsSendReq" resultType="com.esuizhen.cloudservice.followup.model.followupdo.TFollowupSmsReqInfo">
+		SELECT
+			sms.*,
+			CASE
+			WHEN sms.resultProcessState = 0 and assign.operator=#{operator} THEN
+				1
+			WHEN sms.resultProcessState IN (1, 2)  THEN
+				0
+			ELSE
+			0
+			END isEnable,
+			patient.patientNo,
+			fct.contentTemplateName templateName,
+			frv.followupResultValueId,
+			frv.followupResultValueName,
+			(case
+			when sms.resultProcessState=0 then '未处理'
+			when sms.resultProcessState=1 then '自动处理'
+			when sms.resultProcessState=2 then '手动处理'
+			end
+			) as resultProcessStateName
+		FROM
+			followup_sms_req sms
+		LEFT JOIN user_db.u_patient patient ON patient.patientId = sms.patientId
+		LEFT JOIN followup_result_buff buff on sms.followupTaskId = buff.followupTaskId AND sms.followupResultBuffId=buff.followupResultBuffId
+		LEFT JOIN meta_followup_result_value frv on frv.followupResultValueId=buff.followupResultValue
+		LEFT JOIN followup_content_template fct on fct.contentTemplateId=sms.templateId
+		LEFT JOIN r_followup_task_assign assign on assign.followupAssignId=sms.followupAssignId and assign.followupTaskId=sms.followupTaskId
+		<if test="sql != null and sql != ''">
+			join 
+			(
+			${sql}
+			) s on s.doctorId = assign.operator
+		</if>
+		<where>
+			sms.mergeFlag!=2
+			<!-- 当为随访护士时，只查自己随访过的 -->
+			<if test="userRole != null and userRole==3">
+				and assign.operator=#{operator}
+			</if>
+			<if test="replyTimeStart !=null">
+				and DATE_FORMAT(sms.replyTime, '%Y-%m-%d') &gt;=#{replyTimeStart}
+			</if>
+			<if test="replyTimeEnd !=null">
+				and DATE_FORMAT(sms.replyTime, '%Y-%m-%d') &lt;=#{replyTimeEnd}
+			</if>
+			<if test="resultProcessState !=null">
+				and sms.resultProcessState =#{resultProcessState}
+			</if>
+			<if test="followupTaskId != null">
+                and sms.followupTaskId = #{followupTaskId}
+            </if>
+            <if test="followupAssignId != null">
+                and sms.followupAssignId = #{followupAssignId}
+            </if>
+			<if test="followupResultId != null">
+                and sms.followupResultId = #{followupResultId}
+            </if>
+	        <if test="followupResultBuffId != null">
+                and sms.followupResultBuffId = #{followupResultBuffId}
+            </if>
+			<if test="patientId !=null">
+				and sms.patientId =#{patientId}
+			</if>
+			<if test="templateId !=null">
+				and sms.templateId =#{templateId}
+			</if>
+			<if test="state !=null and state=1">
+				and sms.state in (1,3)
+			</if>
+			<if test="state !=null and state!=1">
+				and sms.state =#{state}
+			</if>
+			<if test="searchOperator !=null">
+				and assign.operator =#{searchOperator}
+			</if>
+			<if test="replyState">
+				and sms.replyState =#{replyState}
+			</if>
+			<include refid="DataPrivilege_Where_Condition"/>
+		</where>
+		order by sms.replyTime desc
+	</select>
+	
+	<select id="queryFollowupSmsReqByMobileLast" parameterType="String" resultType="com.esuizhen.cloudservice.followup.model.followupdo.TFollowupSmsReqInfo">
+		SELECT
+			sms.*,template.needReply,template.signature,template.autoReplyContent
+		FROM
+			followup_sms_req sms left join followup_content_template template on template.contentTemplateId=sms.templateId
+		<where>
+				sms.mergeFlag!=2 and sms.mobile = #{mobile}
+		</where>
+		order by createTime desc limit 1
+	</select>
+	<select id="getFollowupSmsRecord" resultType="java.util.Map" parameterType="java.util.Map">
+		SELECT
+			sms.reqId,sms.followupAssignId,sms.followupTaskId,sms.sendTime,
+			sms.mobile,
+			sms.replyTime,
+			sms.replyContent
+		FROM followup_db.followup_sms_req sms
+		WHERE sms.mergeFlag!=2 and sms.replyState =1 and sms.patientId =#{patientId}
+		<if test="followupTaskId != null">
+			and sms.followupTaskId = #{followupTaskId}
+		</if>
+		order by sms.replyTime ASC
+	</select>
+	<insert id="addFollowupSmsReplyRecord" parameterType="java.util.Map">
+		INSERT INTO followup_db.followup_sms_reply 
+		(reqId, mobile, replyContent, replyTime) 
+		VALUES 
+		(#{reqId}, #{mobile}, #{replyContent}, #{replyTime});
+	</insert>
+	<!-- add by fanpanwei 获取指定随访任务的短信回复的buff记录 -->
+	<select id="getFollowupBuffBySms" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupSmsSendReq" resultType="java.util.Map">
+		SELECT
+			buff.followupResultValue,
+			buff.relapseParts,
+			buff.relapseDate,
+			buff.transferParts,
+			buff.transferDate,
+			buff.deathDate,
+			buff.isInHospitalDeath,
+			buff.isTumourDeath,
+			buff.deathCause,
+			buff.otherCause,
+			buff.remark
+		FROM followup_db.followup_sms_req sms
+		INNER JOIN user_db.u_patient patient ON patient.patientId = sms.patientId
+		INNER JOIN followup_result_buff buff on sms.followupResultBuffId=buff.followupResultBuffId
+		WHERE sms.mergeFlag!=2
+		 AND sms.followupTaskId = #{followupTaskId}
+		 AND sms.patientId =#{patientId}
+		order by sms.replyTime desc LIMIT 1
+	</select>
+</mapper>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_incre_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.incre.IncreEciDetectionDetailDao" >
+	<insert id="insert">
+		INSERT INTO cloud_sync_incre_db.eci_detection_detail(
+			detectionDetailId, 
+			detectionReportId,
+			patientId, 
+			patientNo, 
+			seqNo, 
+			detectionTypeName, 
+			detectionItemId, 
+			detectionItemCode,
+			rawDetectionItemCode, 
+			detectionItemName, 
+			detectionItemEnglishName,
+			detectionResult,
+			prompt, 
+			resultType, 
+			unit, 
+			refrenceRange, 
+			refrenceRangeMin, 
+			refrenceRangeMax, 
+			detectionMethod,
+			reagentBrand, 
+			instrument, 
+			patientUuid,
+			createTime, 
+			updateTime, 
+			syncTime,
+			promptType,
+			rawCreateTime
+		)VALUES(
+			#{detectionDetailId}, 
+			#{detectionReportId}, 
+			#{patientId},
+			#{patientNo}, 
+			#{seqNo}, 
+			#{detectionTypeName},
+			#{detectionItemId}, 
+			#{detectionItemCode}, 
+			#{rawDetectionItemCode}, 
+			#{detectionItemName}, 
+			#{detectionItemEnglishName},
+			#{detectionResult}, 
+			#{prompt},
+			#{resultType}, 
+			#{unit},
+			#{refrenceRange},
+			#{refrenceRangeMin}, 
+			#{refrenceRangeMax},
+			#{detectionMethod}, 
+			#{reagentBrand}, 
+			#{instrument}, 
+			#{patientUuid}, 
+			NOW(),
+			#{updateTime}, 
+			NOW(),
+			<!-- add by fanpanwei -->
+			#{promptType},
+			#{rawCreateTime}
+		)
+	</insert>
+</mapper>

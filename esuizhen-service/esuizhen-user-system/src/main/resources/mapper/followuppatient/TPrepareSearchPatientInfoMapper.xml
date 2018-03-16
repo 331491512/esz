@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.followuppatient.TPrepareSearchPatientInfoDao" >
+  
+  <sql id="Patient_Where_Condition">
+  		t.outPatientFlag=2
+  		<if test="patientId != null">
+  			AND t.patientId=#{patientId}
+  		</if>
+  		<if test="patientNo != null">
+  			and (
+  				exists(
+	  				select pn.patientId from r_uuid_patientno pn where pn.patientId=t.patientId 
+	  				and (
+	  					pn.patientNo LIKE '%${patientNo}%'
+	  				) 
+  				) or 
+  				t.patientNo LIKE '%${patientNo}%'
+  			)
+  		</if>
+  		<if test="batchPatientNo != null">
+  			and (
+	  			exists(
+	  				select pn.patientId from r_uuid_patientno pn where pn.patientId=t.patientId 
+	  				and (
+	  					pn.patientNo IN(${batchPatientNo}) 
+	  					<if test="originalBatchPatientNo != null">
+	  						or pn.patientNo IN(${originalBatchPatientNo}) 
+	  					</if>
+	  				)
+	  			)
+	  			or t.patientNo IN(${batchPatientNo}) 
+	  			or t.patientNo IN(${originalBatchPatientNo}) 
+	  		)
+  		</if>
+  		<if test="mobile != null">
+  			AND t.familyPhone LIKE '%${mobile}%'
+  		</if>
+  		<if test="trueName != null">
+  			AND t.trueName LIKE '%${trueName}%'
+  		</if>
+  		<if test="sourceDiagnosis != null">
+  			AND t.sourceDiagnosis LIKE '%${sourceDiagnosis}%'
+  		</if>
+  		<if test="sourceDiseaseCode != null">
+  			AND t.sourceDiseaseCode LIKE '%${sourceDiseaseCode}%'
+  		</if>
+  		<if test="sourceDiseaseTypeId != null">
+  			AND t.sourceDiseaseTypeId=#{sourceDiseaseTypeId}
+  		</if>
+  		<if test="confirmedDateStart != null">
+  			AND t.confirmedDate <![CDATA[>=]]> DATE_FORMAT(from_unixtime(#{confirmedDateStart}/1000),'%Y-%m-%d')
+  		</if>
+  		<if test="confirmedDateEnd != null">
+  			AND t.confirmedDate <![CDATA[<=]]>DATE_FORMAT(from_unixtime(#{confirmedDateEnd}/1000),'%Y-%m-%d')
+  		</if>
+  		<if test="sourcePathologyDiagnosis != null">
+  			AND t.sourcePathologyDiagnosis LIKE '%${sourcePathologyDiagnosis}%'
+  		</if>
+  		<if test="sourcePathologyDiseaseCode != null">
+  			AND t.sourcePathologyDiseaseCode LIKE '%${sourcePathologyDiseaseCode}%'
+  		</if>
+  		
+  		<if test="outhospitalTimes == 1">
+  			<if test="outhospitalDateStart != null or outhospitalDateEnd != null">
+			AND t.patientId IN(SELECT w_i_v1.patientId FROM(
+			SELECT w_i.patientId,MIN(w_i.outhospitalDate) minOuthospitalDate 
+			FROM ehr_db.ei_inhospital_note w_i 
+			GROUP BY w_i.patientId
+			HAVING 1=1
+			<if test="outhospitalDateStart != null">
+				AND DATE_FORMAT(minOuthospitalDate,'%Y-%m-%d') <![CDATA[>=]]> DATE_FORMAT(from_unixtime(#{outhospitalDateStart}/1000),'%Y-%m-%d')
+			</if>
+			<if test="outhospitalDateEnd != null">
+				AND DATE_FORMAT(minOuthospitalDate,'%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(from_unixtime(#{outhospitalDateEnd}/1000),'%Y-%m-%d')
+			</if>
+			) w_i_v1)
+			</if>
+		</if>
+		<if test="outhospitalTimes == 2">
+			<if test="outhospitalDateStart != null or outhospitalDateEnd != null">
+			AND t.patientId IN(
+			SELECT pm.patientId FROM ehr_db.var_patient_medical pm 
+			WHERE 1=1 
+			<if test="outhospitalDateStart != null">
+				AND pm.latestOutHospitalDate <![CDATA[>=]]> DATE_FORMAT(from_unixtime(#{outhospitalDateStart}/1000),'%Y-%m-%d')
+			</if>
+			<if test="outhospitalDateEnd != null">
+				AND pm.latestOutHospitalDate <![CDATA[<=]]> DATE_FORMAT(from_unixtime(#{outhospitalDateEnd}/1000),'%Y-%m-%d')
+			</if>
+			)
+			</if>
+		</if>
+		<if test="outhospitalTimes == null">
+			<if test="outhospitalDateStart != null or outhospitalDateEnd != null">
+			AND t.patientId IN(SELECT DISTINCT w_i.patientId 
+			FROM ehr_db.ei_inhospital_note w_i WHERE 1=1
+			<if test="outhospitalDateStart != null">
+				AND DATE_FORMAT(w_i.outhospitalDate,'%Y-%m-%d') <![CDATA[>=]]> DATE_FORMAT(from_unixtime(#{outhospitalDateStart}/1000),'%Y-%m-%d')
+			</if>
+			<if test="outhospitalDateEnd != null">
+				AND DATE_FORMAT(w_i.outhospitalDate,'%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(from_unixtime(#{outhospitalDateEnd}/1000),'%Y-%m-%d')
+			</if>
+			)
+			</if>
+		</if>
+		<if test="faultType != null">
+			AND (t.patientNoDataFlag=0 OR t.contactDataFlag IN(0,-1) OR t.diagnosisDataFlag=0 OR t.diseaseCodeDataFlag IN(0,-1) OR t.IdentificationDataFlag IN(0,-1) OR t.trueNameDataFlag=-1 OR diseaseTypeDataFlag=0)
+  		</if>
+  		<if test="missingType != null">
+			<if test="missingType == 4">
+				AND t.patientNoDataFlag=0
+			</if>
+			<if test="missingType == 3">
+				AND t.contactDataFlag=0
+			</if>
+			<if test="missingType == 1">
+				AND t.diagnosisDataFlag=0
+			</if>
+			<if test="missingType == 2">
+				AND diseaseCodeDataFlag=0
+			</if>
+			<if test="missingType == 5">
+				AND t.IdentificationDataFlag=0
+			</if>
+			<if test="missingType == 6">
+				AND t.diseaseTypeDataFlag=0
+			</if>
+			<if test="missingType == 99">
+				AND (t.patientNoDataFlag=0 OR t.contactDataFlag=0 OR t.diagnosisDataFlag=0 OR diseaseCodeDataFlag=0 OR t.IdentificationDataFlag=0 OR diseaseTypeDataFlag=0)
+			</if>
+  		</if>
+  		<if test="invalidType != null">
+			<if test="invalidType == 4">
+				AND t.trueNameDataFlag=-1
+			</if>
+			<if test="invalidType == 2">
+				AND t.contactDataFlag=-1
+			</if>
+			<if test="invalidType == 3">
+				AND t.IdentificationDataFlag=-1
+			</if>
+			<if test="invalidType == 1">
+				AND t.diseaseCodeDataFlag=-1
+			</if>
+			<if test="invalidType == 99">
+				AND (t.trueNameDataFlag =- 1 OR (t.contactDataFlag =- 1 AND t.IdentificationDataFlag=1 AND t.diseaseCodeDataFlag=1 AND t.patientNoDataFlag=1 AND t.diagnosisDataFlag=1 AND t.diseaseTypeDataFlag=1) OR (t.contactDataFlag =1 AND t.IdentificationDataFlag=-1 AND t.diseaseCodeDataFlag=1 AND t.patientNoDataFlag=1 AND t.diagnosisDataFlag=1 AND t.diseaseTypeDataFlag=1) OR (t.contactDataFlag =1 AND t.IdentificationDataFlag=1 AND t.diseaseCodeDataFlag=-1 AND t.patientNoDataFlag=1 AND t.diagnosisDataFlag=1 AND t.diseaseTypeDataFlag=1))
+			</if>
+  		</if>
+  		<if test="followupFlag != null and followupFlag==2">
+			AND t.followupFlag=#{followupFlag}
+			<if test="lostFollowupCauseResultValue != null">
+				AND t.lostFollowupCauseResultValue=#{lostFollowupCauseResultValue}
+			</if>
+  		</if>
+  		<if test="followupResultValue != null">
+			AND t.patientId IN(
+  				SELECT f.patientId FROM followup_db.var_patient_followup f WHERE f.followupResultValue=#{followupResultValue}
+  			)
+  		</if>
+  </sql>
+  
+  <!-- 根据查询条件获取患者id，并插入到search_patient表中 --> 
+  <insert id="insert" parameterType="java.util.HashMap" >
+    INSERT INTO ${tableName}(searchId,patientId)
+	SELECT
+		#{searchId},t.patientId
+	FROM
+		u_patient t 
+	WHERE 1=1 
+	<include refid="Patient_Where_Condition"></include>
+	<if test="startRow != null">
+		LIMIT #{startRow},#{num}
+	</if>
+  </insert>
+  
+  <update id="update" parameterType="java.util.HashMap">
+  	UPDATE ${tableName} swp,u_patient t SET swp.${searchColumn}=0 WHERE swp.patientId=t.patientId
+  	<include refid="Patient_Where_Condition"></include>
+  </update>
+  
+  <update id="updateByPatientId" parameterType="java.util.HashMap">
+  	UPDATE ${tableName} swp SET swp.${searchColumn}=0 WHERE swp.patientId IN(${patientId})
+  </update>
+</mapper>

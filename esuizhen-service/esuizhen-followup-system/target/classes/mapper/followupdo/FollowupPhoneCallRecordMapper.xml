@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followupdo.FollowupPhoneCallRecordDao">
+
+	<insert id="insertPhoneCallRecord"  parameterType="com.esuizhen.cloudservice.followup.bean.TelephoneRecordingReq" keyProperty="reqId" useGeneratedKeys="true">
+        INSERT INTO followup_phone_call_record (
+			followupAssignId,
+			followupTaskId,
+			patientId,
+			origFileName,
+			phoneCallPath,
+			phoneCallUrl,
+			duration,
+			readFlag,
+			operator,
+			followupPhone,
+        	createTime,
+        	updateTime 
+        ) VALUES (
+        	
+			#{followupAssignId},
+			#{followupTaskId},
+			#{patientId},
+			#{origFileName},
+			#{phoneCallPath},
+			#{phoneCallUrl},
+			#{duration},
+			#{readFlag},
+			#{operator},
+			#{followupPhone},
+        	now(),
+        	now() 
+        )
+	</insert>
+    
+    <update id="updatePhoneCallRecord" parameterType="com.esuizhen.cloudservice.followup.bean.TelephoneRecordingReq">
+    	update followup_phone_call_record 
+    	 <set>
+	        <if test="duration != null">
+                duration = #{duration},
+            </if>
+             <if test="readFlag != null">
+                readFlag = #{readFlag},
+            </if>
+                updateTime = now()
+        </set>
+        <where>
+        	<if test="phoneCallRecordId != null">
+               and phoneCallRecordId = #{phoneCallRecordId} 
+            </if>
+        	<if test="followupTaskId != null">
+               and followupTaskId = #{followupTaskId} 
+            </if>
+        	<if test="patientId != null">
+               and patientId = #{patientId} 
+            </if>
+        </where>
+    	<!-- set readFlag=#{readFlag}
+    	where followupTaskId=#{followupTaskId} and patientId=#{patientId} -->
+    </update>
+	<select id="queryFollowupPhoneRecordList" parameterType="com.esuizhen.cloudservice.followup.bean.TelephoneRecordingReq" resultType="com.esuizhen.cloudservice.followup.bean.TelephoneRecordingReq">
+		select 
+			phoneCallRecordId,
+			followupAssignId,
+			followupTaskId,
+			patientId,
+			origFileName,
+			phoneCallPath,
+			phoneCallUrl,
+			duration,
+			readFlag,
+			operator,
+			followupPhone,
+        	createTime,
+        	updateTime 
+ 		from followup_phone_call_record
+        <where>
+        	<if test="phoneCallRecordId != null">
+               and phoneCallRecordId = #{phoneCallRecordId} 
+            </if>
+        	<if test="followupAssignId != null">
+               and followupAssignId = #{followupAssignId} 
+            </if>
+	        <if test="followupTaskId != null">
+               and followupTaskId = #{followupTaskId} 
+            </if>
+	        <if test="operator != null">
+               and operator = #{operator} 
+            </if>
+	        <if test="readFlag != null">
+               and readFlag = #{readFlag} 
+            </if>
+            <if test="patientId != null">
+               and patientId = #{patientId} 
+            </if>
+        </where>
+        order by createTime desc
+	</select>
+</mapper>
+

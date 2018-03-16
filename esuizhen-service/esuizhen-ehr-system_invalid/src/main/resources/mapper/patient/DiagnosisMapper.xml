@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.patient.DiagnosisDao">
+
+<!-- 获取患者诊断列表 -->
+<select id="queryPatientDiagnosis" resultType="com.esuizhen.cloudservice.ehr.bean.TDiagnosisInfo">
+	select 
+	t1.diagnosisId,
+	<choose>
+		<when test="diagnosisTypeId==9">
+			CASE WHEN t1.pathologyDiagnosis IS NULL OR LENGTH(t1.pathologyDiagnosis) =0 THEN t1.diagnosis ELSE t1.pathologyDiagnosis END diagnosis,
+			CASE WHEN t1.pathologyDiagnosis IS NULL OR LENGTH(t1.pathologyDiagnosis) =0 THEN t1.diseaseCode ELSE t1.pathologyDiagnosisCode END diseaseCode,
+			CASE WHEN t1.pathologyDiagnosis IS NULL OR LENGTH(t1.pathologyDiagnosis) =0 THEN t1.diagnosis ELSE t1.pathologyDiagnosis END pathologyDiagnosis,
+			CASE WHEN t1.pathologyDiagnosis IS NULL OR LENGTH(t1.pathologyDiagnosis) =0 THEN t1.diseaseCode ELSE t1.pathologyDiagnosisCode END pathologyDiagnosisCode,
+			9 diagnosisTypeId,
+		</when>
+		<otherwise>t1.diagnosis,t1.diseaseCode,t1.pathologyDiagnosis,t1.diagnosisTypeId,t1.pathologyDiagnosisCode,</otherwise>
+	</choose>
+	t1.visitTime,t1.organCode,t1.organName,t1.inHospitalCondition,t1.outhospitalCondition,t1.inhospitalId,
+	t1.isSourceDiagnosis,
+	<![CDATA[CASE WHEN t1.isSourceDiagnosis < 1 THEN 100 ELSE t1.isSourceDiagnosis END sortIndex,]]>  
+	<!-- CASE WHEN t1.diagnosisTypeId=1 AND t1.inhospitalId=(SELECT inhospitalId FROM e_diagnosis_info d WHERE d.patientId=t1.patientId AND d.isSourceDiagnosis=1 ORDER BY visitTime LIMIT 1) THEN 1 ELSE 0 END isSourceDiagnosis, -->
+	IFNULL(t2.sourceFlag,3) sourceFlag,t2.creatorId
+	,t3.deseaseBodyPartName,t4.diseaseTypeName,t5.disagnosisPeriodizationName
+	,CASE t2.sourceFlag WHEN 0 THEN "未知" WHEN 1 THEN "患者本人" WHEN 2 THEN t6.trueName WHEN 3 THEN "住院病案" ELSE  "住院病案" END creatorName
+	,t7.pathologyDiagnosisName,i.outhospitalDate,CONCAT(i.tumourPeriodization,i.tumourPeriodizationT,i.tumourPeriodizationN,i.tumourPeriodizationM1,i.tumourPeriodizationM2) tumourPeriodization,i.catalogState
+	from ehr_db.e_diagnosis_info t1
+	LEFT JOIN ehr_db.ei_inhospital_note i ON t1.inhospitalId=i.inhospitalId
+	LEFT JOIN ehr_db.e_medical_record t2 ON t1.emrId = t2.emrId
+	LEFT JOIN ehr_db.meta_e_disease_body_part t3 ON t1.diseaseBodyPartId = t3.deseaseBodyPartId
+	LEFT JOIN ehr_db.meta_c_disease_type t4 ON t1.diseaseTypeId = t4.diseaseTypeId
+	LEFT JOIN ehr_db.meta_e_diagnosis_periodization t5 ON t1.disagnosisPeriodizationId = t5.disagnosisPeriodizationId
+	LEFT JOIN user_db.u_doctor t6 ON t2.sourceFlag=2 AND t6.doctorId = t2.creatorId
+	LEFT JOIN ehr_db.meta_e_icd_o_3 t7 ON REPLACE(IFNULL(t1.pathologyDiagnosisCode,t1.diseaseCode),"M","") = t7.pathologyDiagnosisCode
+	WHERE
+	t1.patientId = #{patientId}
+	<choose>
+		<when test="diagnosisTypeId==0">
+			AND t1.diagnosisTypeId in (1,2,9)
+		</when>
+		<when test="diagnosisTypeId==9">
+			AND (diagnosisTypeId=9 OR t1.pathologyDiagnosis is not NULL AND LENGTH(t1.pathologyDiagnosis)>0)
+		</when>
+		<otherwise>
+			<if test="diagnosisTypeId != 3">
+				AND t1.diagnosisTypeId=#{diagnosisTypeId}
+			</if>
+		</otherwise>
+	</choose>
+	<if test="diagnosis != null">
+		AND t1.diagnosis LIKE '%${diagnosis}%'
+	</if>
+	<if test="inhospitalId != null">
+	AND t1.inhospitalId=#{inhospitalId}
+	</if>
+	<if test="diagnosisTypeId==9">
+		GROUP BY diagnosis,diseaseCode,visitTime
+	</if>
+	<choose>
+		<when test="diagnosisTypeId == 3">
+			ORDER BY t1.inhospitalId
+		</when>
+		<when test="diagnosisTypeId==1 or diagnosisTypeId==2 or diagnosisTypeId==9">
+			ORDER BY sortIndex ASC,t1.visitTime ASC
+		</when>
+		<otherwise>
+			ORDER BY t1.visitTime DESC
+		</otherwise>
+	</choose>
+</select>
+
+<!-- 获取诊断emrId -->
+<select id="queryPatientDiagnosisEmrIdByCreatorId" resultType="java.lang.String">
+	select t2.emrId from ehr_db.e_diagnosis_info t1
+	INNER JOIN
+	ehr_db.e_medical_record t2 ON t1.emrId=t2.emrId AND t2.creatorId= #{creatorId}
+	where 
+	t1.diagnosisId=#{diagnosisId}
+</select>
+
+<!-- 诊断添加 -->
+<insert id="createDiagnosis">
+	INSERT INTO 
+	ehr_db.e_diagnosis_info(diagnosisId,emrId,patientId,diagnosisTypeId,diagnosis,diseaseTypeId,diseaseBodyPartId,diseaseCode,pathologyDiagnosis,pathologyDiagnosisCode,disagnosisPeriodizationId,isSourceDiagnosis,visitTime,updateTime,createTime)
+	VALUES(#{diagnosisId},#{emrId},#{patientId},#{diagnosisTypeId},#{diagnosis},#{diseaseTypeId},#{diseaseBodyPartId},#{diseaseCode},#{pathologyDiagnosis},#{pathologyDiagnosisCode},#{disagnosisPeriodizationId},#{isSourceDiagnosis},#{visitTime},now(),now())
+</insert>
+
+<!-- 诊断修改 -->
+<update id="modifyDiagnosis">
+	UPDATE ehr_db.e_diagnosis_info t1
+	INNER JOIN ehr_db.e_medical_record t2 ON t1.emrId=t2.emrId AND t2.creatorId=#{creatorId}
+	<set>
+		t1.updateTime = NOW()
+		<if test="diagnosis!=null">
+			,t1.diagnosis=#{diagnosis}
+		</if>
+		<if test="pathologyDiagnosis!=null">
+			,t1.pathologyDiagnosis=#{pathologyDiagnosis}
+		</if>
+		<if test="pathologyDiagnosisCode!=null">
+			,t1.pathologyDiagnosisCode=#{pathologyDiagnosisCode}
+		</if>
+		<if test="visitTime!=null">
+			,t1.visitTime = #{visitTime}
+		</if>
+	</set>
+	WHERE t1.diagnosisId=#{diagnosisId}
+	AND t1.diagnosisTypeId=#{diagnosisTypeId}
+</update>
+<!-- 删除诊断 -->
+<delete id="delDiagnosis">
+	delete from ehr_db.e_diagnosis_info where diagnosisId=#{diagnosisId}
+</delete>	
+</mapper>
+

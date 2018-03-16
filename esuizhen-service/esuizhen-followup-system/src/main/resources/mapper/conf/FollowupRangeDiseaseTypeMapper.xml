@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.conf.FollowupRangeDiseaseTypeDao">
+
+	<sql id="Base_Column_List">
+		diseaseTypeId,diseaseTypeName,diseaseBodyPartId,diseaseBodyPartName
+	</sql>
+
+	<select id="queryAllFollowupDiseaseType" resultType="com.esuizhen.cloudservice.followup.bean.TFollowupConfigDiseaseType">
+		select 
+		      <include refid="Base_Column_List" />
+		from conf_followup_range_disease_type
+	</select>
+	
+	<insert id="batchInsertFollowupDiseaseType">
+		<selectKey resultType="Integer" keyProperty="id" order="AFTER">  
+	        SELECT  
+	        LAST_INSERT_ID()  
+	    </selectKey>  
+	    insert into conf_followup_range_disease_type (diseaseTypeId,diseaseTypeName,diseaseBodyPartId,diseaseBodyPartName)
+	    values
+	    <foreach collection="followupConfigDiseaseTypeList" item="item" index="index" separator=",">
+	    	(#{item.diseaseTypeId},#{item.diseaseTypeName},#{item.diseaseBodyPartId},#{item.diseaseBodyPartName})
+	    </foreach>
+	</insert>
+	
+	<delete id="deleteAllFollowupDiseaseType">
+		delete from conf_followup_range_disease_type
+	</delete>
+	
+</mapper>

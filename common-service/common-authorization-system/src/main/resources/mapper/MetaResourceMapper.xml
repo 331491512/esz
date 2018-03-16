@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.westangel.commonservice.authorization.dao.MetaResourceDao">
+	<resultMap type="com.westangel.common.bean.authorization.MetaResource" id="baseRoleListResultMap">
+		<id column="parentId" property="resourceId"/>
+		<result column="parentResourceName" property="resourceName"/>
+		<result column="parentResourceDisplayName" property="resourceDisplayName"/>
+		
+		<collection property="subResourceList" ofType="com.westangel.common.bean.authorization.MetaResource">
+			<id column="resourceId" property="resourceId"/>
+			<result column="resourceName" property="resourceName"/>
+			<result column="resourcePath" property="resourcePath"/>
+			<result column="resourceDisplayName" property="resourceDisplayName"/>
+			<result column="resourceType" property="resourceType"/>
+			<result column="parentId" property="parentId"/>
+			<result column="remark" property="remark"/>
+		</collection>
+	</resultMap>
+
+	<select id="findSubResources" resultType="com.westangel.common.bean.authorization.MetaResource">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM user_db.meta_resource t1
+		<if test="userId != null or userRole != null">
+			INNER JOIN user_db.r_conf_func_privilege t2 ON t1.resourceId = t2.resourceId
+		</if>
+		<if test="userId != null">
+			INNER JOIN user_db.r_user_role t3 ON t2.userRole = t3.userRole
+		</if>
+		WHERE 1 = 1
+		<if test="resourceType != null">
+			AND t1.resourceType = #{resourceType}
+		</if>
+		<if test="userId != null">
+			AND t3.userId = #{userId}
+		</if>
+		<if test="userRole != null">
+			AND t2.userRole = #{userRole}
+		</if>
+		<if test="resourceId != null">
+			AND t1.parentId = #{resourceId}
+		</if>
+		GROUP BY t1.resourceId
+	</select>
+	
+	<select id="findMetaInfoResourceMenuList" resultType="com.westangel.common.bean.authorization.MetaResource">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM user_db.meta_resource t1
+		<if test="userId != null or userRole != null">
+			INNER JOIN user_db.r_conf_func_privilege t2 ON t1.resourceId = t2.resourceId
+		</if>
+		<if test="userId != null">
+			INNER JOIN user_db.r_user_role t3 ON t2.userRole = t3.userRole
+		</if>
+		WHERE (t1.parentId IS NULL OR t1.parentId = 0)
+		<if test="resourceType != null">
+			AND t1.resourceType = #{resourceType}
+		</if>
+		<if test="userId != null">
+			AND t3.userId = #{userId}
+		</if>
+		<if test="userRole != null">
+			AND t2.userRole = #{userRole}
+		</if>
+		GROUP BY t1.resourceId
+	</select>
+	
+	<sql id="base_column_list">
+		t1.resourceId,
+		t1.resourceName,
+		t1.resourcePath,
+		t1.resourceDisplayName,
+		t1.resourceType,
+		t1.parentId,
+		t1.remark
+	</sql>
+	
+	<!-- 查询全局配置表 -->
+	<select id="queryConfGlobal" resultType="com.westangel.commonservice.authorization.bean.ConfGlobal">
+		select 
+		      *
+		from followup_db.conf_global
+	</select>
+</mapper>

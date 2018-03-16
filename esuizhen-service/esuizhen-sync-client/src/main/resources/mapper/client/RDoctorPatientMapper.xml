@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.client.sync.dao.RDoctorPatientDao" >	
+  	
+	<select id="getBatchSyncRDoctorPatient" resultType="java.util.LinkedHashMap" parameterType="com.esuizhen.client.sync.model.TBatchDetailInfo">
+       SELECT
+			t1.id,t1.patientId,t4.uuid as patientUuid,t1.doctorId,t3.uuid as doctorUuid,t1.hasMedicalRecord,
+			t1.vipFlag,t1.firstVisitFlag,t1.attentionTime,t1.createTime,t1.updateTime,t1.sourceFlag,t1.sourceDiagnosisFlag,
+			t1.mergeFlag,t1.mergeFrom,
+			IFNULL(t1.mergeFromUuid,(SELECT uuid FROM user_db.u_patient WHERE patientId =t1.mergeFrom)) AS mergeFromUuid,
+			t1.mergeTarget,
+			IFNULL(t1.mergeTargetUuid,(SELECT uuid FROM user_db.u_patient WHERE patientId =t1.mergeTarget)) AS mergeTargetUuid,
+			t1.mergeTime,t1.professionalRank
+			,t1.outDeptId,t1.outDeptName,t7.uuid outDeptUuid
+			,t1.inDeptId,t1.inDeptName,t8.uuid inDeptUuid
+		FROM
+			 user_db.r_doctor_patient t1
+		JOIN user_db.u_doctor t2 ON t1.doctorId = t2.doctorId 
+        JOIN sc_db.u_doctor_sync_result_client t3 ON t2.uuid = t3.uuid
+		JOIN user_db.u_patient t4 ON t1.patientId = t4.patientId
+        JOIN sc_db.u_patient_sync_result_client t5 ON t4.uuid = t5.uuid
+        JOIN sc_db.r_doctor_patient_sync_result_client t6 ON t6.id = t1.id 
+        LEFT JOIN user_db.u_department t7 ON t1.outDeptId=t7.deptId
+		LEFT JOIN user_db.u_department t8 ON t1.inDeptId=t8.deptId
+		WHERE
+			t3.syncFlag = 1 AND t5.syncFlag=1 AND t6.syncFlag in (0,2)
+		LIMIT #{detailInfo.syncSize}
+  	</select>
+  	  	
+  	<update id="updateRDoctorPatientSyncflag" parameterType="java.lang.String">
+		UPDATE sc_db.r_doctor_patient_sync_result_client t1
+		SET t1.opFlag=IF(t1.syncFlag=0,1,2),t1.syncFlag = 9 , t1.syncTime=NOW(),t1.updateTime = NOW()
+		WHERE
+			t1.id IN (${ids})
+	</update>
+	
+	<update id="updateSyncResult" parameterType="com.esuizhen.client.sync.bean.TBatchDataResultInfo">
+		UPDATE sc_db.r_doctor_patient_sync_result_client t1
+		SET 
+		    t1.batchId = #{tBatchDataResultInfo.batchId},
+		    t1.syncFlag = #{tBatchDataResultInfo.syncFlag},
+			t1.cause = #{tBatchDataResultInfo.cause},
+			t1.updateTime = NOW()
+		WHERE
+			t1.id = #{tBatchDataResultInfo.resultId} and t1.syncFlag = 9
+	</update>
+</mapper>

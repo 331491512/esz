@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.medicalRecord.RiskfactorsSleepInfoDao" >
+  <resultMap id="BaseResultMap" type="com.esuizhen.cloudservice.ehr.bean.RiskfactorsSleepInfo" >
+    <id column="sleepInfoId" property="sleepInfoId" jdbcType="VARCHAR" />
+    <result column="riskfactorsId" property="riskfactorsId" jdbcType="VARCHAR" />
+    <result column="sleepDes" property="sleepDes" jdbcType="INTEGER" />
+    <result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    sleepInfoId, riskfactorsId, sleepDes, createTime, updateTime
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from e_riskfactors_sleep_info
+    where sleepInfoId = #{sleepInfoId,jdbcType=VARCHAR}
+  </select>
+  <select id="queryOne" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from e_riskfactors_sleep_info
+    where riskfactorsId = #{riskfactorsId}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from e_riskfactors_sleep_info
+    where sleepInfoId = #{primaryKeyId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.esuizhen.cloudservice.ehr.bean.RiskfactorsSleepInfo" >
+    insert into e_riskfactors_sleep_info (sleepInfoId, riskfactorsId, sleepDes, 
+      createTime, updateTime)
+    values (#{sleepInfoId,jdbcType=VARCHAR}, #{riskfactorsId,jdbcType=VARCHAR}, #{sleepDes,jdbcType=INTEGER}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.esuizhen.cloudservice.ehr.bean.RiskfactorsSleepInfo" >
+    insert into e_riskfactors_sleep_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="sleepInfoId != null" >
+        sleepInfoId,
+      </if>
+      <if test="riskfactorsId != null" >
+        riskfactorsId,
+      </if>
+      <if test="sleepDes != null" >
+        sleepDes,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+      <if test="updateTime != null" >
+        updateTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="sleepInfoId != null" >
+        #{sleepInfoId,jdbcType=VARCHAR},
+      </if>
+      <if test="riskfactorsId != null" >
+        #{riskfactorsId,jdbcType=VARCHAR},
+      </if>
+      <if test="sleepDes != null" >
+        #{sleepDes,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.cloudservice.ehr.bean.RiskfactorsSleepInfo" >
+    update e_riskfactors_sleep_info
+    <set >
+      <if test="riskfactorsId != null" >
+        riskfactorsId = #{riskfactorsId,jdbcType=VARCHAR},
+      </if>
+      <if test="sleepDes != null" >
+        sleepDes = #{sleepDes,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where sleepInfoId = #{sleepInfoId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.esuizhen.cloudservice.ehr.bean.RiskfactorsSleepInfo" >
+    update e_riskfactors_sleep_info
+    set riskfactorsId = #{riskfactorsId,jdbcType=VARCHAR},
+      sleepDes = #{sleepDes,jdbcType=INTEGER},
+      createTime = #{createTime,jdbcType=TIMESTAMP},
+      updateTime = #{updateTime,jdbcType=TIMESTAMP}
+    where sleepInfoId = #{sleepInfoId,jdbcType=VARCHAR}
+  </update>
+</mapper>

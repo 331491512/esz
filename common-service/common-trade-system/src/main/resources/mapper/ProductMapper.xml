@@ -1,0 +1,592 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.westangel.commonservice.trade.dao.ProductDao">
+	
+	
+	<!-- 查看某个供应商（如医生）的商品列表详情 -->
+	<!-- 注意：医生端不返回预约加号(packageFlag=-1)；患者端不返回会诊咨询  -->
+	<!--暂不返回预约加号 productType=3(packageFlag>=0)  -->
+	<select id="queryProductList"  resultType="com.westangel.common.bean.trade.TProductDetailInfo">
+		SELECT 
+		       t1.productId, t1.productNo,t1.productName,t1.productType,
+		       t1.vendor vendorId,t2.trueName vendorName,t1.productName,
+		       t3.productSpecName productSpec,t1.refPrice/100 as refPrice,t1.unitPrice/100 as unitPrice,t1.discount,
+		       t1.feeType,t1.state,t1.isGroup
+		      <if test="reqFlag==null">
+				,t4.introduction
+			  </if>
+		      <if test="reqFlag!=null">
+				,t4.publishIntroduction as introduction
+			  </if>
+		FROM 
+		     com_trade_db.product t1,user_db.u_user t2,com_trade_db.meta_product_spec t3,com_trade_db.product_template t4
+		WHERE
+            t1.vendor = t2.userId  AND 
+		    t1.productSpecId = t3.productSpecId AND
+		    t1.vendor = #{userId} AND
+		    t1.productTemplateId = t4.productTemplateId
+		    <choose>
+		    <when test="reqFlag!=null and reqFlag==1">
+		    	AND t4.packageFlag>=-1
+		    	AND t1.productType not in (4,11,13)
+		    	AND t1.state=1
+		    </when>
+		    <when test="reqFlag==null">
+		    	AND t4.packageFlag>=0
+		    </when>
+		    </choose>
+	</select>
+
+	<!-- 获得某个供应商（如医生）的某类（根据productType）商品列表 -->
+	<!-- 因为要确保如果同一个产品如果有多条记录，则返回有订关系的那个，所以第一层查询用orderState逆序排列，保证group by时先返回此条记录 -->
+	<select id="getProduct"  resultType="com.westangel.common.bean.trade.TProductDetailInfo">
+		SELECT * FROM
+		 (SELECT 
+		       t1.productId, t1.productNo,t1.productName,t1.productType,t1.productSource,
+		       t1.vendor vendorId,t2.trueName vendorName,
+		       t3.productSpecName productSpec,
+		       t1.productSpecId,t1.refPrice/100 as refPrice,t1.unitPrice/100 as unitPrice,t1.discount,t1.discountPrice/100 as discountPrice,
+		       t1.feeType,t1.state,t1.isGroup,t1.expressPrice
+	           <if test="buyer!=null">
+                ,CASE WHEN t1.productType=4 THEN t1.introduction ELSE t6.publishIntroduction END introduction
+                ,(case when t4.state is null then -1 else t4.state end) orderState
+                ,(case when t4.subscriptionFlag is null then -1 else t4.subscriptionFlag end ) subscriptionFlag
+                ,(case when t4.subscriptionFlag is null then "" else t4.orderId end ) orderId
+                ,(case when t4.subscriptionFlag is null then "" else t4.description end ) description
+              </if>
+              <if test="buyer==null">
+              	,t1.introduction
+              </if>
+              ,if(t1.productPictureUrls IS NULL,t6.productPictureUrls,t1.productPictureUrls) productPictureUrls
+              ,t1.expressCompanyId
+		      ,t7.expressCompanyName
+              ,t1.createTime,t1.productTemplateId,t1.sortIndex
+			  ,t1.productSubTypes productSubTypes
+		 FROM 
+		     com_trade_db.product t1
+	 	 LEFT JOIN user_db.u_user  t2 ON t1.vendor=t2.userId
+         LEFT JOIN com_trade_db.meta_product_spec t3 ON t1.productSpecId = t3.productSpecId
+         <if test="buyer!=null">
+	      LEFT JOIN com_trade_db.r_order_product t5 ON t1.productId=t5.productId
+	 	  LEFT JOIN com_trade_db.order t4 ON t4.orderId=t5.orderId AND t4.buyer=#{buyer} 
+  	      </if>
+  	      LEFT JOIN com_trade_db.product_template t6 on t1.productTemplateId=t6.productTemplateId 
+  	      LEFT JOIN  com_trade_db.meta_express_company t7 ON t1.expressCompanyId=t7.expressCompanyId
+  	      <if test="tags!=null">
+  	      JOIN com_trade_db.r_product_tag t9 ON t1.productId=t9.productId AND t9.tagId IN
+  	      <foreach collection="tags" item="item" open="(" close=")" separator=",">#{item.tagId}</foreach>
+  	      </if>
+	    WHERE 1
+		 <if test="userId!=null">
+			AND t1.vendor =#{userId}
+		 </if>
+		 <if test="productType!=null">
+			AND t1.productType=#{productType}
+		 </if>
+		 <if test="buyer!=null||reqFlag==null">
+		    AND t1.state=1
+	     </if>
+	     ORDER BY t1.createTime DESC,t1.productTemplateId ASC,t1.productId
+	     <if test="buyer!=null">
+		 ,t4.createTime DESC,orderState DESC,t4.createTime DESC
+	     </if>
+	     ) t
+		 GROUP BY productId
+		 <choose>
+		 	<when test="sortRule=1">ORDER BY productTemplateId,sortIndex</when>
+		 	<when test="sortRule=2">ORDER BY sortIndex,productTemplateId</when>
+		 	<otherwise>ORDER BY productTemplateId,sortIndex asc</otherwise>
+		 </choose>
+	</select>
+	
+	<!-- 根据productId获得商品详情 -->
+	<!-- 如果是患者请求，则返回的是  -->
+	<select id="getProductById"  resultType="com.westangel.common.bean.trade.TProductDetailInfo">
+		SELECT 
+		       t1.productId, t1.productNo,t1.productType,t1.productSubTypes,
+		       t1.vendor vendorId,t1.productSpecId,
+		       t1.refPrice/100 as refPrice,t1.unitPrice/100 as unitPrice,t1.discount,t1.discountPrice/100 as discountPrice,
+		       t1.feeType,t1.state,t1.isGroup,t1.expressPrice,
+		       t1.expressCompanyId,t3.expressCompanyName
+		       ,if(t1.productPictureUrls IS NULL,t2.productPictureUrls,t1.productPictureUrls) productPictureUrls
+		       ,t1.hospitalCertificateFlag,t1.certificateFlag,t1.expressCompanyId,t1.description,t2.isFeeThree
+		  	 <if test="buyer!=null">
+	           ,t2.publishIntroduction as introduction
+	         </if>
+	         <if test="buyer==null">
+	           ,t2.introduction
+	         </if>
+			 <if test="productSubType!=null">
+			   ,#{productSubType} productSubType,IFNULL(t4.productSubName,t1.productName) productName
+			 </if>
+		     <if test="productSubType==null">
+				 ,t1.productName
+			 </if>
+		FROM 
+		     com_trade_db.product t1 
+		     INNER JOIN com_trade_db.product_template t2  ON t1.productTemplateId=t2.productTemplateId
+	 		 LEFT JOIN  com_trade_db.meta_express_company t3 ON t1.expressCompanyId=t3.expressCompanyId
+			 <if test="productSubType!=null">
+				 LEFT JOIN com_trade_db.product_sub_template t4 ON t4.productTemplateId=t1.productTemplateId
+				 AND FIND_IN_SET(#{productSubType},t1.productSubTypes)>0 AND t4.productSubType=#{productSubType}
+			 </if>
+	 	WHERE
+      	     t1.productId=#{productId}
+      	    
+	</select>
+	
+	<!-- 创建产品，内部系统调用 -->
+	<insert id="createProduct"
+		parameterType="com.westangel.common.bean.trade.TProductDetailInfo">
+		INSERT INTO
+		     product(productId,productNo,productTemplateId,productName,productType,vendor,productSpecId,
+		       introduction,refPrice,unitPrice,feeType,state,createTime,updateTime)
+		VALUES(#{productId},#{productNo},#{productTemplateId},#{productName},#{productType},#{vendor},#{productSpecId},
+		       #{introduction},#{refPrice}*100,#{unitPrice}*100,#{feeType},1,NOW(),NOW())
+	</insert>
+	
+	<!-- 产品更新（如服务设置，产品上架)  
+	    只需修改价格和状态，其他字段不做修改。
+	-->
+	<update id="updateProduct" parameterType="com.westangel.common.bean.trade.TProductDetailInfo">
+		UPDATE product
+		<set>
+			<if test="unitPrice">
+				unitPrice = #{unitPrice}*100,
+			</if>
+			    state = #{state},
+				updateTime = now()
+		</set>
+		WHERE productId = #{productId}
+	</update>
+	
+	<!-- 产品下架 	-->
+	<update id="updateProductOffShelf" >
+		UPDATE product
+		<set>
+			    state = 2,
+				updateTime = now()
+		</set>
+		WHERE productId = #{productId}
+	</update>
+		
+	<!-- 获得订购关系. 查询最新一次订购 -->
+	<select id="queryProductSubscription"   resultType="Integer">
+	   SELECT  
+	         t1.state 
+	   FROM
+	         com_trade_db.`order` t1,com_trade_db.`r_order_product` t2
+	   WHERE
+	         t2.productType=#{productType} AND t1.orderId=t2.orderId AND t1.buyer=#{buyer} AND  t1.vendor=#{vendor}
+	   ORDER BY 
+	         t1.createTime DESC
+	   LIMIT 0,1       
+	
+	</select>
+	
+	<!--  获得组成员信息 -->
+	<select id="getGroupMemberList" resultType="com.westangel.common.bean.trade.TProductGroupMemberInfo">
+		SELECT 
+			t2.memberVendor,t3.trueName vendorName,t4.professionalRankName,t6.hospitalName,t7.deptName
+			
+		FROM
+			com_trade_db.product_group t2,
+			user_db.u_doctor t3,
+			user_db.meta_professional_rank t4,
+		    user_db.r_hospital_doctor t5,
+		    user_db.u_hospital t6,
+		    user_db.u_department t7
+			
+		WHERE
+		    
+		 t7.deptId=t5.deptId AND t6.hospitalId=t5.hospitalId AND 
+		 t4.professionalRankId=t3.professionalRank AND t5.doctorId = t3.doctorId AND 
+		 t3.userId=t2.memberVendor AND t2.productId=#{productId}
+	</select>
+	<select id="getGroupMemberListByProductIdAndOrderId" resultType="com.westangel.common.bean.trade.TProductGroupMemberInfo">
+		SELECT 
+			t2.memberVendor,t3.trueName vendorName,t4.professionalRankName,t6.hospitalName,t7.deptName
+			
+		FROM
+			com_trade_db.product_group t2,
+			user_db.u_doctor t3,
+			user_db.meta_professional_rank t4,
+		    user_db.r_hospital_doctor t5,
+		    user_db.u_hospital t6,
+		    user_db.u_department t7
+			
+		WHERE
+		    
+		 t7.deptId=t5.deptId AND t6.hospitalId=t5.hospitalId AND 
+		 t4.professionalRankId=t3.professionalRank AND t5.doctorId = t3.doctorId AND 
+		 t3.userId=t2.memberVendor AND t2.productId=#{productId}
+		 <if test="orderId!=null">
+		 	AND orderId = #{orderId}
+		 </if>	
+		
+	</select>
+	
+		
+	<!-- 初始化产品 -->
+	<select id="getProductInitInfoList"  resultType="com.westangel.commonservice.trade.model.product.TProductInitInfo">
+		SELECT 
+		       t1.productTemplateId,t1.productTemplateName productName,t1.productType,
+		       t1.introduction, t1.productSpecId,t1.discount,
+		       #{userId} as vendor,t1.feeType,
+		       t2.initState as state,t2.refPrice/100 as refPrice,t2.refPrice/100 as unitPrice
+		FROM 
+		     com_trade_db.product_template t1,com_trade_db.meta_c_ref_price t2
+		WHERE
+            t1.productTemplateId = t2.productTemplateId 
+            AND t2.enable=1 
+            AND t2.professionalRankId=#{professionalRankId}
+	</select>
+	
+	<insert id="initProduct"
+		parameterType="com.westangel.commonservice.trade.model.product.TProductInitInfo">
+		INSERT INTO
+		     product(productId,productNo,productTemplateId,productName,productType,vendor,productSpecId,
+		       introduction,refPrice,unitPrice,feeType,discount,state,createTime,updateTime)
+		VALUES
+	    <foreach collection="list" item="item" index="index" separator=",">
+	 	      (#{item.productId},#{item.productNo},#{item.productTemplateId},#{item.productName},
+	 	      #{item.productType},#{item.vendor},#{item.productSpecId},#{item.introduction},
+	 	      #{item.refPrice}*100,#{item.unitPrice}*100,#{item.feeType},#{item.discount},
+		      #{item.state},NOW(),NOW())
+		</foreach>
+	</insert>
+	
+	<!--  获得产品模板列表. 目前只用于医生端查看（未审核时，服务设置不能为空），但不能修改。enable标识为0. 且不返回预约加号 -->
+	<select id="getProductTemplateList"  resultType="com.westangel.common.bean.trade.TProductDetailInfo">
+		SELECT 
+		       "PROD000000000000" as productId, "000000000000" as productNo,
+		       0 as vendorId, "esuizhen" as vendorName,
+		       0 as enable, 2 as state,
+		       t1.productTemplateName as productName,t1.productType,
+		       t2.productSpecName productSpec,t1.introduction,t1.refPrice/100 as refPrice,t1.refPrice/100 as unitPrice,t1.discount,
+		       t1.feeType
+		       
+		FROM 
+		     com_trade_db.product_template t1,com_trade_db.meta_product_spec t2
+		WHERE
+            t1.productSpecId = t2.productSpecId
+            AND usageFlag !=2
+            AND t1.productType not in (4,11,13)
+	</select>
+	
+	
+	<!--  获得产品模板列表. 由运营系统调用 -->
+	<select id="getProductTemplateInfoList"  resultType="com.westangel.commonservice.trade.bean.TProductTemplateInfo">
+		SELECT 
+		       t1.productTemplateId
+		       t1.productTemplateName,
+		       t1.productType,
+		       t1.introduction,
+		       t1.refPrice/100 as refPrice,
+		       t1.remark,
+		       t1.hospitalCertificateFlag,
+		       t1.certificateFlag,
+		       t1.createTime
+		       
+		FROM 
+		     com_trade_db.product_template t1
+		WHERE
+			1
+			<if test="usageFlag!=null and usageFlag!=0">
+            	AND t1.usageFlag =#{usageFlag}
+			</if>
+			<if test="templateType!=null">
+				AND templateType=#{templateType}
+			</if>
+  
+	</select>
+	
+	<!-- 修改产品模板
+	-->
+	<update id="updateProductTemplate" parameterType="com.westangel.commonservice.trade.bean.TProductTemplateInfo">
+		UPDATE com_trade_db.product_template
+		<set>
+			<if test="productTemplateName!=null">
+				productTemplateName= #{productTemplateName},
+			</if>
+			<if test="hospitalCertificateFlag!=null">
+				hospitalCertificateFlag= #{hospitalCertificateFlag},
+			</if>
+			<if test="certificateFlag!=null">
+				certificateFlag= #{certificateFlag},
+			</if>
+			<if test="remark!=null">
+				remark= #{remark},
+			</if>
+			
+				updateTime = now()
+		</set>
+		WHERE productTemplateId = #{productTemplateId}
+	</update>
+	
+    <!-- 根据user和productTemplateId来获得productId -->
+	<select id="getProductId"  resultType="java.lang.String">
+		SELECT 
+		       t1.productId
+		FROM 
+		     com_trade_db.product t1
+	 	WHERE
+      	     t1.productTemplateId=#{productTemplateId}
+      	     AND t1.vendor=#{userId}
+	        
+	</select>
+	
+	<!-- 更新产品状态 	-->
+	<update id="updateProductState" >
+		UPDATE product
+		<set>
+			    state = #{state},
+				updateTime = now()
+		</set>
+		WHERE productId = #{productId}
+	</update>
+
+	<update id="updateProductStateWithProductSubTypes">
+		UPDATE product
+		<set>
+			state = #{state},
+			productSubTypes=#{productSubTypes},
+			updateTime = now()
+		</set>
+		WHERE productId = #{productId}
+	</update>
+	
+	<insert id="createProductByTemplate" >
+		INSERT INTO product
+		     (productId,
+		      productNo,
+		      productTemplateId,
+		      productName,
+		      productType,
+		      vendor,
+		      productSpecId,
+		      introduction,
+		      refPrice,
+		      unitPrice,
+		      feeType,
+		      discount,
+		      state,
+		      productSubTypes,
+		      createTime,
+		      updateTime)
+		SELECT
+		    #{productId},
+		    #{productNo},
+		    productTemplateId,
+		    productTemplateName,
+		    productType,
+		    #{userId},
+		    productSpecId,
+		    introduction,
+		    refPrice,
+		    refPrice,
+		    feeType,
+		    discount,
+		    1,
+		    #{productSubTypes},
+		    now(),
+		    now()
+	   FROM
+	        product_template
+	   WHERE
+	       productTemplateId=#{productTemplateId}
+	        
+	</insert>
+	
+	<!-- 修改产品认证模式
+	-->
+	<update id="setProductCertificationMode" parameterType="com.westangel.commonservice.trade.bean.THospitalProductInfo">
+		UPDATE com_trade_db.product
+		<set>
+			<if test="hospitalCertificateFlag!=null">
+				hospitalCertificateFlag= #{hospitalCertificateFlag},
+			</if>
+			<if test="certificateFlag!=null">
+				certificateFlag= #{certificateFlag},
+			</if>
+			
+				updateTime = now()
+		</set>
+		WHERE productId = #{productId}
+		AND vendor=#{userId}
+	</update>
+	
+    <!-- 设置医院服务产品（认证模式、单价、快递）
+	-->
+	<update id="setProductHospitalInfo" parameterType="com.westangel.commonservice.trade.bean.THospitalProductInfo">
+		UPDATE com_trade_db.product
+		<set>
+			<if test="hospitalCertificateFlag!=null">
+				hospitalCertificateFlag= #{hospitalCertificateFlag},
+			</if>
+			<if test="certificateFlag!=null">
+				certificateFlag= #{certificateFlag},
+			</if>
+			<if test="unitPrice!=null">
+				unitPrice= #{unitPrice}*100,
+			</if>
+			<if test="expressPrice!=null">
+				expressPrice= #{expressPrice},
+			</if>
+			<if test="expressCompanyId!=null">
+				expressCompanyId= #{expressCompanyId},
+			</if>
+				updateTime = now()
+		</set>
+		WHERE productId = #{productId}
+		AND vendor=#{userId}
+	</update>
+	
+	<!-- 运营部分 -->
+	<!-- 查询获取商品列表  -->
+	<select id="getProductInfoList" resultType="com.westangel.common.bean.trade.TProductInfo">
+		SELECT 
+			t1.productId,t2.productTemplateName,t1.productType,t1.vendor,t1.productName,
+			t1.introduction,t1.unitPrice/100,t1.refPrice/100,t1.discountPrice/100,
+			t1.state,t1.productSource,t1.sortIndex,t1.productPictureUrls,t1.provider,t1.customerMobile
+		FROM com_trade_db.product t1
+		JOIN com_trade_db.product_template t2 ON t1.productTemplateId=t2.productTemplateId
+		<if test="reqFlag==1">
+			AND t2.templateType=1
+		</if>
+		<if test="tagId!=null">
+		JOIN com_trade_db.r_product_tag t3 ON t1.productId=t3.productId AND t3.tagId=#{tagId}
+		</if>
+		WHERE 
+		1
+		<if test="vendor!=null">
+			AND t1.vendor=#{vendor}
+		</if>
+		<if test="productType!=null">
+			AND t1.productType=#{productType}
+		</if>
+		<if test="productTemplateId!=null">
+			AND t1.productTemplateId=#{productTemplateId}
+		</if>
+		<if test="productName!=null">
+			AND t1.productName LIKE CONCAT(CONCAT('%', #{productName}),'%')  
+		</if>
+	</select>
+	<!-- 获取商品信息 -->
+	<select id="getProductInfo" resultType="com.westangel.common.bean.trade.TProductInfo">
+		SELECT 
+			t1.productId,t2.productTemplateName,t1.productType,t1.vendor,t1.productName,
+			t1.introduction,t1.unitPrice/100,t1.refPrice/100,t1.discountPrice/100,
+			t1.state,t1.productSource,t1.sortIndex,t1.productPictureUrls,t1.provider,t1.customerMobile
+		FROM com_trade_db.product t1
+		JOIN com_trade_db.product_template t2 ON t1.productTemplateId=t2.productTemplateId
+		WHERE productId=#{productId}
+		<if test="vendor!=null">
+			AND t1.vendor=#{vendor}
+		</if>
+	</select>
+	
+	<!-- 修改商品信息 -->
+	<update id="updateProductInfo">
+		UPDATE com_trade_db.product
+		<set>
+			productName=#{productName},
+			introduction=#{introduction},
+			unitPrice=#{unitPrice}*100,
+			refPrice=#{refPrice}*100,
+			discountPrice=#{discountPrice}*100,
+			productSource=#{productSource},
+			sortIndex=#{sortIndex},
+			description=#{description},
+			productPictureUrls=#{productPictureUrls},
+			provider=#{provider},
+			customerMobile=#{customerMobile}
+		</set>
+		WHERE productId=#{productId}
+	</update>
+	
+	<!-- 初始化产品  -->
+	<select id="getProductInitInfo"  resultType="com.westangel.commonservice.trade.model.product.TProductInitInfo">
+		SELECT 
+		       t1.productTemplateId,t1.productTemplateName productName,t1.productType,
+		       t1.introduction, t1.productSpecId,t1.discount,
+		       #{userId} as vendor,t1.feeType
+		FROM 
+		     com_trade_db.product_template t1
+		WHERE
+         t1.productTemplateId=#{productTemplateId}
+	</select>
+
+	<!-- 获取商品子模板名称 -->
+	<select id="findProductSubTemplate" resultType="java.lang.String">
+		SELECT productSubName FROM com_trade_db.product_sub_template
+		WHERE productTemplateId=#{productTemplateId} AND productSubType=#{productSubType}
+
+	</select>
+
+	<!-- 获取商品子模板列表 -->
+	<select id="findProductSubTemplateListByProductId" resultType="com.westangel.common.bean.trade.TProductSubTemplateInfo">
+		SELECT
+				t1.productSubTemplateId,t1.productTemplateId,t1.productSubName,t1.productSubType,
+    			t1.introduction,t1.publishIntroduction,t1.createTime,t1.updateTime
+    	FROM
+    		com_trade_db.product_sub_template t1
+    		JOIN com_trade_db.product t2 ON t1.productTemplateId=t2.productTemplateId AND t2.productId=#{productId}
+	</select>
+
+	<!-- 查询商品是否存在 -->
+	<select id="findProductByProductId" resultType="com.westangel.common.bean.trade.TProductDetailInfo">
+		select
+			productId,productSubTypes
+		from
+			com_trade_db.product
+		WHERE
+			productId=#{productId}
+	</select>
+
+	<update id="updateHospitalProduct">
+		UPDATE com_trade_db.product P
+		SET p.state=#{state}
+		where p.vendor=#{userId}
+		AND p.productTemplateId not IN
+		<foreach collection="productList" item="items" separator="," open="(" close=")">
+			#{items.productTemplateId}
+		</foreach>
+	</update>
+
+	<select id="getProductByRuleIdList" resultType="com.westangel.common.bean.trade.TProductDetailInfo">
+		SELECT
+			t1.productId, t1.productNo,t1.productName,t1.productType,t1.productSource,
+			t1.vendor vendorId,t1.introduction,
+			t1.productSpecId,t1.refPrice/100 as refPrice,t1.unitPrice/100 as unitPrice,t1.discount,t1.discountPrice/100 as discountPrice,
+			t1.feeType,t1.state,t1.isGroup,t1.expressPrice
+			,if(t1.productPictureUrls IS NULL,t6.productPictureUrls,t1.productPictureUrls) productPictureUrls
+			,t1.expressCompanyId
+			,t1.createTime,t1.productTemplateId,t1.sortIndex
+		FROM
+		     com_trade_db.product t1
+  	    LEFT JOIN com_trade_db.product_template t6 on t1.productTemplateId=t6.productTemplateId AND t6.templateType = 1
+		<if test="tagInfos!=null">
+			JOIN com_trade_db.r_product_tag t2 ON t1.productId=t2.productId AND t2.tagId IN
+			<foreach collection="tagInfos" item="item" open="(" close=")" separator=",">#{item.tagId}</foreach>
+		</if>
+		where t1.state=1
+		<if test="productTemplates!=null">
+			and t1.productTemplateId IN
+			<foreach collection="productTemplates" item="item" open="(" close=")" separator=",">#{item}</foreach>
+		</if>
+		GROUP BY t1.productId
+		order by t1.sortIndex,t1.createTime DESC
+	</select>
+	
+	<select id="queryProductSize" resultType="java.lang.Integer">
+		SELECT COUNT(0) FROM com_trade_db.product
+		WHERE vendor=#{vendor}
+		<if test="productType!=null">
+			AND productType=#{productType}
+		</if> 
+	</select>
+</mapper>

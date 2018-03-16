@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.daily.DailyDao">
+	
+	<!-- 医生新增患者、激活患者、随访结果统计 -->
+	<select id="queryDailInfo" resultType="com.esuizhen.cloudservice.followup.model.daily.DailyInfo">
+		SELECT
+			*, (countnum - activation) AS 'unactivation',DATE_FORMAT(CURDATE(),"%m月%d日") AS "titleDate"
+		FROM
+			(
+				SELECT
+					doctorIds.doctorId AS 'doctorId',
+					doctorIds.userId AS 'userId',
+					doctorIds.appVersion AS appVersion,
+					count(DISTINCT fpr.followupResultId)+count(DISTINCT fpd.patientId) AS 'resultnum',
+					count(DISTINCT rdp.patientId) AS 'countnum',
+					count(DISTINCT ps.patientId) AS 'activation'
+				FROM
+					(
+						SELECT
+							doctorId,
+							u.userId,
+							dv.appVersion
+						FROM
+							user_db.u_user u
+						RIGHT JOIN user_db.u_doctor d ON d.userId = u.userId
+						LEFT JOIN (
+							SELECT
+								appVersion,
+								userId
+							FROM
+								user_db.u_user_device
+							WHERE
+								role = 2
+							ORDER BY
+								updateTime
+						) dv ON dv.userId = d.userId
+						WHERE
+							role = 2
+						AND accountType = 3
+						<if test="doctorId!=null">
+							AND d.doctorId = #{doctorId}
+						</if>
+					) doctorIds
+				LEFT JOIN (
+					SELECT
+						*
+					FROM
+						user_db.r_doctor_patient
+					<choose>
+						<when test="dailyDate!=null">
+							WHERE
+							DATE(createTime) = #{dailyDate}
+						</when>
+						<otherwise>
+							WHERE
+							DATE(createTime) = CURDATE()
+						</otherwise>
+					</choose>
+				) rdp ON rdp.doctorId = doctorIds.doctorId
+				LEFT JOIN (
+					SELECT
+						*
+					FROM
+						followup_db.followup_result
+					<choose>
+						<when test="dailyDate!=null">
+							WHERE
+							DATE(createTime) = #{dailyDate}
+						</when>
+						<otherwise>
+							WHERE
+							DATE(createTime) = CURDATE()
+						</otherwise>
+					</choose>
+				) fpr ON fpr.patientId = rdp.patientId
+				LEFT JOIN(
+					SELECT
+						patientId
+					FROM
+						followup_db.followup_plan fp
+					RIGHT JOIN followup_db.followup_plan_detail fpd ON fpd.followupId = fp.followupId
+					WHERE
+						fpd.isAlertSent = 1
+						AND (fpd.actionType = 2 OR fpd.actionType=3)
+						<choose>
+							<when test="dailyDate!=null">
+								AND DATE(fpd.updateTime) = #{dailyDate}
+							</when>
+							<otherwise>
+								AND DATE(fpd.updateTime) = CURDATE()
+							</otherwise>
+						</choose>
+				)fpd ON fpd.patientId = rdp.patientId
+				LEFT JOIN (
+					SELECT
+						patientId
+					FROM
+						user_db.u_patient p
+					RIGHT JOIN user_db.u_user u ON u.userId = p.userId
+					WHERE
+						u.role = 1
+					AND u.accountType = 2
+					AND u.infoState = 1
+				) ps ON ps.patientId = rdp.patientId
+				GROUP BY
+					doctorIds.doctorId
+			) t
+		WHERE
+			t.countnum > 0
+		OR t.resultnum > 0
+	</select>
+	
+	<!-- 医生新增激活患者病种统计  -->
+	<select id="queryPatientDiseaseGroupResult" resultType="com.esuizhen.cloudservice.followup.model.statis.TStatisData">
+		SELECT
+			mt.diseaseTypeName AS 'id',
+			COUNT(DISTINCT p.patientId) AS 'value'
+		FROM
+			(
+				SELECT
+					patientId,doctorId
+				FROM
+					user_db.r_doctor_patient rdp
+		 		WHERE
+		 		1=1
+		 		<if test="dailyDate!=null">
+		  			AND DATE(rdp.createTime) = #{dailyDate}
+		 		</if>
+		 		<if test="doctorId!=null">
+			   		AND rdp.doctorId = #{doctorId}
+		 		</if>
+			) rp
+		LEFT JOIN user_db.u_patient p ON rp.patientId = p.patientId
+		LEFT JOIN user_db.u_user u ON p.userId = u.userId
+		LEFT JOIN ehr_db.meta_c_disease_type mt ON mt.diseaseTypeId = p.sourceDiseaseTypeId
+		WHERE
+			u.accountType = 2
+		AND u.infoState = 1
+		GROUP BY
+			p.sourceDiseaseTypeId
+	</select>
+	
+	<!-- 随访计划类型统计 -->
+	<select id="queryFollowupResultTypeCount" resultType="com.esuizhen.cloudservice.followup.model.statis.TStatisData">
+		SELECT
+			mfw.followupWayName AS "id",
+			count(DISTINCT fr.followupResultId) AS "value"
+		FROM
+			followup_db.followup_result fr
+		RIGHT JOIN (
+			SELECT
+				patientId
+			FROM
+				user_db.r_doctor_patient
+			<if test="doctorId!=null">
+				WHERE
+					doctorId = #{doctorId}
+			</if>
+		) rdp ON rdp.patientId = fr.patientId
+		LEFT JOIN followup_db.meta_followup_way mfw ON mfw.followupWayId = fr.followUpWay
+		WHERE
+			(fr.followUpWay = 1 OR fr.followUpWay = 2)
+			<if test="dailyDate!=null">
+				AND DATE(fr.createTime)= #{dailyDate}
+			</if>
+		GROUP BY
+			mfw.followupWayId
+	</select>
+	
+	<!-- 复查提醒统计 -->
+	<select id="queryFollowupIsAlertCount" resultType="com.esuizhen.cloudservice.followup.model.statis.TStatisData">
+		SELECT
+			'复查提醒' as id,COUNT(DISTINCT fp.patientId) as value
+		FROM
+			followup_db.followup_plan fp
+		RIGHT JOIN followup_db.followup_plan_detail fpd ON fpd.followupId = fp.followupId
+		WHERE
+			fpd.isAlertSent = 1
+			AND fpd.actionType = 2
+		<if test="dailyDate!=null">
+			AND DATE(fpd.updateTime) = #{dailyDate}
+		</if>
+		AND
+			fp.patientId IN 
+		(
+			SELECT
+				patientId
+			FROM
+				user_db.r_doctor_patient
+			<if test="doctorId!=null">
+				WHERE doctorId = #{doctorId}
+			</if>
+		)
+	</select>
+	
+	<!-- 随访问卷统计 -->
+	<select id="queryFollowupQuestionIsAlertCount" resultType="com.esuizhen.cloudservice.followup.model.statis.TStatisData">
+		SELECT
+			'随访问卷' as id,COUNT(DISTINCT fp.patientId) as value
+		FROM
+			followup_db.followup_plan fp
+		RIGHT JOIN followup_db.followup_plan_detail fpd ON fpd.followupId = fp.followupId
+		WHERE
+			fpd.isAlertSent = 1
+			AND fpd.actionType = 3
+		<if test="dailyDate!=null">
+			AND DATE(fpd.updateTime) = #{dailyDate}
+		</if>
+		AND
+			fp.patientId IN 
+		(
+			SELECT
+				patientId
+			FROM
+				user_db.r_doctor_patient
+			<if test="doctorId!=null">
+				WHERE doctorId = #{doctorId}
+			</if>
+		)
+	</select>
+	
+	<!-- 医生随访计划随访结果类型统计 -->
+	<select id="queryFollowupResult" resultType="com.esuizhen.cloudservice.followup.model.statis.TStatisData">
+		SELECT
+			mfr.followupResultValueName as "id",
+			count(DISTINCT fr.followupResultId) as "value"
+		FROM
+			followup_db.followup_result fr
+		RIGHT JOIN user_db.r_doctor_patient rdp ON rdp.patientId = fr.patientId	
+		LEFT JOIN followup_db.meta_followup_result_value mfr ON mfr.followupResultValueId = fr.followupResultValue
+		WHERE
+			1=1
+			<if test="doctorId!=null">
+			 	AND rdp.doctorId = #{doctorId}
+			</if>
+			<if test="dailyDate!=null">
+				AND DATE(fr.createTime)= #{dailyDate}
+			</if>
+		GROUP BY
+			mfr.followupResultValueId
+	</select>
+	
+	<select id="queryFollowupResultThreeMonth" resultType="com.esuizhen.cloudservice.followup.model.statis.TStatisData">
+		SELECT
+			mfr.followupResultValueName as "id",
+			count(DISTINCT fr.followupResultId) as "value"
+		FROM
+			followup_db.followup_result fr
+		RIGHT JOIN user_db.r_doctor_patient rdp ON rdp.patientId = fr.patientId
+		LEFT JOIN followup_db.meta_followup_result_value mfr ON mfr.followupResultValueId = fr.followupResultValue
+		WHERE
+			fr.followupTime is not null
+			<if test="doctorId!=null">
+			 	AND rdp.doctorId = #{doctorId}
+			</if>
+			<if test="dailyDate!=null">
+				AND #{dailyDate}>=DATE(fr.followupTime) 
+				AND DATE(fr.followupTime)>=date_sub(#{dailyDate},interval 3 month)
+			</if>
+		GROUP BY
+			mfr.followupResultValueId
+	</select>
+	
+	<select id="queryFollowupResultThreeMonthPercentage" resultType="com.esuizhen.cloudservice.followup.model.statis.TStatisData">
+		SELECT
+			id,
+			round(((VALUE / countnum) * 100), 2) AS "value"
+		FROM
+			(
+				SELECT
+					mfr.followupResultValueName AS "id",
+					count(DISTINCT fr.followupResultId) AS "value"
+				FROM
+					followup_db.followup_result fr
+				RIGHT JOIN user_db.r_doctor_patient rdp ON rdp.patientId = fr.patientId
+				LEFT JOIN followup_db.meta_followup_result_value mfr ON mfr.followupResultValueId = fr.followupResultValue
+				WHERE
+					1=1
+				<if test="doctorId!=null">
+				 	AND rdp.doctorId = #{doctorId}
+				</if>
+				<if test="dailyDate!=null">
+					AND #{dailyDate}>=DATE(fr.followupTime) 
+					AND DATE(fr.followupTime)>=date_sub(#{dailyDate},interval 3 month)
+				</if>
+				GROUP BY
+					mfr.followupResultValueId
+			) t1,
+			(
+				SELECT
+					count(*) AS countnum
+				FROM
+					followup_db.followup_result fr
+				RIGHT JOIN user_db.r_doctor_patient rdp ON rdp.patientId = fr.patientId
+				WHERE
+					1=1
+				<if test="doctorId!=null">
+				 	AND rdp.doctorId = #{doctorId}
+				</if>
+				<if test="dailyDate!=null">
+					AND #{dailyDate}>=DATE(fr.followupTime) 
+					AND DATE(fr.followupTime)>=date_sub(#{dailyDate},interval 3 month)
+				</if>
+			) t2
+	</select>
+	
+	<!-- 查询医生当天新增患者 -->
+	<select id="queryDailyNewAddPatient" resultType="com.esuizhen.cloudservice.followup.model.daily.DailyInfo">
+		SELECT
+			*, (countnum - activation) AS 'unactivation'
+		FROM
+			(
+				SELECT
+					count(DISTINCT rdp.patientId) AS 'countnum',
+					count(DISTINCT ps.patientId) AS 'activation'
+				FROM
+				(
+					SELECT
+						*
+					FROM
+						user_db.r_doctor_patient
+					WHERE 1=1
+					<if test="doctorId!=null">
+						AND doctorId = #{doctorId}
+					</if>
+					<if test="dailyDate!=null">
+						AND DATE(createTime)=#{dailyDate}
+					</if>
+				) rdp
+				LEFT JOIN (
+					SELECT
+						patientId
+					FROM
+						user_db.u_patient p
+					RIGHT JOIN user_db.u_user u ON u.userId = p.userId
+					WHERE
+						u.role = 1
+					AND u.accountType = 2
+					AND u.infoState = 1
+				) ps ON ps.patientId = rdp.patientId
+			) t
+	</select>
+	<!-- 查询医生前一天新增患者总数 -->
+	<select id="queryAfterDayNewAddPatient" resultType="java.lang.Integer">
+		SELECT
+			COUNT(*) AS contrastum
+		FROM
+			user_db.r_doctor_patient
+			<if test="doctorId!=null">
+				WHERE
+					doctorId = #{doctorId}
+					<if test="dailyDate!=null"> 
+						AND
+						DATE(createTime) = date_sub(#{dailyDate}, INTERVAL 1 DAY)
+					</if>
+			</if>
+	</select>
+	
+	<!-- 随访结果统计  -->
+	<select id="queryFollowResultCount" resultType="java.lang.Integer">
+		SELECT
+			count(*) AS countnum
+		FROM
+			followup_db.followup_result fr
+		RIGHT JOIN user_db.r_doctor_patient rdp ON rdp.patientId = fr.patientId
+		WHERE
+			1=1
+		<if test="doctorId!=null">
+		 	AND rdp.doctorId = #{doctorId}
+		</if>
+		<if test="dailyDate!=null">
+			AND #{dailyDate}=DATE(fr.createTime) 
+		</if>
+	</select>
+	
+	<!-- 随访结果方式统计  -->
+	<select id="queryFollowWayResultCount" resultType="java.lang.Integer">
+		SELECT
+			count(*) AS countnum
+		FROM
+			followup_db.followup_result fr
+		RIGHT JOIN user_db.r_doctor_patient rdp ON rdp.patientId = fr.patientId
+		WHERE
+			(fr.followUpWay = 1 OR fr.followUpWay = 2)
+		<if test="doctorId!=null">
+		 	AND rdp.doctorId = #{doctorId}
+		</if>
+		<if test="dailyDate!=null">
+			AND #{dailyDate}=DATE(fr.createTime) 
+		</if>
+	</select>
+	
+	<!-- 创建日报数据 -->
+	<insert id="createDaily">
+		INSERT INTO 
+		followup_db.followup_daily(doctorId,followupResultNum,newPatientNum,activatePatientNum,dailyDate,createTime)
+		VALUES(#{doctorId},#{resultnum},#{countnum},#{activation},NOW(),NOW())
+	</insert>
+	
+	<!-- 日报列表 -->
+	<select id="queryDailyInfoList" resultType="com.esuizhen.cloudservice.followup.model.daily.DailyInfo">
+		SELECT doctorId,followupResultNum resultnum,newPatientNum countnum,activatePatientNum activation,dailyDate
+		FROM followup_db.followup_daily
+		where doctorId=#{doctorId}
+		order by createTime DESC
+	</select>
+</mapper>
+

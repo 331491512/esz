@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.client.sync.dao.ExamReportDao" >	
+	
+	<select id="getBatchSyncExamReport" resultType="java.util.LinkedHashMap" parameterType="com.esuizhen.client.sync.model.TBatchDetailInfo">
+        SELECT
+			t1.examReportId,t1.emrId,t2.patientId,t1.patientName,t1.patientNo,t1.inhospitalTimes,t2.uuid AS patientUuid,
+			t1.outPatientFlag,t1.hospitalId,t1.examTypeId,t1.examChildTypeId,t1.examTypeName,t1.deptId,t5.uuid deptUuid,t1.deptName,t1.reportTitle,
+			t1.scanningTechnique,t1.examWay,t1.obtainWay,t1.organCode,t1.organ,t1.bodyCode,t1.bodyPart,t1.nidusCode,t1.nidus,
+			t1.nidusSourceFlag,t1.longestDiameter,t1.shortestDiameter,t1.examFinding,t1.examConclusion,t1.hasImage,t1.picFileUrls,
+			t1.imageFileFormat,t1.applyDoctorId,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.applyDoctorId) AS applyDoctorUuid,
+			t1.applyDoctorNo,t1.applyDoctorName,t1.reportDoctorId,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.reportDoctorId) AS reportDoctorUuid,
+			t1.reportDoctorNo,
+			t1.reportDoctorName,t1.state,t1.readFlag,t1.applyTime,t1.excuteTime,t1.reportTime,t1.createTime,t1.updateTime,t1.patientSex,
+			t1.patientBirth,t1.patientIdno,t1.patientMobile,t1.patientAddress,t1.examConclusionRtf,t1.rawCreateTime,t1.mergeFlag,t1.mergeFrom,
+			IFNULL(t1.mergeFromUuid,(SELECT uuid FROM user_db.u_patient WHERE patientId =t1.mergeFrom)) AS mergeFromUuid,
+			t1.mergeTarget,
+			IFNULL(t1.mergeTargetUuid,(SELECT uuid FROM user_db.u_patient WHERE patientId =t1.mergeTarget)) AS mergeTargetUuid,
+			t1.mergeTime,3 as sourceFlag
+		FROM
+		     lis_db.eci_exam_report t1
+		JOIN user_db.u_patient t2 ON t1.patientId = t2.patientId 
+		JOIN sc_db.u_patient_sync_result_client t3 ON t2.uuid = t3.uuid
+		JOIN sc_db.eci_exam_report_sync_result_client t4 ON t1.examReportId = t4.examReportId
+		LEFT JOIN user_db.u_department t5 ON t1.deptId=t5.deptId
+		WHERE
+			t3.syncFlag = 1 AND t4.syncFlag = 0
+	    LIMIT #{detailInfo.syncSize}
+  	</select>
+   	<update id="updateExamReportSyncflag" parameterType="java.lang.String">
+		UPDATE sc_db.eci_exam_report_sync_result_client t1
+		SET t1.opFlag=IF(t1.syncFlag=0,1,2),t1.syncFlag = 9 , t1.syncTime=NOW(),t1.updateTime = NOW()
+		WHERE
+			t1.examReportId IN (${examReportIds})
+	</update> 	
+	<update id="updateSyncResult" parameterType="com.esuizhen.client.sync.bean.TBatchDataResultInfo">
+		UPDATE sc_db.eci_exam_report_sync_result_client t1
+		SET 
+		    t1.batchId = #{tBatchDataResultInfo.batchId},
+		    t1.syncFlag = #{tBatchDataResultInfo.syncFlag},
+			t1.cause = #{tBatchDataResultInfo.cause},
+			t1.updateTime = NOW()
+		WHERE
+			t1.examReportId = #{tBatchDataResultInfo.resultId} and t1.syncFlag = 9
+	</update>
+</mapper>

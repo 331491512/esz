@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.business.dao.business.mdt.MDTProductGroupDao">
+	<select id="findByProductId" parameterType="java.lang.String"
+		resultType="com.esuizhen.cloudservice.business.bean.TProductGroupInfo">
+		SELECT
+			t1.productId,
+			t1.productName,
+			t1.unitPrice / 100 unitPrice,
+			t1.refPrice / 100 refPrice,
+			t1.mdtProductExpectConsultDay
+		FROM com_trade_db.product t1
+		WHERE t1.productId = #{productId}
+	</select>
+	
+	<select id="findMDTInProductGroupList" resultType="com.esuizhen.cloudservice.business.bean.TMDTDoctorInProductGroupInfo">
+		SELECT
+			t2.doctorId,
+			t2.userId,
+			t2.trueName,
+			t8.productName,
+			t6.positionTitleName,
+			t7.professionalRankName,
+			t4.hospitalName,
+			t5.deptName
+		FROM com_trade_db.product_group t1
+			INNER JOIN user_db.u_doctor t2 ON t2.userId = t1.memberVendor
+			LEFT JOIN user_db.r_hospital_doctor t3 ON t3.doctorId = t2.doctorId
+			LEFT JOIN user_db.u_hospital t4 ON t4.hospitalId = t3.hospitalId
+			LEFT JOIN user_db.u_department t5 ON t5.deptId = t3.deptId
+			LEFT JOIN user_db.meta_position_title t6 ON t6.positionTitleId = t2.positionTitle
+			LEFT JOIN user_db.meta_professional_rank t7 ON t7.professionalRankId = t2.professionalRank
+			INNER JOIN com_trade_db.product t8 ON t8.productId = t1.productId
+		WHERE t1.productId = #{productId}
+			<if test="groupType != null">
+				AND t1.groupType = #{groupType}
+			</if>
+	</select>
+	
+	<select id="findMDTProducts" resultType="com.esuizhen.cloudservice.business.bean.TMDTDoctorInProductGroupInfo">
+		SELECT
+			f1.*
+		FROM(
+			SELECT
+				t1.productId,
+				t1.productName,
+				t1.sortIndex
+			FROM
+				com_trade_db.product t1
+			WHERE
+				t1.productType = 4
+			AND t1.productSource = 2
+			AND t1.state = 1
+			AND t1.`range` != 1
+		
+			UNION ALL
+		
+			SELECT
+				t1.productId,
+				t1.productName,
+				t1.sortIndex
+			FROM
+				com_trade_db.product t1,
+				com_trade_db.r_product_range t2
+			WHERE
+				t1.productId = t2.productId
+				AND t1.productType = 4
+				AND t1.productSource = 2
+				AND t1.state = 1
+				AND t1.`range` = 1
+				AND t2.hospitalId = #{hospitalId}
+		) f1
+		ORDER BY f1.sortIndex ASC
+	</select>
+	
+	<select id="getProductGroupList" resultType="com.esuizhen.cloudservice.business.bean.TMDTDoctorInProductGroupInfo">
+		SELECT
+			t1.groupType,
+			t1.memberVendor userId,
+			t2.trueName doctorName,
+			t2.mobile,
+			t2.signatureUrl,
+			(
+				SELECT
+					CASE
+						WHEN l1.type = 0
+						THEN
+						(
+							SELECT
+								n3.hospitalName
+							FROM com_trade_db.mdt_expert_doctor n1
+								INNER JOIN user_db.r_hospital_doctor n2 ON n2.doctorId = n1.doctorId
+								INNER JOIN user_db.u_hospital n3 ON n3.hospitalId = n2.hospitalId
+							WHERE n1.groupId = t1.groupId AND n3.hospitalName IS NOT NULL
+							LIMIT 1
+						)
+						ELSE
+						(
+							SELECT
+								n1.hospitalName
+							FROM user_db.u_hospital n1
+							WHERE n1.hospitalId = l1.hospitalId
+							LIMIT 1
+						)
+					END
+				FROM com_trade_db.mdt_expert_group l1
+				WHERE l1.groupId = t1.groupId
+			)hospitalName<!-- 在组里随机获取一个医生的医院 -->
+		FROM com_trade_db.product_group t1
+		INNER JOIN user_db.u_doctor t2 ON t1.memberVendor=t2.userId
+		WHERE t1.productId = #{productId}
+		ORDER BY t1.groupType
+	</select>
+</mapper>

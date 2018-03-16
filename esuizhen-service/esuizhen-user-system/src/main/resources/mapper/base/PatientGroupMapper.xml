@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.PatientGroupDao">
+	<resultMap id="BaseResultMap" type="com.westangel.common.bean.PatientGroup">
+		<id column="groupId" property="groupId" jdbcType="BIGINT" />
+		<result column="groupNo" property="groupNo" jdbcType="VARCHAR" />
+		<result column="groupName" property="groupName" jdbcType="VARCHAR" />
+		<result column="groupName" property="description" jdbcType="VARCHAR" />
+		<result column="groupWay" property="groupWay" jdbcType="INTEGER" />
+		<result column="groupMembersNum" property="groupMembersNum"
+			jdbcType="INTEGER" />
+		<result column="creator" property="creator" jdbcType="BIGINT" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<!-- 按病种分组 -->
+	<select id="selectPatientAutoGroup" resultMap="BaseResultMap">
+		SELECT 
+			(CASE WHEN u1.sourceDiseaseTypeId IS NULL THEN -1 ELSE u1.sourceDiseaseTypeId END) groupId,
+			(CASE WHEN u1.sourceDiseaseTypeId IS NULL THEN -1 ELSE u1.sourceDiseaseTypeId END) groupNo,
+			(CASE WHEN u3.diseaseTypeName IS NULL THEN 0 
+				ELSE 1 END) groupNum,
+			(CASE WHEN u3.diseaseTypeName IS NULL THEN '未知病种' 
+				ELSE u3.diseaseTypeName END) groupName, 1 groupWay, COUNT(0) groupMembersNum,
+			(CASE WHEN u1.sourceDiseaseTypeId IS NULL THEN (SELECT MAX(t1.sortIndex) + 1 FROM ehr_db.meta_e_disease_body_part t1)
+				ELSE u4.sortIndex END) main_sort_index,
+			(CASE WHEN u1.sourceDiseaseTypeId IS NULL THEN (SELECT MAX(sortIndex) + 1 FROM ehr_db.meta_c_disease_type)
+				ELSE u3.sortIndex END) sub_sort_index
+		FROM u_patient u1
+			<if test="sql!=null">
+				JOIN (
+					${sql}
+				) t ON u1.patientId = t.patientId
+			</if>
+			LEFT JOIN ehr_db.meta_c_disease_type u3 ON
+			u1.sourceDiseaseTypeId=u3.diseaseTypeId
+			LEFT JOIN ehr_db.meta_e_disease_body_part u4 ON
+			u3.diseaseBodyPartId=u4.deseaseBodyPartId
+		WHERE u1.patientType=1
+		<if test="patientId!=null">
+			AND u1.sourceDiseaseTypeId in (select sourceDiseaseTypeId from user_db.u_patient where patientId = #{patientId})
+		</if>
+		GROUP BY u1.sourceDiseaseTypeId ORDER BY groupNum desc,groupMembersNum desc,main_sort_index, sub_sort_index
+	</select>
+	
+	<!-- 分组人员数量查询  -->
+	<select id="countGroupPatientTotalNum" resultType="java.lang.Integer">
+		SELECT count(0) FROM u_patient_group t1,u_patient_group_members t2,u_patient t3
+		WHERE t2.patientId = t3.patientId AND t3.patientType=1
+		<if test="doctorId!=null">
+			AND t1.creator = #{doctorId}
+		</if>
+		<if test="groupWay!=null">
+			AND t1.groupWay = #{groupWay}
+		</if>
+		<if test="groupNo!=null">
+			AND t1.groupNo = #{groupNo}
+		</if>
+		AND t1.groupNo = t2.groupNo
+	</select>
+	<!-- MDT分组 -->
+	<select id="selectPatientMdtGroup" resultMap="BaseResultMap">
+		SELECT
+			0 groupId,
+			'0' groupNo,
+			'MDT' groupName,
+			9 groupWay,
+			count(t.patientId) groupMembersNum
+		FROM
+			(
+				(
+					SELECT
+						t1.patientId
+					FROM
+						user_db.r_doctor_patient t1
+						JOIN user_db.u_patient t2 ON t1.patientId = t2.patientId AND t2.patientType=1
+					WHERE
+						t1.doctorId = #{doctorId}
+					AND t1.sourceFlag = 7
+					<if test="patientId!=null">
+						AND t1.patientId = #{patientId}
+					</if>
+				)
+				UNION
+					(
+						SELECT
+							t4.patientId
+						FROM
+							(
+								SELECT
+									t1.patientId,
+									t2.UserId doctorUserId,
+									t3.userId patientUserId
+								FROM
+									user_db.r_doctor_patient t1,
+									user_db.u_doctor t2,
+									user_db.u_patient t3
+								WHERE
+									t1.doctorId = #{doctorId}
+								<if test="patientId!=null">
+									AND t1.patientId = #{patientId}
+								</if>
+								AND t1.doctorId = t2.doctorId
+								AND t3.patientId = t1.patientId
+								AND t3.patientType=1
+							) t4,
+							hds_db.s_product_service_apply t5
+						WHERE
+							t4.doctorUserId = t5.agentApplicant
+						AND t4.patientUserId = t5.buyer
+						GROUP BY
+							t4.patientId
+					)
+					UNION
+					(
+						select t3.patientId from user_db.u_doctor t
+						JOIN 
+						com_trade_db.product_group t1 ON t.userId = t1.memberVendor
+						JOIN
+						hds_db.s_product_service_apply t2 ON t2.productId=t1.productId AND t2.orderId=t1.orderId
+						JOIN
+						user_db.u_patient t3 ON t3.userId = t2.buyer AND t3.patientType =1
+						<if test="patientId!=null">
+						  AND t3.patientId = #{patientId}
+						</if>
+						WHERE
+						t.doctorId = #{doctorId}
+					)
+			) t
+			JOIN user_db.r_doctor_patient t1 ON doctorId = #{doctorId} AND t.patientId=t1.patientId
+	</select>
+	
+	<!-- 医生在院或门诊人数统计  -->
+	<select id="countInhospitalGroup" resultType="java.util.LinkedHashMap">
+		SELECT 
+		COUNT(IF(u1.outPatientFlag=1,0,null)) outPatientCount,
+		COUNT(IF(u1.inhospitalState=0,0,null)) inhospitalCount
+		FROM u_patient u1 
+		<if test="sql!=null">
+		JOIN (
+				${sql}
+		) t ON u1.patientId = t.patientId
+		</if>
+	</select>
+	<!-- 自定义分组查询 -->
+	<select id="selectPatientCustom"  resultMap="BaseResultMap">
+		SELECT
+			t1.groupNo,
+			t1.groupName,
+			t1.groupWay,
+			COUNT(t3.patientId) groupMembersNum
+		FROM
+			user_db.u_patient_group t1
+		LEFT JOIN
+			user_db.u_patient_group_members t2 ON t1.groupNo = t2.groupNo
+		LEFT JOIN user_db.u_patient t3 ON t3.patientId = t2.patientId AND t3.patientType=1
+		WHERE
+			groupWay = #{groupWay}
+			AND creator = #{creator}
+		<if test="patientId !=null">
+			AND t3.patientId = #{patientId}
+		</if>
+		GROUP BY t1.groupNo
+	</select>
+	
+	<!-- 查询分组根据名称  -->
+	<select id="queryPatientGroupByParam" resultType="java.lang.String">
+		SELECT groupNo FROM user_db.u_patient_group 
+		WHERE 1
+		<if test="groupName!=null">
+			AND groupName=#{groupName}
+		</if>
+		<if test="creator">
+			AND creator=#{creator} 
+		</if>
+		<if test="groupNo">
+			AND creator in (select creator from user_db.u_patient_group where groupNo=#{groupNo})
+		</if>
+		<if test="groupWay!=null">
+			AND groupWay = #{groupWay}
+		</if>
+	</select>
+	
+	<!-- 创建自定义分组 -->
+	<insert id="addPatientGroup">
+		INSERT INTO user_db.u_patient_group(groupNo,groupName,groupWay,creator,createTime) VALUES(#{groupNo},#{groupName},#{groupWay},#{creator},NOW())
+	</insert>
+	
+	<!-- 修改自定义分组 -->
+	<update id="updatePatientGroup">
+		UPDATE user_db.u_patient_group
+		<set>
+			groupName=#{groupName},
+			updateTime=NOW()
+		</set>
+		WHERE
+		groupWay=#{groupWay}
+		AND
+		groupNo=#{groupNo}
+	</update>
+	
+	<!-- 删除自定义分组 -->
+	<update id="delPatientGroup">
+		DELETE FROM user_db.u_patient_group
+		WHERE
+		groupNo=#{groupNo}
+		AND
+		creator=#{creator}
+	</update>
+</mapper>

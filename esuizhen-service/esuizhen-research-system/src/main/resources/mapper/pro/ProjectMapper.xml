@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.research.dao.pro.ProjectDao">
+
+	<resultMap id="baseProjectDetailResultMap" type="com.esuizhen.cloudservice.research.bean.TProjectDetailInfo">
+		<id column="projectId" property="projectId" jdbcType="VARCHAR" />
+		<result column="projectName" property="projectName" jdbcType="VARCHAR" />
+		<result column="description" property="description" jdbcType="VARCHAR" />
+		<result column="projectDirector" property="projectDirector" jdbcType="BIGINT" />
+		<result column="projectDirectorName" property="projectDirectorName" jdbcType="VARCHAR" />
+		<result column="mainDiseaseTypeId" property="mainDiseaseTypeId" jdbcType="INTEGER" />
+		<result column="mainDiseaseTypeName" property="mainDiseaseTypeName" />
+		<result column="subcenterDirector" property="subcenterDirector" jdbcType="VARCHAR" />
+		<result column="projectBeginTime" property="projectBeginTime" jdbcType="TIMESTAMP" />
+		<result column="projectEndTime" property="projectEndTime" jdbcType="TIMESTAMP" />
+		<result column="projectQRCodeUrl" property="projectQRCodeUrl" jdbcType="VARCHAR" />
+		<result column="informedConsentFormUrl" property="informedConsentFormUrl" jdbcType="VARCHAR" />
+		<result column="icfConfirmWay" property="icfConfirmWay"/>
+		<result column="projectSchemeUrl" property="projectSchemeUrl" jdbcType="VARCHAR" />
+		<result column="iconUrl" property="iconUrl" jdbcType="VARCHAR" />
+		<result column="customName" property="customName" jdbcType="VARCHAR" />
+		<result column="cases" property="cases" jdbcType="INTEGER" />
+		<result column="state" property="state" jdbcType="INTEGER" />
+		<result column="deadlineTime" property="deadlineTime" jdbcType="TIMESTAMP" />
+		<result column="groupType" property="groupType" jdbcType="INTEGER" />
+		<result column="groupTypeEnableFlag" property="groupTypeEnableFlag"/>
+		<result column="planInGroupSum" property="planInGroupSum"/>
+		<result column="confirmedNumber" property="confirmedNumber"/>
+		<result column="inGroupEndDate" property="inGroupEndDate"/>
+		<result column="pendingNum" property="pendingNum" jdbcType="INTEGER" />
+		<result column="patients" property="patients" jdbcType="INTEGER" />
+		<result column="issue" property="issue"/>
+		<result column="currentDate" property="currentDate"/>
+		
+		<collection column="projectId" property="projectTemplateSimpleInfo" ofType="com.esuizhen.cloudservice.research.bean.TProjectTemplateSimpleInfo">
+			<id column="tp_crfTemplateId" property="crfTemplateId" jdbcType="VARCHAR"/>
+			<result column="tp_crfTemplateName" property="crfTemplateName" jdbcType="VARCHAR" />
+			<result column="tp_isPublish" property="isPublish" jdbcType="INTEGER" />
+			<result column="tp_createTime" property="createTime" jdbcType="TIMESTAMP" />
+		</collection>
+		
+		<collection column="projectId" property="subcenterList" ofType="com.esuizhen.cloudservice.research.bean.TProjectSubcenterSimpleInfo">
+			<id column="subcenterId" property="subcenterId"/>
+			<result column="subcenterName" property="subcenterName" jdbcType="VARCHAR"/>
+			<result column="subcenterDirector" property="subcenterDirector" jdbcType="VARCHAR"/>
+			<result column="hospitalName" property="hospitalName" jdbcType="VARCHAR"/>
+			<result column="deptName" property="deptName" jdbcType="VARCHAR"/>
+		</collection>
+		
+		<collection column="projectId" property="doctorList" ofType="com.westangel.common.bean.user.TDoctorMinInfo">
+			<id column="projectInvitationId" property="id" jdbcType="BIGINT"/>
+			<result column="projectInvitationDoctorId" property="doctorId" jdbcType="VARCHAR"/>
+			<result column="projectInvitationTrueName" property="trueName" jdbcType="VARCHAR"/>
+		</collection>
+		
+		<collection column="projectId" property="projectGroupList" ofType="com.esuizhen.cloudservice.research.bean.TProjectGroupInfo">
+			<id column="groupId" property="groupId"/>
+			<result column="groupName" property="groupName"/>
+			<result column="groupNum" property="groupNum"/>
+			<result column="enableFlag" property="enableFlag"/>
+			<result column="groupDescription" property="description"/>
+			<result column="groupIndex" property="index"/>
+		</collection>
+	</resultMap>
+	
+	<select id="queryCountByDirector" parameterType="java.lang.Long" resultType="com.esuizhen.cloudservice.research.bean.TProjectCountInfo">
+		SELECT
+			SUM(f1.totalProjectCount) totalProjectCount,
+			SUM(f1.manageProjectCount) manageProjectCount,
+			SUM(f1.participateCount) participateCount,
+			SUM(f1.unfinishedCount) unfinishedCount,
+			SUM(f1.runningCount) runningCount,
+			SUM(f1.completeCount) completeCount
+		FROM(
+			SELECT
+				COUNT(1) totalProjectCount,
+				COUNT(1) manageProjectCount,
+				0 participateCount,
+				SUM(IF(t1.state = 0, 1, 0)) unfinishedCount,
+				SUM(IF(t1.state = 2, 1, 0)) runningCount,
+				SUM(IF(t1.state = -1, 1, 0)) completeCount
+			FROM pro_db.project t1
+			WHERE t1.projectDirector = #{doctorId}
+			
+			UNION ALL
+			
+			SELECT
+				COUNT(1) totalProjectCount,
+				0 manageProjectCount,
+				COUNT(1) participateCount,
+				0 unfinishedCount,
+				SUM(IF(n1.state = 2, 1, 0)) runningCount,
+				SUM(IF(n1.state = -1, 1, 0)) completeCount
+			FROM(
+				SELECT
+					t1.projectId,
+					t1.state
+				FROM pro_db.project t1
+					INNER JOIN pro_db.project_invitation t2 ON t2.projectId = t1.projectId
+				WHERE t1.issue = 1
+					AND t2.invitee = #{doctorId}
+				GROUP BY t1.projectId
+			) n1
+		) f1
+	</select>
+
+	<select id="findDetailById" resultMap="baseProjectDetailResultMap" parameterType="java.lang.String">
+		SELECT
+			<include refid="base_column_list"></include>,
+			p12.crfTemplateId tp_crfTemplateId, 
+			p12.crfTemplateName tp_crfTemplateName, 
+			p12.isPublish tp_isPublish, 
+			p12.createTime tp_createTime,
+			p2.trueName projectDirectorName, 
+			p3.diseaseTypeName mainDiseaseTypeName,
+			p4.subcenterId, 
+			p4.subcenterName, 
+			p5.trueName subcenterDirector, 
+			p7.hospitalName, p8.deptName, 
+			p10.subDeptName,
+			i1.id projectInvitationId, 
+			i1.invitee projectInvitationDoctorId, 
+			i2.trueName projectInvitationTrueName,
+			p11.crfTemplateId,
+			NULL projectQRCodeUrl,
+			p1.customName,
+			p1.planInGroupSum,
+			(SELECT COUNT(1) FROM pro_db.r_subcenter_patient i1 WHERE i1.projectId = p1.projectId) confirmedNumber,
+			p1.inGroupEndDate,
+			p1.groupType,
+			p1.groupTypeEnableFlag,
+			(SELECT COUNT(0) FROM pro_db.project_invitation_patient t1 WHERE t1.projectId = p1.projectId) patients,
+			0 pendingNum,
+			p13.groupId,
+			p13.groupName,
+			p13.groupNum,
+			p13.enableFlag,
+			p13.index groupIndex,
+			p13.description groupDescription,
+			NOW() currentDate
+		FROM pro_db.project p1
+			LEFT JOIN user_db.u_doctor p2 ON p1.projectDirector=p2.doctorId
+			INNER JOIN ehr_db.meta_c_disease_type p3 ON p1.mainDiseaseTypeId=p3.diseaseTypeId
+			LEFT JOIN pro_db.project_subcenter p4 ON p1.projectId=p4.projectId
+			LEFT JOIN user_db.u_doctor p5 ON p4.subcenterDirector=p5.doctorId
+			LEFT JOIN user_db.r_hospital_doctor p6 ON p5.doctorId=p6.doctorId
+			LEFT JOIN user_db.u_hospital p7 ON p6.hospitalId=p7.hospitalId
+			LEFT JOIN user_db.u_department p8 ON p6.deptId=p8.deptId
+			LEFT JOIN user_db.r_subdept_doctor p9 ON p5.doctorId=p9.doctorId
+			LEFT JOIN user_db.u_sub_dept p10 ON p9.subDeptId=p10.subDeptId
+			LEFT JOIN pro_db.r_crftemplate_project p11 ON p1.projectId=p11.projectId
+			LEFT JOIN pro_db.project_crf_template p12 ON p11.crfTemplateId=p12.crfTemplateId
+			LEFT JOIN pro_db.project_group p13 ON p13.projectId = p1.projectId
+			LEFT JOIN pro_db.project_invitation i1 ON p1.projectId=i1.projectId
+			LEFT JOIN user_db.u_doctor i2 ON i1.invitee=i2.doctorId
+		WHERE p1.projectId=#{projectId}
+		ORDER BY p13.index ASC
+	</select>
+
+	<select id="findById" resultType="com.esuizhen.cloudservice.research.bean.TProjectSimpleInfo">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM pro_db.project p1
+		WHERE p1.projectId = #{projectId}
+	</select>
+	
+	<select id="findByCrfObserveId" resultType="com.esuizhen.cloudservice.research.bean.TProjectSimpleInfo">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM pro_db.project p1
+			INNER JOIN pro_db.r_crftemplate_project t2 ON p1.projectId=t2.projectId
+			INNER JOIN pro_db.crf_course t3 ON t3.crfTemplateId=t2.crfTemplateId
+			INNER JOIN pro_db.crf_course_detail t4 ON t3.crfCourseId=t4.crfCourseId
+			INNER JOIN pro_db.crf_observation_subject_element t5 ON t4.crfCourseItemId=t5.crfCourseItemId
+		WHERE t5.crfObserveId = #{crfObserveId}
+	</select>
+	
+	<select id="findProjects" resultType="com.esuizhen.cloudservice.research.bean.TProjectSimpleInfo">
+		SELECT
+			<include refid="base_column_list"></include>,
+			p3.isBaselineCopied
+		FROM pro_db.project p1
+			LEFT JOIN pro_db.r_crftemplate_project p2 ON p2.projectId=p1.projectId
+			LEFT JOIN pro_db.project_crf_template p3 ON p3.crfTemplateId=p2.crfTemplateId
+		WHERE 1=1
+		<choose>
+			<when test="attributeFlag == 1">
+				AND p1.projectDirector = #{doctorId}
+			</when>
+			<when test="attributeFlag == 2">
+				AND p1.projectId IN(
+					SELECT
+						i1.projectId
+					FROM pro_db.project_invitation i1
+					WHERE i1.invitee = #{doctorId}
+				)
+				AND p1.issue = 1
+			</when>
+		</choose>
+		<if test="state != null">
+			<choose>
+				<when test="stateFlag == 1">
+					AND p1.state = #{state}
+				</when>
+				<otherwise>
+					<![CDATA[
+						AND (p1.state BETWEEN 0 AND #{state})
+					]]>
+				</otherwise>
+			</choose>
+		</if>
+		ORDER BY p1.createTime DESC
+	</select>
+	
+	<select id="findParticipateInProjects" resultType="com.esuizhen.cloudservice.research.bean.TProjectSimpleInfo">
+		SELECT
+			f1.*
+		FROM(
+			SELECT
+				<include refid="base_column_list"></include>,
+				p3.isBaselineCopied
+			FROM pro_db.project p1
+				LEFT JOIN pro_db.r_crftemplate_project p2 ON p2.projectId=p1.projectId
+				LEFT JOIN pro_db.project_crf_template p3 ON p3.crfTemplateId=p2.crfTemplateId
+			WHERE p1.projectDirector = #{doctorId}
+			<if test="state != null">
+				<choose>
+					<when test="stateFlag == 1">
+						AND p1.state = #{state}
+					</when>
+					<otherwise>
+						<![CDATA[
+							AND (p1.state BETWEEN 0 AND #{state})
+						]]>
+					</otherwise>
+				</choose>
+			</if>
+			
+			UNION ALL
+			
+			SELECT
+				<include refid="base_column_list"></include>,
+				p3.isBaselineCopied
+			FROM pro_db.project p1
+				LEFT JOIN pro_db.r_crftemplate_project p2 ON p2.projectId=p1.projectId
+				LEFT JOIN pro_db.project_crf_template p3 ON p3.crfTemplateId=p2.crfTemplateId
+				INNER JOIN pro_db.project_invitation p4 ON p4.projectId = p1.projectId
+			WHERE p4.invitee = #{doctorId}
+				AND p1.issue = 1
+			<if test="state != null">
+				<choose>
+					<when test="stateFlag == 1">
+						AND p1.state = #{state}
+					</when>
+					<otherwise>
+						<![CDATA[
+							AND (p1.state BETWEEN 0 AND #{state})
+						]]>
+					</otherwise>
+				</choose>
+			</if>
+		) f1
+		GROUP BY f1.projectId
+		ORDER BY f1.createTime DESC
+	</select>
+
+	<sql id="base_column_list">
+		p1.projectId, 
+		p1.projectName, 
+		p1.customName,
+		p1.description, 
+		p1.projectDirector, 
+		p1.projectBeginTime,
+		p1.projectEndTime, 
+		p1.mainDiseaseTypeId, 
+		p1.isProjectTemplateSet, 
+		p1.state,
+		p1.informedConsentFormUrl, 
+		p1.icfConfirmWay, 
+		p1.iconUrl, 
+		p1.projectSchemeUrl, 
+		p1.planInGroupSum,
+		p1.inGroupEndDate,
+		p1.groupTypeEnableFlag,
+		p1.groupType,
+		p1.issue,
+		p1.createTime, 
+		p1.updateTime
+	</sql>
+
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.research.bean.TProjectSimpleInfo">
+		INSERT INTO pro_db.project(
+			projectId, 
+			projectName,
+			customName,
+			description, 
+			projectDirector, 
+			projectBeginTime, 
+			projectEndTime,
+			mainDiseaseTypeId, 
+			isProjectTemplateSet, 
+			state, 
+			informedConsentFormUrl, 
+			icfConfirmWay, 
+			iconUrl,
+			projectSchemeUrl,
+			groupType,
+			groupTypeEnableFlag,
+			planInGroupSum,
+			inGroupEndDate, 
+			createTime, 
+			updateTime
+		)VALUES(
+			#{projectId}, 
+			#{projectName}, 
+			#{customName}, 
+			#{description},
+			#{projectDirector},
+			#{projectBeginTime},
+			#{projectEndTime}, 
+			#{mainDiseaseTypeId},
+			#{isProjectTemplateSet}, 
+			#{state},
+			#{informedConsentFormUrl}, 
+			#{icfConfirmWay}, 
+			#{iconUrl},
+			#{projectSchemeUrl},
+			#{groupType},
+			#{groupTypeEnableFlag},
+			#{planInGroupSum},
+			#{inGroupEndDate},
+			NOW(),
+			NOW()
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.esuizhen.cloudservice.research.bean.TProjectSimpleInfo">
+		UPDATE pro_db.project
+		<trim prefix="SET" prefixOverrides=",">
+			<if test="projectName != null">
+				projectName = #{projectName},
+			</if>
+			<if test="projectDirector != null">
+				projectDirector = #{projectDirector},
+			</if>
+			<if test="mainDiseaseTypeId != null">
+				mainDiseaseTypeId = #{mainDiseaseTypeId},
+			</if>
+			isProjectTemplateSet = #{isProjectTemplateSet},
+			<if test="state != null">
+				state = #{state},
+			</if>
+			<if test="informedConsentFormUrl != null">
+				informedConsentFormUrl = #{informedConsentFormUrl},
+			</if>
+			<if test="icfConfirmWay != null">
+				icfConfirmWay = #{icfConfirmWay},
+			</if>
+			<if test="iconUrl != null">
+				iconUrl = #{iconUrl},
+			</if>
+			<if test="projectSchemeUrl != null">
+				projectSchemeUrl = #{projectSchemeUrl},
+			</if>
+			<if test="groupType != null">
+				groupType = #{groupType},
+			</if>
+			<if test="groupTypeEnableFlag != null">
+				groupTypeEnableFlag = #{groupTypeEnableFlag},
+			</if>
+			customName = #{customName},
+			description = #{description},
+			projectBeginTime = #{projectBeginTime},
+			projectEndTime = #{projectEndTime},
+			planInGroupSum = #{planInGroupSum},
+			inGroupEndDate = #{inGroupEndDate},
+			updateTime = NOW()
+		</trim>
+		WHERE projectId=#{projectId}
+	</update>
+	
+	<update id="setIsProjectTemplateSet">
+		UPDATE pro_db.project
+		<set>
+			isProjectTemplateSet=#{isProjectTemplateSet},
+			updateTime=NOW()
+		</set>
+		WHERE projectId=#{projectId}
+	</update>
+	
+	<update id="updateProjectState">
+		UPDATE pro_db.project
+		<set>
+			state = #{state},
+			updateTime = NOW()
+		</set>
+		WHERE projectId = #{projectId}
+	</update>
+	
+	<update id="releaseProject">
+		UPDATE pro_db.project
+		<set>
+			issue = #{issue},
+			state = #{state},
+			updateTime = NOW()
+		</set>
+		WHERE projectId = #{projectId}
+	</update>
+	
+	<update id="updateProjectEndState">
+		UPDATE pro_db.project
+		<set>
+			state = -1,
+			updateTime = NOW()
+		</set>
+		WHERE
+			state = 2
+			AND NOW() > projectEndTime
+	</update>
+	
+	<delete id="delete" parameterType="java.lang.String">
+		DELETE FROM pro_db.project WHERE projectId = #{projectId}
+	</delete>
+	
+</mapper>

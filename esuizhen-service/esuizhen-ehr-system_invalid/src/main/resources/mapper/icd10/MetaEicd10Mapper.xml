@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.icd10.MetaEicd10Dao">
+
+	<!--录入ICD-10  -->
+	<insert id="insertMetaEicd10"  parameterType="com.esuizhen.cloudservice.ehr.model.icd10.MetaEicd10">
+        INSERT INTO meta_e_icd_10 (
+        	diseaseCode ,
+        	diseaseName ,
+        	sexLimit ,
+        	curativeEffect ,
+        	helpRememberCode 
+        ) VALUES (
+        	#{diseaseCode} ,
+        	#{diseaseName} ,
+        	#{sexLimit} ,
+        	#{curativeEffect} ,
+        	#{helpRememberCode} 
+        )
+	</insert>
+    
+    <!--修改ICD-10  -->
+	<update id="updateMetaEicd10" parameterType="com.esuizhen.cloudservice.ehr.model.icd10.MetaEicd10">
+        UPDATE meta_e_icd_10 
+        <set>
+	        <if test="diseaseName != null">
+                diseaseName = #{diseaseName} ,
+            </if>
+	        <if test="sexLimit != null">
+                sexLimit = #{sexLimit} ,
+            </if>
+	        <if test="curativeEffect != null">
+                curativeEffect = #{curativeEffect} ,
+            </if>
+	        <if test="helpRememberCode != null">
+                helpRememberCode = #{helpRememberCode} ,
+            </if>
+        </set>
+        WHERE 
+	        diseaseCode = #{diseaseCode} 
+	</update>
+
+	<!--删除ICD-10  -->
+    <delete id="deleteMetaEicd10ByCode">
+        DELETE FROM meta_e_icd_10 WHERE
+        diseaseCode = #{diseaseCode} 
+    </delete>
+    
+    <!--查询ICD-10明细  -->
+    <select id="queryMetaEicd10ByCode" resultType="com.esuizhen.cloudservice.ehr.model.icd10.MetaEicd10">
+		SELECT 
+        	diseaseCode,
+        	diseaseName,
+        	sexLimit,
+        	curativeEffect,
+        	helpRememberCode
+		FROM meta_e_icd_10 
+	    WHERE 
+	        diseaseCode = #{diseaseCode} 
+	</select>
+	
+	<!--查询ICD-10列表  -->
+    <select id="selectMetaEicd10List" resultType="com.esuizhen.cloudservice.ehr.model.icd10.MetaEicd10">
+		SELECT 
+        	t1.diseaseCode,
+        	t1.diseaseName,
+        	t1.sexLimit,
+        	t1.curativeEffect,
+        	t1.helpRememberCode ,
+        	t1.createTime ,
+        	t3.diseaseTypeId , 
+			t3.diseaseTypeName , 
+			t4.deseaseBodyPartId , 
+			t4.deseaseBodyPartName
+		FROM meta_e_icd_10 t1 , meta_r_disease_type_icd_10 t2 , meta_c_disease_type t3 , meta_e_disease_body_part t4
+		WHERE LOCATE(t2.diseaseCode,t1.diseaseCode) 
+		AND t2.diseaseTypeId=t3.diseaseTypeId
+		AND t3.diseaseBodyPartId=t4.deseaseBodyPartId
+		<if test="createTime!=null">
+			AND t1.createTime>#{createTime}
+		</if>
+		<if test="diseaseCode">
+			AND t1.diseaseCode=#{diseaseCode}
+		</if>
+		<if test="diseaseTypeId">
+			AND t3.diseaseTypeId=#{diseaseTypeId}
+		</if>
+		<if test="deseaseBodyPartId">
+			AND t4.deseaseBodyPartId=#{deseaseBodyPartId}
+		</if>
+	</select>
+</mapper>
+

@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.PatientFamilyDao">
+	<resultMap id="baseResultMap" type="com.westangel.common.bean.user.PatientFamily">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="patientId" property="patientId" jdbcType="BIGINT" />
+		<result column="patientRelation" property="patientRelation"
+			jdbcType="INTEGER" />
+		<result column="familyName" property="familyName" jdbcType="VARCHAR" />
+		<result column="familyPhone" property="familyPhone" jdbcType="VARCHAR" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="zipcode" property="zipcode" jdbcType="VARCHAR" />
+		<result column="isDefault" property="isDefault" jdbcType="INTEGER" />
+		<result column="isValid" property="isValid" jdbcType="INTEGER" />
+		<result column="sourceFlag" property="sourceFlag" jdbcType="INTEGER" />
+		<result column="patientRelationName" property="patientRelationName" jdbcType="VARCHAR" />
+	</resultMap>
+	<select id="find" resultMap="baseResultMap">
+		SELECT t1.id, t1.patientId,
+		t1.patientRelation, t1.familyName, t1.familyPhone, t1.address,
+		t1.createTime, t1.updateTime, t1.remark,t1.zipcode,t1.isDefault,t1.isValid,t1.sourceFlag,
+		(SELECT r.relationName FROM meta_relation r WHERE r.relationId=t1.patientRelation) patientRelationName
+		FROM u_patient_family t1 WHERE
+		t1.patientId=#{patientId,jdbcType=BIGINT}
+		<if test="mobile != null">
+			AND t1.familyPhone=#{mobile}
+		</if>
+	</select>
+	<!-- 通过患者id获取家属信息而且本人的联系方式放在第一条 -->
+	<select id="findByPatientId" resultType="com.westangel.common.bean.user.PatientFamily">
+		SELECT t1.id, t1.patientId,t1.patientRelation, t1.familyName, t1.familyPhone, t1.address,t1.createTime, t1.updateTime, t1.remark,t1.zipcode,t1.isDefault,t1.isValid,(SELECT r.relationName FROM meta_relation r WHERE r.relationId=t1.patientRelation) patientRelationName,(SELECT followupResultValueName FROM followup_db.meta_followup_result_value WHERE followupResultValueId=t1.phoneStatus) phoneStatusName,t1.phoneStatus FROM u_patient_family t1 WHERE t1.patientRelation=0 AND t1.patientId=#{patientId,jdbcType=BIGINT}
+		UNION
+		SELECT t1.id, t1.patientId,t1.patientRelation, t1.familyName, t1.familyPhone, t1.address,t1.createTime, t1.updateTime, t1.remark,t1.zipcode,t1.isDefault,t1.isValid,(SELECT r.relationName FROM meta_relation r WHERE r.relationId=t1.patientRelation) patientRelationName,(SELECT followupResultValueName FROM followup_db.meta_followup_result_value WHERE followupResultValueId=t1.phoneStatus) phoneStatusName,t1.phoneStatus FROM u_patient_family t1 WHERE t1.patientRelation>0 AND t1.patientId=#{patientId,jdbcType=BIGINT}
+	</select>
+	
+	<insert id="insert" parameterType="com.westangel.common.bean.user.PatientFamily">
+		<selectKey resultType="long" keyProperty="id" order="AFTER">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		insert into user_db.u_patient_family(
+			patientId,
+			contactId,
+			operator,
+			patientRelation,
+			familyName,
+			familyPhone,
+			address,
+			remark,
+			createTime,
+			updateTime,
+			zipcode,
+			isDefault,
+			sourceFlag,
+			isValid
+		) values (
+			#{patientId},
+			#{contactId},
+			#{operatorId},
+			#{patientRelation},
+			#{familyName},
+			#{familyPhone},
+			#{address},
+			#{remark},
+			NOW(),
+			NOW(),
+			#{zipcode},
+			#{isDefault},
+			4,
+			#{isValid}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.westangel.common.bean.user.PatientFamily">
+		update user_db.u_patient_family
+		<set>
+			<if test="patientRelation != null">
+				patientRelation=#{patientRelation,jdbcType=INTEGER},
+			</if>
+			<if test="familyName != null">
+				familyName=#{familyName,jdbcType=VARCHAR},
+			</if>
+			<if test="familyPhone != null">
+				familyPhone=#{familyPhone,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null">
+				address=#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				remark=#{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="isValid !=null">
+				isValid=#{isValid},
+			</if>
+			<if test="isDefault !=null">
+				isDefault=#{isDefault},
+			</if>
+			<if test="operatorId !=null">
+				operator=#{operatorId},
+			</if>
+			<if test="zipcode !=null">
+				zipcode=#{zipcode},
+			</if>
+			<if test="phoneStatus !=null">
+				phoneStatus=#{phoneStatus},
+			</if>
+			<if test="patientId !=null">
+				patientId=#{patientId},
+			</if>
+			<if test="sourceFlag==null">
+				sourceFlag=4,
+			</if>
+			<if test="sourceFlag!=null">
+				sourceFlag=#{sourceFlag},
+			</if>
+			updateTime=NOW()
+		</set>
+		where id=#{id,jdbcType=BIGINT}
+	</update>
+
+	<!-- 根据id查询患者id和家庭电话号码 add by zhuguo -->
+	<select id="findPatientInfoById" parameterType="com.westangel.common.bean.user.PatientFamily"
+		resultType="com.westangel.common.bean.user.PatientFamily">
+		SELECT
+			id,
+			patientId,
+			familyPhone,
+			phoneStatus,
+			isValid
+		FROM
+			user_db.u_patient_family
+		WHERE
+			id = #{id,jdbcType=BIGINT}
+	</select>
+
+	<!-- 根据患者id和手机号码，修改同一患者重复的手机号码的电话状态 add by zhuguo -->
+	<update id="updatePatientFamilyPhoneStatus" parameterType="com.westangel.common.bean.user.PatientFamily">
+		UPDATE user_db.u_patient_family
+		<set>
+			<if test="phoneStatus !=null">
+				phoneStatus = #{phoneStatus},
+			</if>
+			<if test="isValid !=null">
+				isValid = #{isValid},
+			</if>
+			updateTime=NOW()
+		</set>
+		WHERE
+			patientId = #{patientId,jdbcType=BIGINT}
+		AND familyPhone = #{familyPhone,jdbcType=VARCHAR}
+		AND id &lt;&gt; #{id,jdbcType=BIGINT}
+	</update>
+	
+	<update id="updatePatientFamily" parameterType="com.westangel.common.bean.user.PatientFamily">
+		update user_db.u_patient_family
+		SET
+		patientRelation=#{patientRelation,jdbcType=INTEGER},
+		familyName=#{familyName,jdbcType=VARCHAR},
+		familyPhone=#{familyPhone,jdbcType=VARCHAR},
+		address=#{address,jdbcType=VARCHAR},
+		remark=#{remark,jdbcType=VARCHAR},
+		isValid=#{isValid},
+		isDefault=#{isDefault},
+		operator=#{operatorId},
+		zipcode=#{zipcode},
+		phoneStatus=#{phoneStatus},
+		updateTime=NOW()
+		where id=#{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateToBPatientFamilyToCloudRelation">
+		UPDATE user_db.u_patient_family
+		<set>
+			patientId=#{cloudPatientId}
+		</set> 
+		WHERE patientId=#{tobPatientId}
+	</update>
+	
+	<delete id="deleteByPatientId">
+		DELETE FROM 
+			user_db.u_patient_family
+		WHERE 
+			patientId=#{patientId}
+	</delete>
+	<!-- add by fanpanwei -->
+	<insert id="insertLinkManInfo" parameterType="com.esuizhen.cloudservice.user.bean.AutiCancerLinkManContact">
+		insert into user_db.u_patient_family(
+			patientId,patientRelation,
+			familyName,familyPhone,address,
+			remark,createTime,updateTime,zipcode,specialDiseaseRegisterId
+		) values (
+			#{patientId},#{relationId},
+			#{familyName},#{familyPhone},#{linkAddress},
+			'',NOW(),NOW(),#{zipcode},#{specialDiseaseRegisterId}
+		)
+	</insert>
+	<update id="updateLinkManInfo" parameterType="com.esuizhen.cloudservice.user.bean.AutiCancerLinkManContact">
+		update user_db.u_patient_family
+		<set>
+			<if test="relationId != null">
+				patientRelation=#{relationId,jdbcType=INTEGER},
+			</if>
+			<if test="familyName != null">
+				familyName=#{familyName,jdbcType=VARCHAR},
+			</if>
+			<if test="familyPhone != null">
+				familyPhone=#{familyPhone,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null">
+				address=#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				remark=#{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="isValid !=null">
+				isValid=#{isValid},
+			</if>
+			<if test="zipcode !=null">
+				zipcode=#{zipcode},
+			</if>
+			updateTime=NOW()
+		</set>
+		where id=#{linkManId,jdbcType=BIGINT}
+	</update>
+	<delete id="deleteLinkManInfo">
+		DELETE FROM 
+			user_db.u_patient_family
+		WHERE 
+			patientId=#{patientId}
+			<if test="specialDiseaseRegisterId != null">
+				AND specialDiseaseRegisterId=#{specialDiseaseRegisterId}
+			</if>
+	</delete>
+	
+	<select id="findLinkMan" resultType="com.esuizhen.cloudservice.user.bean.AutiCancerLinkManContact" parameterType="java.lang.Integer">
+		SELECT upf.id linkManId,upf.patientRelation relationId,upf.familyName,upf.familyPhone,
+			upf.address linkAddress,upf.zipcode,upf.isValid,upf.isDefault,upf.specialDiseaseRegisterId
+		FROM user_db.u_patient_family upf WHERE
+		upf.patientId=#{patientId}
+		<if test="specialDiseaseRegisterId != null">
+			AND upf.specialDiseaseRegisterId=#{specialDiseaseRegisterId}
+		</if>
+	</select>
+	<!-- end by fanpanwei -->
+	
+	<delete id="delByPatientIdAndId" parameterType="java.util.HashMap" flushCache="false">
+		DELETE FROM 
+			user_db.u_patient_family
+		WHERE 
+			patientId=#{patientId}
+			<if test="noDelIdList!=null and noDelIdList.size != 0">
+				AND id NOT IN
+				<foreach collection="noDelIdList" item="rid" open="(" close=")" separator=",">
+					#{rid}
+				</foreach>
+			</if>
+	</delete>
+</mapper>

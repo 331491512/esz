@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.business.dao.business.mdt.MetaMDTProductDao">
+
+	<select id="getMetaMDTProductStateList" parameterType="java.util.Map" resultType="com.esuizhen.cloudservice.business.bean.MetaMDTProductStateListReq">
+		SELECT c.mdtFlowStateId,c.mdtFlowStateName,c.showName,c.sortIndex
+		from (
+			Select mfs.*,(@rowNum:=@rowNum+1) as rowNo
+			From hds_db.meta_mdt_flow_state mfs,
+				(Select (@rowNum :=0) ) b
+			WHERE 1=1 and mfs.enable=1 ORDER BY mfs.sortIndex asc) c 
+		WHERE 1=1
+		<if test="map.mdtRole!=null">
+		
+		</if>
+		<if test="map.userId!=null">
+		
+		</if>
+		<choose>
+		<when test="map.mdtFlowStateId != null">
+			ANd c.rowNo in
+			(select CASE WHEN #{map.ruleState} IS NULL THEN a.rowNo ELSE a.rowNo+#{map.ruleState} END from (
+				Select mfs.*,(@rowNum1:=@rowNum1+1) as rowNo
+				From hds_db.meta_mdt_flow_state mfs ,
+					(Select (@rowNum1 :=0) ) b
+				WHERE 1=1 and mfs.enable=1 ORDER BY mfs.sortIndex asc) a
+			where a.mdtFlowStateId =#{map.mdtFlowStateId})
+		</when>
+		<otherwise>
+			ORDER BY  c.sortIndex asc
+		</otherwise>
+		</choose>
+	</select>
+
+</mapper>

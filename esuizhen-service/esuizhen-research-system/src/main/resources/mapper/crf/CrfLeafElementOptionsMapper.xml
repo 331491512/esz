@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.crf.CrfObservationLeafElementOptionsDao">
+
+	<insert id="insertCrfObservationLeafElementOptions" parameterType="com.esuizhen.cloudservice.research.model.crf.CrfObservationLeafElementOptions">
+        INSERT INTO crf_observation_leaf_element_options (
+        	crfObserveLeafId ,
+        	crfObserveId ,
+        	subjectElementId ,
+        	leafElementId ,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{crfObserveLeafId} ,
+        	#{crfObserveId} ,
+        	#{subjectElementId} ,
+        	#{leafElementId} ,
+        	#{createTime} ,
+        	#{updateTime} 
+        )
+	</insert>
+    
+	<update id="updateCrfObservationLeafElementOptions" parameterType="com.esuizhen.cloudservice.research.model.crf.CrfObservationLeafElementOptions">
+        UPDATE crf_observation_leaf_element_options 
+        <set>
+	        <if test="crfObserveId != null">
+                crfObserveId = #{crfObserveId} ,
+            </if>
+	        <if test="subjectElementId != null">
+                subjectElementId = #{subjectElementId} ,
+            </if>
+	        <if test="leafElementId != null">
+                leafElementId = #{leafElementId} ,
+            </if>
+	        <if test="createTime != null">
+                createTime = #{createTime} ,
+            </if>
+	        <if test="updateTime != null">
+                updateTime = #{updateTime} ,
+            </if>
+        </set>
+        WHERE 
+	        crfObserveLeafId = #{crfObserveLeafId} 
+	</update>
+
+    <delete id="deleteCrfObservationLeafElementOptions">
+        DELETE FROM crf_observation_leaf_element_options WHERE
+        crfObserveLeafId = #{crfObserveLeafId} 
+    </delete>
+    
+    <select id="queryCrfObservationLeafElementOptionsById" resultType="com.esuizhen.cloudservice.research.model.crf.CrfObservationLeafElementOptions">
+		SELECT 
+        	crfObserveLeafId,
+        	crfObserveId,
+        	subjectElementId,
+        	leafElementId,
+        	createTime,
+        	updateTime
+		FROM crf_observation_leaf_element_options 
+	    WHERE 
+	        crfObserveLeafId = #{crfObserveLeafId} 
+	</select>
+	
+</mapper>
+

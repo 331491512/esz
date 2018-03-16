@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.patientinfo.TPatientInfoDao">
+    
+    <select id="queryPatientByHospitalName" resultType="com.esuizhen.cloudservice.ehr.model.patientinfo.TPatientProfile">
+    	select t2.patientId,t1.userId from user_db.u_patient t1 inner join user_db.r_hospital_patient t2 on t1.patientId = t2.patientId
+    inner join user_db.u_hospital t3 on t3.hospitalId = t2.hospitalId where t2.patientNo = #{patientNo} and t3.hospitalName = #{hospitalName}
+    limit 1
+    </select>
+    
+    <select id="queryPatientProfile" resultType="com.esuizhen.cloudservice.ehr.model.patientinfo.TPatientProfile">
+		SELECT 
+        	t1.patientId,
+        	patientNo,
+        	(SELECT idType FROM user_db.u_user WHERE userId=t1.userId) idType,
+        	(SELECT identification FROM user_db.u_user WHERE userId=t1.userId) identification,
+        	mobile,
+        	trueName,
+        	(SELECT address FROM user_db.u_user WHERE userId=t1.userId) address,
+        	sex,
+        	birthDate
+		FROM user_db.u_patient t1 
+	    <where>
+	    t1.patientType=1 AND t1.mergeFlag!=2
+	    	<choose>
+	    		<when test="patientNo!=null">
+	    			AND patientNo LIKE CONCAT(#{patientNo},'%')
+	    			ORDER BY patientNo
+	    		</when>
+	    		<otherwise>
+	    			AND trueName LIKE CONCAT(#{trueName},'%')
+	    			ORDER BY trueName
+	    		</otherwise>
+	    	</choose>
+	    </where>
+	</select>
+	<!-- 根据患者id获取患者信息 -->
+	<select id="queryPatientById" resultType="com.esuizhen.cloudservice.ehr.model.patientinfo.TPatientProfile">
+		SELECT 
+        	t1.patientId,
+        	patientNo,
+        	mobile,
+        	trueName,
+        	sex,
+        	birthDate,
+        	patientType,
+        	catalogState,
+        	userId
+		FROM user_db.u_patient t1 WHERE patientId=#{patientId}
+	</select>
+	
+	<!-- 获取患者信息 -->
+	<select id="queryPatient" resultType="com.esuizhen.cloudservice.ehr.model.patientinfo.TPatientProfile">
+		SELECT 
+        	t1.patientId,
+        	patientNo,
+        	mobile,
+        	trueName,
+        	sex,
+        	birthDate,
+        	patientType,
+        	specialDiseaseRegisterId
+		FROM user_db.u_patient t1 WHERE patientId=#{patientId}
+		<if test="specialDiseaseRegisterId != null">
+			AND specialDiseaseRegisterId=#{specialDiseaseRegisterId}
+		</if>
+	</select>
+	<update id="updatePatient" parameterType="com.esuizhen.cloudservice.ehr.model.patientinfo.TPatientInfo">
+		UPDATE  
+		 user_db.u_patient t1
+		<set>
+	        <if test="trueName != null">
+                t1.trueName = #{trueName} ,
+            </if>
+            <if test="birthDate != null">
+                t1.birthDate = #{birthDate} ,
+            </if>
+            <if test="sex != null">
+                t1.sex = #{sex} ,
+            </if>
+            <if test="inchargeDoctor != null">
+            	t1.inchargeDoctor = #{inchargeDoctor} ,
+            </if>
+            <if test="patientNo != null and patientNo != ''">
+            	t1.patientNo = #{patientNo},
+            </if>
+            <if test="mobile != null">
+            	t1.mobile = #{mobile},
+            </if>
+            <if test="familyPhone != null">
+            	t1.familyPhone = #{familyPhone},
+            </if>
+            <if test="liveStatus != null">
+            	t1.liveStatus = #{liveStatus},
+            </if>
+            <if test="medicalPayType != null">
+            	t1.medicalPayType = #{medicalPayType},
+            </if>
+            
+            <if test="catalogState != null">
+                t1.catalogState = #{catalogState} ,
+                <if test="catalogState == 3">
+					catalogDate = now(), 
+				</if>
+            </if>
+            t1.updateTime=now()
+        </set>
+		WHERE t1.patientId=#{patientId}
+	</update>
+	<update id="updatePatientInfo" parameterType="com.esuizhen.cloudservice.ehr.model.patientinfo.TPatientProfile">
+	
+		UPDATE  
+		 user_db.u_patient t1
+		<set>
+	        <if test="trueName != null">
+                t1.trueName = #{trueName} ,
+            </if>
+            <if test="birthDate != null">
+                t1.birthDate = #{birthDate} ,
+            </if>
+            <if test="sex != null">
+                t1.sex = #{sex} ,
+            </if>
+            <if test="inchargeDoctor != null">
+            	t1.inchargeDoctor = #{inchargeDoctor} ,
+            </if>
+            <if test="patientNo != null and patientNo != ''">
+            	t1.patientNo = #{patientNo},
+            </if>
+            <if test="mobile != null">
+            	t1.mobile = #{mobile},
+            </if>
+            <if test="familyPhone != null">
+            	t1.familyPhone = #{familyPhone},
+            </if>
+            <if test="liveStatus != null">
+            	t1.liveStatus = #{liveStatus},
+            </if>
+            <if test="medicalPayType != null">
+            	t1.medicalPayType = #{medicalPayType},
+            </if>
+            
+            <if test="catalogState != null">
+                t1.catalogState = #{catalogState} ,
+                <if test="catalogState == 3">
+					catalogDate = now(), 
+				</if>
+            </if>
+            t1.updateTime=now()
+        </set>
+		WHERE t1.patientId=#{patientId}
+	</update>
+	
+	<update id="updatePatientById" parameterType="java.util.HashMap">
+		UPDATE user_db.u_patient SET
+           sourceDiagnosis = #{sourceDiagnosis} ,
+           sourceDiseaseCode = #{sourceDiseaseCode} ,
+           sourcePathologyDiagnosis = #{sourcePathologyDiagnosis} ,
+           sourcePathologyDiseaseCode = #{sourcePathologyDiseaseCode} ,
+           diagnosisId = #{diagnosisId} ,
+           diagnosisType = #{diagnosisType} ,
+           updateTime=NOW()
+		WHERE patientId=#{patientId}
+	</update>
+	<update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.cloudservice.ehr.model.patientinfo.TPatientInfo">
+		UPDATE user_db.u_patient
+			<set>
+				<if test="catalogState != null">
+					catalogState = #{catalogState} ,
+					<if test="catalogState == 3">
+						catalogDate = now() ,
+					</if>
+				</if>
+			</set>
+		WHERE patientId=#{patientId}
+	</update>
+	<!-- 调用存储过程,更新医患关系表-->
+  <select id="updateDoctorOfPatient" statementType="CALLABLE" parameterType="java.lang.Long">
+  	<![CDATA[
+    	 {call user_db.updateDoctorOfPatient(#{textpatientid,mode=IN})}
+	]]>
+  </select>
+  
+  <update id="updatePatientFromInhospitalNote" parameterType="java.lang.Long">
+  	update user_db.u_patient p,(
+      SELECT s.* FROM (
+      SELECT patientid, inchargeDoctor, attendingDoctor FROM ehr_db.ei_inhospital_note  
+      where (inchargeDoctor is NOT NULL or attendingDoctor is not null) 
+      and  patientId=#{patientId} ORDER BY inhospitalTimes asc
+      ) s GROUP BY s.patientid 
+      ) t SET p.inchargeDoctor=t.inchargeDoctor,p.attendingDoctor=t.attendingDoctor where p.patientid=t.patientid;
+  
+  </update>
+  <update id="updateRDoctorPatientFromInhospitalNote" parameterType="java.lang.Long">
+  	update user_db.r_doctor_patient p,(
+      SELECT s.* FROM (
+      SELECT patientid, deptDoctor,directorDoctor,inhospitalDoctor,inchargeDoctor, attendingDoctor FROM ehr_db.ei_inhospital_note  
+      where (deptDoctor is not null or directorDoctor is not null or inhospitalDoctor is not null or inchargeDoctor is NOT NULL or attendingDoctor is not null) 
+      and  patientId=#{patientId}
+      ORDER BY inhospitalTimes asc
+      ) s GROUP BY s.patientid 
+      ) t SET p.firstVisitFlag=1
+     where p.patientid=t.patientid and (p.doctorId=t.deptDoctor or p.doctorId=t.directorDoctor or p.doctorId=t.inhospitalDoctor or p.doctorId=t.inchargeDoctor or p.doctorId=t.attendingDoctor);
+  	
+  </update>
+  
+  <insert id="insert" parameterType="com.esuizhen.cloudservice.ehr.model.patientinfo.TPatientInfo">
+  	<selectKey resultType="long" keyProperty="patientId" order="AFTER">
+		SELECT
+		LAST_INSERT_ID() as patientId
+	</selectKey>
+	INSERT INTO user_db.u_patient
+	(
+		patientNo,userId, uuid, trueName, preTrueName,
+		nickName, mobile, sex,
+		birthDate, userPictureUrl, patientRelation, familyName,
+		familyPhone, liveStatus, deathDate,
+		causeOfDeath, bloodType, bloodTypeRH,
+		bodyHeight, disabilityStatus, geneticDiseaseHistory,
+		drugAllergyHistory, medicalPayType,
+		sourceDiagnosis,
+		sourceDiseaseCode, sourcePathologyDiagnosis,
+		sourcePathologyDiseaseCode, attendingDoctor,syncFlag,
+		confirmedDate, hasVisibleMedicalRecord, handleFlag,inchargeDoctor,
+		<if test="outPatientFlag != null">
+			outPatientFlag,
+		</if>
+		createTime,
+		updateTime
+	)
+	VALUES 
+	(
+		#{patientNo,jdbcType=VARCHAR},#{userId,jdbcType=BIGINT}, 
+		<choose>
+			<when test="uuid != null">
+				#{uuid,jdbcType=VARCHAR},
+			</when>
+			<otherwise>
+			REPLACE(UUID(),'-',''),
+			</otherwise>
+		</choose>
+		#{trueName,jdbcType=VARCHAR},
+		#{preTrueName,jdbcType=VARCHAR},
+		#{nickName,jdbcType=VARCHAR},
+		#{mobile,jdbcType=VARCHAR},
+		#{sex,jdbcType=INTEGER},
+		#{birthDate,jdbcType=CHAR}, 
+		#{userPictureUrl,jdbcType=VARCHAR},
+		#{patientRelation,jdbcType=INTEGER}, 
+		#{familyName,jdbcType=VARCHAR},
+		#{familyPhone,jdbcType=VARCHAR}, 
+		#{liveStatus,jdbcType=INTEGER},
+		#{deathDate,jdbcType=TIMESTAMP},
+		#{causeOfDeath,jdbcType=VARCHAR}, 
+		#{bloodType,jdbcType=VARCHAR}, 
+		#{bloodTypeRh,jdbcType=INTEGER},
+		#{bodyHeight,jdbcType=INTEGER}, 
+		#{disabilityStatus,jdbcType=VARCHAR},
+		#{geneticDiseaseHistory,jdbcType=VARCHAR},
+		#{drugAllergyHistory,jdbcType=VARCHAR},
+		#{medicalPayType,jdbcType=INTEGER},
+		#{sourceDiagnosis,jdbcType=VARCHAR},
+		#{sourceDiseaseCode,jdbcType=VARCHAR},
+		#{sourcePathologyDiagnosis,jdbcType=VARCHAR},
+		#{sourcePathologyDiseaseCode,jdbcType=VARCHAR},
+		#{attendingDoctor,jdbcType=INTEGER},
+		#{syncFlag,jdbcType=INTEGER},
+		#{confirmedDate,jdbcType=TIMESTAMP},
+		#{hasVisibleMedicalRecord,jdbcType=INTEGER},
+		#{handleFlag},
+		#{inchargeDoctor},
+		<if test="outPatientFlag != null">
+			#{outPatientFlag},
+		</if>
+		now(),
+		now()
+	)
+  </insert>
+  
+  <select id="queryList" resultType="com.esuizhen.cloudservice.ehr.model.patientinfo.TPatientInfo">
+		SELECT 
+        	t1.patientId,
+        	t1.patientNo,
+        	t1.mobile,
+        	t1.trueName,
+        	t1.sex,
+        	t1.birthDate,
+        	t1.patientType,
+        	t1.handleFlag
+		FROM user_db.u_patient t1 WHERE t1.patientType=1 AND t1.mergeFlag!=2
+		<choose>
+			<when test="matchFlag != null and matchFlag==9">
+				and (
+					t1.patientNo=#{patientNo} 
+					or 
+					t1.trueName=#{trueName} 
+					or (select 1 from user_db.r_hospital_patient where patientId=t1.patientId and hospitalId=#{hospitalId})
+				)
+			</when>
+			<otherwise>
+				<if test="patientNo != null">
+					AND patientNo=#{patientNo}
+				</if>
+				<if test="trueName != null">
+					AND trueName=#{trueName}
+				</if>
+			</otherwise>
+		</choose>
+		
+	</select>
+	<!-- 患者就诊信息列表查询 -->
+	<select id="queryPatientVisitInfo" resultType="java.util.HashMap">
+		SELECT v1.* FROM (
+		(
+			SELECT 
+				t1.patientNo,
+				t1.inhospitalId,
+				t1.inhospitalDate,
+				t1.inhospitalTimes,
+				t1.outhospitalDate,
+				t1.flag,
+				<!-- (SELECT CASE WHEN inhospitalId IS NULL THEN 0 ELSE 1 END FROM ei_inhospital_note WHERE patientId=t1.patientId AND catalogState=3 AND catalogDate <![CDATA[<]]> t1.createTime AND catalogDate <![CDATA[>]]> IFNULL(t1.catalogDate,'') LIMIT 1) catalogWithUpdate, -->
+				case when t2.catalogState=3 and t2.catalogDate <![CDATA[<]]> t1.createTime then 1 else 0 end catalogWithUpdate,
+				t1.catalogState,
+				t1.mainDiagnosis,
+				t1.hospitalId,
+				(SELECT deptName FROM user_db.u_department WHERE deptId=t1.outhospitalDeptId LIMIT 1) outhospitalDeptName ,
+				t4.treatmentTypeName,
+				(SELECT GROUP_CONCAT(d.diagnosis) FROM e_diagnosis_info d WHERE d.inhospitalId=t1.inhospitalId AND d.diagnosisTypeId != 1 GROUP BY d.inhospitalId) otherDiagnosises,
+				CASE t1.inhospitalId WHEN (SELECT d.inhospitalId FROM e_diagnosis_info d WHERE d.patientId=t1.patientId AND d.isSourceDiagnosis=1 ORDER BY visitTime LIMIT 1) THEN 1 ELSE 0 END firstSourceDiagnosisFlag,
+				2 outPatientFlag,
+				t3.hospitalName
+			FROM ei_inhospital_note t1
+			JOIN user_db.u_patient t2 ON t1.patientId=t2.patientId
+			LEFT JOIN user_db.u_hospital t3 ON t1.hospitalId=t3.hospitalId
+			LEFT JOIN (SELECT tn.inHospitalId,GROUP_CONCAT(DISTINCT meta.treatmentTypeName) treatmentTypeName FROM eci_treatment_note tn,meta_e_treatment meta WHERE tn.patientId = #{patientId} AND tn.treatmentTypeId=meta.treatmentTypeId GROUP BY tn.inHospitalId) t4 ON t4.inHospitalId=t1.inhospitalId
+			WHERE t1.patientId = #{patientId}
+			<if test="visitDateStart != null">
+		        	and DATE_FORMAT(t1.outhospitalDate,'%Y-%m-%d') <![CDATA[>=]]> DATE_FORMAT(#{visitDateStart},'%Y-%m-%d')
+		        </if>
+		        <if test="visitDateEnd != null">
+		        	and DATE_FORMAT(t1.outhospitalDate,'%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(#{visitDateEnd},'%Y-%m-%d')
+		        </if>
+		        <if test="visitDeptId != null">
+		        	and t1.outhospitalDeptId = #{visitDeptId}
+		        </if>
+	    )
+	    <if test="display==null or display!='1'.toString()">
+	    UNION
+		(
+			SELECT 
+				t1.patientNo,
+				t1.clinicMedicalId inhospitalId,
+				t1.visitTime inhospitalDate,
+				t1.visitTimes inhospitalTimes,
+				'' outhospitalDate,
+				IF(t1.catalogState=3,1,0) flag,
+				<!-- (SELECT CASE WHEN clinicMedicalId IS NULL THEN 0 ELSE 1 END FROM ec_clinic_medical_note WHERE patientId=t1.patientId AND catalogState=3 AND catalogDate <![CDATA[<]]> t1.createTime AND catalogDate <![CDATA[>]]> IFNULL(t1.catalogDate,'') LIMIT 1) catalogWithUpdate, -->
+				case when t2.catalogState=3 and t2.catalogDate <![CDATA[<]]> t1.createTime then 1 else 0 end catalogWithUpdate,
+				t1.catalogState,
+				t1.diagnosis mainDiagnosis,
+				t1.hospitalId,
+				t1.deptName outhospitalDeptName,
+				t4.treatmentTypeName,
+				'' otherDiagnosises,
+				'' firstSourceDiagnosisFlag,
+				1 outPatientFlag,
+				t3.hospitalName
+			FROM ehr_db.ec_clinic_medical_note t1
+			JOIN user_db.u_patient t2 ON t1.patientId=t2.patientId
+			LEFT JOIN user_db.u_hospital t3 ON t1.hospitalId=t3.hospitalId
+			LEFT JOIN (SELECT tn.clinicMedicalId,GROUP_CONCAT(DISTINCT meta.treatmentTypeName) treatmentTypeName FROM eci_treatment_note tn,meta_e_treatment meta WHERE tn.patientId = #{patientId} AND tn.treatmentTypeId=meta.treatmentTypeId GROUP BY tn.clinicMedicalId) t4 ON t4.clinicMedicalId=t1.clinicMedicalId
+			WHERE t1.patientId = #{patientId}
+			<if test="visitDateStart != null">
+		        	and DATE_FORMAT(t1.visitTime,'%Y-%m-%d') <![CDATA[>=]]> DATE_FORMAT(#{visitDateStart},'%Y-%m-%d')
+		        </if>
+		        <if test="visitDateEnd != null">
+		        	and DATE_FORMAT(t1.visitTime,'%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(#{visitDateEnd},'%Y-%m-%d')
+		        </if>
+		        <if test="visitDeptId != null">
+		        	and t1.deptId = #{visitDeptId}
+		        </if>
+	    )
+	    </if>
+		
+	    ) v1 ORDER BY v1.inhospitalDate desc
+	    <if test="startRow != null">
+			LIMIT #{startRow},#{pageSize}
+		</if>
+	</select>
+	<!-- 查询医生患者关系 -->
+	<select id="searchDoctorPatient" parameterType="com.westangel.common.bean.DoctorPatient" resultType="com.westangel.common.bean.DoctorPatient">
+		SELECT
+			r1.id, r1.patientId, r1.doctorId, r1.hasMedicalRecord, r1.attentionTime, r1.createTime,
+		r1.sourceFlag source_flag
+		FROM user_db.r_doctor_patient r1
+		<!-- WHERE r1.patientId=#{patientId,jdbcType=BIGINT} AND
+			r1.doctorId=#{doctorId,jdbcType=BIGINT} -->
+		<where>
+			<if test="patientId != null">
+			 and r1.patientId=#{patientId,jdbcType=BIGINT}
+			</if>
+			<if test="doctorId != null">
+			 and r1.doctorId=#{doctorId,jdbcType=BIGINT}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 插入医患关系 -->
+	<insert id="insertDoctorPatient" parameterType="com.westangel.common.bean.DoctorPatient">
+		insert into
+		user_db.r_doctor_patient(patientId,doctorId,hasMedicalRecord,attentionTime,createTime,sourceFlag)
+		values(#{patientId,jdbcType=BIGINT},#{doctorId,jdbcType=BIGINT},#{hasMedicalRecord,jdbcType=INTEGER},
+		#{attentionTime,jdbcType=TIMESTAMP},#{createTime,jdbcType=TIMESTAMP},#{sourceFlag,jdbcType=INTEGER})
+	</insert>
+	
+	<insert id="batchInsertDoctorPatient">
+		insert into
+		user_db.r_doctor_patient(patientId,doctorId,createTime,sourceFlag)
+		values
+		<foreach collection="doctorPatientList" item="item" separator=",">
+		(#{item.patientId,jdbcType=BIGINT},#{item.doctorId,jdbcType=BIGINT},
+		now(),#{item.sourceFlag,jdbcType=INTEGER})
+		</foreach>
+	</insert>
+	
+	<select id="queryPatientVisitInfoLastest" resultType="com.esuizhen.cloudservice.ehr.model.inhospital.TInhospitalDetailInfo">
+		SELECT 
+        	t1.patientId,
+        	t1.patientNo,
+        	t1.trueName,
+        	t2.occupationId,
+        	t2.idType,
+        	t2.identification,
+        	t2.marriageStatus,
+        	t2.birthDate,
+			t2.nationId,
+        	t2.nation,
+			t2.sex,
+        	(select occupationName FROM user_db.meta_occupation it1 WHERE occupationId=t2.occupationId) occupationName ,
+			t2.birthPlaceCode birthPlaceCountyCode,
+			(select it3.cityCode FROM user_db.meta_county it3 WHERE t2.birthPlaceCode = it3.countyCode) birthPlaceCityCode ,
+        	(select it3.provinceCode FROM user_db.meta_county it3 WHERE t2.birthPlaceCode = it3.countyCode) birthPlaceProvinceCode ,
+        	t2.birthPlaceAddress,
+        	t2.nationalityId,
+        	(select nationalityName FROM user_db.meta_nationality it1 WHERE nationalityId=t2.nationalityId) nationalityName 
+		FROM user_db.u_patient t1
+		join user_db.u_user t2 on t1.userId=t2.userId
+		WHERE t1.patientNo=#{patientNo}
+		<if test="hospitalId != null">
+			and EXISTS(select 1 from user_db.r_hospital_patient where patientId=t1.patientId and hospitalId=#{hospitalId})
+		</if>
+		LIMIT 1
+	</select>
+</mapper>
+

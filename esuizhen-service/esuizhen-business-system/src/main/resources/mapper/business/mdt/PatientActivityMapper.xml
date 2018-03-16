@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.business.dao.business.mdt.PatientActivityDao">
+
+	<select id="searchPatientActivity" parameterType="com.esuizhen.cloudservice.business.bean.TPatientActivitySignupReq" resultType="java.lang.Integer">
+	SELECT sas.id FROM com_sys_db.sys_activity_signup sas WHERE 1=1
+		<if test="userId!=null and activityId!=null">
+			AND sas.userId=#{userId} and sas.activityId=#{activityId}
+		</if>
+	</select>
+	<insert id="insertPatientActivity"  parameterType="com.esuizhen.cloudservice.business.bean.TPatientActivitySignupReq">
+		INSERT INTO com_sys_db.sys_activity_signup(
+			activityId,
+			personName,
+			personIdentity,
+			userId,
+			mobile,
+			recommendDoctorId,
+			createTime
+		)VALUES(
+			#{activityId},#{personName},#{personIdentity},#{userId},
+			#{mobile},#{recommendDoctorId},NOW()
+		)
+		
+	</insert>
+
+</mapper>

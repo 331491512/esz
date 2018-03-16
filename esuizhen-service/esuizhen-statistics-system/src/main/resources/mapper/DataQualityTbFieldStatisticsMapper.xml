@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.esuizhen.cloudservice.statistics.dao.DataQualityTbFieldStatisticsDao">
+
+	<!-- 质量分析 -->
+	<select id="statisticsDataQualityTbField"
+		parameterType="com.esuizhen.cloudservice.statistics.bean.DataQualityTbFieldStatisticsReq"
+		resultType="com.esuizhen.cloudservice.statistics.bean.DataQualityTbFieldStatisticsRes">
+		
+		SELECT
+			a.fieldDisplayName,
+			b.totalNum,
+			ROUND(
+				b.emptyValueNum / b.totalNum * 100,
+				2
+			) emptyValueNum,
+			ROUND(
+				b.notEmptyValueNum / b.totalNum * 100,
+				2
+			) notEmptyValueNum,
+			ROUND(
+				b.invalidDataNum / b.totalNum * 100,
+				2
+			) invalidDataNum,
+			c.totalNum totalNum1,
+			ROUND(
+				c.emptyValueNum / c.totalNum * 100,
+				2
+			) emptyValueNum1,
+			ROUND(
+				c.notEmptyValueNum / c.totalNum * 100,
+				2
+			) notEmptyValueNum1,
+			ROUND(
+				c.invalidDataNum / c.totalNum * 100,
+				2
+			) invalidDataNum1
+		FROM
+			data_quality_db.conf_data_quality_tbfield_statistics a
+		LEFT JOIN ${tobDynamicTabName} b ON a.tabName = b.tabName
+		AND a.fieldName = b.fieldName
+		LEFT JOIN ${middleDynamicTabName} c ON a.tabNameMid = c.tabName
+		AND a.fieldNameMid = c.fieldName
+		WHERE
+			a.`condition` = #{condition} ORDER BY a.seqNo;
+
+	</select>
+	
+	<!-- 判断查询表是否已存在查询配置 -->
+	<select id="queryDataSearchConfig"
+		parameterType="com.esuizhen.cloudservice.statistics.bean.DataQualityTbFieldStatisticsReq"
+		resultType="com.esuizhen.cloudservice.statistics.bean.DataQualityTbFieldStatisticsReq">
+		
+		SELECT
+			beginDate,
+			endDate,
+			tobDynamicTabName,
+			middleDynamicTabName
+		FROM
+			data_quality_db.data_quality_tbfield_statistics_search
+		WHERE
+			beginDate = DATE_FORMAT(#{beginDate}, '%Y-%m-%d')
+		AND endDate = DATE_FORMAT(#{endDate}, '%Y-%m-%d')
+		AND `condition` = #{condition}
+		
+	</select>
+	
+	<!-- 调用存储过程，创建表，随访系统 -->
+	<select id="creatTableToDate" statementType="CALLABLE">
+		<![CDATA[	
+			{CALL user_db.Pro_data_quality_statistics (
+					#{databaseName},
+					#{tableName},
+					DATE_FORMAT(#{beginDate}, '%Y-%m-%d'),
+					DATE_FORMAT(#{endDate}, '%Y-%m-%d')
+				)}
+		]]>
+	</select>
+	
+	<!-- 调用存储过程，创建表，中间库 -->
+	<select id="creatTableToDateMid" statementType="CALLABLE">
+		<![CDATA[	
+			{CALL user_db.Pro_data_quality_statistics_mid (
+					#{databaseName},
+					#{tableName},
+					DATE_FORMAT(#{beginDate}, '%Y-%m-%d'),
+					DATE_FORMAT(#{endDate}, '%Y-%m-%d')
+				)}
+		]]>
+	</select>
+	
+	<!-- 将查询信息插入查询表中 -->
+	<insert id="insertSearchToTable" >
+		
+		INSERT INTO data_quality_db.data_quality_tbfield_statistics_search (
+			searchMd5,
+			beginDate,
+			endDate,
+			tobDynamicTabName,
+			middleDynamicTabName,
+			`condition`
+		)
+		VALUES
+			(
+				MD5(#{searchMd5}),
+				DATE_FORMAT(#{beginDate}, '%Y-%m-%d'),
+				DATE_FORMAT(#{endDate}, '%Y-%m-%d'),
+				#{tobDynamicTabName},
+				#{middleDynamicTabName},
+				#{condition}
+			)
+
+	</insert>
+	
+	<!-- 判断存储过程创建的表是否存在 -->
+	<select id="queryTableExists" parameterType="java.lang.String"
+		resultType="java.lang.Integer">
+
+		SELECT
+			count(1) count
+		FROM
+			`information_schema`.`tables` a
+		WHERE
+			a.table_name = #{tableName}
+			AND a.table_schema = 'data_quality_db'
+		
+	</select>
+	
+</mapper>
+

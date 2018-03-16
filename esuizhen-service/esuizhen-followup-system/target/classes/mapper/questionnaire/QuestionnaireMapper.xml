@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.questionnaire.QuestionnaireDao">
+
+	<!-- 查看问卷详情映射 -->
+	<resultMap id="questionnaireSimpleResultMap" type="com.esuizhen.cloudservice.followup.model.questionnaire.TFollowupQuestionnaireDetailInfo">
+    	<result property="questionnaireId" column="questionnaireId"/>
+    	<result property="subject" column="subject"/>
+    	<result property="description" column="description"/>
+  		<collection property="titleList" ofType="com.esuizhen.cloudservice.followup.model.questionnaire.TFollowupQuestionnaireTitle">
+    		<result property="title" column="sectionTitle"/>
+    		<collection property="questionnaireList" ofType="com.esuizhen.cloudservice.followup.model.questionnaire.TFollowupQuestionnaireStem">
+	    		<result property="questionType" column="questionType"/>
+	    		<result property="content" column="content"/>
+		    		<collection property="questionOptions" ofType="com.esuizhen.cloudservice.followup.model.questionnaire.TFollowupQuestionnaireOptions">
+		    		<result property="optionIndex" column="optionIndex"/>
+		    		<result property="contentType" column="contentType"/>
+		    		<result property="content" column="optionContent"/>
+		    	</collection>
+	    	</collection>
+    	</collection>
+	</resultMap>
+	
+	<!-- 查看问卷详情映射 -->
+	<resultMap id="followupQuestionnaireResultMap" type="java.util.LinkedHashMap">
+    	<result property="questionnaireId" column="questionnaireId"/>
+    	<result property="questionnaireResultId" column="questionnaireResultId"/>
+    	<result property="subject" column="subject"/>
+    	<result property="description" column="description"/>
+  		<collection property="questionnaireDetail" ofType="java.util.LinkedHashMap">
+    		<result property="title" column="title"/>
+    		<collection property="questionnaire" ofType="java.util.LinkedHashMap">
+	    		<result property="stemContent" column="stemContent"/>
+	    		<result property="questionType" column="questionType"/>
+	    		<result property="answerContent" column="answerContent"/>
+	    		<result property="answerIndex" column="answerIndex"/>
+	    	</collection>
+    	</collection>
+	</resultMap>
+	
+	<!-- 查看问卷答案列表映射 -->
+	<resultMap id="PatientAnswerMap" type="com.esuizhen.cloudservice.followup.model.questionnaire.TQuestionnairePatientInfo">
+		<id property="patientId" column="patientId"/>
+    	<result property="age" column="age"/>
+    	<result property="sex" column="sex"/>
+    	<result property="sexTxt" column="sexTxt"/>
+    	<result property="patientNo" column="patientNo"/>
+    	<result property="trueName" column="trueName"/>
+    	<result property="sourceDiseaseTypeId" column="sourceDiseaseTypeId"/>
+    	<result property="sourceDiseaseTypeName" column="sourceDiseaseTypeName"/>
+    	<result property="sourceDiagnosis" column="sourceDiagnosis"/>
+    	<result property="sourceDiseaseCode" column="sourceDiseaseCode"/>
+  		<collection property="questionnaireAnswerList" ofType="java.util.LinkedHashMap">
+    		<id property="questionnaireOptionId" column="questionnaireOptionId"/>
+  			<result property="parentOptionId" column="parentOptionId"/>
+	    	<result property="contentType" column="contentType"/>
+	    	<result property="level" column="level"/>
+	    	<result property="answerContent" column="answerContent"/>
+    	</collection>
+	</resultMap>
+	
+	<!--问卷列表查看 -->
+	<select id="queryFollowups" resultType="com.esuizhen.cloudservice.followup.model.questionnaire.TFollowupQuestionnaireDetailInfo">
+		SELECT
+			t1.questionnaireId,
+			t1.contentTemplateId,
+			t1.`subject`,
+			t1.description,
+			t1.followupTaskId,
+			t1.isPublish,
+			t1.author,
+			t1.createTime,
+			t1.updateTime,
+			IF (t2.followupTaskId IS NOT NULL,1,0) isInUsage,
+			t3.trueName authorName
+		FROM
+			questionnaire t1
+		LEFT JOIN r_followup_task_content_template t2 ON t1.contentTemplateId = t2.contentTemplateId
+		LEFT JOIN user_db.u_doctor t3 ON t3.doctorId = t1.author
+		WHERE isPublish=1 
+		<if test="subject!=null">
+			AND t1.subject LIKE "%"#{subject}"%" 
+		</if> 
+		<if test="followupTaskId!=null">
+			AND t1.followupTaskId=#{followupTaskId} 
+		</if>
+		<if test="author != null">
+	  		AND t1.author=#{author}
+	  	</if>
+		GROUP BY questionnaireId
+		ORDER BY createTime DESC
+	</select>
+	
+	<!-- 查看问卷详情-->
+	<select id="queryQuestionnaireById" resultType="com.esuizhen.cloudservice.followup.model.questionnaire.TFollowupQuestionnaireDetailInfo">
+		SELECT t1.questionnaireId , t1.subject , t1.description,t1.followupTaskId,t1.contentTemplateId,t1.isPublish,t1.author,t1.createTime,t1.updateTime
+		FROM questionnaire t1
+		WHERE 1
+		<choose>
+			<!-- 通过模版Id获取 -->
+			<when test="contentTemplateId!=null and contentTemplateId!=''">
+				AND t1.contentTemplateId=#{contentTemplateId}
+			</when>
+			<!-- 通过问卷Id获取 -->
+			<otherwise>
+				AND t1.questionnaireId=#{questionnaireId}
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 添加问卷 -->
+	<insert id="insertQuestionnaire" parameterType="com.esuizhen.cloudservice.followup.model.questionnaire.TFollowupQuestionnaireDetailInfo">
+		INSERT INTO questionnaire
+		(questionnaireId , subject ,contentTemplateId, description , isPublish , author , createTime , updateTime)
+		VALUES
+		(#{questionnaireId} , #{subject} , #{contentTemplateId} , #{description} , #{isPublish}, #{author} , NOW() , NOW())
+	</insert>  
+	
+	
+	<!-- 添加问题 -->
+	<insert id="insertQuestionnaireStem" parameterType="com.esuizhen.cloudservice.followup.model.questionnaire.TFollowupQuestionnaireStem">
+		INSERT INTO questionnaire_stem
+		(questionnaireStemId , questionnaireId , sectionId , sectionTitle , stemIndex , stemCode, content , questionType , createTime , updateTime)
+		VALUES
+		(#{questionnaireStemId} , #{questionnaireId} , #{sectionId} , #{sectionTitle}, #{stemIndex} , #{stemCode},  #{content}, #{questionType} ,NOW() , NOW())
+	</insert>  
+	
+	<!-- 添加问题选项 -->
+	<insert id="insertQuestionnaireOptions" parameterType="java.util.List">
+		INSERT INTO questionnaire_options_detail
+		(
+			questionnaireOptionId,questionnaireStemId,stemCode,
+			questionnaireId,optionIndex,contentType,
+			content,indicateValue,nextStemCode,parentOptionId,
+			level,title,questionType,fillFlag,fillContent,
+			fillContentType,fillContent2,fillContentType2,isChecked,createTime)
+		VALUES
+		<foreach collection="options" item="item" index="index" separator=",">
+			(
+				#{item.questionnaireOptionId},#{item.questionnaireStemId},#{item.stemCode},
+				#{item.questionnaireId},#{item.optionIndex},#{item.contentType},
+				#{item.content},#{item.indicateValue},#{item.nextStemCode},#{item.parentOptionId},
+				#{item.level},#{item.title},#{item.questionType},#{item.fillFlag},#{item.fillContent},
+				#{item.fillContentType},#{item.fillContent2},#{item.fillContentType2},#{item.isChecked},now()
+			)
+        </foreach>
+	</insert>
+	  
+	<!-- 软删除问卷 不需要再去展示  -->
+	<update id="deleteSoftQuestionnaireById">
+		UPDATE followup_db.questionnaire
+		SET contentTemplateId=NULL,isPublish=-1
+		WHERE
+		questionnaireId=#{questionnaireId}
+	</update>
+	
+	<!-- 删除问卷 -->
+	<delete id="deleteQuestionnaireById" parameterType="java.lang.String">  
+        DELETE t1
+        FROM 
+        questionnaire t1
+        WHERE t1.questionnaireId = #{questionnaireId}  
+    </delete> 
+    
+	<!-- 删除模板 -->
+	<delete id="deleteTemplateById" parameterType="java.lang.String">  
+		DELETE b.*
+		FROM
+			questionnaire a
+		LEFT JOIN followup_content_template b ON a.contentTemplateId = b.contentTemplateId
+		WHERE
+			a.questionnaireId = #{questionnaireId}
+    </delete> 
+    
+    <!-- 删除题干 -->
+    <delete id="deleteQuestionnaireStemByQuestionnaireId" parameterType="java.lang.String">  
+        DELETE t1
+        FROM questionnaire_stem t1 
+        WHERE
+        t1.questionnaireId = #{questionnaireId} 
+    </delete> 
+    
+    <!-- 删除题肢 -->
+    <delete id="deleteQuestionnaireOptionsByQuestionnaireId" parameterType="java.lang.String">  
+        DELETE t1 
+        FROM questionnaire_options_detail t1
+        WHERE
+        t1.questionnaireId= #{questionnaireId}  
+    </delete> 
+    
+    <!-- 修改随访计划模版 -->
+	<update id="updateQuestionnaireById" parameterType="com.esuizhen.cloudservice.followup.model.questionnaire.TFollowupQuestionnaireDetailInfo">  
+        UPDATE questionnaire 
+        <set>
+            <if test="subject != null">
+                subject = #{subject} ,
+            </if>
+            <if test="description != null">
+                description = #{description} ,
+            </if>
+            <if test="isPublish != null">
+                isPublish = #{isPublish} ,
+            </if>
+            <if test="author != null">
+                author = #{author} ,
+            </if>
+            <if test="1==1">
+                updateTime = NOW()
+            </if>
+        </set>
+        WHERE questionnaireId = #{questionnaireId}  
+    </update>
+    
+    <!-- 修改随访内容模版表（followup_content_template）add by zhuguo -->
+	<update id="updateQuestionnaireContentTemplateByQuestionnaireId" parameterType="com.esuizhen.cloudservice.followup.model.questionnaire.TFollowupQuestionnaireDetailInfo">  
+        UPDATE followup_db.followup_content_template
+         <set>
+            <if test="subject != null">
+				contentTemplateName = #{subject}
+			</if>
+		</set>
+		WHERE
+			contentTemplateId = (
+				SELECT
+					contentTemplateId
+				FROM
+					followup_db.questionnaire
+				WHERE
+					questionnaireId = #{questionnaireId}
+			)
+    </update>
+    
+    <select id="queryPatientAnswerByQuestionnaireId" parameterType="java.lang.String" resultMap="PatientAnswerMap">
+		SELECT 
+		rd.questionnaireOptionId,
+		rd.contentType,
+		rd.`level`,
+		CASE WHEN rd.contentType=3 THEN rd.fillContent ELSE rd.content END answerContent,
+		CASE WHEN rd.contentType != 3 AND rd.level=2 THEN rd.parentOptionId ELSE rd.questionnaireStemId END parentOptionId,
+		patient.patientId,
+		patient.patientNo,
+		patient.trueName,
+		patient.sex,
+		CASE WHEN patient.sex=1 THEN '男' WHEN patient.sex=2 THEN '女' END 
+			sexTxt,
+		CASE WHEN patient.birthDate IS NULL THEN 0 ELSE  TIMESTAMPDIFF(YEAR, patient.birthDate, now()) END age,
+		patient.sourceDiseaseTypeId,
+		dt.diseaseTypeName sourceDiseaseTypeName,
+		patient.sourceDiagnosis,
+		patient.sourceDiseaseCode
+		FROM questionnaire_result qr 
+		JOIN user_db.u_patient patient on patient.patientId=qr.patientId
+		JOIN questionnaire_result_options_detail rd on rd.questionnaireResultId=qr.questionnaireResultId
+		left join ehr_db.meta_c_disease_type dt on patient.sourceDiseaseTypeId=dt.diseaseTypeId
+		where qr.questionnaireId=#{questionnaireId} 
+		<if test="followupTaskId != null">
+			AND qr.followupItemId=#{followupTaskId}
+		</if>
+		and (rd.level in(0,2) or rd.contentType=3) 
+		ORDER BY patient.patientId
+    </select>
+    
+    <select id="queryQuestionnaireSubjectByQuestionnaireId" parameterType="java.lang.String" resultType="java.util.Map">
+		SELECT w.* FROM (
+			SELECT questionnaireStemId,questionnaireStemId questionnaireOptionId,content,
+							stemIndex optionIndex,t1.stemCode,
+							1 sortNum
+			FROM followup_db.questionnaire_stem t1 
+			WHERE questionnaireId=#{questionnaireId}
+				UNION
+			SELECT  questionnaireStemId,questionnaireOptionId,content,
+							optionIndex,t1.stemCode,
+							2 sortNum
+			FROM followup_db.questionnaire_options_detail t1 
+			WHERE LEVEL=1 AND questionnaireId=#{questionnaireId}
+		)w ORDER BY w.questionnaireStemId,w.questionnaireOptionId,
+					w.sortNum,w.stemCode,w.optionIndex ASC
+    </select>
+</mapper>

@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_match_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.match.MatchUserDao" >
+	<resultMap id="baseResultMap" type="com.westangel.common.bean.User" >
+		<id column="userId" property="userId" jdbcType="BIGINT" />
+		<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+		<result column="syncFlag" property="syncFlag" jdbcType="VARCHAR" />
+		<result column="userName" property="userName" jdbcType="VARCHAR" />
+		<result column="cryptPasswd" property="cryptPasswd" jdbcType="VARCHAR" />
+		<result column="trueName" property="trueName" jdbcType="VARCHAR" />
+		<result column="nickName" property="nickName" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="sex" property="sex" jdbcType="INTEGER" />
+		<result column="birthDate" property="birthDate" jdbcType="TIMESTAMP" />
+		<result column="userPictureUrl" property="userPictureUrl" jdbcType="VARCHAR" />
+		<result column="email" property="email" jdbcType="VARCHAR" />
+		<result column="nation" property="nation" jdbcType="VARCHAR" />
+		<result column="country" property="country" jdbcType="VARCHAR" />
+		<result column="cityCode" property="cityCode" jdbcType="VARCHAR" />
+		<result column="city" property="city" jdbcType="VARCHAR" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="nativePlace" property="nativePlace" jdbcType="VARCHAR" />
+		<result column="profession" property="profession" jdbcType="VARCHAR" />
+		<result column="rawOccupationId" property="rawOccupationId" jdbcType="VARCHAR" />
+		<result column="rawProfession" property="rawProfession" jdbcType="VARCHAR" />
+		<result column="company" property="company" jdbcType="VARCHAR" />
+		<result column="idType" property="idType" jdbcType="INTEGER" />
+		<result column="identification" property="identification" jdbcType="VARCHAR" />
+		<result column="marriageStatus" property="marriageStatus" jdbcType="INTEGER" />
+		<result column="signature" property="signature" jdbcType="VARCHAR" />
+		<result column="education" property="education" jdbcType="INTEGER" />
+		<result column="school" property="school" jdbcType="VARCHAR" />
+		<result column="interest" property="interest" jdbcType="VARCHAR" />
+		<result column="idFileUrl" property="idFileUrl" jdbcType="VARCHAR" />
+		<result column="accountType" property="accountType" jdbcType="INTEGER" />
+		<result column="infoState" property="infoState" jdbcType="INTEGER" />
+		<result column="state" property="state" jdbcType="INTEGER" />
+		<result column="role" property="role" jdbcType="INTEGER" />
+		<result column="subroles" property="subroles" jdbcType="VARCHAR" />
+		<result column="points" property="points" jdbcType="INTEGER" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+		<result column="firstLoginTime" property="firstLoginTime" jdbcType="TIMESTAMP" />
+		<result column="lastLoginTime" property="lastLoginTime" jdbcType="TIMESTAMP" />
+		<result column="sourceFlag" property="sourceFlag" jdbcType="INTEGER" />
+	</resultMap>
+	
+	<sql id="base_column_list">
+		t1.userId, t1.uuid, t1.syncFlag, t1.userName, t1.cryptPasswd, t1.trueName, t1.nickName, t1.mobile, t1.sex, t1.birthDate, 
+	    t1.userPictureUrl, t1.email, t1.nation, t1.country, t1.cityCode, t1.city, t1.address, t1.nativePlace, t1.profession, 
+	    t1.rawOccupationId,t1.rawProfession,
+	    t1.company, t1.idType, t1.identification, t1.marriageStatus, t1.signature, t1.education, t1.school, t1.interest, 
+	    t1.idFileUrl, t1.accountType, t1.infoState, t1.state, t1.role, t1.subroles, t1.points, t1.createTime, t1.updateTime, 
+	    t1.firstLoginTime, t1.lastLoginTime, t1.sourceFlag, t1.affirmUserId, t1.affirm, t1.affirmDateTime
+	</sql>
+	
+	<select id="findByUuid" resultMap="baseResultMap">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM cloud_sync_match_db.u_user t1
+		WHERE t1.uuid=#{uuid,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="findByUserId" resultMap="baseResultMap" parameterType="java.lang.Long">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM cloud_sync_match_db.u_user t1
+		WHERE t1.userId=#{userId,jdbcType=BIGINT}
+	</select>
+	
+	<insert id="insert" parameterType="com.westangel.common.bean.User" >
+		insert into cloud_sync_match_db.u_user(
+			userId, 
+			uuid, 
+			userName, 
+			cryptPasswd,
+			trueName, 
+			nickName, 
+			mobile, 
+			sex, 
+			birthDate, 
+			userPictureUrl, 
+			email, 
+			nation, 
+			country, 
+			cityCode, 
+			city, 
+			address, 
+			nativePlace, 
+			profession,
+			rawOccupationId,
+			rawProfession,
+			company, 
+			idType, 
+			identification, 
+			marriageStatus, 
+			signature, 
+			education, 
+			school,
+			interest,
+			idFileUrl, 
+			accountType,
+			infoState,
+			state, 
+			role,
+			subroles,
+			points, 
+			createTime,
+			updateTime,
+			firstLoginTime, 
+			lastLoginTime,
+			sourceFlag,
+			syncTime
+		) values(
+			#{userId,jdbcType=BIGINT},
+	   		#{uuid,jdbcType=VARCHAR},
+	   		#{userName,jdbcType=VARCHAR}, 
+     		#{cryptPasswd,jdbcType=VARCHAR}, 
+     		#{trueName,jdbcType=VARCHAR}, 
+     		#{nickName,jdbcType=VARCHAR}, 
+     		#{mobile,jdbcType=VARCHAR}, 
+     		#{sex,jdbcType=INTEGER}, 
+     		#{birthDate,jdbcType=TIMESTAMP}, 
+	        #{userPictureUrl,jdbcType=VARCHAR}, 
+	        #{email,jdbcType=VARCHAR}, 
+	        #{nation,jdbcType=VARCHAR}, 
+	        #{country,jdbcType=VARCHAR}, 
+	        #{cityCode,jdbcType=VARCHAR}, 
+	        #{city,jdbcType=VARCHAR}, 
+	        #{address,jdbcType=VARCHAR},
+	        #{nativePlace,jdbcType=VARCHAR}, 
+	        #{profession,jdbcType=VARCHAR},
+	        #{rawOccupationId,jdbcType=VARCHAR},
+			#{rawProfession,jdbcType=VARCHAR},
+	        #{company,jdbcType=VARCHAR}, 
+	        #{idType,jdbcType=INTEGER}, 
+	        #{identification,jdbcType=VARCHAR}, 
+	        #{marriageStatus,jdbcType=INTEGER}, 
+	        #{signature,jdbcType=VARCHAR}, 
+	        #{education,jdbcType=INTEGER}, 
+	        #{school,jdbcType=VARCHAR}, 
+	        #{interest,jdbcType=VARCHAR}, 
+	        #{idFileUrl,jdbcType=VARCHAR}, 
+	        #{accountType,jdbcType=INTEGER}, 
+	        #{infoState,jdbcType=INTEGER}, 
+	        #{state,jdbcType=INTEGER}, 
+	        #{role,jdbcType=INTEGER}, 
+	        #{subroles,jdbcType=VARCHAR}, 
+	        #{points,jdbcType=INTEGER}, 
+	        #{createTime}, 
+	        NOW(), 
+	        #{firstLoginTime},
+	        NOW(), 
+	        #{sourceFlag,jdbcType=INTEGER},
+	       NOW()
+	        )
+	        
+	 </insert>
+	 
+	 <update id="updatePushFlag">
+	 	UPDATE cloud_sync_match_db.u_user
+	 	<set>
+	 		pushFlag=#{pushFlag,jdbcType=INTEGER},
+	 		pushTimes=pushTimes+1,
+	 		pushTime=NOW()
+	 	</set>
+	 	WHERE uuid IN
+	 	(
+			<foreach collection="userUuids" item="uuid" index="index" separator=",">
+				#{uuid}
+			</foreach>
+		)
+		AND role=#{role}
+	 </update>
+	 
+	 <update id="setAffirm">
+	 	UPDATE cloud_sync_match_db.u_user
+	 	<set>
+	 		affirmUserId=#{affirmUserId},
+	 		affirm=#{affirm},
+	 		affirmDateTime=NOW()
+	 	</set>
+	 	WHERE userId=#{userId}
+	 </update>
+	 
+	 <update id="setNotifyDoctorAgain">
+	 	UPDATE cloud_sync_match_db.u_user
+		<set>
+			pushFlag=0
+		</set>
+		WHERE
+		 	<![CDATA[
+		 		(DATE_SUB(CURDATE(), INTERVAL 3 DAY)>=pushTime OR pushTime IS NULL)
+				AND pushFlag=1
+				AND affirm<>1
+				AND role=2
+		 	]]>
+	 </update>
+	 
+	 <update id="setNotifyPatientAgain">
+	 	UPDATE cloud_sync_match_db.u_user
+		<set>
+			pushFlag=0
+		</set>
+		WHERE
+		 	<![CDATA[
+		 		(DATE_SUB(CURDATE(),INTERVAL 7 DAY)>=pushTime OR pushTime IS NULL)
+				AND pushFlag=1
+				AND affirm<>1
+				AND pushTimes<4
+				AND role=1
+		 	]]>
+	 </update>
+	 
+	 <delete id="delete">
+	 	DELETE FROM cloud_sync_match_db.u_user WHERE userId=#{userId,jdbcType=BIGINT}
+	 </delete>
+	 
+	 <update id="updateAccountType">
+	 	UPDATE user_db.u_user SET accountType =#{accountType} WHERE uuid=#{uuid}
+	 </update>
+</mapper>

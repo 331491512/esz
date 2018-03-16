@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.westangel.commonservice.authorization.dao.DoctorDao">
+
+	<select id="findSubordinateDoctorList" resultType="com.westangel.common.bean.Doctor">
+		SELECT
+			t1.userId,
+			t1.doctorId,
+			t1.trueName,
+			t1.sex,
+			t2.positionTitleName
+		FROM user_db.u_doctor t1
+			LEFT JOIN user_db.meta_position_title t2 ON t1.positionTitle = t2.positionTitleId
+		WHERE t1.parentId = #{doctorId}
+	</select>
+
+	<select id="findRoleDoctor" resultType="com.westangel.common.bean.Doctor">
+		SELECT
+			t1.userId,
+			t1.doctorId,
+			t1.trueName,
+			t1.sex,
+			t1.mobile,
+			t4.userRole,
+			t4.roleName
+		FROM user_db.u_doctor t1
+			INNER JOIN user_db.r_hospital_doctor t2 ON t1.doctorId = t2.doctorId
+			INNER JOIN user_db.r_user_role t3 ON t1.userId = t3.userId
+			INNER JOIN user_db.meta_role t4 ON t3.userRole = t4.userRole
+		WHERE t2.hospitalId = #{hospitalId}
+			AND t3.userRole = #{userRole}
+	</select>
+	
+	<select id="findPositionDoctor" resultType="com.westangel.common.bean.Doctor">
+		SELECT
+			t1.userId,
+			t1.doctorId,
+			t1.trueName,
+			t1.sex,
+			t1.mobile,
+			t2.positionTitleName
+		FROM user_db.u_doctor t1
+			INNER JOIN user_db.meta_position_title t2 ON t1.positionTitle = t2.positionTitleId
+			INNER JOIN user_db.r_hospital_doctor t3 ON t1.doctorId = t3.doctorId
+		WHERE t3.hospitalId = #{hospitalId}
+			AND t2.positionTitleId = #{positionTitleId}
+	</select>
+	
+	<select id="findSubordinateDoctors" resultType="com.westangel.common.bean.Doctor">
+		SELECT
+			t1.userId,
+			t1.doctorId,
+			t1.trueName,
+			t1.sex,
+			t1.mobile,
+			t4.userRole,
+			t4.roleName,
+			t5.positionTitleName
+		FROM user_db.u_doctor t1
+			INNER JOIN user_db.r_hospital_doctor t2 ON t1.doctorId = t2.doctorId
+			LEFT JOIN user_db.r_user_role t3 ON t1.userId = t3.userId
+			LEFT JOIN user_db.meta_role t4 ON t3.userRole = t4.userRole
+			LEFT JOIN user_db.meta_position_title t5 ON t5.positionTitleId = t1.positionTitle
+		WHERE t1.parentId = #{parentId} AND t2.hospitalId = #{hospitalId}
+	</select>
+
+	<select id="findByUserId" resultType="com.westangel.common.bean.Doctor">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM user_db.u_doctor t1
+		WHERE t1.userId = #{userId}
+	</select>
+	
+	<select id="findByDoctorId" resultType="com.westangel.common.bean.Doctor">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM user_db.u_doctor t1
+		WHERE t1.doctorId = #{doctorId}
+	</select>
+
+	<select id="findDoctorProfileByUserId" resultType="com.westangel.common.bean.DoctorProfile">
+		SELECT
+			<include refid="base_column_list"></include>,
+			t2.hospitalId, t3.hospitalName, t2.deptId, t4.deptName dept, t2.staffNo
+		FROM user_db.u_doctor t1
+		LEFT JOIN user_db.r_hospital_doctor t2 ON t1.doctorId = t2.doctorId
+		LEFT JOIN user_db.u_hospital t3 ON t3.hospitalId = t2.hospitalId
+		LEFT JOIN user_db.u_department t4 ON t4.deptId = t2.deptId
+		WHERE t1.userId = #{userId}
+	</select>
+	
+	<sql id="base_column_list">
+		t1.doctorId,
+		t1.userId,
+		t1.trueName,
+		t1.nickName, 
+		t1.mobile, 
+		t1.sex,
+		t1.parentId,
+		t1.birthDate, 
+		t1.userPictureUrl, 
+		t1.professionCredence,
+		t1.registerCredence, 
+		t1.professionCredencePicUrl,
+		t1.registerCredencePicUrl, 
+		t1.isExpert, 
+		t1.skills,
+		t1.tagIds, 
+		t1.tags, 
+		t1.positionTitle,
+		t1.professionalRank, 
+		t1.tel, 
+		t1.introduction, 
+		t1.auditState, 
+		t1.createTime, 
+		t1.updateTime
+	</sql>
+
+	<!-- 新增医生基本信息 -->
+	<insert id="insert" parameterType="com.westangel.common.bean.Doctor">
+		<selectKey resultType="long" keyProperty="doctorId" order="AFTER">
+			SELECT LAST_INSERT_ID() as doctorId
+		</selectKey>
+		insert into user_db.u_doctor(
+			userId,
+			trueName,
+			nickName, 
+			mobile, 
+			sex,
+			parentId,
+			birthDate, 
+			userPictureUrl, 
+			professionCredence,
+			registerCredence, 
+			professionCredencePicUrl,
+			registerCredencePicUrl, 
+			isExpert, 
+			skills,
+			tagIds, 
+			tags, 
+			positionTitle,
+			professionalRank, 
+			tel, 
+			introduction, 
+			auditState, 
+			createTime, 
+			updateTime
+		)values(
+			#{userId}, 
+			#{trueName},
+			#{nickName},
+			#{mobile},
+			#{sex},
+			#{parentId},
+			#{birthDate},
+			#{userPictureUrl},
+			#{professionCredence},
+			#{registerCredence},
+			#{professionCredencePicUrl},
+			#{registerCredencePicUrl},
+			#{isExpert},
+			#{skills},
+			#{tagIds},
+			#{tags},
+			#{positionTitle},
+			#{professionalRank},
+			#{tel},
+			#{introduction},
+			#{auditState},
+			NOW(),
+			NOW()
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.westangel.common.bean.Doctor">
+		update user_db.u_doctor
+		<set>
+			<if test="userId != null">
+				userId = #{userId,jdbcType=BIGINT},
+			</if>
+			<if test="trueName != null">
+				trueName=#{trueName,jdbcType=VARCHAR},
+			</if>
+			<if test="nickName != null">
+				nickName = #{nickName,jdbcType=VARCHAR},
+			</if>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="sex != null">
+				sex = #{sex,jdbcType=INTEGER},
+			</if>
+			<if test="parentId != null">
+				parentId = #{parentId},
+			</if>
+			<if test="birthDate != null">
+				birthDate = #{birthDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="userPictureUrl != null">
+				userPictureUrl = #{userPictureUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="professionCredence != null">
+				professionCredence =
+				#{professionCredence,jdbcType=VARCHAR},
+			</if>
+			<if test="registerCredence != null">
+				registerCredence = #{registerCredence,jdbcType=VARCHAR},
+			</if>
+			<if test="professionCredencePicUrl != null">
+				professionCredencePicUrl =
+				#{professionCredencePicUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="registerCredencePicUrl != null">
+				registerCredencePicUrl =
+				#{registerCredencePicUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="isExpert != null">
+				isExpert = #{isExpert,jdbcType=INTEGER},
+			</if>
+			<if test="skills != null">
+				skills = #{skills,jdbcType=VARCHAR},
+			</if>
+			<if test="tagIds != null">
+				tagIds = #{tagIds,jdbcType=VARCHAR},
+			</if>
+			<if test="tags != null">
+				tags = #{tags,jdbcType=VARCHAR},
+			</if>
+			<if test="positionTitle != null">
+				positionTitle = #{positionTitle,jdbcType=INTEGER},
+			</if>
+			<if test="professionalRank != null">
+				professionalRank = #{professionalRank,jdbcType=INTEGER},
+			</if>
+			<if test="tel != null">
+				tel = #{tel,jdbcType=VARCHAR},
+			</if>
+			<if test="introduction != null">
+				introduction = #{introduction,jdbcType=VARCHAR},
+			</if>
+			<if test="auditState != null">
+				auditState = #{auditState,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				createTime = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			updateTime=NOW()
+		</set>
+		where doctorId=#{doctorId,jdbcType=BIGINT}
+	</update>
+	
+	<update id="updateSubordinate">
+		update user_db.u_doctor
+		<set>
+			parentId = #{parentId}
+		</set>
+		WHERE doctorId IN
+		<foreach collection="doctors" item="doctor" open="(" separator="," close=")">
+			#{doctor.doctorId}
+		</foreach>
+	</update>
+	
+	<update id="removeParentRelation">
+		update user_db.u_doctor
+		<set>
+			parentId = NULL,
+			updateTime = NOW()
+		</set>
+		WHERE parentId = #{parentId}
+	</update>
+	
+	<update id="updateParentId">
+		update user_db.u_doctor
+		<set>
+			parentId = #{parentId},
+			updateTime = NOW()
+		</set>
+		WHERE doctorId = #{doctorId}
+	</update>
+</mapper>

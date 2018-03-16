@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.esuizhen.cloudservice.statistics.dao.FollowupWayDao">
+	<!-- 统计微信随访方式的随访量 -->
+	<select id="statisticsWXFollowupWay" resultType="com.esuizhen.cloudservice.statistics.bean.TFollowupWayProgressInfo">
+		SELECT
+			4 followupWayId,
+			'微信随访' followupWayName,
+			COUNT(1) totalQuantity,
+			(
+				SELECT
+					COUNT(1)
+				FROM followup_db.followup_wx_req r1
+				WHERE r1.followupTaskId = t1.followupTaskId
+				<if test="followupAssignId != null">
+					AND r1.followupAssignId = t1.followupAssignId
+				</if>
+				AND r1.state = 1 and r1.mergeFlag!=2
+			) finishedQuantity,
+			(
+				SELECT
+					COUNT(1)
+				FROM followup_db.followup_wx_req r1
+				WHERE r1.followupTaskId = t1.followupTaskId
+				<if test="followupAssignId != null">
+					AND r1.followupAssignId = t1.followupAssignId
+				</if>
+				AND r1.state = 1 AND r1.replyState = 1 and r1.mergeFlag!=2
+			) replyQuantity,
+			(
+				SELECT
+					COUNT(1)
+				FROM followup_db.followup_wx_req r1
+				WHERE r1.followupTaskId = t1.followupTaskId
+				<if test="followupAssignId != null">
+					AND r1.followupAssignId = t1.followupAssignId
+				</if>
+				AND r1.state = 1 AND r1.replyState = 0 and r1.mergeFlag!=2
+			) unreplyQuantity,
+			(
+				SELECT
+					COUNT(1)
+				FROM followup_db.followup_wx_req r1
+				WHERE r1.followupTaskId = t1.followupTaskId
+				<if test="followupAssignId != null">
+					AND r1.followupAssignId = t1.followupAssignId
+				</if>
+				AND r1.state = 2 and r1.mergeFlag!=2
+			) failQuantity
+		FROM followup_db.followup_wx_req t1
+		WHERE t1.followupTaskId = #{followupTaskId} and t1.mergeFlag!=2
+		<if test="followupAssignId != null">
+			AND t1.followupAssignId = #{followupAssignId}
+		</if>
+	</select>
+	
+	<!-- 统计短信随访方式的随访量 -->
+	<select id="statisticsSMSFollowupWay" resultType="com.esuizhen.cloudservice.statistics.bean.TFollowupWayProgressInfo">
+		SELECT
+			1 followupWayId,
+			'短信随访' followupWayName,
+			COUNT(1) totalQuantity,
+			(
+				SELECT
+					COUNT(1)
+				FROM followup_db.followup_sms_req r1
+				WHERE r1.followupTaskId = t1.followupTaskId
+				<if test="followupAssignId != null">
+					AND r1.followupAssignId = t1.followupAssignId
+				</if>
+				AND r1.state in (1,3) and r1.mergeFlag!=2
+			) finishedQuantity,
+			(
+				SELECT
+					COUNT(1)
+				FROM followup_db.followup_sms_req r1
+				WHERE r1.followupTaskId = t1.followupTaskId
+				<if test="followupAssignId != null">
+					AND r1.followupAssignId = t1.followupAssignId
+				</if>
+				AND r1.state in (1,3) AND r1.replyState = 1 and r1.mergeFlag!=2
+			) replyQuantity,
+			(
+				SELECT
+					COUNT(1)
+				FROM followup_db.followup_sms_req r1
+				WHERE r1.followupTaskId = t1.followupTaskId
+				<if test="followupAssignId != null">
+					AND r1.followupAssignId = t1.followupAssignId
+				</if>
+				AND r1.state in (1,3) AND r1.replyState = 0 and r1.mergeFlag!=2
+			) unreplyQuantity,
+			(
+				SELECT
+					COUNT(1)
+				FROM followup_db.followup_sms_req r1
+				WHERE r1.followupTaskId = t1.followupTaskId
+				<if test="followupAssignId != null">
+					AND r1.followupAssignId = t1.followupAssignId
+				</if>
+				AND r1.state = 2 and r1.mergeFlag!=2
+			) failQuantity
+		FROM followup_db.followup_sms_req t1
+		WHERE t1.followupTaskId = #{followupTaskId} and t1.mergeFlag!=2
+		<if test="followupAssignId != null">
+			AND t1.followupAssignId = #{followupAssignId}
+		</if>
+	</select>
+	
+	<!-- 电话随访统计 -->
+	<select id="statisticsCallFollowupWay" resultType="com.esuizhen.cloudservice.statistics.bean.TFollowupWayProgressInfo">
+		SELECT
+			2 followupWayId,
+			'电话随访' followupWayName,
+			COUNT(1) totalQuantity,
+			SUM(IF(f1.type = 1, 1, 0)) effectivedQuantity,
+			SUM(IF(f1.type = 2, 1, 0)) invalidQuantity
+		FROM(
+			SELECT
+				t2.type
+			FROM followup_db.followup_result_buff t1
+				INNER JOIN followup_db.meta_followup_result_value t2 ON t2.followupResultValueId = t1.followupResultValue
+			WHERE t1.followupWay = 2 AND t1.followupTaskId = #{followupTaskId} and t1.mergeFlag!=2
+			<if test="followupAssignId != null">
+				AND t1.followupAssignId = #{followupAssignId}
+			</if>
+		) f1
+	</select>
+	
+	<!-- 就诊自动标记统计 -->
+	<select id="statisticsTreatmentFollowupWay" resultType="com.esuizhen.cloudservice.statistics.bean.TFollowupWayProgressInfo">
+		SELECT
+			7 followupWayId,
+			'就诊自动标记' followupWayName,
+			COUNT(1) totalQuantity,
+			(
+				SELECT
+					COUNT(1)
+				FROM followup_db.followup_result r1
+				WHERE r1.followupTaskId = t1.followupTaskId AND r1.followupAssignId = t1.followupAssignId AND r1.followupResultValue = 15 and r1.mergeFlag!=2
+			) outpatientQuantity,
+			(
+				SELECT
+					COUNT(1)
+				FROM followup_db.followup_result r1
+				WHERE r1.followupTaskId = t1.followupTaskId AND r1.followupAssignId = t1.followupAssignId AND r1.followupResultValue = 16 and r1.mergeFlag!=2
+			) inhospitalQuantity
+		FROM followup_db.followup_result t1
+		WHERE t1.followupTaskId = #{followupTaskId} and t1.mergeFlag!=2
+		<if test="followupAssignId != null">
+			AND t1.followupAssignId = #{followupAssignId}
+		</if>
+		AND t1.followupResultValue IN(15, 16)
+	</select>
+</mapper>
+

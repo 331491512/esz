@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.temp.TempDoctorDao" >
+    <!-- 向temp表推送数据 -->
+    <insert id="insert">
+		INSERT INTO server_sync_temp_db.u_doctor (
+			doctorId,userId,opFlag,parentId,parentUuid,uuid,mobile,
+			trueName,auditState,nickName,sex,birthDate,userPictureUrl,
+			professionCredence,registerCredence,workCredence,professionCredencePicUrl,
+			registerCredencePicUrl,workCredencePicUrl,isExpert,skills,tagIds,tags,
+			positionTitle,professionalRank,qrcodeUrl,tel,introduction,auditRemark,
+			recommendFlag,createTime,staffNo,batchId,hospitalId,deptId,deptUuid
+		)
+		VALUES(
+			#{doctorId},#{userId},#{opFlag},#{parentId},#{parentUuid},#{uuid},#{mobile},
+			#{trueName},#{auditState},#{nickName},#{sex},#{birthDate},#{userPictureUrl},
+			#{professionCredence},#{registerCredence},#{workCredence},#{professionCredencePicUrl},
+			#{registerCredencePicUrl},#{workCredencePicUrl},#{isExpert},#{skills},#{tagIds},#{tags},
+			#{positionTitle},#{professionalRank},#{qrcodeUrl},#{tel},#{introduction},#{auditRemark},
+			#{recommendFlag},#{createTime},#{staffNo},#{batchId},#{hospitalId},#{deptId},#{deptUuid}
+		)
+	</insert>
+	
+	<select id="queryDoctorByBatchId" resultType="com.esuizhen.server.sync.model.temp.SyncDoctor">
+		SELECT
+		IFNULL(t2.doctorId,t21.doctorId) doctorId,
+		IFNULL(t2.userId,t21.userId) userId,
+		IFNULL(t3.doctorId,t31.doctorId) parentId,
+		t1.parentUuid,
+		t1.uuid,
+		t1.mobile,
+		t1.trueName,
+		t1.auditState,
+		t1.nickName,
+		t1.sex,
+		t1.birthDate,
+		t1.userPictureUrl,
+		t1.professionCredence,
+		t1.registerCredence,
+		t1.workCredence,
+		t1.professionCredencePicUrl,
+		t1.registerCredencePicUrl,
+		t1.workCredencePicUrl,
+		t1.isExpert,
+		t1.skills,
+		t1.tagIds,
+		t1.tags,
+		t1.positionTitle,
+		t1.professionalRank,
+		t1.qrcodeUrl,
+		t1.tel,
+		t1.introduction,
+		t1.auditRemark,
+		t1.recommendFlag,
+		t1.createTime,
+		t1.staffNo,
+		t1.batchId,
+		t1.hospitalId,
+		t4.deptId deptId,
+		t1.deptUuid
+		FROM 
+		server_sync_temp_db.u_doctor t1
+		LEFT JOIN user_db.u_doctor t2 ON t1.uuid=t2.uuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t21 ON t1.uuid=t21.uuid
+		LEFT JOIN user_db.u_doctor t3 ON t1.parentUuid=t3.uuid
+		LEFT JOIN user_db.r_uuid_doctor_relationship t31 ON t1.parentUuid=t21.uuid
+		LEFT JOIN user_db.u_department t4 ON t1.deptUuid = t4.uuid
+		WHERE t1.batchId=#{batchId}
+	</select>
+</mapper>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.CloudMetaEIcd10Dao" >
+	
+	<select id="findByDiseaseTypeId" resultType="com.westangel.common.bean.ehr.MetaEicd10" parameterType="java.lang.Integer">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM ehr_db.meta_e_icd_10 t1
+			INNER JOIN ehr_db.meta_r_disease_type_icd_10 t2 ON LOCATE(t2.diseaseCode,t1.diseaseCode)
+		WHERE t2.diseaseTypeId=#{diseaseTypeId}
+	</select>
+	
+	<sql id="base_column_list">
+		t1.diseaseCode, 
+		t1.diseaseName, 
+		t1.sexLimit, 
+		t1.curativeEffect, 
+		t1.helpRememberCode, 
+		t1.createTime
+	</sql>
+	
+</mapper>

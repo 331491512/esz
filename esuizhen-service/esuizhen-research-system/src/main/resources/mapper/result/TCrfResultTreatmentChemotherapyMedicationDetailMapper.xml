@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TCrfResultTreatmentChemotherapyMedicationDetailDao">
+
+	<insert id="insertCrfResultTreatmentChemotherapyMedicationDetail" parameterType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentChemotherapyMedicationDetail">
+        INSERT INTO crf_result_treatment_chemotherapy_medication_detail 
+        (
+        	crfChemotherapyMedicationResultDetailId ,
+        	crfResultId ,
+        	crfTreatmentChemotherapyResultId ,
+        	medicationType ,
+        	medicationId ,
+        	medicationName ,
+        	commodityName ,
+        	computingMethod ,
+        	theoreticalDose ,
+        	measurementUnit ,
+        	drugUsage ,
+        	actualDose ,
+        	treatmentPeriod ,
+        	totalCourse ,
+        	delay ,
+        	decrement ,
+        	beginTime ,
+        	endTime ,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{crfChemotherapyMedicationResultDetailId} ,
+        	#{crfResultId} ,
+        	#{crfTreatmentChemotherapyResultId} ,
+        	#{medicationType} ,
+        	#{medicationId} ,
+        	#{medicationName} ,
+        	#{commodityName} ,
+        	#{computingMethod} ,
+        	#{theoreticalDose} ,
+        	#{measurementUnit} ,
+        	#{drugUsage} ,
+        	#{actualDose} ,
+        	#{treatmentPeriod} ,
+        	#{totalCourse} ,
+        	#{delay} ,
+        	#{decrement} ,
+        	#{beginTime} ,
+        	#{endTime} ,
+        	NOW() ,
+        	NOW()
+        )
+	</insert>
+    
+    <insert id="insertCrfResultTreatmentChemotherapyMedicationDetailList" parameterType="java.util.List">
+        INSERT INTO crf_result_treatment_chemotherapy_medication_detail 
+        (
+        	crfChemotherapyMedicationResultDetailId ,
+        	crfResultId ,
+        	crfTreatmentChemotherapyResultId ,
+        	medicationType ,
+        	medicationId ,
+        	medicationName ,
+        	commodityName ,
+        	computingMethod ,
+        	theoreticalDose ,
+        	measurementUnit ,
+        	drugUsage ,
+        	actualDose ,
+        	treatmentPeriod ,
+        	totalCourse ,
+        	delay ,
+        	decrement ,
+        	beginTime ,
+        	endTime ,
+        	createTime ,
+        	updateTime 
+        ) VALUES 
+        <foreach collection="list" index="index" item="item" separator=",">
+        (
+        	#{item.crfChemotherapyMedicationResultDetailId} ,
+        	#{item.crfResultId} ,
+        	#{item.crfTreatmentChemotherapyResultId} ,
+        	#{item.medicationType} ,
+        	#{item.medicationId} ,
+        	#{item.medicationName} ,
+        	#{item.commodityName} ,
+        	#{item.computingMethod} ,
+        	#{item.theoreticalDose} ,
+        	#{item.measurementUnit} ,
+        	#{item.drugUsage} ,
+        	#{item.actualDose} ,
+        	#{item.treatmentPeriod} ,
+        	#{item.totalCourse} ,
+        	#{item.delay} ,
+        	#{item.decrement} ,
+        	#{item.beginTime} ,
+        	#{item.endTime} ,
+        	NOW() ,
+        	NOW()
+        )
+        </foreach>
+	</insert>
+	
+	<update id="updateCrfResultTreatmentChemotherapyMedicationDetail" parameterType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentChemotherapyMedicationDetail">
+        UPDATE crf_result_treatment_chemotherapy_medication_detail 
+        <set>
+	        <if test="crfResultId != null">
+                crfResultId = #{crfResultId} ,
+            </if>
+	        <if test="crfTreatmentChemotherapyResultId != null">
+                crfTreatmentChemotherapyResultId = #{crfTreatmentChemotherapyResultId} ,
+            </if>
+	        <if test="medicationType != null">
+                medicationType = #{medicationType} ,
+            </if>
+	        <if test="medicationId != null">
+                medicationId = #{medicationId} ,
+            </if>
+	        <if test="medicationName != null">
+                medicationName = #{medicationName} ,
+            </if>
+	        <if test="commodityName != null">
+                commodityName = #{commodityName} ,
+            </if>
+	        <if test="computingMethod != null">
+                computingMethod = #{computingMethod} ,
+            </if>
+	        <if test="theoreticalDose != null">
+                theoreticalDose = #{theoreticalDose} ,
+            </if>
+	        <if test="measurementUnit != null">
+                measurementUnit = #{measurementUnit} ,
+            </if>
+	        <if test="drugUsage != null">
+                drugUsage = #{drugUsage} ,
+            </if>
+	        <if test="actualDose != null">
+                actualDose = #{actualDose} ,
+            </if>
+	        <if test="treatmentPeriod != null">
+                treatmentPeriod = #{treatmentPeriod} ,
+            </if>
+	        <if test="totalCourse != null">
+                totalCourse = #{totalCourse} ,
+            </if>
+	        <if test="delay != null">
+                delay = #{delay} ,
+            </if>
+	        <if test="decrement != null">
+                decrement = #{decrement} ,
+            </if>
+	        <if test="beginTime != null">
+                beginTime = #{beginTime} ,
+            </if>
+	        <if test="endTime != null">
+                endTime = #{endTime} ,
+            </if>
+	        <if test="updateTime != null">
+                updateTime = NOW() ,
+            </if>
+        </set>
+        WHERE 
+	        crfChemotherapyMedicationResultDetailId = #{crfChemotherapyMedicationResultDetailId} 
+	</update>
+
+    <delete id="deleteCrfResultTreatmentChemotherapyMedicationDetail">
+        DELETE FROM crf_result_treatment_chemotherapy_medication_detail WHERE crfChemotherapyMedicationResultDetailId = #{crfChemotherapyMedicationResultDetailId} 
+    </delete>
+    
+    <delete id="deleteCrfResultTreatmentChemotherapyMedicationDetailByCrfResultId">
+        DELETE FROM crf_result_treatment_chemotherapy_medication_detail WHERE crfResultId = #{crfResultId} 
+    </delete>
+    
+    <select id="queryCrfResultTreatmentChemotherapyMedicationDetailById" resultType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentChemotherapyMedicationDetail">
+		SELECT 
+        	crfChemotherapyMedicationResultDetailId,
+        	crfResultId,
+        	crfTreatmentChemotherapyResultId,
+        	medicationType,
+        	medicationId,
+        	medicationName,
+        	commodityName,
+        	computingMethod,
+        	theoreticalDose,
+        	measurementUnit,
+        	drugUsage,
+        	actualDose,
+        	treatmentPeriod,
+        	totalCourse,
+        	delay,
+        	decrement,
+        	beginTime,
+        	endTime,
+        	createTime,
+        	updateTime
+		FROM crf_result_treatment_chemotherapy_medication_detail 
+	    WHERE 
+	        crfChemotherapyMedicationResultDetailId = #{crfChemotherapyMedicationResultDetailId} 
+	</select>
+	
+	<delete id="deleteByProjectId">
+		DELETE
+			i7.*
+		FROM pro_db.crf_result_main i1,
+			pro_db.crf_observation_subject_element i2,
+			pro_db.crf_course_detail i3,
+			pro_db.crf_course i4,
+			pro_db.r_crftemplate_project i5,
+			pro_db.crf_result_treatment_chemotherapy i6,
+			pro_db.crf_result_treatment_chemotherapy_medication_detail i7
+		WHERE i1.crfObserveId = i2.crfObserveId
+			AND i2.crfCourseItemId = i3.crfCourseItemId
+			AND i3.crfCourseId = i4.crfCourseId
+			AND i4.crfTemplateId = i5.crfTemplateId
+			AND i1.crfResultId = i6.crfResultId
+			AND i6.crfTreatmentChemotherapyResultId = i7.crfTreatmentChemotherapyResultId
+			AND i5.projectId = #{projectId}
+	</delete>
+	
+</mapper>
+

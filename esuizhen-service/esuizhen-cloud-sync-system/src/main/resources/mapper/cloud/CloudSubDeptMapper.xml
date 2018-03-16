@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_incre_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.CloudSubDeptDao" >
+	<resultMap id="baseSubDeptResultMap" type="com.esuizhen.cloudservice.sync.model.SubDept">
+		<id column="deptId" property="deptId" jdbcType="BIGINT" />
+		<result column="deptUuid" property="deptUuid" jdbcType="VARCHAR" />
+		<result column="deptName" property="deptName" jdbcType="VARCHAR" />
+		<result column="hospitalId" property="hospitalId" jdbcType="BIGINT" />
+		<result column="hospitalUuid" property="hospitalUuid" jdbcType="VARCHAR" />
+		<result column="level" property="level" jdbcType="INTEGER" />
+		<result column="tel" property="tel" jdbcType="VARCHAR" />
+		<result column="introduction" property="introduction" jdbcType="VARCHAR" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<select id="exsitSubDept" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		SELECT COUNT(0) FROM user_db.u_sub_dept t1 WHERE t1.subDeptId=#{subDeptId}
+	</select>
+	
+	<select id="findByUuid" resultMap="baseSubDeptResultMap" parameterType="java.lang.String">
+		SELECT
+			t1.subDeptId, t1.uuid subDeptUuid, t1.subDeptName, t1.level, t1.tel, t1.introduction,
+			t1.createTime, t1.updateTime, t2.deptId, t2.uuid deptUuid
+		FROM user_db.u_sub_dept t1
+			INNER JOIN user_db.u_department t2 ON t1.deptId=t2.deptId
+		WHERE t1.uuid=#{uuid}
+	</select>
+</mapper>

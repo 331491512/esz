@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<mapper namespace="com.esuizhen.server.sync.dao.sc.ConfSyncTableDao" >
+
+	<select id="getConfSyncTableInfo" resultType="com.esuizhen.server.sync.bean.ConfSyncTableInfo">
+		SELECT  dbName,
+   				dbId,
+				tableId,
+				tableCode,
+				tableName
+		FROM sc_db.conf_sync_table s1
+		JOIN sc_db.conf_sync_db s2 ON s1.dbId=s2.dbId
+		WHERE s1.tableCode=#{tableCode}
+
+	</select>
+
+	<insert id="insertData">
+		insert into ${tableName} (${columnNames})
+		values (${columnValues})
+	</insert>
+
+</mapper>

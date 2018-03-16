@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.crf.TCrfOperationInfoDao">
+
+	<insert id="insertCrfObservationtreatmentOperationOptions" parameterType="com.esuizhen.cloudservice.research.model.crf.TCrfOperationInfo">
+        INSERT INTO crf_observation_treatment_operation_options
+        (
+        	crfObserveItemId ,
+        	crfObserveId ,
+        	subjectElementId ,
+        	operationProperty ,
+        	operationName ,
+        	operationCode ,
+        	`index`,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{crfObserveItemId} ,
+        	#{crfObserveId} ,
+        	#{subjectElementId} ,
+        	#{operationProperty} ,
+        	#{operationName} ,
+        	#{operationCode} ,
+        	#{index} ,
+        	NOW() ,
+        	NOW() 
+        )
+	</insert>
+    
+    <insert id="insertCrfObservationtreatmentOperationOptionsList" parameterType="java.util.List">
+        INSERT INTO crf_observation_treatment_operation_options
+        (
+        	crfObserveItemId ,
+        	crfObserveId ,
+        	subjectElementId ,
+        	operationProperty ,
+        	operationName ,
+        	operationCode ,
+        	`index`,
+        	createTime ,
+        	updateTime 
+        ) VALUES 
+        <foreach collection="list" index="index" item="item" separator=",">
+        (
+        	#{item.crfObserveItemId} ,
+        	#{item.crfObserveId} ,
+        	#{item.subjectElementId} ,
+        	#{item.operationProperty} ,
+        	#{item.operationName} ,
+        	#{item.operationCode} ,
+        	#{item.index} ,
+        	NOW() ,
+        	NOW() 
+        )
+        </foreach>
+        
+	</insert>
+	
+	<update id="updateCrfObservationtreatmentOperationOptions" parameterType="com.esuizhen.cloudservice.research.model.crf.TCrfOperationInfo">
+        UPDATE crf_observation_treatment_operation_options
+        <set>
+	        <if test="crfObserveId != null">
+                crfObserveId = #{crfObserveId} ,
+            </if>
+	        <if test="subjectElementId != null">
+                subjectElementId = #{subjectElementId} ,
+            </if>
+	        <if test="operationProperty != null">
+                operationProperty = #{operationProperty} ,
+            </if>
+	        <if test="operationName != null">
+                operationName = #{operationName} ,
+            </if>
+	        <if test="operationCode != null">
+                operationCode = #{operationCode} ,
+            </if>
+	        <if test="1==1">
+                updateTime = #{updateTime} ,
+            </if>
+        </set>
+        WHERE 
+	        crfObserveItemId = #{crfObserveItemId} 
+	</update>
+
+    <delete id="deleteCrfObservationtreatmentOperationOptions">
+        DELETE FROM crf_observation_treatment_operation_options WHERE crfObserveItemId = #{crfObserveItemId} 
+    </delete>
+    
+    <delete id="deleteCrfObservationtreatmentOperationOptionsByCrfObserveId">
+        DELETE FROM crf_observation_treatment_operation_options WHERE crfObserveId = #{crfObserveId} 
+    </delete>
+    
+    <select id="queryCrfObservationtreatmentOperationOptionsById" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfOperationInfo">
+		SELECT 
+        	crfObserveItemId,
+        	crfObserveId,
+        	subjectElementId,
+        	operationProperty,
+        	operationName,
+        	operationCode,
+        	createTime,
+        	updateTime
+		FROM crf_observation_treatment_operation_options
+	    WHERE 
+	        crfObserveItemId = #{crfObserveItemId} 
+	    ORDER BY `index` ASC
+	</select>
+	
+	<select id="queryCrfObservationtreatmentOperationOptionsByCrfObserveId" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfOperationInfo">
+		SELECT 
+        	crfObserveItemId,
+        	crfObserveId,
+        	subjectElementId,
+        	operationProperty,
+        	operationName,
+        	operationCode,
+        	createTime,
+        	updateTime
+		FROM crf_observation_treatment_operation_options 
+	    WHERE 
+	        crfObserveId = #{crfObserveId} 
+	    ORDER BY `index` ASC
+	</select>
+</mapper>
+

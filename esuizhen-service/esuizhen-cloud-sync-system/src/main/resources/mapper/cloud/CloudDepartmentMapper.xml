@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.CloudDepartmentDao" >
+	<resultMap id="baseResultMap" type="com.esuizhen.cloudservice.sync.model.Department">
+		<id column="deptId" property="deptId" jdbcType="BIGINT" />
+		<result column="deptUuid" property="deptUuid" jdbcType="VARCHAR" />
+		<result column="deptName" property="deptName" jdbcType="VARCHAR" />
+		<result column="hospitalId" property="hospitalId" jdbcType="BIGINT" />
+		<result column="hospitalUuid" property="hospitalUuid" jdbcType="VARCHAR" />
+		<result column="level" property="level" jdbcType="INTEGER" />
+		<result column="tel" property="tel" jdbcType="VARCHAR" />
+		<result column="introduction" property="introduction" jdbcType="VARCHAR" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<select id="existDepartment" resultType="java.lang.Integer">
+		SELECT COUNT(0) FROM user_db.u_department t1 WHERE t1.deptId=#{deptId}
+	</select>
+	
+	<select id="findByUuid" resultMap="baseResultMap">
+		SELECT
+			t1.deptId, t1.uuid deptUuid, t1.deptName, t1.level, t1.tel, t1.introduction,
+			t1.createTime, t1.updateTime, t2.hospitalId, t2.uuid hospitalUuid
+		FROM user_db.u_department t1
+			LEFT JOIN user_db.u_hospital t2 ON t1.hospitalId=t2.hospitalId
+		WHERE t1.uuid=#{uuid}
+	</select>
+</mapper>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.surgeryintensivecare.PatientSurgeryIntensiveCareDao">
+
+	<insert id="insertPatientSurgeryIntensiveCareInfo" parameterType="com.esuizhen.cloudservice.ehr.model.surgeryintensivecare.TPatientSurgeryIntensiveCareInfo">
+        INSERT INTO eci_surgery_intensive_care (
+        	intensiveId,
+        	inhospitalId,
+        	intensiveCareName ,
+        	inIntensiveCareTime,
+        	outIntensiveCareTime,
+        	createTime,
+        	updateTime
+        ) VALUES (
+        	#{intensiveId} ,
+        	#{inhospitalId} ,
+        	#{intensiveCareName} ,
+        	#{inIntensiveCareTime} ,
+        	#{outIntensiveCareTime},
+        	now(),
+        	now()
+        )
+	</insert>
+    
+
+    <delete id="deletePatientSurgeryIntensiveCareInfo">
+        DELETE FROM eci_surgery_intensive_care WHERE
+        inhospitalId = #{inhospitalId} 
+    </delete>
+
+	<!-- add by zhuguo 根据主键删除 -->
+    <delete id="deletePatientSurgeryIntensiveCareInfoByintensiveId">
+        DELETE FROM eci_surgery_intensive_care WHERE intensiveId = #{intensiveId} 
+    </delete>
+    
+    <!-- add by zhuguo 根据主键修改 -->
+    <update id="updatePatientSurgeryIntensiveCareInfo">
+    	UPDATE eci_surgery_intensive_care SET
+        	<if test="inhospitalId != null">
+        		inhospitalId = #{inhospitalId},
+        	</if>
+        	<if test="intensiveCareName != null">
+        		intensiveCareName = #{intensiveCareName},
+        	</if>
+        	<if test="inIntensiveCareTime != null">
+        		inIntensiveCareTime = #{inIntensiveCareTime},
+        	</if>
+        	<if test="outIntensiveCareTime != null">
+        		outIntensiveCareTime = #{outIntensiveCareTime},
+        	</if>
+        		updateTime = now()
+        WHERE
+        	intensiveId = #{intensiveId}
+    </update>
+    
+    <select id="queryPatientSurgeryIntensiveCareInfoByInHospitalId" resultType="com.esuizhen.cloudservice.ehr.model.surgeryintensivecare.TPatientSurgeryIntensiveCareInfo">
+		SELECT 
+        	intensiveId,
+        	inhospitalId,
+        	intensiveCareName ,
+        	inIntensiveCareTime,
+        	outIntensiveCareTime
+		FROM eci_surgery_intensive_care 
+	    WHERE 
+	        inhospitalId = #{inhospitalId} 
+	</select>
+	
+</mapper>
+

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.esuizhen.cloudservice.questionnaire.dao.FollowupContentTemplateInfoDao">
+	<sql id="data_privilege_where_condition">
+	  	<choose>
+			<!-- 数据权限1全院查询 -->
+			<when test="dataId!=null and dataId==1 and operator!=null">
+				and exists (
+					select 1 from user_db.r_doctor_patient dp where dp.doctorId=#{operator} and f.author=dp.patientId
+					UNION
+					select 1 from user_db.r_hospital_doctor hd join r_hospital_patient hp on hd.hospitalId=hp.hospitalId where hd.doctorId=#{operator} and f.author=hp.patientId
+				)
+			</when>
+			<!-- 数据权限4查询本医生 -->
+			<when test="dataId!=null and dataId==4 and operator!=null">
+				and exists (
+					select 1 from user_db.r_doctor_patient dp where dp.doctorId=#{operator} and f.author=dp.patientId
+				)
+			</when>
+			<!-- 云端默认查询本医生 -->
+			<when test="deployLocation==2 and operator!=null">
+				and exists (
+					select 1 from user_db.r_doctor_patient dp where dp.doctorId=#{operator} and f.author=dp.patientId
+				)
+			</when>
+		</choose>
+	  </sql>
+	  
+	<sql id="Base_Column_List">
+		contentTemplateId, contentTemplateName, contentTemplateType, content, needReply,
+		author, isPublish, signature, autoReplyContent, createTime, updateTime
+	</sql>
+	
+	<select id="queryFollowupContentTemplateInfo"  resultType="com.esuizhen.cloudservice.questionnaire.model.TFollowupContentTemplateInfo">
+		select
+			<include refid="Base_Column_List"/>
+	    from followup_content_template where contentTemplateId=#{contentTemplateId}
+	</select>
+
+	<select id="selectFollowupContentTemplateInfo" resultType="com.esuizhen.cloudservice.questionnaire.bean.FollowupContentTemplateResultRes">
+		select  f.contentTemplateId,
+				f.contentTemplateName,
+		        f.contentTemplateType,
+		        f.content,
+		        f.needReply,
+		        f.isPublish,
+		        CASE
+		        WHEN (SELECT r.id FROM r_followup_task_content_template r WHERE r.contentTemplateId=f.contentTemplateId LIMIT 1) IS NULL
+		        AND (SELECT q.questionnaireId FROM questionnaire q WHERE q.contentTemplateId=f.contentTemplateId LIMIT 1) IS NULL
+		        AND (SELECT r.reqId FROM followup_wx_req r WHERE r.templateId=f.contentTemplateId LIMIT 1) IS NULL
+		        THEN 0 ELSE 1 END isInUsage
+	    from followup_content_template f
+	    where 1=1
+	    <if test="contentTemplateName != null" >
+	        and f.contentTemplateName like "%${contentTemplateName}%"
+	    </if>
+	    <if test="contentTemplateType != null" >
+	        and f.contentTemplateType = #{contentTemplateType}
+	    </if>
+	    <if test="needReply != null" >
+	        and f.needReply = #{needReply}
+	    </if>
+	    <if test="followupTaskId!=null">
+	    	and f.contentTemplateId in (select contentTemplateId from r_followup_task_content_template where followupTaskId=#{followupTaskId})
+	    </if>
+	    <if test="author != null" >
+	        and f.author = #{author}
+	    </if>
+	    order by f.createTime desc
+	</select>
+	
+	<select id="selectFollowupContentTemplateInfoTotalCount" resultType="java.lang.Integer">
+		select count(1) from followup_content_template 
+	    where 1=1
+	    <if test="contentTemplateName != null" >
+	        and contentTemplateName = #{contentTemplateName}
+	    </if>
+	    <if test="contentTemplateType != null" >
+	        and contentTemplateType = #{contentTemplateType}
+	    </if>
+	    <if test="needReply != null" >
+	        and needReply = #{needReply}
+	    </if>
+	</select>
+	  <insert id="insertFollowupContentTemplateInfo" parameterType="com.esuizhen.cloudservice.questionnaire.model.TFollowupContentTemplateInfo" >
+	    insert into followup_content_template (contentTemplateId, contentTemplateName, 
+	      contentTemplateType, content, needReply, 
+	      author, isPublish, signature, autoReplyContent, createTime, updateTime
+	      )
+	    values (#{contentTemplateId}, #{contentTemplateName}, 
+	      #{contentTemplateType}, #{content}, #{needReply}, 
+	      #{author}, #{isPublish}, #{signature}, #{autoReplyContent}, now(), now()
+	      )
+	  </insert>
+	  
+	 <update id="updateFollowupContentTemplateInfo" parameterType="com.esuizhen.cloudservice.questionnaire.model.TFollowupContentTemplateInfo" >
+	    update followup_content_template
+	    <set >
+	      <if test="contentTemplateName != null" >
+	        contentTemplateName = #{contentTemplateName},
+	      </if>
+	      <if test="contentTemplateType != null" >
+	        contentTemplateType = #{contentTemplateType},
+	      </if>
+	      <if test="content != null" >
+	        content = #{content},
+	      </if>
+	      <if test="needReply != null" >
+	        needReply = #{needReply},
+	      </if>
+	      <if test="author != null" >
+	        author = #{author},
+	      </if>
+	      <if test="isPublish != null" >
+	        isPublish = #{isPublish},
+	      </if>
+	      <if test="signature != null" >
+	        signature = #{signature},
+	      </if>
+	      <if test="autoReplyContent != null" >
+	        autoReplyContent = #{autoReplyContent},
+	      </if>
+	      <if test="createTime != null" >
+	        createTime = #{createTime},
+	      </if>
+	        updateTime = now()
+	    </set>
+	    where contentTemplateId = #{contentTemplateId}
+	  </update>
+	  
+	  <delete id="deleteFollowupContentTemplateById" parameterType="java.lang.String">
+	  	delete from followup_content_template where contentTemplateId=#{contentTemplateId}
+	  </delete>
+</mapper>

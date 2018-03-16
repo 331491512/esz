@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TCrfResultGenenalPhysicalExaminationDao">
+	<resultMap type="com.esuizhen.cloudservice.research.model.result.TCrfResultMainInfo" id="baseTCrfResultMainInfoCrfResultGenenalPhysicalExaminationsResultMap">
+		<id column="crfResultId" property="crfResultId"/>
+		<result column="crfObserveId" property="crfObserveId"/>
+		<result column="subjectElementId" property="subjectElementId"/>
+		<result column="projectId" property="projectId"/>
+		<result column="crfCourseItemTime" property="crfCourseItemTime"/>
+		<result column="creatorId" property="creatorId"/>
+		<result column="patientId" property="patientId"/>
+		
+		<collection property="crfResult" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultGenenalPhysicalExamination">
+			<id column="crfPhysicalExaminationResultId" property="crfPhysicalExaminationResultId"/>
+			<result column="crfResultId" property="crfResultId"/>
+			<result column="checkDate" property="checkDate"/>
+			<result column="hight" property="hight"/>
+			<result column="weightLof" property="weightLof"/>
+			<result column="heartRate" property="heartRate"/>
+			<result column="pulse" property="pulse"/>
+			<result column="temperature" property="temperature"/>
+			<result column="waist" property="waist"/>
+			<result column="weight" property="weight"/>
+			<result column="bodyArea" property="bodyArea"/>
+			<result column="breath" property="breath"/>
+			<result column="bloodLow" property="bloodLow"/>
+			<result column="bloodHigh" property="bloodHigh"/>
+			<result column="hipline" property="hipline"/>
+			<result column="bust" property="bust"/>
+			<result column="createTime" property="createTime"/>
+			<result column="updateTime" property="updateTime"/>
+		</collection>
+	</resultMap>
+	
+	<resultMap type="com.esuizhen.cloudservice.research.model.result.TCrfResultGenenalPhysicalExamination" id="baseCrfResultGenenalPhysicalExaminationsResultMap">
+		<id column="crfPhysicalExaminationResultId" property="crfPhysicalExaminationResultId"/>
+		<result column="crfResultId" property="crfResultId"/>
+		<result column="checkDate" property="checkDate"/>
+		<result column="hight" property="hight"/>
+		<result column="weightLof" property="weightLof"/>
+		<result column="heartRate" property="heartRate"/>
+		<result column="pulse" property="pulse"/>
+		<result column="temperature" property="temperature"/>
+		<result column="waist" property="waist"/>
+		<result column="weight" property="weight"/>
+		<result column="bodyArea" property="bodyArea"/>
+		<result column="breath" property="breath"/>
+		<result column="bloodLow" property="bloodLow"/>
+		<result column="bloodHigh" property="bloodHigh"/>
+		<result column="hipline" property="hipline"/>
+		<result column="bust" property="bust"/>
+		<result column="createTime" property="createTime"/>
+		<result column="updateTime" property="updateTime"/>
+	</resultMap>
+
+	<select id="findCrfResultGenenaPhysicalExamRecord" resultMap="baseTCrfResultMainInfoCrfResultGenenalPhysicalExaminationsResultMap">
+		SELECT * FROM(
+			SELECT
+				t2.crfObserveId, 
+				t2.subjectElementId, 
+				t2.projectId, 
+				t2.crfCourseItemTime, 
+				t2.creatorId, 
+				t2.patientId,
+				<include refid="base_column_list"></include>
+			FROM pro_db.crf_result_genenal_physical_examination t1
+				INNER JOIN pro_db.crf_result_main t2 ON t1.crfResultId=t2.crfResultId
+			WHERE t2.projectId = #{projectId} AND t2.patientId = #{patientId}
+			ORDER BY t1.createTime DESC
+		) f1
+		GROUP BY DATE_FORMAT(f1.checkDate, '%Y-%m-%d')
+		ORDER BY f1.checkDate ASC
+	</select>
+	
+	<select id="findCrfResultGenenalPhysicalExaminations" resultMap="baseTCrfResultMainInfoCrfResultGenenalPhysicalExaminationsResultMap">
+		SELECT
+			t2.crfObserveId, t2.subjectElementId, t2.projectId, t2.crfCourseItemTime, t2.creatorId, t2.patientId,
+			<include refid="base_column_list"></include>
+		FROM pro_db.crf_result_genenal_physical_examination t1
+			INNER JOIN pro_db.crf_result_main t2 ON t1.crfResultId=t2.crfResultId
+			INNER JOIN pro_db.crf_observation_subject_element t3 ON t2.crfObserveId=t3.crfObserveId
+		WHERE t3.crfObserveId = #{crfObserveId} AND t2.patientId = #{patientId}
+	</select>
+
+	<sql id="base_column_list">
+		t1.crfPhysicalExaminationResultId,
+		t1.crfResultId,
+		t1.checkDate,
+		t1.hight,
+		t1.weightLof,
+		t1.heartRate,
+		t1.pulse,
+		t1.temperature,
+		t1.waist,
+		t1.weight,
+		t1.bodyArea,
+		t1.breath,
+		t1.bloodLow,
+		t1.bloodHigh,
+		t1.hipline,
+		t1.bust,
+		t1.createTime,
+		t1.updateTime
+	</sql>
+
+	<insert id="insert">
+		INSERT INTO pro_db.crf_result_genenal_physical_examination(
+			crfPhysicalExaminationResultId,
+			crfResultId,
+			checkDate,
+			hight,
+			weightLof,
+			heartRate,
+			pulse,
+			temperature,
+			waist,
+			weight,
+			bodyArea,
+			breath,
+			bloodLow, 
+			bloodHigh,
+			hipline,
+			bust,
+			createTime,
+			updateTime
+		)VALUES(
+			#{crfPhysicalExaminationResultId},
+			#{crfResultId},
+			#{checkDate},
+			#{hight},
+			#{weightLof},
+			#{heartRate},
+			#{pulse},
+			#{temperature},
+			#{waist},
+			#{weight},
+			#{bodyArea},
+			#{breath},
+			#{bloodLow},
+			#{bloodHigh},
+			#{hipline},
+			#{bust},
+			NOW(),
+			NOW()
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE pro_db.crf_result_genenal_physical_examination
+		<set>
+			<if test="crfResultId != null">
+				crfResultId = #{crfResultId},
+			</if>
+			<if test="checkDate != null">
+				checkDate = #{checkDate},
+			</if>
+			<if test="hight != null">
+				hight = #{hight},
+			</if>
+			<if test="weightLof != null">
+				weightLof = #{weightLof},
+			</if>
+			<if test="heartRate != null">
+				heartRate = #{heartRate},
+			</if>
+			<if test="pulse != null">
+				pulse = #{pulse},
+			</if>
+			<if test="temperature != null">
+				temperature = #{temperature},
+			</if>
+			<if test="waist != null">
+				waist = #{waist},
+			</if>
+			<if test="weight != null">
+				weight = #{weight},
+			</if>
+			<if test="bodyArea != null">
+				bodyArea = #{bodyArea},
+			</if>
+			<if test="breath != null">
+				breath = #{breath},
+			</if>
+			<if test="bloodLow != null">
+				bloodLow = #{bloodLow},
+			</if>
+			<if test="bloodHigh != null">
+				bloodHigh = #{bloodHigh},
+			</if>
+			<if test="hipline != null">
+				hipline = #{hipline},
+			</if>
+			<if test="bust != null">
+				bust = #{bust},
+			</if>
+			updateTime = NOW()
+		</set>
+		WHERE crfPhysicalExaminationResultId = #{crfPhysicalExaminationResultId}
+	</update>
+	
+	<delete id="deleteByCrfResultIdAndPatientId">
+		DELETE FROM pro_db.crf_result_genenal_physical_examination WHERE crfResultId = #{crfResultId}
+	</delete>
+	
+	<delete id="deleteByProjectId">
+		DELETE
+			i6.*
+		FROM pro_db.crf_result_main i1,
+			pro_db.crf_observation_subject_element i2,
+			pro_db.crf_course_detail i3,
+			pro_db.crf_course i4,
+			pro_db.r_crftemplate_project i5,
+			pro_db.crf_result_genenal_physical_examination i6
+		WHERE i1.crfObserveId = i2.crfObserveId
+			AND i2.crfCourseItemId = i3.crfCourseItemId
+			AND i3.crfCourseId = i4.crfCourseId
+			AND i4.crfTemplateId = i5.crfTemplateId
+			AND i5.projectId = #{projectId}
+	</delete>
+</mapper>

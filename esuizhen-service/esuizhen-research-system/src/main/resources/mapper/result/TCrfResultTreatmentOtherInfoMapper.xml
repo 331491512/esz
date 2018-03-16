@@ -1,0 +1,683 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TCrfResultTreatmentOtherInfoDao">
+
+	<resultMap id="crfResultTreatmentOtherInfoMap" type="com.esuizhen.cloudservice.research.model.result.TCrfResultMainInfo" >
+		<result property="crfResultId" column="crfResultId" />
+		<result property="crfObserveId" column="crfObserveId" />
+		<result property="subjectElementId" column="subjectElementId" />
+		<result property="projectId" column="projectId" />
+		<result property="patientId" column="patientId" />
+		<result property="creatorId" column="creatorId" />
+		<result property="happenTime" column="happenTime"/>
+		<result property="crfCourseItemTime" column="crfCourseItemTime" />
+		<collection property="crfResult" javaType="ArrayList" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentOtherInfo">
+			<result property="crfTreatmentOtherResultId" column="crfTreatmentOtherResultId" />
+			<result property="crfResultTypeName" column="crfResultTypeName"/>
+			<result property="crfResultId" column="crfResultId" />
+			<result property="schemeName" column="schemeName" />
+			<result property="beginTime" column="beginTime" />
+			<result property="endTime" column="endTime" />
+			<result property="index" column="index" />
+		</collection>
+	</resultMap>
+	
+	<insert id="insertCrfResultTreatmentOther" parameterType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentOtherInfo">
+        INSERT INTO crf_result_treatment_other 
+        (
+        	crfTreatmentOtherResultId ,
+        	crfResultTypeName,
+        	crfResultId ,
+        	schemeName ,
+        	beginTime ,
+        	endTime ,
+        	`index`,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{crfTreatmentOtherResultId} ,
+        	#{crfResultTypeName},
+        	#{crfResultId} ,
+        	#{schemeName} ,
+        	#{beginTime} ,
+        	#{endTime} ,
+        	#{index} ,
+        	NOW(),
+        	NOW()
+        )
+	</insert>
+    
+    <insert id="insertCrfResultTreatmentOtherList" parameterType="java.util.List">
+        INSERT INTO crf_result_treatment_other 
+        (
+        	crfTreatmentOtherResultId ,
+        	crfResultTypeName,
+        	crfResultId ,
+        	schemeName ,
+        	beginTime ,
+        	endTime ,
+        	`index`,
+        	createTime ,
+        	updateTime 
+        ) VALUES 
+        <foreach collection="list" index="index" item="item" separator=",">
+        (
+        	#{item.crfTreatmentOtherResultId} ,
+        	#{item.crfResultTypeName},
+        	#{item.crfResultId} ,
+        	#{item.schemeName} ,
+        	#{item.beginTime} ,
+        	#{item.endTime} ,
+        	#{item.index} ,
+        	NOW(),
+        	NOW()
+        )
+        </foreach>
+	</insert>
+	
+	<update id="updateCrfResultTreatmentOther" parameterType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentOtherInfo">
+        UPDATE crf_result_treatment_other 
+        <set>
+	        <if test="crfResultId != null">
+                crfResultId = #{crfResultId} ,
+            </if>
+	        <if test="crfResultTypeName != null">
+                crfResultTypeName = #{crfResultTypeName} ,
+            </if>
+             <if test="schemeName != null">
+                schemeName = #{schemeName} ,
+            </if>
+	        <if test="beginTime != null">
+                beginTime = #{beginTime} ,
+            </if>
+	        <if test="endTime != null">
+                endTime = #{endTime} ,
+            </if>
+	        <if test="updateTime != null">
+                updateTime = NOW() ,
+            </if>
+        </set>
+        WHERE 
+	        crfTreatmentOtherResultId = #{crfTreatmentOtherResultId} 
+	</update>
+
+    <delete id="deleteCrfResultTreatmentOther">
+        DELETE FROM crf_result_treatment_other WHERE crfTreatmentOtherResultId = #{crfTreatmentOtherResultId} 
+    </delete>
+    
+    <delete id="deleteCrfResultTreatmentOtherByCrfResultId">
+        DELETE FROM crf_result_treatment_other WHERE crfResultId = #{crfResultId} 
+    </delete>
+    
+    <select id="queryCrfResultTreatmentOtherById" resultType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentOtherInfo">
+		SELECT 
+        	crfTreatmentOtherResultId,
+        	crfResultTypeName,
+        	crfResultId,
+        	schemeName,
+        	beginTime,
+        	endTime,
+        	`index`,
+        	createTime,
+        	updateTime
+		FROM crf_result_treatment_other 
+	    WHERE 
+	        crfTreatmentOtherResultId = #{crfTreatmentOtherResultId} 
+	</select>
+	
+	<select id="queryCrfResultTreatmentOtherByCrfObserveIdPatientId" resultMap="crfResultTreatmentOtherInfoMap">
+		SELECT 
+			t1.crfResultId,
+	    	t1.crfObserveId,
+	    	t1.subjectElementId,
+	    	t1.projectId,
+	    	t1.patientId,
+	    	t1.creatorId,
+        	t2.crfTreatmentOtherResultId,
+        	t2.crfResultTypeName,
+        	t2.crfResultId,
+        	t2.schemeName,
+        	t2.beginTime,
+        	t2.endTime,
+        	t2.`index`
+		FROM crf_result_main t1 , crf_result_treatment_other t2
+	    WHERE t1.crfResultId=t2.crfResultId
+	    AND t1.crfObserveId = #{crfObserveId} 
+	    AND t1.patientId = #{patientId}
+	    ORDER BY t2.`index` ASC
+	</select>
+	
+	<select id="queryCrfResultTreatmentMedicationRecord" resultType="com.esuizhen.cloudservice.research.model.result.TCrfResultMainInfo">
+		SELECT
+			f1.patientId,
+			DATE_FORMAT(f1.happenTime, '%Y-%m-01') happenTime
+		FROM(
+		    SELECT 
+				t1.crfResultId,
+		    	t1.projectId,
+		    	t1.patientId,
+		    	t1.creatorId,
+				t1.crfCourseItemTime,
+		    	t2.operationTime happenTime,
+				t4.subjectElementName crfResultTypeName,
+				t3.crfCourseItemId,
+				t5.crfObserveId,
+				t5.subjectElementId
+			FROM pro_db.crf_result_main t1 , 
+				pro_db.crf_result_treatment_operation t2, 
+				pro_db.crf_observation_subject_element t3,
+				pro_db.meta_crf_subject_element t4,
+				pro_db.crf_observation_subject_element t5
+			WHERE
+				t1.crfResultId = t2.crfResultId
+				AND t1.crfObserveId = t3.crfObserveId
+				AND t3.subjectElementId = t4.subjectElementId
+				AND t3.parentId = t5.subjectElementId
+				AND t3.crfCourseItemId = t5.crfCourseItemId
+			    AND t1.projectId = #{projectId} 
+			    AND t1.patientId = #{patientId} 
+		    
+		    UNION ALL 
+		    
+		    SELECT 
+				t1.crfResultId,
+		    	t1.projectId,
+		    	t1.patientId,
+		    	t1.creatorId,
+				t1.crfCourseItemTime,
+		    	t2.beginTime happenTime,
+				t4.subjectElementName crfResultTypeName,
+				t3.crfCourseItemId,
+				t5.crfObserveId,
+				t5.subjectElementId
+			FROM pro_db.crf_result_main t1 , 
+				pro_db.crf_result_treatment_chemotherapy t2, 
+				pro_db.crf_observation_subject_element t3,
+				pro_db.meta_crf_subject_element t4,
+				pro_db.crf_observation_subject_element t5
+			WHERE
+				t1.crfResultId = t2.crfResultId
+				AND t1.crfObserveId = t3.crfObserveId
+				AND t3.subjectElementId = t4.subjectElementId
+				AND t3.parentId = t5.subjectElementId
+				AND t3.crfCourseItemId = t5.crfCourseItemId
+			    AND t1.projectId = #{projectId} 
+			    AND t1.patientId = #{patientId} 
+		    
+		    UNION ALL 
+		    
+		    SELECT 
+				t1.crfResultId,
+		    	t1.projectId,
+		    	t1.patientId,
+		    	t1.creatorId,
+				t1.crfCourseItemTime,
+		    	t2.beginTime happenTime,
+				t4.subjectElementName crfResultTypeName,
+				t3.crfCourseItemId,
+				t5.crfObserveId,
+				t5.subjectElementId
+			FROM pro_db.crf_result_main t1 ,
+				pro_db.crf_result_treatment_radiotherapy t2,
+				pro_db.crf_observation_subject_element t3,
+				pro_db.meta_crf_subject_element t4,
+				pro_db.crf_observation_subject_element t5
+			WHERE
+				t1.crfResultId = t2.crfResultId
+				AND t1.crfObserveId = t3.crfObserveId
+				AND t3.subjectElementId = t4.subjectElementId
+				AND t3.parentId = t5.subjectElementId
+				AND t3.crfCourseItemId = t5.crfCourseItemId
+			    AND t1.projectId = #{projectId} 
+			    AND t1.patientId = #{patientId}
+		
+			UNION ALL
+			
+			SELECT
+				t1.crfResultId,
+				t1.projectId,
+				t1.patientId,
+				t1.creatorId,
+				t1.crfCourseItemTime,
+				t2.beginTime happenTime,
+				t4.subjectElementName crfResultTypeName,
+				t3.crfCourseItemId,
+				t5.crfObserveId,
+				t5.subjectElementId
+			FROM pro_db.crf_result_main t1, 
+				pro_db.crf_result_treatment_other t2, 
+				pro_db.crf_observation_subject_element t3,
+				pro_db.meta_crf_subject_element t4,
+				pro_db.crf_observation_subject_element t5
+			WHERE
+				t1.crfResultId = t2.crfResultId
+				AND t1.crfObserveId = t3.crfObserveId
+				AND t3.subjectElementId = t4.subjectElementId
+				AND t3.parentId = t5.subjectElementId
+				AND t3.crfCourseItemId = t5.crfCourseItemId
+				AND t3.subjectElementId = 'T95'
+			    AND t1.projectId = #{projectId} 
+			    AND t1.patientId = #{patientId}
+		
+			UNION ALL
+		
+			SELECT
+				t1.crfResultId,
+				t1.projectId,
+				t1.patientId,
+				t1.creatorId,
+				t1.crfCourseItemTime,
+				t2.beginTime happenTime,
+				t4.subjectElementName crfResultTypeName,
+				t3.crfCourseItemId,
+				t5.crfObserveId,
+				t5.subjectElementId
+			FROM pro_db.crf_result_main t1,
+				pro_db.crf_result_treatment_other t2,
+				pro_db.crf_observation_subject_element t3,
+				pro_db.meta_crf_subject_element t4,
+				pro_db.crf_observation_subject_element t5
+			WHERE
+				t1.crfResultId = t2.crfResultId
+				AND t1.crfObserveId = t3.crfObserveId
+				AND t3.subjectElementId = t4.subjectElementId
+				AND t3.parentId = t5.subjectElementId
+				AND t3.crfCourseItemId = t5.crfCourseItemId
+				AND t3.subjectElementId = 'T96'
+				AND t1.projectId = #{projectId} 
+			    AND t1.patientId = #{patientId}
+		
+			UNION ALL
+		
+			SELECT
+				t1.crfResultId,
+				t1.projectId,
+				t1.patientId,
+				t1.creatorId,
+				t1.crfCourseItemTime,
+				t2.beginTime happenTime,
+				t4.subjectElementName crfResultTypeName,
+				t3.crfCourseItemId,
+				t5.crfObserveId,
+				t5.subjectElementId
+			FROM pro_db.crf_result_main t1,
+				pro_db.crf_result_treatment_other t2,
+				pro_db.crf_observation_subject_element t3,
+				pro_db.meta_crf_subject_element t4,
+				pro_db.crf_observation_subject_element t5
+			WHERE
+				t1.crfResultId = t2.crfResultId
+				AND t1.crfObserveId = t3.crfObserveId
+				AND t3.subjectElementId = t4.subjectElementId
+				AND t3.parentId = t5.subjectElementId
+				AND t3.crfCourseItemId = t5.crfCourseItemId
+				AND t3.subjectElementId = 'T97'
+				AND t1.projectId = #{projectId} 
+			    AND t1.patientId = #{patientId}
+		
+			UNION ALL
+		
+			SELECT
+				t1.crfResultId,
+				t1.projectId,
+				t1.patientId,
+				t1.creatorId,
+				t1.crfCourseItemTime,
+				t2.beginTime happenTime,
+				t4.subjectElementName crfResultTypeName,
+				t3.crfCourseItemId,
+				t5.crfObserveId,
+				t5.subjectElementId
+			FROM pro_db.crf_result_main t1,
+				pro_db.crf_result_treatment_other t2,
+				pro_db.crf_observation_subject_element t3,
+				pro_db.meta_crf_subject_element t4,
+				pro_db.crf_observation_subject_element t5
+			WHERE
+				t1.crfResultId = t2.crfResultId
+				AND t1.crfObserveId = t3.crfObserveId
+				AND t3.subjectElementId = t4.subjectElementId
+				AND t3.parentId = t5.subjectElementId
+				AND t3.crfCourseItemId = t5.crfCourseItemId
+				AND t3.subjectElementId = 'T98'
+				AND t1.projectId = #{projectId} 
+			    AND t1.patientId = #{patientId}
+		
+			UNION ALL
+		
+			SELECT
+				t1.crfResultId,
+				t1.projectId,
+				t1.patientId,
+				t1.creatorId,
+				t1.crfCourseItemTime,
+				t2.beginTime happenTime,
+				t4.subjectElementName crfResultTypeName,
+				t3.crfCourseItemId,
+				t5.crfObserveId,
+				t5.subjectElementId
+			FROM pro_db.crf_result_main t1,
+				pro_db.crf_result_treatment_other t2,
+				pro_db.crf_observation_subject_element t3,
+				pro_db.meta_crf_subject_element t4,
+				pro_db.crf_observation_subject_element t5
+			WHERE
+				t1.crfResultId = t2.crfResultId
+				AND t1.crfObserveId = t3.crfObserveId
+				AND t3.subjectElementId = t4.subjectElementId
+				AND t3.parentId = t5.subjectElementId
+				AND t3.crfCourseItemId = t5.crfCourseItemId
+				AND t3.subjectElementId = 'T98'
+				AND t1.projectId = #{projectId} 
+			    AND t1.patientId = #{patientId}
+			
+			UNION ALL
+			
+				SELECT
+					t1.crfResultId,
+					t1.projectId,
+					t1.patientId,
+					t1.creatorId,
+					t1.crfCourseItemTime,
+					t2.beginTime happenTime,
+					t4.subjectElementName crfResultTypeName,
+					t3.crfCourseItemId,
+					t5.crfObserveId,
+					t5.subjectElementId
+				FROM
+					pro_db.crf_result_main t1,
+					pro_db.crf_result_treatment_other t2,
+					pro_db.crf_observation_subject_element t3,
+					pro_db.meta_crf_subject_element t4,
+					pro_db.crf_observation_subject_element t5
+				WHERE
+					t1.crfResultId = t2.crfResultId
+				AND t1.crfObserveId = t3.crfObserveId
+				AND t3.subjectElementId = t4.subjectElementId
+				AND t3.parentId = t5.subjectElementId
+				AND t3.crfCourseItemId = t5.crfCourseItemId
+				AND t3.subjectElementId = 'T99'
+				AND t1.projectId = #{projectId} 
+			    AND t1.patientId = #{patientId}
+		) f1
+		GROUP BY DATE_FORMAT(f1.happenTime, '%Y-%m')
+		ORDER BY DATE_FORMAT(f1.happenTime, '%Y-%m') DESC
+	</select>
+	
+	<select id="queryCrfResultTreatmentMedicationByHappenTime" resultType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentOtherInfo">
+		SELECT
+			*
+		FROM(
+		    SELECT 
+				t1.crfResultId,
+		    	t1.projectId,
+		    	t1.patientId,
+		    	t1.creatorId,
+				t1.crfCourseItemTime,
+		    	t2.operationTime happenTime,
+				t4.subjectElementName crfResultTypeName,
+				t3.crfCourseItemId,
+				t5.crfObserveId,
+				t5.subjectElementId
+			FROM pro_db.crf_result_main t1 , 
+				pro_db.crf_result_treatment_operation t2, 
+				pro_db.crf_observation_subject_element t3,
+				pro_db.meta_crf_subject_element t4,
+				pro_db.crf_observation_subject_element t5
+			WHERE
+				t1.crfResultId = t2.crfResultId
+				AND t1.crfObserveId = t3.crfObserveId
+				AND t3.subjectElementId = t4.subjectElementId
+				AND t3.parentId = t5.subjectElementId
+				AND t3.crfCourseItemId = t5.crfCourseItemId
+			    AND t1.projectId = #{projectId} 
+			    AND t1.patientId = #{patientId} 
+		    
+		    UNION ALL 
+		    
+		    SELECT 
+				t1.crfResultId,
+		    	t1.projectId,
+		    	t1.patientId,
+		    	t1.creatorId,
+				t1.crfCourseItemTime,
+		    	t2.beginTime happenTime,
+				t4.subjectElementName crfResultTypeName,
+				t3.crfCourseItemId,
+				t5.crfObserveId,
+				t5.subjectElementId
+			FROM pro_db.crf_result_main t1 , 
+				pro_db.crf_result_treatment_chemotherapy t2, 
+				pro_db.crf_observation_subject_element t3,
+				pro_db.meta_crf_subject_element t4,
+				pro_db.crf_observation_subject_element t5
+			WHERE
+				t1.crfResultId = t2.crfResultId
+				AND t1.crfObserveId = t3.crfObserveId
+				AND t3.subjectElementId = t4.subjectElementId
+				AND t3.parentId = t5.subjectElementId
+				AND t3.crfCourseItemId = t5.crfCourseItemId
+			    AND t1.projectId = #{projectId} 
+			    AND t1.patientId = #{patientId} 
+		    
+		    UNION ALL 
+		    
+		    SELECT 
+				t1.crfResultId,
+		    	t1.projectId,
+		    	t1.patientId,
+		    	t1.creatorId,
+				t1.crfCourseItemTime,
+		    	t2.beginTime happenTime,
+				t4.subjectElementName crfResultTypeName,
+				t3.crfCourseItemId,
+				t5.crfObserveId,
+				t5.subjectElementId
+			FROM pro_db.crf_result_main t1 ,
+				pro_db.crf_result_treatment_radiotherapy t2,
+				pro_db.crf_observation_subject_element t3,
+				pro_db.meta_crf_subject_element t4,
+				pro_db.crf_observation_subject_element t5
+			WHERE
+				t1.crfResultId = t2.crfResultId
+				AND t1.crfObserveId = t3.crfObserveId
+				AND t3.subjectElementId = t4.subjectElementId
+				AND t3.parentId = t5.subjectElementId
+				AND t3.crfCourseItemId = t5.crfCourseItemId
+			    AND t1.projectId = #{projectId} 
+			    AND t1.patientId = #{patientId}
+
+			UNION ALL
+
+			SELECT
+				t1.crfResultId,
+				t1.projectId,
+				t1.patientId,
+				t1.creatorId,
+				t1.crfCourseItemTime,
+				t2.beginTime happenTime,
+				t4.subjectElementName crfResultTypeName,
+				t3.crfCourseItemId,
+				t5.crfObserveId,
+				t5.subjectElementId
+			FROM pro_db.crf_result_main t1, 
+				pro_db.crf_result_treatment_other t2, 
+				pro_db.crf_observation_subject_element t3,
+				pro_db.meta_crf_subject_element t4,
+				pro_db.crf_observation_subject_element t5
+			WHERE
+				t1.crfResultId = t2.crfResultId
+				AND t1.crfObserveId = t3.crfObserveId
+				AND t3.subjectElementId = t4.subjectElementId
+				AND t3.parentId = t5.subjectElementId
+				AND t3.crfCourseItemId = t5.crfCourseItemId
+				AND t3.subjectElementId = 'T95'
+			    AND t1.projectId = #{projectId} 
+			    AND t1.patientId = #{patientId}
+		
+			UNION ALL
+		
+			SELECT
+				t1.crfResultId,
+				t1.projectId,
+				t1.patientId,
+				t1.creatorId,
+				t1.crfCourseItemTime,
+				t2.beginTime happenTime,
+				t4.subjectElementName crfResultTypeName,
+				t3.crfCourseItemId,
+				t5.crfObserveId,
+				t5.subjectElementId
+			FROM pro_db.crf_result_main t1,
+				pro_db.crf_result_treatment_other t2,
+				pro_db.crf_observation_subject_element t3,
+				pro_db.meta_crf_subject_element t4,
+				pro_db.crf_observation_subject_element t5
+			WHERE
+				t1.crfResultId = t2.crfResultId
+				AND t1.crfObserveId = t3.crfObserveId
+				AND t3.subjectElementId = t4.subjectElementId
+				AND t3.parentId = t5.subjectElementId
+				AND t3.crfCourseItemId = t5.crfCourseItemId
+				AND t3.subjectElementId = 'T96'
+				AND t1.projectId = #{projectId} 
+			    AND t1.patientId = #{patientId}
+		
+			UNION ALL
+		
+			SELECT
+				t1.crfResultId,
+				t1.projectId,
+				t1.patientId,
+				t1.creatorId,
+				t1.crfCourseItemTime,
+				t2.beginTime happenTime,
+				t4.subjectElementName crfResultTypeName,
+				t3.crfCourseItemId,
+				t5.crfObserveId,
+				t5.subjectElementId
+			FROM pro_db.crf_result_main t1,
+				pro_db.crf_result_treatment_other t2,
+				pro_db.crf_observation_subject_element t3,
+				pro_db.meta_crf_subject_element t4,
+				pro_db.crf_observation_subject_element t5
+			WHERE
+				t1.crfResultId = t2.crfResultId
+				AND t1.crfObserveId = t3.crfObserveId
+				AND t3.subjectElementId = t4.subjectElementId
+				AND t3.parentId = t5.subjectElementId
+				AND t3.crfCourseItemId = t5.crfCourseItemId
+				AND t3.subjectElementId = 'T97'
+				AND t1.projectId = #{projectId} 
+			    AND t1.patientId = #{patientId}
+		
+			UNION ALL
+		
+			SELECT
+				t1.crfResultId,
+				t1.projectId,
+				t1.patientId,
+				t1.creatorId,
+				t1.crfCourseItemTime,
+				t2.beginTime happenTime,
+				t4.subjectElementName crfResultTypeName,
+				t3.crfCourseItemId,
+				t5.crfObserveId,
+				t5.subjectElementId
+			FROM pro_db.crf_result_main t1,
+				pro_db.crf_result_treatment_other t2,
+				pro_db.crf_observation_subject_element t3,
+				pro_db.meta_crf_subject_element t4,
+				pro_db.crf_observation_subject_element t5
+			WHERE
+				t1.crfResultId = t2.crfResultId
+				AND t1.crfObserveId = t3.crfObserveId
+				AND t3.subjectElementId = t4.subjectElementId
+				AND t3.parentId = t5.subjectElementId
+				AND t3.crfCourseItemId = t5.crfCourseItemId
+				AND t3.subjectElementId = 'T98'
+				AND t1.projectId = #{projectId} 
+			    AND t1.patientId = #{patientId}
+		
+			UNION ALL
+		
+			SELECT
+				t1.crfResultId,
+				t1.projectId,
+				t1.patientId,
+				t1.creatorId,
+				t1.crfCourseItemTime,
+				t2.beginTime happenTime,
+				t4.subjectElementName crfResultTypeName,
+				t3.crfCourseItemId,
+				t5.crfObserveId,
+				t5.subjectElementId
+			FROM pro_db.crf_result_main t1,
+				pro_db.crf_result_treatment_other t2,
+				pro_db.crf_observation_subject_element t3,
+				pro_db.meta_crf_subject_element t4,
+				pro_db.crf_observation_subject_element t5
+			WHERE
+				t1.crfResultId = t2.crfResultId
+				AND t1.crfObserveId = t3.crfObserveId
+				AND t3.subjectElementId = t4.subjectElementId
+				AND t3.parentId = t5.subjectElementId
+				AND t3.crfCourseItemId = t5.crfCourseItemId
+				AND t3.subjectElementId = 'T98'
+				AND t1.projectId = #{projectId} 
+			    AND t1.patientId = #{patientId}
+			
+			UNION ALL
+			
+				SELECT
+					t1.crfResultId,
+					t1.projectId,
+					t1.patientId,
+					t1.creatorId,
+					t1.crfCourseItemTime,
+					t2.beginTime happenTime,
+					t4.subjectElementName crfResultTypeName,
+					t3.crfCourseItemId,
+					t5.crfObserveId,
+					t5.subjectElementId
+				FROM
+					pro_db.crf_result_main t1,
+					pro_db.crf_result_treatment_other t2,
+					pro_db.crf_observation_subject_element t3,
+					pro_db.meta_crf_subject_element t4,
+					pro_db.crf_observation_subject_element t5
+				WHERE
+					t1.crfResultId = t2.crfResultId
+				AND t1.crfObserveId = t3.crfObserveId
+				AND t3.subjectElementId = t4.subjectElementId
+				AND t3.parentId = t5.subjectElementId
+				AND t3.crfCourseItemId = t5.crfCourseItemId
+				AND t3.subjectElementId = 'T99'
+				AND t1.projectId = #{projectId} 
+			    AND t1.patientId = #{patientId}
+		   ) f1
+		WHERE DATE_FORMAT(f1.happenTime, '%Y-%m') = DATE_FORMAT(#{happenTime}, '%Y-%m')
+		GROUP BY f1.crfResultId
+		ORDER BY f1.happenTime DESC
+	</select>
+	
+	<delete id="deleteByProjectId">
+		DELETE
+			i6.*
+		FROM pro_db.crf_result_main i1,
+			pro_db.crf_observation_subject_element i2,
+			pro_db.crf_course_detail i3,
+			pro_db.crf_course i4,
+			pro_db.r_crftemplate_project i5,
+			pro_db.crf_result_treatment_other i6
+		WHERE i1.crfObserveId = i2.crfObserveId
+			AND i2.crfCourseItemId = i3.crfCourseItemId
+			AND i3.crfCourseId = i4.crfCourseId
+			AND i4.crfTemplateId = i5.crfTemplateId
+			AND i5.projectId = #{projectId}
+	</delete>
+</mapper>
+

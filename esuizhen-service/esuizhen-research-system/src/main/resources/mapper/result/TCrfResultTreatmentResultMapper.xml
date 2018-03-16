@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TCrfResultTreatmentResultDao">
+	<resultMap type="com.esuizhen.cloudservice.research.model.result.TCrfResultMainInfo" id="baseTCrfResultMainInfoCrfTreatmentResultResultMap">
+		<id column="crfResultId" property="crfResultId"/>
+		<result column="crfObserveId" property="crfObserveId"/>
+		<result column="subjectElementId" property="subjectElementId"/>
+		<result column="projectId" property="projectId"/>
+		<result column="crfCourseItemTime" property="crfCourseItemTime"/>
+		<result column="creatorId" property="creatorId"/>
+		<result column="patientId" property="patientId"/>
+		
+		<collection property="crfResult" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreantmentResultInfo">
+			<id column="crfTreantmentResultId" property="crfTreantmentResultId"/>
+			<result column="crfResultId" property="crfResultId"/>
+			<result column="fillDate" property="fillDate"/>
+			<result column="effectType" property="effectType"/>
+			<result column="happenDate" property="happenDate"/>
+			<result column="bodyPartId" property="bodyPartId"/>
+			<result column="createTime" property="createTime"/>
+			<result column="updateTime" property="updateTime"/>
+		</collection>
+	</resultMap>
+
+	<select id="findCrfResultTreatmentResultInfo" resultMap="baseTCrfResultMainInfoCrfTreatmentResultResultMap">
+		SELECT
+			t2.crfObserveId, t2.subjectElementId, t2.projectId, t2.crfCourseItemTime, t2.creatorId, t2.patientId,
+			<include refid="base_column_list"></include>
+		FROM pro_db.crf_result_treatment_result t1
+			INNER JOIN pro_db.crf_result_main t2 ON t1.crfResultId=t2.crfResultId
+			INNER JOIN pro_db.crf_observation_subject_element t3 ON t2.crfObserveId=t3.crfObserveId
+		WHERE t3.crfObserveId = #{crfObserveId} AND t2.patientId = #{patientId}
+	</select>
+	
+	<sql id="base_column_list">
+		t1.crfTreantmentResultId,
+		t1.crfResultId,
+		t1.fillDate,
+		t1.effectType,
+		t1.happenDate,
+		t1.bodyPartId,
+		t1.createTime,
+		t1.updateTime
+	</sql>
+	
+	<insert id="insert">
+		INSERT INTO pro_db.crf_result_treatment_result(
+			crfTreantmentResultId,
+			crfResultId,
+			fillDate,
+			effectType,
+			happenDate,
+			bodyPartId,
+			createTime,
+			updateTime
+		)VALUES(
+			#{crfTreantmentResultId},
+			#{crfResultId},
+			#{fillDate},
+			#{effectType},
+			#{happenDate},
+			#{bodyPartId},
+			NOW(),
+			NOW()
+		)
+	</insert>
+	
+	<delete id="deleteByCrfResultIdAndPatientId">
+		DELETE FROM pro_db.crf_result_treatment_result WHERE crfResultId = #{crfResultId}
+	</delete>
+	
+	<delete id="deleteByProjectId">
+		DELETE
+			i6.*
+		FROM pro_db.crf_result_main i1,
+			pro_db.crf_observation_subject_element i2,
+			pro_db.crf_course_detail i3,
+			pro_db.crf_course i4,
+			pro_db.r_crftemplate_project i5,
+			pro_db.crf_result_treatment_result i6
+		WHERE i1.crfObserveId = i2.crfObserveId
+			AND i2.crfCourseItemId = i3.crfCourseItemId
+			AND i3.crfCourseId = i4.crfCourseId
+			AND i4.crfTemplateId = i5.crfTemplateId
+			AND i5.projectId = #{projectId}
+	</delete>
+</mapper>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+	
+	<mapper namespace="com.esuizhen.cloudservice.ehr.dao.medical.MedicalCatalogueDao">
+	<sql id="Base_Column_List">
+		changeVersionId,
+		patientId,
+		hospitalId,
+		visitId,
+		visitType,
+		inhospitalContent,
+		diagnosisContent,
+		surgeryContent,
+		intensiveCareContent,
+		treatmentContent,
+		morbidityContent,
+		genenalExamSignsContent,
+		adverseReactionContent,
+		cardTag,
+		operator,
+		createTime
+	</sql>
+	<!-- 增加病案编目修改版本表信息 -->
+	<insert id="insertChangeVersion">
+		INSERT INTO ehr_db.emc_change_version (
+			patientId,
+			hospitalId,
+			visitId,
+			visitType,
+			inhospitalContent,
+			diagnosisContent,
+			surgeryContent,
+			intensiveCareContent,
+			treatmentContent,
+			morbidityContent,
+			genenalExamSignsContent,
+			adverseReactionContent,
+			cardTag,
+			operator,
+			createTime
+		)
+		VALUES
+			(
+				#{patientId},
+				#{hospitalId},
+				#{visitId},
+				#{visitType},
+				#{inhospitalContent},
+				#{diagnosisContent},
+				#{surgeryContent},
+				#{intensiveCareContent},
+				#{treatmentContent},
+				#{morbidityContent},
+				#{genenalExamSignsContent},
+				#{adverseReactionContent},
+				#{cardTag},
+				#{operator},
+				NOW()
+			)
+	</insert>
+	
+	<!-- 删除病案编目修改版本表信息 -->
+	<delete id="deleteChangeVersion">
+		DELETE
+		FROM
+			ehr_db.emc_change_version
+		WHERE
+			changeVersionId = #{changeVersionId}
+	</delete>
+	
+	<!-- 查询病案编目修改版本表信息 -->
+	<select id="queryChangeVersionList" resultType="com.esuizhen.cloudservice.ehr.model.medical.ChangeVersion">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			ehr_db.emc_change_version
+		<where>
+			<if test="visitId != null">
+				AND visitId=#{visitId}
+			</if>
+			<if test="patientId != null">
+				AND patientId=#{patientId}
+			</if>
+		</where>
+		<!-- 
+		<if test="startRow != null">
+			LIMIT #{startRow},#{num}
+		</if>
+		 -->
+	</select>
+	
+	<!-- 查询病案编目修改版本表信息 -->
+	<select id="queryChangeVersionInfo" resultType="com.esuizhen.cloudservice.ehr.model.medical.ChangeVersion">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			ehr_db.emc_change_version
+		WHERE
+			changeVersionId = #{changeVersionId}
+	</select>
+</mapper>

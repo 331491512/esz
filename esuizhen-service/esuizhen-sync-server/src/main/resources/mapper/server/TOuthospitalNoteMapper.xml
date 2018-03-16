@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.server.TOuthospitalNoteDao" >
+
+  <insert id="insertSelective" parameterType="com.esuizhen.server.sync.bean.server.OuthospitalNoteRes" >
+    insert into ehr_db.ei_outhospital_note
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="outhospitalId != null" >
+        outhospitalId,
+      </if>
+      <if test="inhospitalId != null" >
+        inhospitalId,
+      </if>
+      <if test="inhospitalNo != null" >
+        inhospitalNo,
+      </if>
+      <if test="inhospitalTimes != null" >
+        inhospitalTimes,
+      </if>
+      <if test="emrId != null" >
+        emrId,
+      </if>
+      <if test="patientId != null" >
+        patientId,
+      </if>
+      <if test="patientNo != null" >
+        patientNo,
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId,
+      </if>
+      <if test="inhospitalDate != null" >
+        inhospitalDate,
+      </if>
+      <if test="outhospitalDate != null" >
+        outhospitalDate,
+      </if>
+      <if test="inhospitalDays != null" >
+        inhospitalDays,
+      </if>
+      <if test="symptomSummary != null" >
+        symptomSummary,
+      </if>
+      <if test="inhospitalDiagnosis != null" >
+        inhospitalDiagnosis,
+      </if>
+      <if test="treatmentSummary != null" >
+        treatmentSummary,
+      </if>
+      <if test="outhospitalDiagnosis != null" >
+        outhospitalDiagnosis,
+      </if>
+      <if test="outhospitalDoctorAdvice != null" >
+        outhospitalDoctorAdvice,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+      <if test="updateTime != null" >
+        updateTime,
+      </if>
+      <if test="syncTime != null" >
+        syncTime,
+      </if>
+      <if test="syncFlag != null" >
+        syncFlag,
+      </if>
+      <if test="patientuuId != null" >
+        patientuuId,
+      </if>
+      <if test="mainID != null" >
+        mainID,
+      </if>
+      <if test="contentType != null" >
+        contentType,
+      </if>
+      <if test="outhospitalSummary != null" >
+        outhospitalSummary,
+      </if>
+      <if test="rawCreateTime != null" >
+        rawCreateTime,
+      </if>
+      <if test="mergeFlag != null" >
+        mergeFlag,
+      </if>
+      <if test="mergeFrom != null" >
+        mergeFrom,
+      </if>
+      <if test="mergeTarget != null" >
+        mergeTarget,
+      </if>
+      <if test="mergeTime != null" >
+        mergeTime,
+      </if>
+      <if test="mergeFromUuid != null" >
+        mergeFromUuid,
+      </if>
+      <if test="mergeTargetUuid != null" >
+        mergeTargetUuid,
+      </if>
+      <if test="tempId != null" >
+        tempId,
+      </if>
+      <if test="oldPatientNo != null" >
+        oldPatientNo,
+      </if>
+      <if test="oldInhospitalTimes != null" >
+        oldInhospitalTimes,
+      </if>
+      <if test="treatmentResult != null" >
+        treatmentResult,
+      </if>
+      <if test="summaryContent != null" >
+        summaryContent,
+      </if>
+      <if test="rawContent != null" >
+        rawContent,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="outhospitalId != null" >
+        #{outhospitalId,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalId != null" >
+        #{inhospitalId,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalNo != null" >
+        #{inhospitalNo,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalTimes != null" >
+        #{inhospitalTimes,jdbcType=INTEGER},
+      </if>
+      <if test="emrId != null" >
+        #{emrId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        #{patientNo,jdbcType=CHAR},
+      </if>
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="inhospitalDate != null" >
+        #{inhospitalDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="outhospitalDate != null" >
+        #{outhospitalDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="inhospitalDays != null" >
+        #{inhospitalDays,jdbcType=INTEGER},
+      </if>
+      <if test="symptomSummary != null" >
+        #{symptomSummary,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalDiagnosis != null" >
+        #{inhospitalDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentSummary != null" >
+        #{treatmentSummary,jdbcType=VARCHAR},
+      </if>
+      <if test="outhospitalDiagnosis != null" >
+        #{outhospitalDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="outhospitalDoctorAdvice != null" >
+        #{outhospitalDoctorAdvice,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncTime != null" >
+        #{syncTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncFlag != null" >
+        #{syncFlag,jdbcType=TINYINT},
+      </if>
+      <if test="patientuuId != null" >
+        #{patientuuId,jdbcType=VARCHAR},
+      </if>
+      <if test="mainID != null" >
+        #{mainID,jdbcType=VARCHAR},
+      </if>
+      <if test="contentType != null" >
+        #{contentType,jdbcType=INTEGER},
+      </if>
+      <if test="outhospitalSummary != null" >
+        #{outhospitalSummary,jdbcType=VARCHAR},
+      </if>
+      <if test="rawCreateTime != null" >
+        #{rawCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFlag != null" >
+        #{mergeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mergeFrom != null" >
+        #{mergeFrom,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTarget != null" >
+        #{mergeTarget,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTime != null" >
+        #{mergeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFromUuid != null" >
+        #{mergeFromUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeTargetUuid != null" >
+        #{mergeTargetUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="tempId != null" >
+        #{tempId,jdbcType=INTEGER},
+      </if>
+      <if test="oldPatientNo != null" >
+        #{oldPatientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="oldInhospitalTimes != null" >
+        #{oldInhospitalTimes,jdbcType=INTEGER},
+      </if>
+      <if test="treatmentResult != null" >
+        #{treatmentResult,jdbcType=VARCHAR},
+      </if>
+      <if test="summaryContent != null" >
+        #{summaryContent,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="rawContent != null" >
+        #{rawContent,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.server.sync.bean.server.OuthospitalNoteRes" >
+    update ehr_db.ei_outhospital_note
+    <set >
+      <if test="inhospitalId != null" >
+        inhospitalId = #{inhospitalId,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalNo != null" >
+        inhospitalNo = #{inhospitalNo,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalTimes != null" >
+        inhospitalTimes = #{inhospitalTimes,jdbcType=INTEGER},
+      </if>
+      <if test="emrId != null" >
+        emrId = #{emrId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        patientId = #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        patientNo = #{patientNo,jdbcType=CHAR},
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="inhospitalDate != null" >
+        inhospitalDate = #{inhospitalDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="outhospitalDate != null" >
+        outhospitalDate = #{outhospitalDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="inhospitalDays != null" >
+        inhospitalDays = #{inhospitalDays,jdbcType=INTEGER},
+      </if>
+      <if test="symptomSummary != null" >
+        symptomSummary = #{symptomSummary,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalDiagnosis != null" >
+        inhospitalDiagnosis = #{inhospitalDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentSummary != null" >
+        treatmentSummary = #{treatmentSummary,jdbcType=VARCHAR},
+      </if>
+      <if test="outhospitalDiagnosis != null" >
+        outhospitalDiagnosis = #{outhospitalDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="outhospitalDoctorAdvice != null" >
+        outhospitalDoctorAdvice = #{outhospitalDoctorAdvice,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncTime != null" >
+        syncTime = #{syncTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncFlag != null" >
+        syncFlag = #{syncFlag,jdbcType=TINYINT},
+      </if>
+      <if test="patientuuId != null" >
+        patientuuId = #{patientuuId,jdbcType=VARCHAR},
+      </if>
+      <if test="mainID != null" >
+        mainID = #{mainID,jdbcType=VARCHAR},
+      </if>
+      <if test="contentType != null" >
+        contentType = #{contentType,jdbcType=INTEGER},
+      </if>
+      <if test="outhospitalSummary != null" >
+        outhospitalSummary = #{outhospitalSummary,jdbcType=VARCHAR},
+      </if>
+      <if test="rawCreateTime != null" >
+        rawCreateTime = #{rawCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFlag != null" >
+        mergeFlag = #{mergeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mergeFrom != null" >
+        mergeFrom = #{mergeFrom,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTarget != null" >
+        mergeTarget = #{mergeTarget,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTime != null" >
+        mergeTime = #{mergeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFromUuid != null" >
+        mergeFromUuid = #{mergeFromUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeTargetUuid != null" >
+        mergeTargetUuid = #{mergeTargetUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="tempId != null" >
+        tempId = #{tempId,jdbcType=INTEGER},
+      </if>
+      <if test="oldPatientNo != null" >
+        oldPatientNo = #{oldPatientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="oldInhospitalTimes != null" >
+        oldInhospitalTimes = #{oldInhospitalTimes,jdbcType=INTEGER},
+      </if>
+      <if test="treatmentResult != null" >
+        treatmentResult = #{treatmentResult,jdbcType=VARCHAR},
+      </if>
+      <if test="summaryContent != null" >
+        summaryContent = #{summaryContent,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="rawContent != null" >
+        rawContent = #{rawContent,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where outhospitalId = #{outhospitalId,jdbcType=VARCHAR}
+  </update>
+</mapper>

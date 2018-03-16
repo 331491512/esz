@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.statistics.dao.StatsExportValueInfoDao">
+	<!-- 插入查询 -->
+	<insert id="insert" parameterType="com.westangel.common.bean.search.StatsExportValueInfo">
+		<selectKey resultType="long" keyProperty="id" order="AFTER">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO ods_db.var_stats_export_value(
+			exportTemplateId,
+			searchId,
+			`values`,
+			createTime
+		)VALUES(
+			#{exportTemplateId},
+			#{searchId},
+			#{values},
+			NOW()
+		)
+	</insert>
+	
+	<insert id="insertByBatch">
+		INSERT INTO ods_db.var_stats_export_value(
+			exportTemplateId,
+			searchId,
+			`values`,
+			createTime
+		)VALUES
+		<foreach collection="statsExportValueInfoes" item="item" separator=",">
+			(
+				#{item.exportTemplateId},
+				#{item.searchId},
+				#{item.values},
+				NOW()
+			)
+		</foreach>
+	</insert>
+</mapper>
+

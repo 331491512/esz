@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.server.ProcedureDao">
+	<!-- 医生信息合并 -->
+	<select id="mergeDoctorInfo" statementType="CALLABLE" parameterType="java.util.Map" resultType="java.lang.Integer">
+		<![CDATA[
+		   {
+		   	CALL user_db.merge_matchDoctor_to_targetDoctor(
+		   		#{matchDoctorId, mode=IN, jdbcType=BIGINT},
+		   		#{targetDoctorId, mode=IN, jdbcType=BIGINT},
+		   		#{mergeState, mode=OUT, jdbcType=INTEGER})
+		   }
+		]]>
+	</select>
+	<!-- 患者信息合并 -->
+	<select id="mergePatientInfo" statementType="CALLABLE" parameterType="java.util.Map" resultType="java.lang.Integer">
+		<![CDATA[
+		   {
+		   	CALL user_db.merge_matchPatient_to_targetPatient(
+		   		#{matchPatientId, mode=IN, jdbcType=BIGINT},
+		   		#{targetPatientId, mode=IN, jdbcType=BIGINT},
+		   		#{mergeState, mode=OUT, jdbcType=INTEGER})
+		   }
+		]]>
+	</select>
+</mapper>

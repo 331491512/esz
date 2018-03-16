@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.questionnaire.dao.FollowupGlobalConfigInfoDao">
+
+	<sql id="Base_Column_List">
+		followupCycle, phoneResultMustConnectFlag, otherAsValidResultFlag,autoPatientNoPaddingFlag,autoGuessDiedFlag,
+		autoPatientNoPaddingDigits, cancerFilterFlag, deathDateRequiredFlag, diseaseTypeSelfDefineFlag, isOutsideCallAuth,outsideCallNum,isIpCall,ipCallNum,hospitalId,
+		hospitalName, rolloutTime, deployTime,followupResultFlag,notMalignantTumorFlag,validResultControlFlag, createTime, updateTime,
+		PERIOD_DIFF(DATE_FORMAT(NOW(),'%Y%m'),DATE_FORMAT(rolloutTime,'%Y%m')) rolloutMonth,
+		followupRangeFlag,smsTemplateShowPatientNameFlag,deployLocation,displayFollowupTable,followupActivateSmsFlag,exportSensitiveDataFlag
+	</sql>
+
+	<select id="selectFollowupGlobalConfigInfo" resultType="com.esuizhen.cloudservice.questionnaire.model.TFollowupGlobalConfigInfo">
+		select 
+		      <include refid="Base_Column_List" />
+		from followup_db.conf_global
+	</select>
+</mapper>

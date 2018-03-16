@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.FollowupResultDao">
+	<update id="update">
+		UPDATE followup_db.followup_result
+		<set>
+			patientId=#{cloudPatientId},
+			updateTime=NOW()
+		</set> 
+		WHERE patientId=#{tobPatientId}
+	</update>
+	
+	<update id="setVarPatientFollowupDeath">
+		UPDATE followup_db.var_patient_followup
+		<set>
+			followupState=2,
+			updateTime=NOW()
+		</set> 
+		WHERE patientId=#{patientId}
+	</update>
+</mapper>

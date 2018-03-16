@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.crf.TCrfAdverseReactionInfoDao">
+
+	<insert id="insertCrfObservationAdverseReactionOptions" parameterType="com.esuizhen.cloudservice.research.model.crf.TCrfAdverseReactionInfo">
+        INSERT INTO crf_observation_adverse_reaction_options (
+        	crfObserveItemId ,
+        	crfObserveId ,
+        	subjectElementId ,
+        	adverseReactionId ,
+        	`index`,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{crfObserveItemId} ,
+        	#{crfObserveId} ,
+        	#{subjectElementId} ,
+        	#{adverseReactionId} ,
+        	#{index} ,
+        	NOW() ,
+        	NOW() 
+        )
+	</insert>
+    
+    <insert id="insertCrfObservationAdverseReactionOptionsList" parameterType="java.util.List">
+        INSERT INTO crf_observation_adverse_reaction_options 
+        (
+        	crfObserveItemId ,
+        	crfObserveId ,
+        	subjectElementId ,
+        	adverseReactionId ,
+        	`index`,
+        	createTime ,
+        	updateTime 
+        ) VALUES 
+        <foreach collection="list" item="item" index="index" separator=",">
+        (
+        	#{item.crfObserveItemId} ,
+        	#{item.crfObserveId} ,
+        	#{item.subjectElementId} ,
+        	#{item.adverseReactionId} ,
+        	#{item.index} ,
+        	NOW() ,
+        	NOW() 
+        )
+        </foreach>
+        
+	</insert>
+	
+	<update id="updateCrfObservationAdverseReactionOptions" parameterType="com.esuizhen.cloudservice.research.model.crf.TCrfAdverseReactionInfo">
+        UPDATE crf_observation_adverse_reaction_options 
+        <set>
+	        <if test="crfObserveId != null">
+                crfObserveId = #{crfObserveId} ,
+            </if>
+	        <if test="subjectElementId != null">
+                subjectElementId = #{subjectElementId} ,
+            </if>
+	        <if test="adverseReactionId != null">
+                adverseReactionId = #{adverseReactionId} ,
+            </if>
+	        <if test="1==1">
+                updateTime = NOW() ,
+            </if>
+        </set>
+        WHERE 
+	        crfObserveItemId = #{crfObserveItemId} 
+	</update>
+
+    <delete id="deleteCrfObservationAdverseReactionOptions">
+        DELETE FROM crf_observation_adverse_reaction_options WHERE crfObserveItemId = #{crfObserveItemId} 
+    </delete>
+    
+    <delete id="deleteCrfObservationAdverseReactionOptionsByCrfObserveId">
+        DELETE FROM crf_observation_adverse_reaction_options WHERE crfObserveId = #{crfObserveId} 
+    </delete>
+    
+    <select id="queryCrfObservationAdverseReactionOptionsById" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfAdverseReactionInfo">
+		SELECT 
+        	crfObserveItemId,
+        	crfObserveId,
+        	subjectElementId,
+        	adverseReactionId,
+        	createTime,
+        	updateTime
+		FROM crf_observation_adverse_reaction_options 
+	    WHERE 
+	        crfObserveItemId = #{crfObserveItemId}
+	    ORDER BY `index` ASC  
+	</select>
+	
+	<select id="queryCrfObservationAdverseReactionOptionsByCrfObserveId" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfAdverseReactionInfo">
+		SELECT 
+        	crfObserveItemId,
+        	crfObserveId,
+        	subjectElementId,
+        	adverseReactionId,
+        	createTime,
+        	updateTime
+		FROM crf_observation_adverse_reaction_options 
+	    WHERE 
+	        crfObserveId = #{crfObserveId}
+	    ORDER BY `index` ASC
+	</select>
+	
+</mapper>
+

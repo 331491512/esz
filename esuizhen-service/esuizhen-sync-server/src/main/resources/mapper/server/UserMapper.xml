@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.server.UserDao">
+	<insert id="insertUser">
+		<selectKey resultType="long" keyProperty="userId" order="AFTER">
+			SELECT LAST_INSERT_ID() as userId
+		</selectKey>
+		INSERT INTO user_db.u_user(
+		uuid,userName,role,accountType,infoState,trueName,createTime,firstLoginTime,updateTime,
+		cryptPasswd,nickName,mobile,sex,birthDate,userPictureUrl,email,nationId,nation,nationalityId,
+		country,cityId,cityCode,city,address,nativePlace,birthPlaceCode,birthPlaceAddress,rawOccupationId,rawProfession,occupationId,
+		profession,company,idType,identification,marriageStatus,signature,education,school,interest,
+		idFileUrl,state,subroles,points,lastLoginTime,sourceFlag,userFlag,migrateFlag,
+		lastLogoutTime,appFlag,weixinFlag,pcFlag,tobFlag,patientNo,clinicNo,staffNo,companyTel,
+		comZipCode,rawCreateTime,mergeFlag,mergeFromUuid,mergeTargetUuid,mergeTime
+		)VALUES(
+		#{uuid},#{userName},#{role},#{accountType},#{infoState},#{trueName},#{createTime},#{firstLoginTime},#{updateTime},
+		#{cryptPasswd},#{nickName},#{mobile},#{sex},#{birthDate},#{userPictureUrl},#{email},#{nationId},#{nation},#{nationalityId},
+		#{country},#{cityId},#{cityCode},#{city},#{address},#{nativePlace},#{birthPlaceCode},#{birthPlaceAddress},#{rawOccupationId},#{rawProfession},#{occupationId},
+		#{profession},#{company},#{idType},#{identification},#{marriageStatus},#{signature},#{education},#{school},#{interest},
+		#{idFileUrl},#{state},#{subroles},#{points},#{lastLoginTime},#{sourceFlag},#{userFlag},#{migrateFlag},
+		#{lastLogoutTime},#{appFlag},#{weixinFlag},#{pcFlag},#{tobFlag},#{patientNo},#{clinicNo},#{staffNo},#{companyTel},
+		#{comZipCode},#{rawCreateTime},#{mergeFlag},#{mergeFromUuid},#{mergeTargetUuid},#{mergeTime}
+		)
+	</insert>
+
+	<select id="queryUser" resultType="com.esuizhen.server.sync.model.server.User">
+		SELECT
+		t1.userId,t1.uuid,t1.syncFlag,t1.userName,t1.cryptPasswd,t1.trueName,t1.nickName,t1.mobile,t1.sex,t1.birthDate,t1.email,t1.nation,t1.country,t1.cityCode,
+		t1.city,t1.cityId,t1.address,t1.nativePlace,t1.profession,t1.company,t1.companyTel,t1.comZipCode,t1.idType,t1.identification,
+		t1.marriageStatus,t1.education,t1.school,t1.interest,t1.idFileUrl,t1.accountType,t1.infoState,t1.createTime,t1.updateTime,
+		t1.sourceFlag,t1.birthPlaceCode,t1.birthPlaceAddress,t1.rawOccupationId,t1.rawProfession,t1.nationId,t1.nationalityId,t1.occupationId,t1.staffNo,t1.state,
+		t1.appFlag,t1.weixinFlag,t1.pcFlag,t1.tobFlag,
+		t1.rawCreateTime,t1.patientNo,t1.clinicNo,t1.mergeFlag,t1.mergeFrom,t1.mergeFromUuid,t1.mergeTarget,t1.mergeTargetUuid
+		FROM user_db.u_user t1
+		<if test="auditState!=null">
+			JOIN user_db.u_patient t2 ON t1.userId=t2.userId
+		</if>
+		<where>
+			<if test="idType!=null">
+				AND t1.idType=#{idType}
+			</if>
+			<if test="identification!=null">
+				AND t1.identification=#{identification}
+			</if>
+			<if test="role!=null">
+				AND t1.role=#{role}
+			</if>
+			<if test="auditState!=null">
+				AND t2.auditState=#{auditState}
+			</if>
+			<if test="mobile!=null">
+				AND t1.mobile =#{mobile}
+			</if>
+			<if test="userId!=null">
+				AND t1.userId = #{userId}
+			</if>
+			<if test="uuid!=null">
+				AND t1.uuid = #{uuid}
+			</if>
+			<if test="accountTypeFlag!=null">
+				<![CDATA[AND t1.accountType>0]]>
+				AND t1.tobFlag!=1
+			</if>
+		</where>
+	</select>
+
+	<update id="update">
+		update user_db.u_user
+		<set>
+			<if test="uuid!=null">
+				uuid=#{uuid},
+			</if>
+			<if test="userName!=null">
+				userName=#{userName},
+			</if>
+			<if test="accountType!=null">
+				accountType=#{accountType},
+			</if>
+			<if test="infoState!=null">
+				infoState=#{infoState},
+			</if>
+			<if test="trueName!=null">
+				trueName=#{trueName},
+			</if>
+			<if test="createTime!=null">
+				createTime=#{createTime},
+			</if>
+			<if test="firstLoginTime!=null">
+				firstLoginTime=#{firstLoginTime},
+			</if>
+			<if test="updateTime!=null">
+				updateTime=#{updateTime},
+			</if>
+			<if test="cryptPasswd!=null">
+				cryptPasswd=#{cryptPasswd},
+			</if>
+			<if test="nickName!=null">
+				nickName=#{nickName},
+			</if>
+			<if test="mobile!=null">
+				mobile=#{mobile},
+			</if>
+			<if test="sex!=null">
+				sex=#{sex},
+			</if>
+			<if test="birthDate!=null">
+				birthDate=#{birthDate},
+			</if>
+			<if test="userPictureUrl!=null">
+				userPictureUrl=#{userPictureUrl},
+			</if>
+			<if test="email!=null">
+				email=#{email},
+			</if>
+			<if test="nationId!=null">
+				nationId=#{nationId},
+			</if>
+			<if test="nation!=null">
+				nation=#{nation},
+			</if>
+			<if test="nationalityId!=null">
+				nationalityId=#{nationalityId},
+			</if>
+			<if test="country!=null">
+				country=#{country},
+			</if>
+			<if test="cityId!=null">
+				cityId=#{cityId},
+			</if>
+			<if test="cityCode!=null">
+				cityCode=#{cityCode},
+			</if>
+			<if test="city!=null">
+				city=#{city},
+			</if>
+			<if test="address!=null">
+				address=#{address},
+			</if>
+			<if test="nativePlace!=null">
+				nativePlace=#{nativePlace},
+			</if>
+			<if test="birthPlaceCode!=null">
+				birthPlaceCode=#{birthPlaceCode},
+			</if>
+			<if test="birthPlaceAddress!=null">
+				birthPlaceAddress=#{birthPlaceAddress},
+			</if>
+			<if test="rawOccupationId!=null">
+				rawOccupationId=#{rawOccupationId},
+			</if>
+			<if test="rawProfession!=null">
+				rawProfession=#{rawProfession},
+			</if>
+			<if test="occupationId!=null">
+				occupationId=#{occupationId},
+			</if>
+			<if test="profession!=null">
+				profession=#{profession},
+			</if>
+			<if test="company!=null">
+				company=#{company},
+			</if>
+			<if test="idType!=null">
+				idType=#{idType},
+			</if>
+			<if test="identification!=null">
+				identification=#{identification},
+			</if>
+			<if test="marriageStatus!=null">
+				marriageStatus=#{marriageStatus},
+			</if>
+			<if test="signature!=null">
+				signature=#{signature},
+			</if>
+			<if test="education!=null">
+				education=#{education},
+			</if>
+			<if test="school!=null">
+				school=#{school},
+			</if>
+			<if test="interest!=null">
+				interest=#{interest},
+			</if>
+			<if test="idFileUrl!=null">
+				idFileUrl=#{idFileUrl},
+			</if>
+			<if test="state!=null">
+				state=#{state},
+			</if>
+			<if test="subroles!=null">
+				subroles=#{subroles},
+			</if>
+			<if test="points!=null">
+				points=#{points},
+			</if>
+			<if test="lastLoginTime!=null">
+				lastLoginTime=#{lastLoginTime},
+			</if>
+			<if test="sourceFlag!=null">
+				sourceFlag=#{sourceFlag},
+			</if>
+			<if test="userFlag!=null">
+				userFlag=#{userFlag},
+			</if>
+			<if test="migrateFlag!=null">
+				migrateFlag=#{migrateFlag},
+			</if>
+			<if test="lastLogoutTime!=null">
+				lastLogoutTime=#{lastLogoutTime},
+			</if>
+			<if test="appFlag!=null">
+				appFlag=#{appFlag},
+			</if>
+			<if test="weixinFlag!=null">
+				weixinFlag=#{weixinFlag},
+			</if>
+			<if test="pcFlag!=null">
+				pcFlag=#{pcFlag},
+			</if>
+			<if test="tobFlag!=null">
+				tobFlag=#{tobFlag},
+			</if>
+			<if test="patientNo!=null">
+				patientNo=#{patientNo},
+			</if>
+			<if test="clinicNo!=null">
+				clinicNo=#{clinicNo},
+			</if>
+			<if test="staffNo!=null">
+				staffNo=#{staffNo},
+			</if>
+			<if test="companyTel!=null">
+				companyTel=#{companyTel},
+			</if>
+			<if test="comZipCode!=null">
+				comZipCode=#{comZipCode},
+			</if>
+			<if test="rawCreateTime!=null">
+				rawCreateTime=#{rawCreateTime},
+			</if>
+			<if test="mergeFlag!=null">
+				mergeFlag=#{mergeFlag},
+			</if>
+			<if test="mergeFromUuid!=null">
+				mergeFromUuid=#{mergeFromUuid},
+			</if>
+			<if test="mergeTargetUuid!=null">
+				mergeTargetUuid=#{mergeTargetUuid},
+			</if>
+			<if test="mergeTime!=null">
+				mergeTime=#{mergeTime},
+			</if>
+		</set>
+		where userId = #{userId}
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM user_db.u_user 
+		WHERE userId = #{userId}
+	</delete>
+</mapper>

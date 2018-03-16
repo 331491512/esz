@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.medicalRecord.ExamReportDetailDao" >
+  <resultMap id="BaseResultMap" type="com.esuizhen.cloudservice.ehr.model.medicalRecord.ExamReportDetail" >
+    <id column="examReportDetailId" property="examReportDetailId" jdbcType="VARCHAR" />
+    <result column="examReportId" property="examReportId" jdbcType="VARCHAR" />
+    <result column="seqNo" property="seqNo" jdbcType="INTEGER" />
+    <result column="organCode" property="organCode" jdbcType="VARCHAR" />
+    <result column="organ" property="organ" jdbcType="VARCHAR" />
+    <result column="nidusCode" property="nidusCode" jdbcType="VARCHAR" />
+    <result column="nidus" property="nidus" jdbcType="VARCHAR" />
+    <result column="nidusSourceFlag" property="nidusSourceFlag" jdbcType="INTEGER" />
+    <result column="longestDiameter" property="longestDiameter" jdbcType="REAL" />
+    <result column="shortestDiameter" property="shortestDiameter" jdbcType="REAL" />
+    <result column="flag" property="flag" jdbcType="INTEGER" />
+    <result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    examReportDetailId, examReportId, seqNo, organCode, organ, nidusCode, nidus, nidusSourceFlag, 
+    longestDiameter, shortestDiameter, flag, createTime, updateTime
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from lis_db.eci_exam_report_detail
+    where examReportDetailId = #{examReportDetailId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from lis_db.eci_exam_report_detail
+    where examReportDetailId = #{examReportDetailId,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExamReportId" parameterType="java.lang.String" >
+    delete from lis_db.eci_exam_report_detail
+    where examReportId = #{examReportId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.ExamReportDetail" >
+    insert into lis_db.eci_exam_report_detail (examReportDetailId, examReportId, 
+      seqNo, organCode, organ, 
+      nidusCode, nidus, nidusSourceFlag, 
+      longestDiameter, shortestDiameter, flag, 
+      createTime, updateTime)
+    values (#{examReportDetailId,jdbcType=VARCHAR}, #{examReportId,jdbcType=VARCHAR}, 
+      #{seqNo,jdbcType=INTEGER}, #{organCode,jdbcType=VARCHAR}, #{organ,jdbcType=VARCHAR}, 
+      #{nidusCode,jdbcType=VARCHAR}, #{nidus,jdbcType=VARCHAR}, #{nidusSourceFlag,jdbcType=INTEGER}, 
+      #{longestDiameter,jdbcType=REAL}, #{shortestDiameter,jdbcType=REAL}, #{flag,jdbcType=INTEGER}, 
+      now(), now())
+  </insert>
+  <insert id="insertSelective" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.ExamReportDetail" >
+    insert into lis_db.eci_exam_report_detail
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="examReportDetailId != null" >
+        examReportDetailId,
+      </if>
+      <if test="examReportId != null" >
+        examReportId,
+      </if>
+      <if test="seqNo != null" >
+        seqNo,
+      </if>
+      <if test="organCode != null" >
+        organCode,
+      </if>
+      <if test="organ != null" >
+        organ,
+      </if>
+      <if test="nidusCode != null" >
+        nidusCode,
+      </if>
+      <if test="nidus != null" >
+        nidus,
+      </if>
+      <if test="nidusSourceFlag != null" >
+        nidusSourceFlag,
+      </if>
+      <if test="longestDiameter != null" >
+        longestDiameter,
+      </if>
+      <if test="shortestDiameter != null" >
+        shortestDiameter,
+      </if>
+      <if test="flag != null" >
+        flag,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+        updateTime,
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="examReportDetailId != null" >
+        #{examReportDetailId,jdbcType=VARCHAR},
+      </if>
+      <if test="examReportId != null" >
+        #{examReportId,jdbcType=VARCHAR},
+      </if>
+      <if test="seqNo != null" >
+        #{seqNo,jdbcType=INTEGER},
+      </if>
+      <if test="organCode != null" >
+        #{organCode,jdbcType=VARCHAR},
+      </if>
+      <if test="organ != null" >
+        #{organ,jdbcType=VARCHAR},
+      </if>
+      <if test="nidusCode != null" >
+        #{nidusCode,jdbcType=VARCHAR},
+      </if>
+      <if test="nidus != null" >
+        #{nidus,jdbcType=VARCHAR},
+      </if>
+      <if test="nidusSourceFlag != null" >
+        #{nidusSourceFlag,jdbcType=INTEGER},
+      </if>
+      <if test="longestDiameter != null" >
+        #{longestDiameter,jdbcType=REAL},
+      </if>
+      <if test="shortestDiameter != null" >
+        #{shortestDiameter,jdbcType=REAL},
+      </if>
+      <if test="flag != null" >
+        #{flag,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+        now()
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.ExamReportDetail" >
+    update lis_db.eci_exam_report_detail
+    <set >
+      <if test="examReportId != null" >
+        examReportId = #{examReportId,jdbcType=VARCHAR},
+      </if>
+      <if test="seqNo != null" >
+        seqNo = #{seqNo,jdbcType=INTEGER},
+      </if>
+      <if test="organCode != null" >
+        organCode = #{organCode,jdbcType=VARCHAR},
+      </if>
+      <if test="organ != null" >
+        organ = #{organ,jdbcType=VARCHAR},
+      </if>
+      <if test="nidusCode != null" >
+        nidusCode = #{nidusCode,jdbcType=VARCHAR},
+      </if>
+      <if test="nidus != null" >
+        nidus = #{nidus,jdbcType=VARCHAR},
+      </if>
+      <if test="nidusSourceFlag != null" >
+        nidusSourceFlag = #{nidusSourceFlag,jdbcType=INTEGER},
+      </if>
+      <if test="longestDiameter != null" >
+        longestDiameter = #{longestDiameter,jdbcType=REAL},
+      </if>
+      <if test="shortestDiameter != null" >
+        shortestDiameter = #{shortestDiameter,jdbcType=REAL},
+      </if>
+      <if test="flag != null" >
+        flag = #{flag,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where examReportDetailId = #{examReportDetailId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.ExamReportDetail" >
+    update lis_db.eci_exam_report_detail
+    set examReportId = #{examReportId,jdbcType=VARCHAR},
+      seqNo = #{seqNo,jdbcType=INTEGER},
+      organCode = #{organCode,jdbcType=VARCHAR},
+      organ = #{organ,jdbcType=VARCHAR},
+      nidusCode = #{nidusCode,jdbcType=VARCHAR},
+      nidus = #{nidus,jdbcType=VARCHAR},
+      nidusSourceFlag = #{nidusSourceFlag,jdbcType=INTEGER},
+      longestDiameter = #{longestDiameter,jdbcType=REAL},
+      shortestDiameter = #{shortestDiameter,jdbcType=REAL},
+      flag = #{flag,jdbcType=INTEGER},
+      createTime = #{createTime,jdbcType=TIMESTAMP},
+      updateTime = now()
+    where examReportDetailId = #{examReportDetailId,jdbcType=VARCHAR}
+  </update>
+</mapper>

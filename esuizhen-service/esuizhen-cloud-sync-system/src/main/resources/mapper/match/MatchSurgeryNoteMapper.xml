@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_match_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.match.MatchSurgeryNoteDao" >
+	<sql id="base_column_list">
+		t1.surgeryId, t1.emrId, t1.patientUuid, t1.patientNo, t1.hospitalId, t1.deptUuid, t1.bedNo, t1.surgeryName,
+		t1.surgeryDoctorUuid, t1.surgeryAssistant1Uuid, t1.surgeryAssistant2Uuid, t1.surgeryDate,t1.inhospitalId,
+		t1.surgeryBeginTime, t1.surgeryEndTime, 
+		t1.incisionGroup,
+		t1.incisionHealLevel,
+		t1.rawAnesthesiaWayId,
+		t1.anesthesiaWayId,
+		t1.anesthesiaDoctorUuid, t1.anesthesiaWay, t1.preOperativeDiagnosis, 
+		t1.inOperativeDiagnosis, t1.bodyPosture, t1.transfusion, t1.surgeryNurses, t1.operativeApproach, t1.operativeProbe,
+		t1.operativeMeasures, t1.operativeSituation, t1.woundClosureWay, t1.opCode, t1.incisionBandagedWay, t1.remark, t1.createTime, t1.updateTime
+	</sql>
+	
+	<select id="findByPatientUuid" resultType="com.esuizhen.cloudservice.sync.bean.TPatientSurgeryNoteDetailInfo" parameterType="java.lang.String">
+		SELECT <include refid="base_column_list"></include> FROM cloud_sync_match_db.eci_surgery_note t1
+		WHERE t1.patientUuid=#{patientUuid,jdbcType=VARCHAR}
+	</select>
+	
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.sync.model.SurgeryNote" >
+		INSERT INTO cloud_sync_match_db.eci_surgery_note(
+			surgeryId, 
+			emrId, 
+			patientUuid, 
+			patientNo, 
+			hospitalId,
+			deptUuid, 
+			bedNo, 
+			surgeryName, 
+			surgeryDoctorUuid, 
+			surgeryAssistant1Uuid, 
+			surgeryAssistant2Uuid, 
+			surgeryDate,
+			surgeryBeginTime, 
+			surgeryEndTime,
+			incisionGroup,
+			incisionHealLevel,
+			rawAnesthesiaWayId,
+			anesthesiaWayId,
+			anesthesiaDoctorUuid,
+			anesthesiaWay, 
+			preOperativeDiagnosis, 
+			inOperativeDiagnosis,
+			bodyPosture, 
+			transfusion, 
+			surgeryNurses, 
+			operativeApproach, 
+			operativeProbe, 
+			operativeMeasures, 
+			operativeSituation,
+			opCode, 
+			woundClosureWay, 
+			incisionBandagedWay, 
+			remark,
+			inhospitalId,
+			createTime, 
+			updateTime,syncTime,
+			mainID,inhospitalTimes,opLevel,surgeryDoctorName,surgeryAssistant1Name,
+			surgeryAssistant2Name,anesthesiaDoctorName,incisionHealingId,incisionHealing,
+			treatmentSchemeId,treatmentSchemeName,rawCreateTime
+		)VALUES(
+			#{surgeryId,jdbcType=VARCHAR},
+			#{emrId,jdbcType=VARCHAR},
+			#{patientUuid,jdbcType=VARCHAR},
+			#{patientNo,jdbcType=VARCHAR},
+			#{hospitalId,jdbcType=INTEGER},
+			#{deptUuid,jdbcType=VARCHAR},
+			#{bedNo,jdbcType=VARCHAR},
+			#{surgeryName,jdbcType=VARCHAR},
+			#{surgeryDoctorUuid,jdbcType=VARCHAR},
+			#{surgeryAssistant1Uuid,jdbcType=VARCHAR},
+			#{surgeryAssistant2Uuid,jdbcType=VARCHAR},
+			#{surgeryDate,jdbcType=TIMESTAMP},
+			#{surgeryBeginTime,jdbcType=TIMESTAMP},
+			#{surgeryEndTime,jdbcType=TIMESTAMP},
+			#{incisionGroup,jdbcType=INTEGER},
+			#{incisionHealLevel,jdbcType=INTEGER},
+			#{rawAnesthesiaWayId,jdbcType=INTEGER},
+			#{anesthesiaWayId,jdbcType=INTEGER},
+			#{anesthesiaDoctorUuid,jdbcType=VARCHAR},
+			#{anesthesiaWay,jdbcType=VARCHAR},
+			#{preOperativeDiagnosis,jdbcType=VARCHAR},
+			#{inOperativeDiagnosis,jdbcType=VARCHAR},
+			#{bodyPosture,jdbcType=VARCHAR},
+			#{transfusion,jdbcType=INTEGER},
+			#{surgeryNurses,jdbcType=VARCHAR},
+			#{operativeApproach,jdbcType=VARCHAR},
+			#{operativeProbe,jdbcType=VARCHAR},
+			#{operativeMeasures,jdbcType=VARCHAR},
+			#{operativeSituation,jdbcType=VARCHAR},
+			#{opCode},
+			#{woundClosureWay,jdbcType=VARCHAR},
+			#{incisionBandagedWay,jdbcType=VARCHAR},
+			#{remark,jdbcType=VARCHAR},
+			#{inhospitalId},
+			#{createTime}, 
+			#{updateTime},NOW(),
+			#{mainID},#{inhospitalTimes},#{opLevel},#{surgeryDoctorName},#{surgeryAssistant1Name},
+			#{surgeryAssistant2Name},#{anesthesiaDoctorName},#{incisionLevel},#{incisionHeal},
+			#{curePlan},#{treatmentSchemeName},#{rawCreateTime}
+		)
+	 </insert>
+	 
+	 <update id="updatePatientUuid">
+	 	UPDATE cloud_sync_match_db.eci_surgery_note
+	 	<set>
+	 		<if test="uuidFinal != null">
+	 			patientUuid=#{uuidFinal,jdbcType=VARCHAR}
+	 		</if>
+	 	</set>
+	 	WHERE patientUuid IN
+		(
+			<foreach collection="uuidRelationships" item="uuidRelationship" index="index" separator=",">
+				#{uuidRelationship.uuid,jdbcType=VARCHAR}
+			</foreach>
+		)
+	 </update>
+	 
+	 <delete id="delete" parameterType="java.lang.String">
+	 	DELETE FROM cloud_sync_match_db.eci_surgery_note WHERE surgeryId=#{surgeryId}
+	 </delete>
+</mapper>

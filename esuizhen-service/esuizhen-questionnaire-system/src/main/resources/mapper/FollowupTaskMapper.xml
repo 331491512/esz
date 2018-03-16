@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.questionnaire.dao.FollowupTaskDao">
+    <!-- 查询随访任务详情-患者列表 -->
+	<select id="queryFollowupTaskPatientList"
+		parameterType="com.esuizhen.cloudservice.questionnaire.bean.FollowupMsgSendReq"
+		resultType="java.util.HashMap">
+		SELECT
+			t2.uuid,
+			t2.patientId,
+			t2.trueName
+		FROM followup_db.r_followup_task_patient t1
+			JOIN user_db.u_patient t2 on t1.patientId=t2.patientId
+			JOIN user_db.u_user u ON u.userId=t2.userId
+			JOIN followup_db.followup_task task ON t1.followupTaskId=task.followupTaskId
+			LEFT JOIN followup_db.followup_result t3 on t1.patientId=t3.patientId AND t1.followupTaskId=t3.followupTaskId
+			LEFT JOIN user_db.u_patient_family t4 on t1.patientId=t4.patientId
+		WHERE
+			t1.followupTaskId=#{taskId}
+			and t1.mergeFlag!=2
+			AND task.state in(0,1)
+		<if test="assignId != null">
+			AND t1.followupAssignId=#{assignId}
+		</if>
+		<if test="patientNo != null">
+			<bind name="patternPatientNo" value="'%' + patientNo + '%'" />
+			and (
+ 				exists(
+  				select pn.patientId from user_db.r_uuid_patientno pn where pn.patientId=t2.patientId 
+  				and (
+  					pn.patientNo LIKE #{patternPatientNo}
+  				) 
+ 				) 
+ 				or t2.patientNo LIKE #{patternPatientNo}
+	 		)
+		</if>
+		<if test="patientTrueName!=null">
+			<bind name="pattern" value="'%' + patientTrueName + '%'" />
+			AND t2.trueName LIKE #{pattern}
+		</if>
+		<if test="sourceDiagnosis!=null">
+			<bind name="pattern2" value="'%' + sourceDiagnosis + '%'" />
+			AND t2.sourceDiagnosis LIKE #{pattern2}
+		</if>
+		<if test="followupResultValue != null and followupResultValue.size() > 0">
+			and t3.followupResultValue in
+	   		<foreach collection="followupResultValue" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+		<if test="state != null and state.size() > 0">
+			and t1.state in
+	   		<foreach collection="state" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+			</foreach>
+		</if>
+		<if test="phone != null">
+			<bind name="patternPhone" value="'%' + phone + '%'" />
+			AND (t4.familyPhone LIKE #{patternPhone} OR t3.followupResultPhone LIKE #{patternPhone})
+		</if>
+		<if test="nationIdStr != null">
+			AND u.nationId IN (${nationIdStr})
+		</if>
+		<if test="sourceDiseaseTypeIdStr != null">
+			AND t2.sourceDiseaseTypeId IN (${sourceDiseaseTypeIdStr})
+		</if>
+		GROUP BY t1.patientId
+	</select>
+	
+	<select id="queryUserByFollowupTaskId" resultType="java.util.HashMap">
+		SELECT t1.operator,t3.userRole FROM followup_db.r_followup_task_assign t1
+		LEFT JOIN user_db.u_doctor t2 ON t1.operator=t2.doctorId
+		LEFT JOIN user_db.r_user_role t3 ON t2.userId=t3.userId
+		WHERE t1.followupTaskId=#{followupTaskId}
+		LIMIT 1
+	</select>
+	
+	<update id="updateFollowupTaskPatient">
+		UPDATE followup_db.r_followup_task_patient SET 
+		<if test="questionnaireReqId != null">
+			questionnaireReqId=#{questionnaireReqId},
+		</if>
+		<if test="questionnaireState != null">
+			questionnaireState=#{questionnaireState},
+		</if>
+		updateTime=now()
+		WHERE followupTaskId=#{followupTaskId} AND patientId=#{patientId}
+	</update>
+</mapper>

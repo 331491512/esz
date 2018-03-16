@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_match_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.match.MatchClinicMedicalNoteDao" >
+	<select id="findByPatientUuid" resultType="com.esuizhen.cloudservice.sync.bean.TClinicMedicalNoteInfo">
+		SELECT
+			t1.clinicMedicalId,
+			t1.emrId,
+			t1.clinicNo,
+			t1.patientId,
+			t1.patientUuid,
+			t1.patientNo,
+			healthCardNo,
+			patientName,
+			patientIdno,
+			patientAddress,
+			patientMobile,
+			patientSex,
+			patientBirth,
+			patientAge,
+			deptId,
+			deptUuid,
+			deptName,
+			t1.hospitalId,
+			t1.symptomSummary,
+			t1.diagnosis,
+			t1.diseaseCode,
+			t1.remark,
+			t1.clinicDoctor,
+			t1.clinicDoctorUuid,
+			attendingDoctorId,
+			attendingDoctoruuId,
+			t1.visitTimes,
+			t1.visitTime,
+			t1.createTime,
+			t1.updateTime,
+			t1.syncFlag,
+			t1.syncTime,t1.rawCreateTime
+		FROM cloud_sync_match_db.ec_clinic_medical_note t1
+		WHERE t1.patientUuid = #{patientUuid}
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cloud_sync_match_db.ec_clinic_medical_note(
+			clinicMedicalId,
+			emrId,
+			clinicNo,
+			patientId,
+			patientUuid,
+			patientNo,
+			healthCardNo,
+			patientName,
+			patientIdno,
+			patientAddress,
+			patientMobile,
+			patientSex,
+			patientBirth,
+			patientAge,
+			deptId,
+			deptUuid,
+			deptName,
+			hospitalId,
+			symptomSummary,
+			diagnosis,
+			diseaseCode,
+			remark,
+			clinicDoctor,
+			clinicDoctorUuid,
+			attendingDoctorId,
+			attendingDoctoruuId,
+			visitTimes,
+			visitTime,
+			createTime,
+			updateTime,
+			syncFlag,
+			syncTime,rawCreateTime
+		)VALUES(
+			#{clinicMedicalId},
+			#{emrId},
+			#{clinicNo},
+			#{patientId},
+			#{patientUuid},
+			#{patientNo},
+			#{healthCardNo},
+			#{patientName},
+			#{patientIdno},
+			#{patientAddress},
+			#{patientMobile},
+			#{patientSex},
+			#{patientBirth},
+			#{patientAge},
+			#{deptId},
+			#{deptUuid},
+			#{deptName},
+			#{hospitalId},
+			#{symptomSummary},
+			#{diagnosis},
+			#{diseaseCode},
+			#{remark},
+			#{clinicDoctor},
+			#{clinicDoctorUuid},
+			#{attendingDoctorId},
+			#{attendingDoctoruuId},
+			#{visitTimes},
+			#{visitTime},
+			#{createTime},
+			#{updateTime},
+			#{syncFlag},
+			NOW(),
+			<!-- add by fanpanwei -->
+			#{rawCreateTime}
+		)
+	</insert>
+	
+	<update id="updatePatientUuid">
+		UPDATE cloud_sync_match_db.ec_clinic_medical_note
+		<set>
+			patientUuid = #{patientFinalUuid}
+		</set>
+		WHERE patientUuid IN
+		(
+			<foreach collection = "uuidRelationships" item="item" index="index" separator=",">
+				#{item.uuid}
+			</foreach>
+		)
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM cloud_sync_match_db.ec_clinic_medical_note WHERE clinicMedicalId = #{clinicMedicalId}
+	</delete>
+</mapper>

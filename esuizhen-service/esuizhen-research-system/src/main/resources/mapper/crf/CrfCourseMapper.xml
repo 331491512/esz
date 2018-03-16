@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.research.dao.crf.CrfCourseDao">
+
+	<resultMap type="com.esuizhen.cloudservice.research.bean.TCrfCourseConf" id="baseCourseDetailResultMap">
+		<id column="crfTemplateId" property="crfTemplateId" jdbcType="VARCHAR"/>
+		<result column="followupStartMark" property="followupStartMark" jdbcType="INTEGER"/>
+		
+		<collection column="crfTemplateId" property="crfCourseList" ofType="com.esuizhen.cloudservice.research.bean.TCrfCourseConfInfo">
+			<id column="crfCourseId" property="crfCourseId" jdbcType="VARCHAR"/>
+			<result column="crfCourseItemName" property="crfCourseItemName" jdbcType="VARCHAR"/>
+			<result column="crfTemplateId" property="crfTemplateId" jdbcType="INTEGER"/>
+			<result column="crfCourseIndex" property="crfCourseIndex" jdbcType="INTEGER"/>
+			<result column="followupPeriod" property="followupPeriod" jdbcType="INTEGER"/>
+			<result column="followupPeriodUnit" property="followupPeriodUnit" jdbcType="VARCHAR"/>
+			<result column="followupFrequency" property="followupFrequency" jdbcType="INTEGER"/>
+			<result column="followupFrequencyUnit" property="followupFrequencyUnit" jdbcType="VARCHAR"/>
+			<result column="followupCount" property="followupCount" jdbcType="INTEGER"/>
+		</collection>
+	</resultMap>
+	
+	<resultMap type="com.esuizhen.cloudservice.research.bean.TCrfCourseInfo" id="baseTCrfCourseInfoResultMap">
+		<id column="crfCourseId" property="crfCourseId" jdbcType="VARCHAR"/>
+		<result column="crfTemplateId" property="crfTemplateId" jdbcType="VARCHAR"/>
+		<result column="crfCourseItemName" property="crfCourseItemName" jdbcType="VARCHAR"/>
+		<result column="crfCourseIndex" property="crfCourseIndex" jdbcType="INTEGER"/>
+		<result column="followupPeriod" property="followupPeriod" jdbcType="INTEGER"/>
+		<result column="followupPeriodUnit" property="followupPeriodUnit" jdbcType="VARCHAR"/>
+		<result column="followupFrequency" property="followupFrequency" jdbcType="INTEGER"/>
+		<result column="followupFrequencyUnit" property="followupFrequencyUnit" jdbcType="VARCHAR"/>
+		<result column="isBaselineCopied" property="isBaselineCopied" jdbcType="INTEGER"/>
+		<result column="curentTime" property="curentTime"/>
+		
+		<collection property="crfCourseItemList" ofType="com.esuizhen.cloudservice.research.bean.TCrfCourseDetailInfo">
+			<id column="crf_crfCourseItemId" property="crfCourseItemId" jdbcType="VARCHAR"/>
+			<result column="crf_crfCourseItemName" property="crfCourseItemName" jdbcType="VARCHAR"/>
+			<result column="crf_crfCourseItemIndex" property="crfCourseItemIndex"/>
+			<result column="currentFlag" property="currentFlag"/>
+			
+			<collection property="crfObserveList" ofType="com.esuizhen.cloudservice.research.model.crf.TCrfObservationSubjectElement">
+				<id column="crfObserveId" property="crfObserveId" jdbcType="VARCHAR"/>
+				<result column="sub_subjectElementId" property="subjectElementId" jdbcType="VARCHAR"/>
+				<result column="sub_subjectElementName" property="subjectElementName" jdbcType="VARCHAR"/>
+				<result column="collectionFlag" property="collectionFlag"/>
+			</collection>
+		</collection>
+	</resultMap>
+	
+	<select id="findByCrfCourseItemId" resultType="com.esuizhen.cloudservice.research.bean.TCrfCourseInfo" parameterType="java.lang.String">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM pro_db.crf_course c1
+			INNER JOIN pro_db.crf_course_detail d1 ON c1.crfCourseId = d1.crfCourseId
+		WHERE d1.crfCourseItemId = #{crfCourseItemId}
+	</select>
+	
+	<select id="findByCrfCourseId" resultType="com.esuizhen.cloudservice.research.bean.TCrfCourseInfo" parameterType="java.lang.String">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM pro_db.crf_course c1
+		WHERE c1.crfCourseId = #{crfCourseId}
+	</select>
+	
+	<select id="findProjectCourseItems" resultMap="baseTCrfCourseInfoResultMap">
+		SELECT
+			t2.crfCourseId, t2.crfCourseItemName, t2.crfCourseIndex, t2.followupCount,
+			t1.crfCourseItemId crf_crfCourseItemId, t1.crfCourseItemName crf_crfCourseItemName,
+			t1.crfCourseItemIndex crf_crfCourseItemIndex,
+			(CASE WHEN t1.crfCourseItemId = #{currentCrfCourseItemId} THEN 1 ELSE 0 END) currentFlag,
+			NOW() curentTime
+		FROM pro_db.crf_course_detail t1
+			INNER JOIN pro_db.crf_course t2 ON t1.crfCourseId = t2.crfCourseId
+			INNER JOIN pro_db.r_crftemplate_project t3 ON t2.crfTemplateId = t3.crfTemplateId
+		WHERE t3.projectId = #{projectId}
+		ORDER BY t2.crfCourseIndex, t1.crfCourseItemIndex
+	</select>
+	
+	<select id="queryByCrfTemplateId" resultMap="baseTCrfCourseInfoResultMap" parameterType="java.lang.String">
+		SELECT
+			<include refid="base_column_list"></include>,
+			c2.crfCourseItemId crf_crfCourseItemId,
+			c2.crfCourseItemName crf_crfCourseItemName,
+			c3.crfObserveId, 
+			c3.subjectElementId sub_subjectElementId, 
+			c4.subjectElementName sub_subjectElementName,
+			(CASE WHEN c1.crfCourseIndex=0 THEN c5.isBaselineCopied ELSE NULL END) isBaselineCopied,
+			IF(c3.subjectElementId NOT IN(SELECT n1.parentId FROM pro_db.meta_crf_subject_element n1 WHERE n1.subjectElementLevel = 3 GROUP BY n1.parentId), 1,
+				(
+					SELECT
+						IF(COUNT(0) > 0, 1, 0)
+					FROM pro_db.crf_observation_subject_element i1
+					WHERE i1.parentId = c3.subjectElementId
+						AND i1.crfCourseItemId = c3.crfCourseItemId
+				)
+			) collectionFlag
+		FROM pro_db.crf_course c1
+			INNER JOIN pro_db.crf_course_detail c2 ON c1.crfCourseId=c2.crfCourseId
+			INNER JOIN pro_db.crf_observation_subject_element c3 ON c2.crfCourseItemId=c3.crfCourseItemId
+			INNER JOIN pro_db.meta_crf_subject_element c4 ON c3.subjectElementId=c4.subjectElementId AND c4.subjectElementLevel=2
+			INNER JOIN pro_db.project_crf_template c5 ON c1.crfTemplateId=c5.crfTemplateId
+		WHERE c1.crfTemplateId=#{crfTemplateId}
+		ORDER BY c1.crfCourseIndex ASC, c2.crfCourseItemIndex ASC, c3.subjectIndex ASC
+	</select>
+	
+	<select id="queryByCrfCourseItemId" resultMap="baseTCrfCourseInfoResultMap" parameterType="java.lang.String">
+		SELECT
+			<include refid="base_column_list"></include>,
+			c2.crfCourseItemId crf_crfCourseItemId, c2.crfCourseItemName crf_crfCourseItemName,
+			c3.crfObserveId, c3.subjectElementId sub_subjectElementId, c4.subjectElementName sub_subjectElementName,
+			(CASE WHEN c1.crfCourseIndex=0 THEN c5.isBaselineCopied ELSE NULL END) isBaselineCopied
+		FROM pro_db.crf_course c1
+			INNER JOIN pro_db.crf_course_detail c2 ON c1.crfCourseId=c2.crfCourseId
+			INNER JOIN pro_db.crf_observation_subject_element c3 ON c2.crfCourseItemId=c3.crfCourseItemId
+			INNER JOIN pro_db.meta_crf_subject_element c4 ON c3.subjectElementId=c4.subjectElementId AND c4.subjectElementLevel=2
+			INNER JOIN pro_db.project_crf_template c5 ON c1.crfTemplateId=c5.crfTemplateId
+		WHERE c1.crfTemplateId=(
+			SELECT t2.crfTemplateId FROM pro_db.crf_course_detail t1
+				INNER JOIN pro_db.crf_course t2 ON t1.crfCourseId = t2.crfCourseId
+			WHERE t1.crfCourseItemId = #{crfCourseItemId}
+		)
+		ORDER BY c1.crfCourseIndex ASC, c2.crfCourseItemIndex ASC, c3.subjectIndex ASC
+	</select>
+
+	<select id="findByCrfTemplateId" resultMap="baseCourseDetailResultMap" parameterType="java.lang.String">
+		SELECT
+			c2.crfTemplateId, c2.followupStartMark, <include refid="base_column_list"></include>
+		FROM pro_db.crf_course c1
+			INNER JOIN pro_db.project_crf_template c2 ON c1.crfTemplateId=c2.crfTemplateId
+		WHERE c1.followupPeriod>0 AND c1.crfTemplateId=#{crfTemplateId}
+		ORDER BY c1.crfCourseIndex
+	</select>
+
+	<select id="queryCoursesByCrfTemplateId" resultType="com.esuizhen.cloudservice.research.bean.TCrfCourseConfInfo" parameterType="java.lang.String">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM pro_db.crf_course c1
+		WHERE c1.crfTemplateId=#{crfTemplateId}
+		ORDER BY c1.crfCourseIndex
+	</select>
+
+	<sql id="base_column_list">
+		c1.crfCourseId, c1.crfTemplateId, c1.crfCourseItemName, c1.crfCourseIndex, c1.followupPeriod, c1.followupPeriodUnit,
+		c1.followupFrequency, c1.followupFrequencyUnit, c1.followupCount, c1.createTime, c1.updateTime
+	</sql>
+	
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.research.bean.TCrfCourseConfInfo">
+		INSERT INTO pro_db.crf_course(
+			crfCourseId, crfTemplateId, crfCourseItemName, crfCourseIndex, followupPeriod, followupPeriodUnit,
+			followupFrequency, followupFrequencyUnit, followupCount, createTime, updateTime)
+		VALUES(
+			#{crfCourseId},
+			#{crfTemplateId},
+			#{crfCourseItemName},
+			#{crfCourseIndex},
+			#{followupPeriod},
+			#{followupPeriodUnit},
+			#{followupFrequency},
+			#{followupFrequencyUnit},
+			#{followupCount},
+			NOW(), NOW()
+		)
+	</insert>
+	
+	<delete id="delete" parameterType="java.lang.String">
+		DELETE FROM pro_db.crf_course WHERE crfCourseId=#{crfCourseId}
+	</delete>
+	
+</mapper>

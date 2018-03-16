@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.client.sync.dao.SurgeryNoteDao" >	
+	
+	<select id="getBatchSyncSurgeryNote" resultType="java.util.LinkedHashMap" parameterType="com.esuizhen.client.sync.model.TBatchDetailInfo">
+		SELECT
+			t1.surgeryId,t1.inhospitalId,t1.emrId,t1.mainID,t1.tempId,t1.patientId,t1.patientNo,t1.oldPatientNo,t1.inhospitalTimes,
+			t1.oldInhospitalTimes,t1.inhospitalNo,t2.uuid AS patientUuid,t1.hospitalId,t1.deptId,
+			(SELECT uuid FROM user_db.u_department WHERE deptId=t1.deptId) AS deptUuid,
+			t1.bedNo,t1.opCode,t1.treatmentSchemeId,
+			t1.treatmentSchemeName,t1.opLevel,t1.surgeryName,t1.surgeryDoctor,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.surgeryDoctor) as surgeryDoctorUuid,
+			t1.surgeryDoctorName,t1.surgeryAssistant1,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.surgeryAssistant1) as surgeryAssistant1Uuid,
+			t1.surgeryAssistant1Name,t1.surgeryAssistant2,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.surgeryAssistant2) as surgeryAssistant2Uuid,
+			t1.surgeryAssistant2Name,t1.surgeryDate,t1.surgeryBeginTime,t1.surgeryEndTime,t1.anesthesiaDoctor,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.anesthesiaDoctor) as anesthesiaDoctorUuid,
+			t1.anesthesiaDoctorName,t1.anesthesiaWay,t1.preOperativeDiagnosis,t1.inOperativeDiagnosis,t1.bodyPosture,t1.transfusion,t1.surgeryNurses,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.surgeryNurses) as surgeryNursesUuid,
+			t1.operativeApproach,t1.operativeProbe,t1.operativeMeasures,t1.operativeSituation,t1.woundClosureWay,t1.incisionBandagedWay,t1.operatorName,
+			t1.remark,t1.createTime,t1.updateTime,t1.incisionHealing,t1.serialNum,t1.incisionHealingId,
+			t1.rawCreateTime,t1.mergeFlag,t1.mergeFrom,
+			IFNULL(t1.mergeFromUuid,(SELECT uuid FROM user_db.u_patient WHERE patientId =t1.mergeFrom)) AS mergeFromUuid,
+			t1.mergeTarget,
+			IFNULL(t1.mergeTargetUuid,(SELECT uuid FROM user_db.u_patient WHERE patientId =t1.mergeTarget)) AS mergeTargetUuid,
+			t1.mergeTime,IFNUll(t5.sourceFlag,3) as sourceFlag,
+			t1.incisionGroup,t1.incisionHealLevel,t1.rawAnesthesiaWayId,t1.anesthesiaWayId
+		FROM
+		     ehr_db.eci_surgery_note t1
+		JOIN user_db.u_patient t2 ON t1.patientId = t2.patientId
+    	JOIN sc_db.u_patient_sync_result_client t3 ON t2.uuid = t3.uuid
+   		JOIN sc_db.eci_surgery_note_sync_result_client t4 ON t1.surgeryId = t4.surgeryId
+		LEFT JOIN ehr_db.e_medical_record t5 ON t1.emrId = t5.emrId 
+		WHERE
+			t3.syncFlag = 1 AND t4.syncFlag=0 
+	    LIMIT #{detailInfo.syncSize}
+  	</select>
+  	
+  	<update id="updateSurgeryNoteSyncflag" parameterType="java.lang.String">
+		UPDATE sc_db.eci_surgery_note_sync_result_client t1
+		SET t1.opFlag=IF(t1.syncFlag=0,1,2),t1.syncFlag = 9 , t1.syncTime=NOW(),t1.updateTime = NOW()
+		WHERE
+			t1.surgeryId IN (${surgeryIds})
+	</update>
+	
+	<update id="updateSyncResult" parameterType="com.esuizhen.client.sync.bean.TBatchDataResultInfo">
+		UPDATE sc_db.eci_surgery_note_sync_result_client t1
+		SET 
+		    t1.batchId = #{tBatchDataResultInfo.batchId},
+		    t1.syncFlag = #{tBatchDataResultInfo.syncFlag},
+			t1.cause = #{tBatchDataResultInfo.cause},
+			t1.updateTime = NOW()
+		WHERE
+			t1.surgeryId = #{tBatchDataResultInfo.resultId} and t1.syncFlag = 9
+	</update>
+</mapper>

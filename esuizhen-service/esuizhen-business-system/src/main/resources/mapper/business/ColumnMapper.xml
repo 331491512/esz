@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.business.dao.business.ColumnDao">
+	
+	<!-- 获取医院栏目列表 -->
+	<select id="queryColumnByHospital" resultType="com.westangel.common.bean.column.TColumnInfo">
+		SELECT
+			t1.title,
+			t1.description,
+			t1.pictureUrl,
+			<![CDATA[
+			CASE WHEN t1.linkType=1 AND t1.url IS NOT NULL THEN CONCAT(#{wxUrl},t1.url,"?hospitalId=",t2.hospitalId,"&hospitalUserId=",CASE WHEN t2.userId IS NULL THEN "" ELSE t2.userId END) ELSE t1.url END url
+			]]>
+		FROM
+			hds_db.s_hospital_column t1
+		JOIN
+			user_db.u_hospital t2 ON t1.hospitalId = t2.hospitalId
+		WHERE
+			t1.hospitalId = #{hospitalId}
+			<if test="columnType!=null">
+				AND t1.columnType=#{columnType}
+			</if>
+			<if test="reqFlag!=null and reqFlag==0">
+				AND t1.state=1
+				ORDER BY t1.sortIndex ASC
+			</if>
+			<if test="reqFlag!=null and reqFlag==0">
+				AND t1.newsShowFlag=1
+				ORDER BY t1.newsSortIndex ASC
+			</if>
+			<if test="reqFlag==null">
+				ORDER BY t1.sortIndex ASC
+			</if>
+	</select>
+	
+	
+	<!-- 获取医院默认栏目 -->
+	<select id="queryDefaultColumnByHospital" resultType="com.westangel.common.bean.column.TColumnInfo">
+		SELECT
+			t1.title,
+			t1.description,
+			t1.pictureUrl,
+			<![CDATA[
+			CASE WHEN t1.linkType=1 AND t1.url IS NOT NULL THEN CONCAT(#{wxUrl},t1.url,"?hospitalId=",t2.hospitalId,"&hospitalUserId=",CASE WHEN t2.userId IS NULL THEN "" ELSE t2.userId END) ELSE t1.url END url
+			]]>
+		FROM
+			hds_db.s_column_template t1
+		JOIN
+			user_db.u_hospital t2 ON t2.hospitalId = #{hospitalId}
+		WHERE t1.defaultFlag =1
+			<if test="columnType!=null">
+				AND t1.columnType=#{columnType}
+			</if>
+	</select>
+	
+</mapper>

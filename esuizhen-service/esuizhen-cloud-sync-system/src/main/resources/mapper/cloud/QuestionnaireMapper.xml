@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.QuestionnaireDao">
+	
+	<select id="queryQuestionnaireById" resultType="java.lang.Integer">
+		SELECT count(1)
+		FROM followup_db.questionnaire t1
+		WHERE t1.questionnaireId=#{questionnaireId}
+	</select>
+	
+	<!-- 添加问卷 -->
+	<insert id="insertQuestionnaire" parameterType="com.esuizhen.cloudservice.sync.model.TFollowupQuestionnaireDetailInfo">
+		INSERT INTO followup_db.questionnaire
+		(questionnaireId , subject ,contentTemplateId, description , isPublish , author , createTime , updateTime)
+		VALUES
+		(#{questionnaireId} , #{subject} , #{contentTemplateId} , #{description} , #{isPublish}, #{author} , NOW() , NOW())
+	</insert>  
+	
+	
+	<!-- 添加问题 -->
+	<insert id="insertQuestionnaireStem" parameterType="com.esuizhen.cloudservice.sync.model.TFollowupQuestionnaireStem">
+		INSERT INTO followup_db.questionnaire_stem
+		(questionnaireStemId , questionnaireId , sectionId , sectionTitle , stemIndex , stemCode, content , questionType , createTime , updateTime)
+		VALUES
+		(#{questionnaireStemId} , #{questionnaireId} , #{sectionId} , #{sectionTitle}, #{stemIndex} , #{stemCode},  #{content}, #{questionType} ,NOW() , NOW())
+	</insert>  
+	
+	<!-- 添加问题选项 -->
+	<insert id="insertQuestionnaireOptions" parameterType="java.util.List">
+		INSERT INTO followup_db.questionnaire_options_detail
+		(questionnaireOptionId,questionnaireStemId,stemCode,
+		questionnaireId,optionIndex,contentType,
+		content,indicateValue,nextStemCode,parentOptionId,
+		level,title,questionType,fillFlag,
+		fillContent,fillContentType,fillContent2,fillContentType2,
+		isChecked,createTime)
+		VALUES
+		<foreach collection="options" item="item" index="index" separator=",">
+			(
+				#{item.questionnaireOptionId},#{item.questionnaireStemId},#{item.stemCode},
+				#{item.questionnaireId},#{item.optionIndex},#{item.contentType},
+				#{item.content},#{item.indicateValue},#{item.nextStemCode},#{item.parentOptionId},
+				#{item.level},#{item.title},#{item.questionType},
+				#{item.fillFlag},#{item.fillContent},#{item.fillContentType},#{item.fillContent2},#{item.fillContentType2},
+				#{item.isChecked},now()
+			)
+        </foreach>
+	</insert>
+</mapper>

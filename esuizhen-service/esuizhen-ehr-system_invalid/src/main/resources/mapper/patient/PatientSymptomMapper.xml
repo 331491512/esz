@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.patient.PatientSymptomDao">
+
+	<!-- 获取患者诊断列表 -->
+	<select id="patientSymptomList" resultType="com.esuizhen.cloudservice.ehr.bean.PatientSymptomInfo">
+		select 
+		t1.symptomId,t1.patientId,t1.patientNo,t1.symptomTypeId,t1.symptomName,t1.relationId,t1.relationName,t1.familyHistoryDiseaseTypeId,t1.familyHistoryDiseaseTypeName,t1.riskFactors,t1.visitTime,t1.diseaseTransfer,t1.sustainTime,t1.sustainTimeUnit,t1.clinicMedicalId,t1.inhospitalId
+		from ehr_db.e_symptom_info t1
+		<where>
+			<if test="patientId != null">
+			AND patientId=#{patientId}
+			</if>
+			<if test="symptomName != null">
+			AND symptomName=#{symptomName}
+			</if>
+			<if test="clinicMedicalId != null">
+				and clinicMedicalId=#{clinicMedicalId}
+			</if>
+			<if test="inhospitalId != null">
+				and inhospitalId=#{inhospitalId}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 诊断添加 -->
+	<insert id="insertPatientSymptom" parameterType="com.esuizhen.cloudservice.ehr.bean.PatientSymptomInfo">
+		INSERT INTO 
+		ehr_db.e_symptom_info(symptomId,emrId,patientId,inhospitalId,clinicMedicalId,patientNo,symptomTypeId,symptomName,symptomDegree,remark,relationId,relationName,familyHistoryDiseaseTypeId,familyHistoryDiseaseTypeName,riskFactors,visitTime,createTime,updateTime,diseaseTransfer,sustainTime,sustainTimeUnit)
+		VALUES(#{symptomId},#{emrId},#{patientId},#{inhospitalId},#{clinicMedicalId},#{patientNo},#{symptomTypeId},#{symptomName},#{symptomDegree},#{remark},#{relationId},#{relationName},#{familyHistoryDiseaseTypeId},#{familyHistoryDiseaseTypeName},#{riskFactors},#{visitTime},NOW(),NOW(),#{diseaseTransfer},#{sustainTime},#{sustainTimeUnit})
+	</insert>
+	<update id="updatePatientSymptom">
+		UPDATE ehr_db.e_symptom_info SET 
+		symptomTypeId=#{symptomTypeId},
+		symptomName=#{symptomName},
+		symptomDegree=#{symptomDegree},
+		remark=#{remark},
+		relationId=#{relationId},
+		relationName=#{relationName},
+		familyHistoryDiseaseTypeId=#{familyHistoryDiseaseTypeId},
+		familyHistoryDiseaseTypeName=#{familyHistoryDiseaseTypeName},
+		riskFactors=#{riskFactors},
+		visitTime=#{visitTime},
+		sustainTime=#{sustainTime},
+		sustainTimeUnit=#{sustainTimeUnit},
+		updateTime=NOW()
+		WHERE symptomId=#{symptomId}
+	</update>
+	
+	<delete id="deletePatientSymptom">
+		DELETE FROM ehr_db.e_symptom_info WHERE patientId=#{patientId}
+		<choose>
+	    	<when test="clinicMedicalId != null">
+	    		and clinicMedicalId=#{clinicMedicalId}
+	    	</when>
+	    	<otherwise>
+	    		and inhospitalId=#{inhospitalId}
+	    	</otherwise>
+	    </choose>
+	</delete>
+
+	<!-- 根据患者id获取患者信息 -->
+	<select id="queryPatientById" resultType="java.util.HashMap">
+		SELECT 
+        	t1.patientId,
+        	t1.patientNo,
+        	t1.mobile,
+        	if(u.idType,u.identification,null) idNo,
+        	u.address,
+        	t1.trueName,
+        	t1.sex,
+        	t1.outPatientFlag,
+        	t1.birthDate,
+        	t1.patientType
+		FROM user_db.u_patient t1
+		INNER JOIN user_db.u_user u ON u.userId=t1.userId
+		WHERE patientId=#{patientId}
+	</select>
+</mapper>
+

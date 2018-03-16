@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.crf.TCrfSymptomTcmInfoDao">
+
+	<insert id="insertCrfObservationTcmSymptomOptions" parameterType="com.esuizhen.cloudservice.research.model.crf.TCrfSymptomTcmInfo">
+        INSERT INTO crf_observation_tcm_symptom_options 
+        (
+        	crfObserveItemId ,
+        	crfObserveId ,
+        	subjectElementId ,
+        	tcmSymptomId ,
+        	tcmSymptomName ,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{crfObserveItemId} ,
+        	#{crfObserveId} ,
+        	#{subjectElementId} ,
+        	#{tcmSymptomId} ,
+        	#{tcmSymptomName} ,
+        	NOW() ,
+        	NOW() 
+        )
+	</insert>
+    
+    <insert id="insertCrfObservationTcmSymptomOptionsList" parameterType="java.util.List">
+        INSERT INTO crf_observation_tcm_symptom_options 
+        (
+        	crfObserveItemId ,
+        	crfObserveId ,
+        	subjectElementId ,
+        	tcmSymptomId ,
+        	tcmSymptomName ,
+        	createTime ,
+        	updateTime 
+        ) VALUES 
+        <foreach collection="list" index="index" item="item" separator=",">
+        (
+        	#{item.crfObserveItemId} ,
+        	#{item.crfObserveId} ,
+        	#{item.subjectElementId} ,
+        	#{item.tcmSymptomId} ,
+        	#{item.tcmSymptomName} ,
+        	NOW() ,
+        	NOW() 
+        )
+        </foreach>
+        
+	</insert>
+	
+	<update id="updateCrfObservationTcmSymptomOptions" parameterType="com.esuizhen.cloudservice.research.model.crf.TCrfSymptomTcmInfo">
+        UPDATE crf_observation_tcm_symptom_options 
+        <set>
+	        <if test="crfObserveId != null">
+                crfObserveId = #{crfObserveId} ,
+            </if>
+	        <if test="subjectElementId != null">
+                subjectElementId = #{subjectElementId} ,
+            </if>
+	        <if test="tcmSymptomId != null">
+                tcmSymptomId = #{tcmSymptomId} ,
+            </if>
+	        <if test="tcmSymptomName != null">
+                tcmSymptomName = #{tcmSymptomName} ,
+            </if>
+	        <if test="1==1">
+                updateTime = NOW() ,
+            </if>
+        </set>
+        WHERE 
+	        crfObserveItemId = #{crfObserveItemId} 
+	</update>
+
+    <delete id="deleteCrfObservationTcmSymptomOptions">
+        DELETE FROM crf_observation_tcm_symptom_options WHERE crfObserveItemId = #{crfObserveItemId} 
+    </delete>
+    
+    <delete id="deleteCrfObservationTcmSymptomOptionsByCrfObserveId">
+        DELETE FROM crf_observation_tcm_symptom_options WHERE crfObserveId = #{crfObserveId} 
+    </delete>
+    
+    <select id="queryCrfObservationTcmSymptomOptionsById" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfSymptomTcmInfo">
+		SELECT 
+        	crfObserveItemId,
+        	crfObserveId,
+        	subjectElementId,
+        	tcmSymptomId,
+        	tcmSymptomName,
+        	createTime,
+        	updateTime
+		FROM crf_observation_tcm_symptom_options 
+	    WHERE 
+	        crfObserveItemId = #{crfObserveItemId} 
+	</select>
+	
+	<select id="queryCrfObservationTcmSymptomOptionsByCrfObserveId" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfSymptomTcmInfo">
+		SELECT 
+        	crfObserveItemId,
+        	crfObserveId,
+        	subjectElementId,
+        	tcmSymptomId,
+        	tcmSymptomName,
+        	createTime,
+        	updateTime
+		FROM crf_observation_tcm_symptom_options 
+	    WHERE 
+	        crfObserveId = #{crfObserveId} 
+	</select>
+</mapper>
+

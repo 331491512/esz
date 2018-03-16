@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.statistics.dao.FollowupReportApplyDao">
+	<!-- 未发送的随访报告 -->
+	<select id="queryNotSendFollowupReportApply" resultType="com.esuizhen.cloudservice.statistics.bean.TFollowupReportApply">
+		select t1.productapplyId,t1.userId,t1.email,t1.createTime applyDate
+		,t2.trueName,t2.doctorId
+		FROM hds_db.s_followup_report_apply t1
+		LEFT JOIN
+		user_db.u_doctor t2 ON t1.userId=t2.userId
+		where t1.sendFlag=0
+	</select>
+	
+	<!-- 随访报告修改 -->
+	<update id="modifyFollowupReportApply">
+		update hds_db.s_followup_report_apply 
+		<set>
+			sendFlag=1
+			,sendTime=NOW()
+			,updateTime=NOW() 
+		</set>
+		where productapplyId=#{productapplyId}
+	</update>
+</mapper>
+

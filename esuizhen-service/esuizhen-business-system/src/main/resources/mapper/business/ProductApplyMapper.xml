@@ -1,0 +1,1438 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.business.dao.business.ProductApplyDao">
+	<resultMap id="BaseResultMap" type="com.esuizhen.cloudservice.business.model.business.TMDTDetailInfo">
+	    <id column="id" property="id" />
+	    <result column="productApplyId" property="productApplyId" />
+	    <result column="orderId" property="orderId"  />
+	    <result column="productId" property="productId"  />
+	    <result column="orderTitle" property="orderTitle"  />
+	    <result column="progressState" property="progressState"  />
+	    <result column="auditState" property="auditState" />
+	    <result column="goal" property="goal"  />
+	    <result column="diagnosis" property="diagnosis"  />
+	    <result column="pathologyDiagnosis" property="pathologyDiagnosis" />
+	    <result column="subscriptionFlag" property="subscriptionFlag"  />
+	    <result column="realPrice" property="realPrice"  />
+	    <result column="auditStateName" property="auditStateName"  />
+	    <result column="buyerName" property="buyerName" />
+	    <result column="buyer" property="buyer" />
+	    <result column="contactMobile" property="contactMobile" />
+	    <result column="consultOrderTime" property="consultOrderTime" />
+	    <result column="trueName" property="trueName"  />
+	    <result column="sex" property="sex"  />
+	    <result column="patientNo" property="patientNo"  />
+	    <result column="mobile" property="mobile" />
+	    <result column="identification" property="identification"  />
+	    <result column="cause" property="cause" />
+	    <result column="summarization" property="summarization"  />
+	    <result column="consultAttachement" property="consultAttachement"  />
+	    <result column="createTime" property="createTime"  />
+	    <result column="updateTime" property="updateTime"  />
+	    <result column="description" property="description"  />
+	    <result column="recommendedDoctor" property="recommendedDoctor"  />
+	    <result column="mdtApplyNo" property="mdtApplyNo"  />
+	    <result column="applyHospitalId" property="applyHospitalId"  />
+	    <result column="deptId" property="deptId"  />
+	    <result column="agentApplicant" property="agentApplicant"  />
+	    <result column="recommendedDoctorMobile" property="recommendedDoctorMobile" />
+	    <result column="clinicImpression" property="clinicImpression"  />
+	    <result column="mdtProductExpectConsultDay" property="mdtProductExpectConsultDay"  />
+	    <result column="mdtFlowStateId" property="mdtFlowStateId"  />
+	    <result column="pathologySectionFlag" property="pathologySectionFlag" />
+	    <result column="sectionCount" property="sectionCount"  />
+	    <result column="sealWaxFlag" property="sealWaxFlag" />
+	    <result column="sampleNo" property="sampleNo"  />
+	    <result column="sampleDamageCause" property="sampleDamageCause"  />
+	    <result column="sampleCheckFlag" property="sampleCheckFlag" />
+	    <result column="packExpressFlag" property="packExpressFlag"  />
+	    <result column="expressCompany" property="expressCompany"  />
+	    <result column="expressNo" property="expressNo"  />
+	    <result column="needRadiateFlag" property="needRadiateFlag"/>
+	    <result column="productName" property="productName" />
+	    <result column="deptName" property="deptName"  />
+	    <result column="applyHospitalName" property="applyHospitalName"  />
+	    <result column="agentApplicantName" property="agentApplicantName"  />
+	    <result column="logisticsInfo" property="logisticsInfo"  />
+	    <result column="radiateUserId" property="radiateUserId"  />
+	    <result column="acceptanceTime" property="acceptanceTime"  />
+	    <result column="basicPathologyUserId" property="basicPathologyUserId"  />
+	    <result column="basicPathologyUserName" property="basicPathologyUserName"  />
+	    <result column="basicPathologyUserPhome" property="basicPathologyUserPhome"  />
+	    <result column="dataArrangement" property="dataArrangement"  />
+  	</resultMap>
+  	
+	<resultMap type="com.esuizhen.cloudservice.business.model.business.TMDTDetailInfo" id="OptionBaseResultMap" extends="BaseResultMap">
+		<collection property="optionList" column="productApplyId" select="com.esuizhen.cloudservice.business.dao.business.mdt.MdtDoctorOptionDao.getOpinionInfoById"/>
+		<collection property="expressAddress" column="addressId" select="com.esuizhen.cloudservice.business.dao.business.mdt.ExpressAddressDao.getExpressAddressById"/>
+		<collection property="productGroup" column="productId" select="com.esuizhen.cloudservice.business.dao.business.mdt.MDTProductGroupDao.getProductGroupList"/>
+	</resultMap>
+	<!-- 服务 -->
+	<!-- 获取产品类型 -->
+	<select id="getProductTypeByProductId" resultType="java.lang.Integer">
+		SELECT
+		productType FROM com_trade_db.product WHERE productId = #{productId}
+	</select>
+
+	<!-- 创建服务申请 -->
+	<insert id="createProductServiceApply">
+		INSERT INTO hds_db.s_product_service_apply(
+			productApplyId,
+			rProductApplyId,
+			buyer,
+			vendor,
+			productId,
+			productType,
+			orderId,
+			orderTitle,
+			realPrice,
+			tips,
+			remark,
+			contactMobile,
+			periodFeeType,
+			state,
+			progressState,
+			idleCancelTime,
+			expireTime,
+			createTime,
+			updateTime,
+			inPackage,
+			subscriptionFlag,
+			description,
+			treatmentCourse,
+			`explain`,
+			recommendedDoctor,
+			agentApplicant,
+			wxProductId,
+			applySource,
+			productSubType,
+			serviceCode,
+			isRefund
+		)VALUES(
+			#{productApplyId},
+			#{rProductApplyId},
+			#{buyer},
+			#{vendor},
+			#{productId},
+			#{productType},
+			#{orderId},
+			#{orderTitle},
+			#{realPrice}*100,
+		    #{tips},
+		    #{remark},
+		    #{contactMobile},
+		    #{periodFeeType},
+			#{state},
+			0,
+			#{idleCancelTime},
+			#{expireTime},
+			NOW(),
+			NOW(),
+			#{inPackage},
+			#{subscriptionFlag},
+			#{description},
+			#{treatmentCourse},
+			#{explain},
+			#{recommendedDoctor},
+			#{agentApplicant},
+			#{wxProductId},
+			#{applySource},
+			#{productSubType},
+			#{serviceCode},
+			#{isRefund}
+		)
+	</insert>
+
+
+	<!-- 修改电话咨询时间 -->
+	<update id="modifyTelConsultingTime">
+		UPDATE hds_db.s_product_service_apply
+		<set>
+			consultOrderTime = #{consultOrderTime},
+			progressState=1,
+			updateTime = now()
+	
+		</set>
+		WHERE productApplyId = #{productApplyId}
+	</update>
+
+	<!-- 更新服务 -->
+	<update id="modifyProductServiceApply">
+		UPDATE hds_db.s_product_service_apply
+		<set>
+			<if test="summarization!=null">
+				summarization = #{summarization},
+			</if>
+			<if test="serviceLevel!=null">
+				evaluationServiceLevel=#{serviceLevel},
+			</if>
+			<if test="evaluationRemark!=null">
+				evaluationRemark = #{evaluationRemark},
+			</if>
+			
+			updateTime = now()
+		</set>
+		WHERE productApplyId = #{productApplyId}
+	</update>
+	
+	<update id="modifyProductServiceApplyState">
+		UPDATE hds_db.s_product_service_apply
+		<set>
+			<if test="state!=null">
+				state = #{state},
+			</if>
+			<if test="auditState!=null">
+				auditState = #{auditState},
+			</if>
+			<if test="subscriptionFlag!=null">
+				subscriptionFlag = #{subscriptionFlag},
+			</if>
+			<if test="progressState!=null">
+				progressState=#{progressState},
+			</if>
+			<if test="consultOrderTime!=null">
+				consultOrderTime=#{consultOrderTime},
+			</if>
+			<if test="idleCancelTime!=null">
+				idleCancelTime=#{idleCancelTime},
+			</if>
+		
+			<if test="expireTime!=null">
+				expireTime=#{expireTime},
+			</if>
+			<if test="consultHappenTime!=null">
+				consultHappenTime=#{consultHappenTime},
+			</if>
+			<if test="wxProductId!=null">
+				wxProductId=#{wxProductId},
+			</if>
+			<if test="syncFlag!=null">
+				syncFlag=#{syncFlag},
+			</if>
+			updateTime = now()
+		</set>
+		WHERE productApplyId = #{productApplyId}
+	</update>
+	
+	<update id="modifyProductServiceApplyTips">
+		UPDATE hds_db.s_product_service_apply
+		<set>
+			<if test="tips!=null">
+				tips = #{tips},
+			</if>
+			updateTime = now()
+		</set>
+		WHERE productApplyId = #{productApplyId}
+	</update>
+	
+	
+	<update id="modifyProductServiceApplyTipsAndQuotaUsage">
+		UPDATE hds_db.s_product_service_apply
+		<set>
+			<if test="tips!=null">
+				tips = #{tips},
+			</if>
+			<if test="quota!=null">
+				quota = #{quota},
+			</if>
+			<if test="usage!=null">
+				`usage` = #{usage},
+			</if>
+			<if test="parentProductName!=null">
+				`parentProductName` = #{parentProductName},
+			</if>
+		
+			updateTime = now()
+		</set>
+		WHERE productApplyId = #{productApplyId}
+	</update>
+	
+	
+	
+	<update id="modifyProductServiceApplyAuditState">
+		UPDATE s_product_service_apply
+		<set>
+			<if test="auditState!=null">
+				auditState  = #{auditState},
+			</if>
+			updateTime = now()
+		</set>
+		WHERE productApplyId = #{productApplyId}
+	</update>
+	
+	<update id="modifyProductServiceApplyProgressState">
+		UPDATE s_product_service_apply
+		<set>
+			<if test="progressState!=null">
+				progressState  = #{progressState},
+			</if>
+			<if test="cause!=null">
+				cause  = #{cause},
+			</if>
+			<if test="state!=null">
+				state  = #{state},
+			</if>
+			<if test="auditState!=null">
+				auditState  = #{auditState},
+			</if>
+			<if test="syncFlag!=null">
+				syncFlag  = #{syncFlag},
+			</if>
+			<if test="description!=null">
+				description  = #{description},
+			</if>
+			updateTime = now()
+		</set>
+		WHERE productApplyId = #{productApplyId}
+	</update>
+
+	<!-- 获取商品类型服务编号 -->
+	<select id="getProductTypeByproductApplyId" resultType="java.lang.Integer">
+		SELECT
+		productType FROM hds_db.s_product_service_apply WHERE productApplyId =
+		#{productApplyId}
+	</select>
+	
+	<!-- 获取服务申请内容 -->
+	<select id="getProductServiceApplyInfo" resultType="com.esuizhen.cloudservice.business.model.business.ProductServiceApply">
+		SELECT
+	    	t1.productApplyId,t1.buyer,t1.vendor,t1.productType,t1.productId,t1.orderId,t1.orderTitle,t1.wxProductId,t1.isRefund
+	    	,realPrice/100 as realPrice,t1.state,t1.progressState,t1.auditState
+	    	,t1.createTime,t1.consultOrderTime,t1.contactMobile,t1.inPackage,t1.summarization,t1.remark,t1.periodFeeType,
+	    	t1.idleCancelTime,t1.expireTime, t1.applySource,t1.inPackage,t1.remark
+	    	,t2.productTemplateId,t3.packageFlag,t3.isAutoAccept,t1.productSubType,t1.description,t1.serviceCode,t1.syncFlag
+	    FROM 
+	        hds_db.s_product_service_apply t1,com_trade_db.product t2,com_trade_db.product_template t3
+	    WHERE 
+	   	    t1.productApplyId = #{productApplyId} and t1.productId=t2.productId AND t2.productTemplateId=t3.productTemplateId
+	</select>
+	<!-- 获取推荐医生 -->
+	<select id="getProductServiceApplyRecommendedDoctor" resultType="java.lang.String">
+		SELECT
+	    	recommendedDoctor
+	    FROM 
+	        hds_db.s_product_service_apply
+	    WHERE 
+	   	    productApplyId = #{productApplyId}
+	</select>
+	
+	<!-- 获取患者对医生的评价 -->
+	<select id="getProductServiceApplyScoreInfo" resultType="com.esuizhen.cloudservice.business.model.business.ProductServiceApply">
+		SELECT
+	    	productApplyId,evaluationServiceLevel,evaluationRemark
+	    FROM 
+	        hds_db.s_product_service_apply 
+	    WHERE 
+	   	    productApplyId = #{productApplyId}
+	</select>
+	
+	<!-- 获取存在服务中订购关系的ProductApplyId. 通过s_product_service_apply表查询，只返回最新的一条。因为可能允许重复订购 -->
+	<select id="getProductSubcriptionInService" resultType="com.esuizhen.cloudservice.business.bean.TProductSubscriptionInfo">
+		SELECT
+	    	state,subscriptionFlag,productApplyId,tips,realPrice/100 as realPrice,consultOrderTime,auditState,wxProductId,expireTime,t1.usage
+	    FROM 
+	        hds_db.s_product_service_apply  t1
+	    WHERE 
+	        vendor = #{vendor}
+	   	    <if test="buyer!=null">
+	        AND buyer = #{buyer}  
+	        </if>
+	   	    <if test="productType!=null and productType!=0">
+	   	    AND productType=#{productType} 
+	   	    </if>
+	   	    <if test="productId!=null">
+	        AND productId = #{productId}  
+	        </if>
+	   	    AND (state = 2 OR state=4 OR state=1 OR state=10) 
+	   	     
+	   	ORDER BY state DESC, createTime DESC
+	   	LIMIT 0,1 
+	</select>
+	
+	<!-- 查询订购关系是否存在，直接通过var_patient_business表查询 -->
+	<select id="queryServiceSubscriptionInfo" resultType="com.westangel.common.bean.user.ServiceSubscriptionInfo">
+		SELECT
+	    	doctorId,patientId,subscriptionFlag,vipFlag,
+			periodFeeType,vipBeginTime,vipEndTime,vipProductName,createTime,updateTime
+	    FROM 
+	        hds_db.var_patient_business
+	    WHERE 
+	        doctorId = #{doctorId}
+	   	    AND patientId = #{patientId}  
+	</select>
+	
+	<!-- 获取存在服务中订购关系的Product列表. -->
+	<select id="listProductSubscription" resultType="com.esuizhen.cloudservice.business.bean.TProductSubscriptionSimpleInfo">
+		SELECT
+	    	t1.productApplyId,
+	    	t1.orderId,
+	    	t1.orderTitle,
+	    	t1.productId,
+	    	t1.productType,
+	    	t1.state,
+	    	t1.progressState,
+	    	t1.auditState,
+	    	t1.subscriptionFlag,
+	    	t1.buyer,
+	    	t1.vendor,
+	    	t2.trueName as vendorName,
+	    	t1.createTime,
+	    	t1.expireTime,t1.productSubType,
+	    	(case when t1.updateTime is null then t1.createTime else t1.updateTime end) updateTime
+	    	<if test="reqFlag!=null and reqFlag==1">
+	    		,
+				(case
+					when t1.state=1 then '申请成功,待处理'
+					when t1.state=5 and t1.productSubType=901 then '已完成'
+					when t1.state=5 and t1.productSubType=902 then '已领取'
+					when t1.state=3 or t1.state=6 or t1.state=7 or t1.state=11 then '已退款'
+				    when t1.state<![CDATA[>]]>1 and t1.state <![CDATA[<]]>5 and t1.state!=3
+				    	and t1.productSubType=901 and t1.progressState=5 then '病案已寄出'
+				    when t1.state<![CDATA[>]]>1 and t1.state<![CDATA[<]]>5 and t1.productSubType=902 then '待领取'
+				    else '处理中' end
+				)auditStateName ,
+				/*(case
+				  when t1.state=1 and t1.auditState=0 then '待处理'
+				  when t1.state=2 and t1.auditState=0 then '已接受'
+	    	      when t1.state=2 and t1.auditState=1 then '已接受'
+	    	      when t1.state=2 and t1.auditState=2 then '处理中'
+	    	      when t1.state=4 and t1.auditState=2 then '处理中'
+	    	      when t1.state=4 and t1.auditState=4 then '已发件'
+	    	      when t1.state=7 and t1.auditState=3 then '已拒绝'
+	    	      when t1.state=3 then '已拒绝'
+	    	      when t1.state=5 and t1.auditState=5 then '已完成'
+	    	      when t1.state=5 then '已完成'
+	    	      else '未知状态' end)
+				auditStateName
+	    		,*/
+	    		t1.description,
+	    		t1.remark
+	    	</if>
+	       	<if test="reqFlag==null or reqFlag==3">
+	    	,(case when t1.subscriptionFlag=-1 AND t1.progressState=0 then '会诊申请成功，未付款'
+	    		  when t1.progressState=0 then '会诊申请成功' 
+			      when t1.progressState=1 then '上传资料成功' 
+				  when t1.progressState=2 AND t1.auditState=0 then '资料审核中'
+	    	      when t1.progressState=2 AND t1.auditState=1 then '资料待完善'
+	    	      when t1.progressState=2 AND t1.auditState=2 then '资料审核通过'
+	    	      when t1.progressState=2 AND t1.auditState=3 then '会诊安排中'
+	    	      when t1.progressState=2 AND t1.auditState=4 then '会诊安排失败'
+	    	      when t1.progressState=2 AND t1.auditState=5 then '等待专家会诊'
+	    	      when t1.progressState=2 AND t1.auditState=6 then '会诊成功'
+	    	      when t1.progressState=3 AND t1.auditState=7 then '会诊完成'
+	    	      else '未知状态' end
+	    	     )auditStateName
+	    	</if>
+			<if test="reqFlag==3 || reqFlag==4">
+				,t4.professionalRankName,t2.userPictureUrl
+			</if>
+	    FROM 
+	        hds_db.s_product_service_apply t1
+	        LEFT JOIN user_db.u_user t2 ON t1.vendor=t2.userId
+			<if test="reqFlag==3 || reqFlag==4">
+				LEFT JOIN user_db.u_doctor t3 ON t3.userId=t2.userId
+				left JOIN user_db.meta_professional_rank t4 ON t4.professionalRankId=t3.professionalRank
+			</if>
+	    WHERE 
+	         t1.buyer = #{buyer}  
+	        <if test="vendor!=null">
+	      	 AND  t1.vendor = #{vendor}
+	   	   </if>
+	   	    <if test="productType!=null">
+	   	    AND t1.productType=#{productType} 
+	   	    </if>
+	   	    <if test="reqFlag==null">
+	    		AND t1.subscriptionFlag>-1
+	    	</if>
+	   	    <if test="reqFlag!=null and reqFlag==2">
+	    	AND (t1.state=1 OR t1.state=2 OR t1.state=4)	
+	    	AND t2.role=4
+	    	</if>
+	 		AND t1.productType!=8
+			<if test="reqFlag!=null and reqFlag==4">
+				AND (t1.state=1 OR t1.state=2 OR t1.state=4)
+				AND t2.role=2
+			</if>
+	   	ORDER BY 
+	   	 <if test="sort!=null and sort==1">
+	   	  t1.updateTime ASC, 
+	   	 </if>
+	   	  <if test="sort!=null and sort==0">
+	   	   t1.updateTime DESC, 
+	   	 </if>
+	   	 <if test="sort==null">
+	   	  t1.createTime DESC, 
+	   	 </if>
+		  t1.state DESC
+		 <if test="num!=null">
+			 limit 0,#{num}
+		 </if>
+	</select>
+	
+	<!-- 查询订单状态 -->
+	<select id="queryProductOrderState" resultType="com.esuizhen.cloudservice.business.bean.TProductSubscriptionInfo">
+		SELECT
+	    	state,productApplyId,tips,realPrice/100 as realPrice
+	    FROM 
+	        hds_db.s_product_service_apply 
+	    WHERE 
+	   	    buyer = #{buyer} AND orderId=#{orderId} 
+	   	     
+	</select>
+	
+	<!-- 获取服务配置. 如果同一个ProductType有多个配置，只返回第一个-->
+	<select id="getProductServiceConf" resultType="com.esuizhen.cloudservice.business.model.business.ProductServiceConf">
+	    SELECT
+	    	t1.productType,t1.productName,t1.isApplyPushNotifyToDoctor,t1.isApplyPushNotifyToPatient,
+	    	t1.isApplyAcceptNotify,t1.idleCancelTime,t1.expireTime,t1.specType,t1.periodFeeType,t2.repurchaseFlag,t2.isAutoAccept   
+	    FROM
+	    	hds_db.conf_product_service t1,com_trade_db.product_template t2
+	    WHERE
+	    	t1.productTemplateId=t2.productTemplateId AND productType=#{productType}
+	   LIMIT 0,1 	
+	    
+	</select>
+	
+	<!-- 根据productId获取服务配置. -->
+	<select id="getProductServiceConfById" resultType="com.esuizhen.cloudservice.business.model.business.ProductServiceConf">
+	    SELECT
+	    	t1.productType,t1.productName,t1.isApplyPushNotifyToDoctor,t1.isApplyPushNotifyToPatient, 
+	    	t1.isApplyAcceptNotify,t1.idleCancelTime,t1.expireTime,t1.specType,t1.periodFeeType,t1.isApplyPushNotifyToAgent,
+	    	t1.isRefund,
+	    	t3.repurchaseFlag,t3.isAutoAccept      
+	    FROM
+	    	hds_db.conf_product_service t1,com_trade_db.product t2,com_trade_db.product_template t3
+	    WHERE
+	    	t3.productTemplateId=t2.productTemplateId AND t2.productTemplateId=t1.productTemplateId AND t2.productId=#{productId} 
+	</select>
+	
+	<!-- 获取mdt详情 -->
+	<select id="queryMDTDetail" resultType="com.esuizhen.cloudservice.business.model.business.TMDTDetailInfo">
+		SELECT 
+			t1.productApplyId,
+			orderId,
+			productId,
+			orderTitle,
+			progressState,
+			t1.auditState,
+			goal,
+			(CASE WHEN diagnosis IS NULL THEN "" ELSE diagnosis END) diagnosis,
+			(CASE WHEN pathologyDiagnosis IS NULL THEN "" ELSE pathologyDiagnosis END) pathologyDiagnosis,
+			subscriptionFlag,
+			realPrice/100 realPrice,
+			<choose>
+				<when test="role!=null and role==2">
+					(case 
+					  when subscriptionFlag=-1 AND progressState=0 then '等待患者付款'
+					  when progressState=0 then '已付款'
+				      when progressState=1 then '已付款' 
+					  when progressState=2 AND t1.auditState=0 then '资料审核中'
+		    	      when progressState=2 AND t1.auditState=1 then '资料待完善'
+		    	      when progressState=2 AND t1.auditState=2 then '资料审核通过'
+		    	      when progressState=2 AND t1.auditState=3 then '会诊安排中'
+		    	      when progressState=2 AND t1.auditState=4 then '会诊安排失败'
+		    	      when progressState=2 AND t1.auditState=5 then '等待专家会诊'
+		    	      when progressState=2 AND t1.auditState=6 then '会诊成功'
+		    	      when progressState=3 AND t1.auditState=7 then '会诊完成'
+	    	      	else '未知状态' end
+	    	     )auditStateName,
+				</when>
+				<otherwise>
+					(case
+					  when subscriptionFlag=-1 AND progressState=0 then '会诊申请成功'
+					  when progressState=0 then '会诊支付成功'
+				      when progressState=1 then '上传资料成功' 
+					  when progressState=2 AND t1.auditState=0 then '资料审核中'
+		    	      when progressState=2 AND t1.auditState=1 then '资料待完善'
+		    	      when progressState=2 AND t1.auditState=2 then '资料审核通过'
+		    	      when progressState=2 AND t1.auditState=3 then '会诊安排中'
+		    	      when progressState=2 AND t1.auditState=4 then '会诊安排失败'
+		    	      when progressState=2 AND t1.auditState=5 then '等待专家会诊'
+		    	      when progressState=2 AND t1.auditState=6 then '会诊成功'
+		    	      when progressState=3 AND t1.auditState=7 then '会诊完成'
+		    	      else '未知状态' end
+	    	     	)auditStateName,
+				</otherwise>
+			</choose>
+			patientId,
+			t2.trueName buyerName,
+			buyer,
+			contactMobile,
+			t1.consultOrderTime,
+			cause,
+			summarization,
+			consultAttachement,
+			t1.createTime,
+			t1.updateTime,
+			description,
+			treatmentCourse,
+			`explain`,
+			recommendedDoctor
+		FROM
+			hds_db.s_product_service_apply t1
+		LEFT JOIN user_db.u_patient t2 ON t2.userId = buyer
+		LEFT JOIN hds_db.s_mdt_apply t3 ON t1.productApplyId = t3.productApplyId
+		WHERE
+			orderId=#{orderId}
+	</select>
+	
+	<!-- 获取mdt详情WEB -->
+	<select id="queryMDTDetailWeb" resultMap="OptionBaseResultMap">
+		SELECT 
+			t1.productApplyId,
+			t1.orderId,
+			t1.productId,
+			t1.orderTitle,
+			t1.progressState,
+			t1.auditState,
+			t3.goal,
+			t3.diagnosis,
+			t3.pathologyDiagnosis,
+			t1.subscriptionFlag,
+			t1.realPrice/100 realPrice,
+			<choose>
+				<when test="role!=null and role==2">
+					(case 
+					  when t1.subscriptionFlag=-1 AND t1.progressState=0 then '等待患者付款'
+					  when t1.progressState=0 then '已付款'
+				      when t1.progressState=1 then '已付款' 
+					  when t1.progressState=2 AND t1.auditState=0 then '资料审核中'
+		    	      when t1.progressState=2 AND t1.auditState=1 then '资料待完善'
+		    	      when t1.progressState=2 AND t1.auditState=2 then '资料审核通过'
+		    	      when t1.progressState=2 AND t1.auditState=3 then '会诊安排中'
+		    	      when t1.progressState=2 AND t1.auditState=4 then '会诊安排失败'
+		    	      when t1.progressState=2 AND t1.auditState=5 then '等待专家会诊'
+		    	      when t1.progressState=2 AND t1.auditState=6 then '会诊成功'
+		    	      when t1.progressState=3 AND t1.auditState=7 then '会诊完成'
+		    	      else '未知状态' end
+	    	     	)auditStateName,
+				</when>
+				<otherwise>
+					(case 
+					  when t1.subscriptionFlag=-1 AND t1.progressState=0 then '会诊申请成功'
+					  when t1.progressState=0 then '会诊支付成功'
+				      when t1.progressState=1 then '上传资料成功' 
+					  when t1.progressState=2 AND t1.auditState=0 then '资料审核中'
+		    	      when t1.progressState=2 AND t1.auditState=1 then '资料待完善'
+		    	      when t1.progressState=2 AND t1.auditState=2 then '资料审核通过'
+		    	      when t1.progressState=2 AND t1.auditState=3 then '会诊安排中'
+		    	      when t1.progressState=2 AND t1.auditState=4 then '会诊安排失败'
+		    	      when t1.progressState=2 AND t1.auditState=5 then '等待专家会诊'
+		    	      when t1.progressState=2 AND t1.auditState=6 then '会诊成功'
+		    	      when t1.progressState=3 AND t1.auditState=7 then '会诊完成'
+		    	      else '未知状态' end
+	    	     	)auditStateName,
+				</otherwise>
+			</choose>
+			t2.trueName buyerName,
+			t1.buyer,
+			t1.contactMobile,
+			t1.consultOrderTime,
+			t2.trueName,
+			CASE WHEN t2.sex=1 THEN '男' WHEN t2.sex=2 THEN '女' END sex,t2.mobile,t2.patientId,
+			(SELECT identification FROM user_db.u_user WHERE userId=t2.userId) identification,
+			t1.cause,
+			t1.summarization,
+			t1.consultAttachement,
+			t1.createTime,
+			t1.updateTime,
+			t1.description,
+			t1.treatmentCourse,
+			t1.`explain`,
+			t1.recommendedDoctor,
+			t3.id,
+			t3.mdtApplyNo,
+			t3.applyHospitalId,
+			t3.deptId,
+			t1.agentApplicant,
+			t3.recommendedDoctorMobile,
+			t3.clinicImpression,
+			t3.specimenDestroyReson sampleDamageCause,
+			t3.acceptanceTime,
+			t3.basicPathologyUserId,
+			t4.mdtProductExpectConsultDay,
+			t4.productName,
+			t4.addressId,
+			t3.mdtFlowStateId,
+			t3.pathologySectionFlag,
+			t3.sectionCount,
+			t3.sealWaxFlag,
+			t3.sampleNo,
+			t3.specimenIntactFlag sampleCheckFlag,
+			t3.packExpressFlag,
+			t3.expressCompany,
+			t3.expressNo,
+			t3.needRadiateFlag,
+			t3.radiateUserId,
+			t3.specimenName,
+			t3.specimenSource,
+			t3.dataArrangement,
+			(SELECT deptName FROM user_db.u_department WHERE deptId = t3.deptId) deptName,
+			(SELECT hospitalName FROM user_db.u_hospital WHERE hospitalId=t3.applyHospitalId) applyHospitalName,
+			(SELECT address FROM user_db.u_hospital WHERE hospitalId=t3.applyHospitalId) mailAddress,
+			(SELECT trueName FROM user_db.u_doctor WHERE userId=t1.agentApplicant) agentApplicantName,
+			CONCAT(t3.expressCompany,'-',t3.expressNo) logisticsInfo,
+			(SELECT t11.patientNo FROM user_db.r_hospital_patient t11
+				INNER JOIN user_db.u_patient t22 ON t11.patientId=t22.patientId
+			WHERE t22.userId=buyer AND t11.hospitalId=t3.applyHospitalId) patientNo,
+			(SELECT trueName FROM user_db.u_doctor WHERE userId=t3.basicPathologyUserId) basicPathologyUserName,
+			(SELECT mobile FROM user_db.u_doctor WHERE userId=t3.basicPathologyUserId) basicPathologyUserPhome
+		FROM
+			hds_db.s_product_service_apply t1
+			INNER JOIN com_trade_db.product t4 ON t1.productId=t4.productId
+			LEFT JOIN user_db.u_patient t2 ON t2.userId = t1.buyer
+			LEFT JOIN hds_db.s_mdt_apply t3 ON t1.productApplyId = t3.productApplyId
+		WHERE
+			t3.id=#{id}
+		<if test="orderId != null">
+			AND t1.orderId=#{orderId}
+		</if>
+	</select>
+	
+	<!-- 更新mdt状态 -->
+	<update id="changeMDTState" parameterType="com.esuizhen.cloudservice.business.bean.MDTChangeStateReq">
+		UPDATE
+			hds_db.s_product_service_apply
+		SET
+			progressState=#{progressState},
+			<choose>
+				<when test="progressState==2">
+				auditState=#{auditState},
+				</when>
+				<when test="progressState==3">,
+				auditState=7,consultAttachement=#{consultAttachement},
+				</when>
+			</choose>
+			cause=#{cause},
+			updateTime=NOW()
+		WHERE
+			orderId=#{orderId}
+	</update>
+	
+	<!-- 更新mdt状态到上传会诊资料 -->
+	<update id="submitMDTEmr" parameterType="com.esuizhen.cloudservice.business.bean.MdtEmrSubmitReq">
+		UPDATE 
+			hds_db.s_product_service_apply
+		SET
+			progressState=1,
+			auditState=0,
+			updateTime=NOW()
+		WHERE
+			productApplyId=#{productApplyId}
+	</update>
+	
+	<!-- 获取mdt病历资料列表 -->
+	<select id="findMDTEmr" resultType="com.esuizhen.cloudservice.business.model.business.TMDTEmrInfo">
+		SELECT
+			t1.productApplyId,
+			t1.productType,
+			t1.emrType,
+			t1.emrSubType,
+			t1.subdivision,
+			t1.picFileUrl,
+			t1.auditState,
+			t1.cause,
+			t1.remark,
+			t1.mdtReportType,
+			t1.createTime,
+			t2.visitTime
+		FROM
+			hds_db.s_mdt_emr t1
+			LEFT JOIN ehr_db.e_medical_record t2 ON t2.emrId = t1.emrId
+		WHERE t1.productApplyId = #{productApplyId}
+			<if test="productType != null">
+				AND t1.productType = #{productType}
+			</if>
+			<if test="mdtReportType != null and mdtReportType!=0">
+				AND t1.mdtReportType = #{mdtReportType}
+			</if>
+			<if test="emrType != null">
+				AND t1.emrType = #{emrType}
+			</if>
+			<if test="emrSubType != null">
+				AND t1.emrSubType  = #{emrSubType}
+			</if>
+			<if test="subdivision != null">
+				AND t1.subdivision = #{subdivision}
+			</if>
+		ORDER BY t1.createTime ASC
+	</select>
+	
+	<!-- 添加MDT病历 -->
+	<insert id="uploadMDTEmr" parameterType="com.esuizhen.cloudservice.business.bean.MdtEmrUploadReq">
+		INSERT INTO hds_db.s_mdt_emr(
+			productApplyId,
+			emrId,
+			productType,
+			emrType,
+			emrSubType,
+			subdivision,
+			picFileUrl,
+			mdtReportType,
+			remark,
+			createTime
+		)VALUES(
+			#{productApplyId},
+			#{emrId},
+			4,
+			#{emrType},
+			#{emrSubType},
+			#{subdivision},
+			#{picFileUrl},
+			#{mdtReportType},
+			#{remark},
+			NOW()
+		)
+	</insert>
+	
+	<!--  创建套餐配额 -->
+	<insert id="setPackageProductQuota">
+		INSERT INTO 
+	    	hds_db.s_product_quota_usage(productApplyId,productType,childProductType,quota,createTime)
+		SELECT 
+		    #{productApplyId},t1.productType,t1.childProductType,t1.quota,NOW()
+        FROM com_trade_db.product_package_quota t1,com_trade_db.product t2,com_trade_db.product_template t3
+        WHERE      
+             t1.productTemplateId=t2.productTemplateId AND t2.productTemplateId=t3.productTemplateId AND  t2.productId=#{productId}
+	</insert>
+	
+	<!-- 获取套餐配额使用情况，返回一个列表。  -->
+	<!--  这里，t1是父类套餐产品，如私人医生； 如果申请了多个套餐产品，则先取包月，再取包年；再取余额小的那个-->
+	<select id="getProductPackageUsage" resultType="com.esuizhen.cloudservice.business.model.business.TProductPackageQuotaUsageInfo">
+		SELECT
+			t2.quotaUsageId, t2.quota-t2.usage as packageUsageAvailable,t2.quota,t2.usage,t1.orderTitle as parentProductName
+		FROM 
+		   hds_db.s_product_service_apply t1, hds_db.s_product_quota_usage t2
+		WHERE
+			t1.buyer=#{buyer} AND t1.vendor=#{vendor} AND t1.productApplyId=t2.productApplyId 
+			AND t1.productType=t2.productType AND t2.childProductType=#{productType}
+			AND  (t1.state = 2 OR t1.state=4 OR t1.state=10)  
+		ORDER BY t1.productType ASC ,packageUsageAvailable ASC 	
+	
+	</select>
+	
+	<!--  更新套餐内配额使用情况 -->
+	<update id="updatePackageProductQuota">
+		UPDATE 
+		  hds_db.s_product_quota_usage
+		<set>
+			`usage`=`usage`+1,
+		    updateTime = now()
+		
+		</set>
+		
+		WHERE 
+			quotaUsageId=#{quotaUsageId} AND childProductType=#{productType}
+	</update>
+	
+	<!--  退还套餐内配额使用 -->
+	<update id="giveBackPackageProductQuota">
+		UPDATE 
+		  hds_db.s_product_quota_usage
+		<set>
+			`usage`=`usage`-1,
+			 givebackTime = now()
+	
+		</set>
+		
+		WHERE 
+			quotaUsageId=#{quotaUsageId} AND childProductType=#{productType}
+	</update>
+	
+	
+	
+	<!--  根据订单号查询服务申请是否存在 -->
+	<select id="isExistProductApplyByOrderId" resultType="java.lang.Integer">
+		SELECT 
+		 	count(*)
+		FROM
+		    hds_db.s_product_service_apply
+		WHERE
+			orderId=#{orderId}
+	
+	</select>
+	
+	<!--  更新vipFlag -->
+	<update id="updateVipFlag">
+		UPDATE 
+		  hds_db.var_patient_business
+		<set>
+			 <if test="subscriptionFlag!=null">
+			 	subscriptionFlag = #{subscriptionFlag},
+			 </if>
+			 <if test="vipFlag!=null">
+			 	vipFlag=#{vipFlag},
+			 </if>
+			 <if test="periodFeeType!=null">
+			 	periodFeeType=#{periodFeeType},
+			 </if>
+			 <if test="vipBeginTime!=null">
+			 	vipBeginTime=#{vipBeginTime},
+			 </if>
+			 <if test="vipEndTime!=null">
+			 	vipEndTime=#{vipEndTime},
+			 </if>
+			 <if test="vipProductName!=null">
+			 	vipProductName=#{vipProductName},
+			 </if>
+			 
+			 updateTime = now()
+	
+		</set>
+		
+		WHERE 
+			doctorId=#{doctorId} AND patientId=#{patientId}
+	</update>
+	
+	<!--  更新subscriptionFlag -->
+	<update id="updateSubscriptionFlag">
+		UPDATE 
+		  hds_db.var_patient_business
+		<set>
+			 <if test="subscriptionFlag!=null">
+			 	subscriptionFlag = #{subscriptionFlag},
+			 </if>
+			 updateTime = now()
+		</set>
+		WHERE 
+			doctorId=#{doctorId} AND patientId=#{patientId}
+	</update>
+	
+	<!--  更新agentApplyFlag -->
+	<update id="updateAgentApplyFlag">
+		UPDATE 
+		  hds_db.var_patient_business
+		<set>
+			 <if test="subscriptionFlag!=null">
+			 	agentApplyFlag = #{agentApplyFlag},
+			 </if>
+			 updateTime = now()
+		</set>
+		WHERE 
+			doctorId=#{doctorId} AND patientId=#{patientId}
+	</update>
+	
+    <!-- 创建VIP记录-->
+	<insert id="insertVipFlag">
+		INSERT INTO
+			hds_db.var_patient_business(doctorId,patientId,subscriptionFlag,vipFlag,
+			periodFeeType,vipBeginTime,vipEndTime,vipProductName,createTime)
+			
+		VALUES(#{doctorId},#{patientId},#{subscriptionFlag},#{vipFlag},
+		    #{periodFeeType},#{vipBeginTime},#{vipEndTime},#{vipProductName},NOW())
+		 
+	</insert>
+	
+	<!-- 创建Subscription记录-->
+	<insert id="insertSubscriptionFlag">
+		INSERT INTO
+			hds_db.var_patient_business(doctorId,patientId,subscriptionFlag,createTime)
+			
+		VALUES(#{doctorId},#{patientId},#{subscriptionFlag},NOW())
+		 
+	</insert>
+	<!-- 创建agentApplyFlag记录 -->
+	<insert id="insertAgentApplyFlag">
+		INSERT INTO
+			hds_db.var_patient_business(doctorId,patientId,agentApplyFlag,createTime)
+		VALUES(#{doctorId},#{patientId},#{agentApplyFlag},NOW())
+	</insert>
+		
+	<!-- 获取VIP列表 -->
+	<select id="listServiceSubscriptionInfo" resultType="com.esuizhen.cloudservice.business.model.business.TServiceSubscriptionInfo">
+		SELECT
+			uup.userId as patientUserId,
+			vpb.subscriptionFlag as subscriptionFlag,
+			vpb.vipFlag as vipFlag,
+			vpb.periodFeeType as periodFeeType,
+			vpb.vipBeginTime as vipBeginTime,
+			vpb.vipEndTime as vipEndTime,
+			vpb.vipProductName as vipProductName
+		FROM 
+			var_patient_business vpb, user_db.u_patient uup 
+		WHERE 
+			vpb.doctorId=(SELECT doctorId FROM user_db.u_doctor WHERE userId=#{vendor}) 
+			AND uup.patientId=vpb.patientId
+	</select>
+	
+	<!-- 查看Mdt病情评估 -->
+	<select id="queryMdtDiseaseEvaluation" resultType="com.esuizhen.cloudservice.business.bean.MdtDiseaseEvaluationSubmitReq">
+		SELECT
+			t1.productApplyId,
+			t1.diagnosis,
+			t1.pathologyDiagnosis,
+			t1.goal,
+			t2.description,
+			t2.recommendedDoctor
+		FROM
+			hds_db.s_mdt_apply t1
+		LEFT JOIN hds_db.s_product_service_apply t2 ON t1.productApplyId = t2.productApplyId
+		WHERE
+			t1.productApplyId = #{productApplyId}
+		LIMIT 1
+	</select>
+	
+	<!-- 插入Mdt病情评估  -->
+	<insert id="createMdtDiseaseEvaluation">
+		<selectKey resultType="long" keyProperty="id" order="AFTER">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO hds_db.s_mdt_apply (
+			productApplyId,
+			mdtFlowStateId,
+			applyHospitalId,
+			deptId,
+			mdtApplyNo,
+			diagnosis,
+			pathologyDiagnosis,
+			clinicImpression,
+			recommendedDoctorMobile,
+			goal,
+			createTime,
+			updateTime
+		) VALUES (
+			#{productApplyId},
+			#{mdtFlowStateId},
+			#{applyHospitalId},
+			#{deptId},
+			#{mdtApplyNo},
+			#{diagnosis},
+			#{pathologyDiagnosis},
+			#{clinicImpression},
+			#{recommendedDoctorMobile},
+			#{goal},
+			NOW(),
+			NOW()
+		)
+	</insert>
+	
+	<!-- 针对MDT咨询，用于修改流程状态 -->
+	<update id="updateMDTApplyByApplyId">
+		UPDATE hds_db.s_mdt_apply
+		<set>
+			<if test="mdtFlowStateId != null">
+				mdtFlowStateId = #{mdtFlowStateId},
+			</if>
+			updateTime = NOW()
+		</set>
+		<where>
+			productApplyId = #{productApplyId}
+		</where>
+	</update>
+	
+	<!-- 修改病情描述 -->
+	<update id="modifyMdtDescription">
+		UPDATE hds_db.s_product_service_apply
+		<set>
+			description = #{description},
+			updateTime = now()
+		</set>
+		WHERE productApplyId = #{productApplyId}
+	</update>
+	
+	
+	<!-- 获取医院服务信息 -->
+	<select id="getHospitalProductSimpleInfoList" resultType="com.esuizhen.cloudservice.business.bean.THospitalProduct">
+		SELECT
+			t1.userId hospitalUserId,
+			t1.hospitalName
+		FROM
+			user_db.u_hospital t1
+		INNER JOIN com_trade_db.product t2 ON t1.userId = t2.vendor
+		AND t2.state = 1
+		GROUP BY
+			t1.hospitalId
+	</select>
+	
+	<!-- 获取医院服务信息 -->
+	<select id="getHospitalProductMobileByHospitalUserId" resultType="java.lang.String">
+		SELECT
+			contactMobile
+		FROM
+			hds_db.s_hospital_product
+		<choose>
+			<when test="hospitalUserId!=null">
+				WHERE hospitalUserId=#{hospitalUserId}
+			</when>
+			<otherwise>
+				WHERE 1!=1
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 获取医院服务简要信息 -->
+	<select id="getProductApplySimpleInfo" resultType="com.esuizhen.cloudservice.business.bean.TProductSubscriptionSimpleInfo">
+		SELECT
+			t1.productApplyId,
+			t1.orderTitle,
+		    t1.orderId,
+			CASE
+		WHEN t1.productType in(6,7,9,14) THEN
+			(
+				SELECT
+					hospitalName
+				FROM
+					user_db.u_hospital
+				WHERE
+					userId = t1.vendor
+			)
+		ELSE
+			""
+		END hospitalName,
+		 t1.createTime,
+		 t1.expireTime,
+		 t1.contactMobile,
+		t1.serviceCode,
+		t1.productSubType,
+		t1.subscriptionFlag,
+		t1.state,
+		t1.progressState,
+		t1.auditState,
+		t1.cause,
+		t4.expressCompanyName,
+		t1.description,
+		t1.realPrice/100 realPrice,
+		t5.state paymentState,
+		t1.remark
+		FROM
+			(
+				SELECT
+					*
+				FROM
+					hds_db.s_product_service_apply t2
+				<if test="productApplyId!=null">
+					WHERE
+					productApplyId = #{productApplyId}
+				</if>
+			) t1
+		LEFT JOIN
+			hds_db.s_product_service_apply t2
+		ON
+			t1.buyer = t2.buyer
+		AND t1.vendor = t2.vendor
+		AND t1.productType = t2.productType
+		AND t1.productApplyId != t2.productApplyId
+		AND t1.createTime > t2.createTime
+		AND t2.expireTime > NOW()
+		LEFT JOIN
+			com_trade_db.product t3 ON t3.productId=t1.productId
+		LEFT JOIN
+			com_trade_db.meta_express_company t4 ON t3.expressCompanyId=t4.expressCompanyId
+		LEFT JOIN
+			com_trade_db.order_payment t5 ON t5.orderId=t1.orderId
+		ORDER BY
+			t2.createTime DESC
+		LIMIT 1
+	</select>
+	
+	<!-- 获取上一次申请的该服务 -->
+	<select id="getPraveProductApplySimpleInfo" resultType="com.esuizhen.cloudservice.business.bean.TProductSubscriptionSimpleInfo">
+		SELECT
+			productApplyId,
+			orderTitle,
+			expireTime,
+			contactMobile
+		FROM
+			hds_db.s_product_service_apply
+		WHERE
+			buyer = #{buyer}
+		AND vendor = #{vendor}
+		AND productType = #{productType}
+		AND expireTime>NOW()
+		ORDER BY
+			createTime DESC
+		LIMIT 1
+	</select>
+	
+	
+	<!-- 医院服务包订购列表 -->
+	<select id="listProductHospitalSubscription" resultType="com.esuizhen.cloudservice.business.bean.TProductSubscriptionSimpleInfo">
+		SELECT
+			t1.orderTitle,
+			t1.expireTime,
+			t2.hospitalName
+		FROM
+			(
+				SELECT
+					*
+				FROM
+					(
+						SELECT
+							vendor,
+							orderTitle,
+							expireTime,
+							productType
+						FROM
+							hds_db.s_product_service_apply
+						WHERE
+							productType in(6,7,14)
+						<if test="buyer">
+							AND buyer=#{buyer}
+						</if>
+						AND expireTime >= NOW()
+						ORDER BY
+							productType ASC,
+							expireTime DESC
+					) t1
+				GROUP BY
+					vendor,
+					productType
+			) t1
+		LEFT JOIN hds_db.s_hospital_product t2 ON t2.hospitalUserId = t1.vendor
+	</select>
+	
+	<!-- 代理申请列表 -->
+	<select id="getProductApplyListByAgentApplicant" resultType="com.esuizhen.cloudservice.business.bean.TProductSubscriptionSimpleInfo">
+		SELECT 
+			productApplyId,orderId,productId,orderTitle,progressState,t1.auditState,subscriptionFlag,
+			(SELECT productSource FROM com_trade_db.product WHERE productId=t1.productId) productSource,
+			(SELECT id FROM hds_db.s_mdt_apply WHERE productApplyId= t1.productApplyId LIMIT 1 ) id ,
+					(case
+				  when subscriptionFlag=-1 AND progressState=0 then '等待患者付款'
+				  when progressState=0 then '已付款' 
+			      when progressState=1 then '已付款' 
+				  when progressState=2 AND t1.auditState=0 then '资料审核中'
+	    	      when progressState=2 AND t1.auditState=1 then '资料待完善'
+	    	      when progressState=2 AND t1.auditState=2 then '资料审核通过'
+	    	      when progressState=2 AND t1.auditState=3 then '会诊安排中'
+	    	      when progressState=2 AND t1.auditState=4 then '会诊安排失败'
+	    	      when progressState=2 AND t1.auditState=5 then '等待专家会诊'
+	    	      when progressState=2 AND t1.auditState=6 then '会诊成功'
+	    	      when progressState=3 AND t1.auditState=7 then '会诊完成'
+	    	      else '未知状态' end
+	    	     )auditStateName,
+	    	(SELECT mdtFlowStateId FROM hds_db.s_mdt_apply it1 WHERE it1.productApplyId=t1.productApplyId) mdtFlowStateId ,   
+			t1.createTime,buyer,t2.trueName buyerName,t2.userPictureUrl
+			
+		FROM
+			hds_db.s_product_service_apply t1
+		LEFT JOIN user_db.u_patient t2 ON t1.buyer = t2.userId
+		WHERE
+				1=1
+		<if test="agentApplicant!=null">
+			AND t1.agentApplicant=#{agentApplicant}
+		</if>
+		<if test="reqFlag!=null">
+		<![CDATA[ 
+			AND  auditState <6
+		]]>
+		</if>
+		<if test="productType!=null">
+			AND t1.productType=#{productType}
+		</if>
+		ORDER BY t1.createTime DESC
+	</select>
+	
+	<!-- 通过OrderId 获取服务Id -->
+	<select id="getProductApplyIdByOrderId" resultType="java.lang.String">
+		SELECT
+			productApplyId
+		FROM
+			hds_db.s_product_service_apply
+		WHERE
+			orderId =#{orderId}
+	</select>
+	
+	<!-- 获取申请者是否有点显示 -->
+	<select id="queryDotCountByAgentApplicant" resultType="java.lang.Integer">
+		SELECT
+			COUNT(productApplyId)
+		FROM
+			hds_db.s_product_service_apply
+		WHERE
+			dot = 1
+			<if test="agentApplicant!=null">
+				AND agentApplicant =#{agentApplicant}
+			</if>
+	</select>
+	
+	<!-- 修改服务点 -->
+	<update id="modifyProductServiceApplyDot">
+		UPDATE hds_db.s_product_service_apply
+		<set>
+			<if test="dot!=null">
+				dot = #{dot},
+			</if>
+			updateTime = now()
+		</set>
+		WHERE 
+			1=1
+			<if test="orderId!=null">
+				AND orderId = #{orderId}
+			</if>
+			<if test="productApplyId!=null">
+				AND orderId = #{productApplyId}
+			</if>
+			
+	</update>
+	
+	
+	<select id="getBuyerInfoList" resultType="com.esuizhen.cloudservice.business.bean.TProductBuyerInfo">
+	SELECT
+		productApplyId,
+		description,
+		buyer 
+	from hds_db.s_product_service_apply
+	where
+		productType=#{productType} 
+		and vendor=#{vendor}
+		and state=4
+		and auditState=2
+	</select>
+	
+	<update id="updateExpressNum">
+		UPDATE hds_db.s_product_service_apply
+		<set>
+			remark=#{expressNum},
+			auditState=4,
+			updateTime = now()
+		</set>
+		WHERE 
+			productApplyId=#{productApplyId}
+			
+	</update>
+	
+	<!-- 统计数据申请 -->
+	<select id="queryProductApplyStatis" resultType="com.esuizhen.cloudservice.business.bean.TProductApplyStatisInfo">
+		SELECT 
+			sum(CASE WHEN state =1 or (productType=2 and state=2) THEN 1 ELSE 0 END) wait,
+			sum(CASE WHEN state in (3,6,10,11) THEN 1 ELSE 0 END) cancel,
+			sum(CASE WHEN state in (3,6,10,11) and inPackage=0 THEN realPrice ELSE 0 END)/100 loss
+		FROM hds_db.s_product_service_apply
+		where state in (1, 2, 6, 10, 11) 
+			AND vendor=#{vendor} AND productType!=11
+	</select>
+	
+	<!-- 服务申请列表获取 -->
+	<select id="queryProductApplyList" resultType="com.esuizhen.cloudservice.business.bean.TProductApplyInfo">
+		SELECT 
+			t1.productApplyId,t1.productType,t1.buyer,t1.idleCancelTime,t1.consultOrderTime,t1.createTime applyTime
+			,t1.subscriptionFlag,t1.inPackage,t1.state,t1.orderTitle,t1.realPrice/100 realPrice
+			,t2.trueName buyerName,t2.userPictureUrl
+		<if test="reqFlag==1">
+			,(CASE WHEN productType=1 THEN "未回复"
+			WHEN productType = 2 AND state=6 THEN "未处理"
+			WHEN productType = 2 AND state in (10,11) THEN "未通话"
+			ELSE "未处理" END
+			)stateName
+		</if>
+		FROM 
+			hds_db.s_product_service_apply t1
+			LEFT JOIN user_db.u_patient t2 ON t2.userId=t1.buyer
+		WHERE
+		<if test="reqFlag==0">
+			(t1.state =1 or (t1.productType=2 and state=2))
+		</if>
+		<if test="reqFlag==1">
+			state in (6,10,11)
+		</if> 
+		AND vendor=#{vendor}
+		AND t1.productType !=11
+	</select>
+	
+	<!-- 随访报告查询 -->
+	<select id="queryFollowupReportByUserId" resultType="java.lang.String">
+		select productapplyId from hds_db.s_followup_report_apply where sendFlag=0 AND userId=#{userId}
+	</select>
+	
+	<!-- 随访报告插入 -->
+	<insert id="addFollowupReportApply">
+	INSERT INTO hds_db.s_followup_report_apply(productapplyId,userId,email,createTime)
+	VALUES (#{productapplyId},#{userId},#{email},NOW())
+	</insert>
+	
+	<update id="updateAuditStateFinished">
+		UPDATE hds_db.s_product_service_apply
+		<set>
+			auditState=5,
+			updateTime = now()
+		</set>
+		WHERE 
+			productApplyId=#{productApplyId}
+			AND buyer=#{buyer}
+			
+	</update>
+	
+	<!-- 通过productId查询快递公司信息 -->
+	<select id="queryExpressCompanyNameByProductId" resultType="com.westangel.common.bean.ExpressCompany">
+		SELECT
+			t1.*
+		FROM
+			com_trade_db.meta_express_company t1
+		JOIN com_trade_db.product t2 ON t1.expressCompanyId = t2.expressCompanyId
+		AND t2.productId =#{productId}
+	</select>
+	
+	<!-- 获取产品服务的流程号 -->
+	<select id="findMdtApplyNo" resultType="java.lang.String">
+		SELECT
+			CONCAT(#{prefix}, DATE_FORMAT(SYSDATE(),'%Y%m%d'), LPAD(COUNT(1) + 1, 3, 0)) flowNumber
+		FROM hds_db.s_product_service_apply t1
+		WHERE DATE_FORMAT(t1.createTime, '%Y%m%d') = DATE_FORMAT(NOW(), '%Y%m%d') AND t1.productType = #{productType}
+	</select>
+	
+	<select id="findApplyInfo" resultType="com.esuizhen.cloudservice.business.bean.TProductApply">
+		SELECT
+			t1.agentApplicant,
+			t1.productApplyId,
+			t2.doctorId agentApplicantId,
+			t2.trueName agentApplicantName,
+			t3.hospitalId applyHospitalId,
+			(SELECT hospitalName FROM user_db.u_hospital WHERE hospitalId = t3.hospitalId) applyHospitalName , 
+			(SELECT it2.groupName FROM com_trade_db.product_group it1 , com_trade_db.mdt_expert_group it2 WHERE it1.groupId=it2.groupId AND it1.productId=t1.productId LIMIT 1 ) groupName , 
+			t4.trueName patientName,
+			t1.buyer,
+			t4.patientId
+		FROM hds_db.s_product_service_apply t1
+			INNER JOIN user_db.u_doctor t2 ON t2.userId = t1.agentApplicant
+			INNER JOIN user_db.r_hospital_doctor t3 ON t3.doctorId = t2.doctorId
+			INNER JOIN user_db.u_patient t4 ON t4.userId = t1.buyer
+		WHERE t1.productApplyId = #{productApplyId}
+	</select>
+	
+	<!-- 查询患者病历资料或会诊资料是否已转发给患者 -->
+	<select id="findEmrForwardFlag" resultType="java.lang.Integer">
+		SELECT
+			IF(COUNT(0) > 0, 1, 0)
+		FROM hds_db.s_mdt_emr t1
+			INNER JOIN ehr_db.e_medical_record t2 ON t2.emrId = t1.emrId
+		WHERE t1.mdtReportType BETWEEN 1 AND 3
+			AND t1.productApplyId = #{productApplyId}
+			AND t2.patientId = #{patientId}
+			AND t2.visibleFlag IN(1, 2, 4)
+	</select>
+
+	<select id="getServiceProgressInfos" resultType="com.esuizhen.cloudservice.business.bean.ServiceProgressResp">
+		SELECT
+			id,productApplyId,progressName,processState,happenTime,createTime,updateTime
+		FROM
+			hds_db.s_service_process
+		WHERE
+			productApplyId=#{productApplyId}
+		ORDER BY id DESC
+	</select>
+
+	<select id="getRandomProductApplyServiceCode" resultType="java.lang.String">
+		select t.randomNum from (
+			select
+				LPAD(CEILING(RAND()*1000000),6,0) as randomNum
+			from hds_db.s_product_service_apply
+			UNION
+			select
+				LPAD(CEILING(RAND()*1000000),6,0) as randomNum
+		) t where t.randomNum not in (SELECT serviceCode from hds_db.s_product_service_apply
+			where serviceCode is not null) limit 1
+	</select>
+
+	<insert id="insertServiceProgress">
+		INSERT into hds_db.s_service_process(productApplyId,progressName,processState,happenTime,createTime,updateTime)
+		VALUES (#{productApplyId},#{progressName},#{processState},#{happenTime},now(),now())
+	</insert>
+	<select id="getUserDataByCallsid" parameterType="java.lang.String" resultType="java.lang.String">
+		Select userData From com_smscall_db.call_ytx_record
+		WHERE callSid=#{callSid}
+	</select>
+</mapper>

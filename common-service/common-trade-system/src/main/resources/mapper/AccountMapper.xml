@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.westangel.commonservice.trade.dao.AccountDao">
+		
+	<!-- 获取账户基本信息 -->
+	<select id="getBasicAccountInfo"
+		resultType="com.westangel.common.bean.trade.TAccountInfo">
+		SELECT
+			t1.balance/100 as balance,t2.points
+		FROM
+			com_trade_db.account t1,user_db.u_user t2
+		WHERE
+			t1.userId=t2.userId AND t1.userId = #{userId}
+		     
+	</select>	 
+	
+	<!-- 获取账户accountId -->
+	<select id="getAccountId"
+		resultType="Long">
+		SELECT
+			accountId
+		FROM
+			com_trade_db.account
+		WHERE
+			userId=#{userId} AND accountClass = #{accountClass}
+		     
+	</select>	     
+	
+
+	<!-- 获取卖家订单总数。只返回已支付的订单 -->
+	<select id="getVendorTotalOrderNum" resultType="int">
+	SELECT
+	count(*) vendorTotalOrderNum
+	FROM
+	com_trade_db.`order`
+	WHERE
+	vendor = #{userId} AND state>0
+	</select>
+
+	<!-- 获取买家订单总数 -->
+	<select id="getBuyerTotalOrderNum"  resultType="int">
+	    SELECT
+	       count(*) buyerTotalOrderNum
+	    FROM
+		   com_trade_db.`order` 
+		WHERE 	
+	    	buyer = #{userId} AND state>0
+	</select>
+	
+	<!-- 获取卖家总收益 -->
+	<select id="getVendorTotalIncome"  resultType="float">
+	    SELECT
+	       max(totalRevenue)/100 as totalIncome
+	    FROM
+		   com_trade_db.account_revenue_split_record 
+		WHERE 	
+	    	vendor = #{userId}
+	</select>
+		
+	<!-- 获取买家总支出 -->
+	<select id="getBuyerTotalExpenses"  resultType="float" >
+	    SELECT
+	       sum(payment)/100 as totalExpenses
+	    FROM
+		   com_trade_db.account_trade_record 
+		WHERE 	
+	       state=1	AND buyer = #{userId}
+	</select>
+	
+	<!-- 获取账户收支明细信息 -->
+	<select id="listIncomeExpensesDetail"
+		resultType="com.westangel.commonservice.trade.model.account.TIncomeExpensesItemInfo">
+		SELECT
+			t1.recId,t1.remark item,(t1.debit-t1.credit)/100 as income,t1.createTime
+		FROM
+			com_trade_db.account_debit_credit_record t1,com_trade_db.account t2
+		WHERE
+			t1.accountId=t2.accountId AND t2.accountClass=#{accountClass} AND t2.userId = #{userId}
+		ORDER BY createTime DESC     
+	</select>	     
+	
+	<!-- 生成交易记录，由交易系统内部调用 -->
+	<insert id="createTradeRecord"
+		parameterType="com.westangel.commonservice.trade.model.account.TTradeRecordItemInfo">
+		INSERT INTO
+		     `account_trade_record`(tradeId,orderId,buyer,vendor,state,remark,
+		       payment,volume,createTime)
+		VALUES(#{tradeId},#{orderId},#{buyer},#{vendor},#{state},#{remark},
+		       #{payment}*100,#{volume}*100,NOW())
+	</insert>
+	
+	<select id="getTradeRecordItemInfo"
+		resultType="com.westangel.commonservice.trade.model.account.TTradeRecordItemInfo">
+		SELECT 
+		     tradeId,orderId,buyer,vendor,state,remark,
+		     payment/100 as payment,volume/100 as volume,createTime
+		FROM 
+			`account_trade_record`
+		WHERE
+		    orderId=#{orderId}
+		
+	</select>
+	
+
+	<!-- 生成记账单记录，由交易系统内部调用 -->
+	<insert id="createDebitCreditRecord"
+		parameterType="com.westangel.commonservice.trade.model.account.TDebitCreditRecordItemInfo">
+		INSERT INTO
+		     `account_debit_credit_record`(recId,recRelatedId,refId,refTable,accountId,remark,
+		       debit,credit,createTime)
+		VALUES(#{recId},#{recRelatedId},#{refId},#{refTable},#{accountId},#{remark},
+		       #{debit}*100,#{credit}*100,NOW())
+	</insert>
+		
+	<!-- 判断账户是否存在-->
+	<select id="isExistAccount"
+		resultType="int">
+		SELECT
+			count(accountId)
+		FROM
+			com_trade_db.account
+		WHERE
+			userId=#{userId} AND accountClass = #{accountClass}
+		     
+	</select>	
+	
+	<!--  创建账户 -->
+	<insert id="createAccount" parameterType="com.westangel.commonservice.trade.model.account.TAccountPublishInfo">
+	    INSERT INTO
+			com_trade_db.account(accountId,userId,accountName,role,roleName,accountClass,createTime,accountNo)
+		VALUES(#{accountId},#{userId},#{accountName},#{role},#{roleName},#{accountClass},NOW(),
+			  #{accountNo})
+		    
+	    
+	</insert>
+	
+	<!-- 更新账户信息 -->
+	<!-- 数据库中存储的是“分”，传入的是“元”，需要转换下 -->
+	<update id="updateAccountBalance">
+		UPDATE 
+			com_trade_db.account
+		<set>
+			balance=balance+#{debit}*100,
+			updateTime=NOW()
+		</set>
+		WHERE
+			accountId=#{accountId}
+	
+	</update>
+	
+	<!-- 将交易记录设为‘退款' -->
+	<update id="tradeRecordRefund">
+		UPDATE 
+			com_trade_db.account_trade_record
+		<set>
+	       <if test="remark!=null">
+	         remark=#{remark},       
+	        </if>
+			state=2,
+		    updateTime=NOW()
+	
+		</set>
+		WHERE
+			orderId=#{orderId}
+	
+	</update>
+	
+	<update id="updateAccountForDraw">
+		UPDATE 
+			com_trade_db.account
+		<set>
+			balance=balance-#{money},
+			updateTime=NOW()
+		</set>
+		WHERE userId=#{userId}
+	</update>
+	
+	<insert id="addWithDrawRecord">
+		INSERT INTO com_trade_db.account_withdraw_record (
+			userId,
+			withdrawValue,
+			withdrawAccountNo,
+			withdrawAccountType,
+			remark,
+			createTime
+		)
+		VALUES
+		(
+			#{userId},
+			#{money},
+			'999999',
+			'9',
+			'用户提现',
+			NOW()
+		)
+	</insert>
+</mapper>

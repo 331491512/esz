@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.westangel.commonservice.sys.dao.ArticleDao">
+
+	<!-- 查询疾病知识标题 -->
+	<select id="queryArticleTitleList" resultType="com.westangel.commonservice.sys.bean.TArticleTitle">
+		SELECT t1.articleTitle,t1.articleId,t1.pictureUrl,t1.introduction
+		from sys_knowledge_article t1
+		<!--<if test="diseaseTypeId!=null and diseaseTypeId!=0">
+		JOIN meta_knowledge_tag t2 ON LOCATE(t2.tagName,tags) 
+		JOIN r_knowledge_tag_disease_type t3 ON t2.tagId=t3.tagId AND t3.diseaseTypeId = #{diseaseTypeId}
+		</if>-->
+		<if test="doctorId!=null">
+			JOIN user_db.r_doctor_knowledge_article t4 ON t4.articleId=t1.articleId AND t4.doctorId = #{doctorId}
+		</if>
+		<if test="tags!=null">
+			JOIN operation_db.r_article_tag t5 ON t5.articleId=t1.articleId AND t5.tagId IN
+			<foreach collection="tags" item="item" open="(" close=")" separator=",">#{item.tagId}</foreach>
+		</if>
+		<if test="tagId!=null">
+			JOIN operation_db.r_article_tag t2 ON t2.articleId=t1.articleId AND t2.tagId=#{tagId}
+		</if>
+		where t1.state=1
+		<if test="doctorId==null or doctorId==''">
+			and t1.articleType=1
+		</if>
+		<if test="keyword!=null and keyword!=''">
+			and t1.articleTitle LIKE "%"#{keyword}"%"  <!-- "%"#{keyword}"%" 
+				"%"||#{keyword}||"%" CONCAT('%',#{keyword},'%') allok -->
+		</if>
+		<!--<if test="tag!=null and tag!=''">
+			and LOCATE(#{tag},t1.tags)
+		</if>-->
+		GROUP BY t1.articleId
+		<if test="isRandom==0">
+			ORDER BY t1.sortIndex
+		</if>
+		<if test="isRandom==1">
+			ORDER BY RAND()
+		</if>
+	</select>
+
+	<!-- 查询疾病知识内容 -->
+	<select id="queryArticleContent" resultType="java.util.LinkedHashMap">
+		SELECT articleTitle,content,articleId,pictureUrl,introduction FROM com_sys_db.sys_knowledge_article where
+		articleId=#{articleId}
+	</select>
+	
+	<!-- 疾病信息获取  LOCATE(t1.tagName, t2.tags) -->
+	<select id="queryArticleMetaEdiseaseBodyPartTypeList" resultType="java.util.LinkedHashMap">
+		SELECT
+			t1.tagId,
+			t3.tagName
+		FROM
+			com_sys_db.sys_tag t3
+			JOIN operation_db.r_article_tag t1 ON t1.tagId=t3.tagId
+		WHERE
+			t3.tagTypeId=#{tagType}
+		GROUP BY
+			tagId
+		ORDER BY
+			tagId ASC
+	</select>
+
+	<select id="findIcdDiseaseTypeIdByPatientId" resultType="java.lang.Integer">
+		select sourceDiseaseTypeId from user_db.u_patient where patientId=#{patientId}
+	</select>
+
+	<select id="findArticleTitleByTag" resultType="com.westangel.commonservice.sys.bean.TArticleTitle">
+		SELECT t1.articleTitle,t1.articleId,t1.pictureUrl,t1.introduction
+		FROM sys_knowledge_article t1
+		<if test="tagId!=null">
+			JOIN operation_db.r_article_tag t2 ON t2.articleId=t1.articleId AND t2.tagId=#{tagId}
+		</if>
+		WHERE t1.state=1 and t1.articleType=1
+		<if test="keyword!=null and keyword!=''">
+			and t1.articleTitle LIKE "%"#{keyword}"%"
+		</if>
+		<if test="tagId!=null">
+			GROUP BY t1.articleId
+		</if>
+		<if test="isRandom==0">
+			ORDER BY t1.sortIndex
+		</if>
+		<if test="isRandom==1">
+			ORDER BY RAND()
+		</if>
+	</select>
+
+	<select id="findArticleListByRule" resultType="com.westangel.commonservice.sys.bean.TArticleTitle">
+		SELECT
+			t1.articleTitle,t1.articleId,t1.pictureUrl,t1.introduction
+		FROM com_sys_db.sys_knowledge_article t1
+		<if test="req.tagInfos!=null">
+			JOIN operation_db.r_article_tag t2 ON t1.articleId=t2.articleId AND t2.tagId IN
+			<foreach collection="req.tagInfos" item="item" open="(" close=")" separator=",">#{item.tagId}</foreach>
+		</if>
+		where t1.state=1
+		<if test="articleTypes!=null">
+			and t1.articleType IN
+			<foreach collection="articleTypes" item="item" open="(" close=")" separator=",">#{item}</foreach>
+		</if>
+		GROUP BY t1.articleId
+		ORDER BY t1.sortIndex,t1.createTime DESC
+	</select>
+
+</mapper>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_incre_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.CloudEciDetectionDetailDao" >
+
+	<select id="findByDetectionDetailId" resultType="com.esuizhen.cloudservice.sync.model.EciDetectionDetail">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM lis_db.eci_detection_detail t1
+		WHERE t1.detectionDetailId=#{detectionDetailId}
+	</select>
+	
+	<sql id="base_column_list">
+		t1.detectionDetailId, 
+		t1.patientId, 
+		t1.patientNo, 
+		t1.seqNo, 
+		t1.detectionItemId, 
+		t1.detectionItemCode,
+		t1.detectionItemName,
+		t1.detectionResult, 
+		t1.prompt, 
+		t1.resultType, 
+		t1.unit, 
+		t1.refrenceRange,
+		t1.refrenceRangeMin, 
+		t1.refrenceRangeMax, 
+		t1.detectionMethod, 
+		t1.reagentBrand, 
+		t1.instrument,
+		t1.createTime, 
+		t1.detailID, 
+		t1.mainID, 
+		t1.updateTime, 
+		t1.syncTime, 
+		t1.syncFlag
+	</sql>
+
+	<insert id="insert">
+		INSERT INTO lis_db.eci_detection_detail(
+			detectionDetailId, 
+			detectionReportId, 
+			patientId, 
+			patientNo, 
+			seqNo, 
+			detectionTypeName, 
+			detectionItemId,
+			detectionItemCode, 
+			rawDetectionItemCode, 
+			detectionItemName,
+			detectionItemEnglishName, 
+			detectionResult,
+			prompt, 
+			unit, 
+			refrenceRange, 
+			refrenceRangeMin, 
+			refrenceRangeMax, 
+			detectionMethod,
+			reagentBrand, 
+			instrument,
+			createTime, 
+			updateTime, 
+			syncTime, 
+			syncFlag, 
+			mainID, 
+			detailID,
+			<!-- add by fanpanwei -->
+			promptType,
+			rawCreateTime
+		)VALUES(
+			#{detectionDetailId},
+			#{detectionReportId},
+			#{patientId},
+			#{patientNo}, 
+			#{seqNo},
+			#{detectionTypeName},
+			#{detectionItemId},
+			#{detectionItemCode}, 
+			#{rawDetectionItemCode}, 
+			#{detectionItemName}, 
+			#{detectionItemEnglishName},
+			#{detectionResult},
+			#{prompt}, 
+			#{unit}, 
+			#{refrenceRange}, 
+			#{refrenceRangeMin}, 
+			#{refrenceRangeMax},
+			#{detectionMethod}, 
+			#{reagentBrand}, 
+			#{instrument},
+			#{createTime}, 
+			#{updateTime}, 
+			NOW(), 
+			#{syncFlag}, 
+			#{mainID}, 
+			#{detailID},
+			<!-- add by fanpanwei -->
+			#{promptType},
+			#{rawCreateTime}
+		)
+	</insert>
+</mapper>

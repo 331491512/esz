@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.westangel.commonservice.trade.dao.MetaInfoDao">
+	
+	
+	
+
+	<!-- 获取快递公司Id和名称元数据列表 -->
+	<select id="queryMetaInfoExpressCompanyList"
+		resultType="com.westangel.commonservice.trade.bean.TExpressCompanyInfo">
+		SELECT
+			expressCompanyId,
+			expressCompanyName
+		FROM
+			com_trade_db.meta_express_company
+		WHERE
+			hospitalId = 0 
+		 <if test="hospitalId!=null">
+		 	OR hospitalId=#{hospitalId}
+		 </if>	
+	</select>
+</mapper>

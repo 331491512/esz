@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  
+ <mapper namespace="com.esuizhen.cloudservice.user.dao.TagDao">
+  	<select id="findmenuTagList" resultType="com.esuizhen.cloudservice.user.bean.Tag" parameterType="java.util.Map">
+  		SELECT t1.tagId,t1.tagName,t1.tagTypeId,t1.tagDescription,t1.createTime,t2.tagTypeName from com_sys_db.sys_tag t1 inner JOIN com_sys_db.sys_tag_type t2 on t1.tagTypeId = t2.tagTypeId
+  		<where>
+  			<if test="tagTypeId != null and tagTypeId !=''">
+  				t1.tagTypeId = #{tagTypeId}
+  			</if>
+  			<if test="tagName != null and tagName !=''">
+  				and t1.tagName like concat("%",#{tagName},"%")
+  			</if>
+  		</where>
+  	</select>
+  	
+  	<select id="getTagIdByTagName" resultType ="java.lang.Integer">
+	  select tagId from com_sys_db.sys_tag
+	  <where>
+	      tagName=#{tem}
+	  </where>
+	</select>
+	
+	<select id="getTagIdByArticleId" resultType ="java.lang.Integer">
+	  select tagId from operation_db.r_article_tag
+	  where articleId=#{articleId}
+	</select>
+	
+	<insert id="saveArticleTag">
+	   INSERT INTO
+	   operation_db.r_article_tag
+	   (articleid,tagId,createTime,updateTime) 
+	   VALUES
+	   <foreach collection="list" item="record" separator=",">
+	   (
+	    #{articleId},
+	    #{record},
+	    NOW(),
+	    NOW()
+	   )
+	   </foreach>
+	</insert>
+ </mapper>

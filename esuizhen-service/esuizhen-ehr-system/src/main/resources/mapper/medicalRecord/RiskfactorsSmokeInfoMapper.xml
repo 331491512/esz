@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.medicalRecord.RiskfactorsSmokeInfoDao" >
+  <resultMap id="BaseResultMap" type="com.esuizhen.cloudservice.ehr.bean.RiskfactorsSmokeInfo" >
+    <id column="smokeInfoId" property="smokeInfoId" jdbcType="VARCHAR" />
+    <result column="riskfactorsId" property="riskfactorsId" jdbcType="VARCHAR" />
+    <result column="firstAge" property="firstAge" jdbcType="INTEGER" />
+    <result column="sustainYear" property="sustainYear" jdbcType="INTEGER" />
+    <result column="dailyCount" property="dailyCount" jdbcType="INTEGER" />
+    <result column="abstainYear" property="abstainYear" jdbcType="INTEGER" />
+    <result column="passivitySmoke" property="passivitySmoke" jdbcType="INTEGER" />
+    <result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    smokeInfoId, riskfactorsId, firstAge, sustainYear, dailyCount, abstainYear, passivitySmoke, 
+    createTime, updateTime
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from e_riskfactors_smoke_info
+    where smokeInfoId = #{smokeInfoId,jdbcType=VARCHAR}
+  </select>
+  <select id="queryOne" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from e_riskfactors_smoke_info
+    where riskfactorsId = #{riskfactorsId}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from e_riskfactors_smoke_info
+    where smokeInfoId = #{primaryKeyId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.esuizhen.cloudservice.ehr.bean.RiskfactorsSmokeInfo" >
+    insert into e_riskfactors_smoke_info (smokeInfoId, riskfactorsId, firstAge, 
+      sustainYear, dailyCount, abstainYear, 
+      passivitySmoke, createTime, updateTime
+      )
+    values (#{smokeInfoId,jdbcType=VARCHAR}, #{riskfactorsId,jdbcType=VARCHAR}, #{firstAge,jdbcType=INTEGER}, 
+      #{sustainYear,jdbcType=INTEGER}, #{dailyCount,jdbcType=INTEGER}, #{abstainYear,jdbcType=INTEGER}, 
+      #{passivitySmoke,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.esuizhen.cloudservice.ehr.bean.RiskfactorsSmokeInfo" >
+    insert into e_riskfactors_smoke_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="smokeInfoId != null" >
+        smokeInfoId,
+      </if>
+      <if test="riskfactorsId != null" >
+        riskfactorsId,
+      </if>
+      <if test="firstAge != null" >
+        firstAge,
+      </if>
+      <if test="sustainYear != null" >
+        sustainYear,
+      </if>
+      <if test="dailyCount != null" >
+        dailyCount,
+      </if>
+      <if test="abstainYear != null" >
+        abstainYear,
+      </if>
+      <if test="passivitySmoke != null" >
+        passivitySmoke,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+      <if test="updateTime != null" >
+        updateTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="smokeInfoId != null" >
+        #{smokeInfoId,jdbcType=VARCHAR},
+      </if>
+      <if test="riskfactorsId != null" >
+        #{riskfactorsId,jdbcType=VARCHAR},
+      </if>
+      <if test="firstAge != null" >
+        #{firstAge,jdbcType=INTEGER},
+      </if>
+      <if test="sustainYear != null" >
+        #{sustainYear,jdbcType=INTEGER},
+      </if>
+      <if test="dailyCount != null" >
+        #{dailyCount,jdbcType=INTEGER},
+      </if>
+      <if test="abstainYear != null" >
+        #{abstainYear,jdbcType=INTEGER},
+      </if>
+      <if test="passivitySmoke != null" >
+        #{passivitySmoke,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.cloudservice.ehr.bean.RiskfactorsSmokeInfo" >
+    update e_riskfactors_smoke_info
+    <set >
+      <if test="riskfactorsId != null" >
+        riskfactorsId = #{riskfactorsId,jdbcType=VARCHAR},
+      </if>
+      <if test="firstAge != null" >
+        firstAge = #{firstAge,jdbcType=INTEGER},
+      </if>
+      <if test="sustainYear != null" >
+        sustainYear = #{sustainYear,jdbcType=INTEGER},
+      </if>
+      <if test="dailyCount != null" >
+        dailyCount = #{dailyCount,jdbcType=INTEGER},
+      </if>
+      <if test="abstainYear != null" >
+        abstainYear = #{abstainYear,jdbcType=INTEGER},
+      </if>
+      <if test="passivitySmoke != null" >
+        passivitySmoke = #{passivitySmoke,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where smokeInfoId = #{smokeInfoId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.esuizhen.cloudservice.ehr.bean.RiskfactorsSmokeInfo" >
+    update e_riskfactors_smoke_info
+    set riskfactorsId = #{riskfactorsId,jdbcType=VARCHAR},
+      firstAge = #{firstAge,jdbcType=INTEGER},
+      sustainYear = #{sustainYear,jdbcType=INTEGER},
+      dailyCount = #{dailyCount,jdbcType=INTEGER},
+      abstainYear = #{abstainYear,jdbcType=INTEGER},
+      passivitySmoke = #{passivitySmoke,jdbcType=INTEGER},
+      createTime = #{createTime,jdbcType=TIMESTAMP},
+      updateTime = #{updateTime,jdbcType=TIMESTAMP}
+    where smokeInfoId = #{smokeInfoId,jdbcType=VARCHAR}
+  </update>
+</mapper>

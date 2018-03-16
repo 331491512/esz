@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.temp.TempUserDao" >
+    <!-- 向temp表推送数据 -->
+    <insert id="insert">
+		INSERT INTO server_sync_temp_db.u_user (
+			userId,uuid,userName,role,accountType,infoState,trueName,createTime,
+			firstLoginTime,updateTime,cryptPasswd,nickName,mobile,sex,birthDate,
+			userPictureUrl,email,nationId,nation,nationalityId,country,cityId,cityCode,
+			city,address,nativePlace,birthPlaceCode,birthPlaceAddress,occupationId,profession,
+			company,idType,identification,marriageStatus,signature,education,school,interest,
+			idFileUrl,state,subroles,points,lastLoginTime,sourceFlag,userFlag,migrateFlag,
+			relatedUserId,lastLogoutTime,appFlag,weixinFlag,pcFlag,patientNo,clinicNo,
+			staffNo,companyTel,comZipCode,rawCreateTime,mergeFlag,mergeFrom,
+			mergeFromUuid,mergeTarget,mergeTargetUuid,mergeTime,batchId,tobFlag,
+			rawOccupationId,rawProfession
+		)
+		VALUES(  
+			#{userId},#{uuid},#{userName},#{role},#{accountType},#{infoState},#{trueName},#{createTime},
+			#{firstLoginTime},#{updateTime},#{cryptPasswd},#{nickName},#{mobile},#{sex},#{birthDate},
+			#{userPictureUrl},#{email},#{nationId},#{nation},#{nationalityId},#{country},#{cityId},#{cityCode},
+			#{city},#{address},#{nativePlace},#{birthPlaceCode},#{birthPlaceAddress},#{occupationId},#{profession},
+			#{company},#{idType},#{identification},#{marriageStatus},#{signature},#{education},#{school},#{interest},
+			#{idFileUrl},#{state},#{subroles},#{points},#{lastLoginTime},#{sourceFlag},#{userFlag},#{migrateFlag},
+			#{relatedUserId},#{lastLogoutTime},#{appFlag},#{weixinFlag},#{pcFlag},#{patientNo},#{clinicNo},
+			#{staffNo},#{companyTel},#{comZipCode},#{rawCreateTime},#{mergeFlag},#{mergeFrom},
+			#{mergeFromUuid},#{mergeTarget},#{mergeTargetUuid},#{mergeTime},#{batchId},#{tobFlag},
+			#{rawOccupationId},#{rawProfession}
+		)
+	</insert>
+	<!-- 获取同步结果 -->
+   <select id="getBatChDataResult" resultType="com.esuizhen.server.sync.bean.TBatchDataResultInfo" parameterType="java.lang.String">
+		SELECT
+			t1.uuid AS resultId,
+			t1.syncFlag,
+			t1.syncTime,
+			t1.cause
+		FROM
+			sc_db.u_user_sync_result_server t1
+		WHERE
+			t1.batchId = #{batchId}
+	</select>
+	
+	<!-- 获取用户信息 -->
+	<select id="queryUser" resultType="com.esuizhen.server.sync.model.temp.SyncUser">
+		SELECT 
+		t1.uuid,
+		t1.userName,
+		t1.role,
+		t1.accountType,
+		t1.infoState,
+		t1.trueName,
+		t1.createTime,
+		t1.firstLoginTime,
+		t1.updateTime,
+		t1.cryptPasswd,
+		t1.nickName,
+		t1.mobile,
+		t1.sex,
+		t1.birthDate,
+		t1.userPictureUrl,
+		t1.email,
+		t1.nationId,
+		t1.nation,
+		t1.nationalityId,
+		t1.country,
+		t1.cityId,
+		t1.cityCode,
+		t1.city,
+		t1.address,
+		t1.nativePlace,
+		t1.birthPlaceCode,
+		t1.birthPlaceAddress,
+		t1.rawOccupationId,
+		t1.rawProfession,
+		t1.occupationId,
+		t1.profession,
+		t1.company,
+		t1.idType,
+		t1.identification,
+		t1.marriageStatus,
+		t1.signature,
+		t1.education,
+		t1.school,
+		t1.interest,
+		t1.idFileUrl,
+		t1.state,
+		t1.subroles,
+		t1.points,
+		t1.lastLoginTime,
+		t1.sourceFlag,
+		t1.userFlag,
+		t1.migrateFlag,
+		t1.relatedUserId,
+		t1.lastLogoutTime,
+		t1.appFlag,
+		t1.weixinFlag,
+		t1.pcFlag,
+		t1.patientNo,
+		t1.clinicNo,
+		t1.staffNo,
+		t1.companyTel,
+		t1.comZipCode,
+		t1.rawCreateTime,
+		t1.mergeFlag,
+		t1.mergeFromUuid,
+		t1.mergeTargetUuid,
+		t1.mergeTime,
+		t1.tobFlag,
+		t1.batchId
+		FROM server_sync_temp_db.u_user t1
+		WHERE t1.batchId=#{batchId} AND t1.uuid=#{uuid}
+	</select>
+</mapper>

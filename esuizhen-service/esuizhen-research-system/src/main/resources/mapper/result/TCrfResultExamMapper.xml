@@ -1,0 +1,531 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TCrfResultExamDao">
+	<resultMap type="com.esuizhen.cloudservice.research.model.result.TCrfResultMainInfo" id="baseTCrfResultMainInfoCrfResultExamsResultMap">
+		<id column="crfResultId" property="crfResultId"/>
+		<result column="crfObserveId" property="crfObserveId"/>
+		<result column="subjectElementId" property="subjectElementId"/>
+		<result column="projectId" property="projectId"/>
+		<result column="crfCourseItemTime" property="crfCourseItemTime"/>
+		<result column="happenTime" property="happenTime"/>
+		<result column="creatorId" property="creatorId"/>
+		<result column="patientId" property="patientId"/>
+		<result column="dataSourceType" property="dataSourceType"/>
+		<result column="dataSourceTypeName" property="dataSourceTypeName"/>
+		
+		<collection property="crfResult" javaType="ArrayList" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultExam">
+			<id column="crfExamResultId" property="crfExamResultId"/>
+			<result column="crfResultId" property="crfResultId"/>
+			<result column="examParentTypeId" property="examParentTypeId"/>
+			<result column="examTypeId" property="examTypeId"/>
+			<result column="examTypeName" property="examTypeName"/>
+			<result column="excuteDate" property="excuteDate"/>
+			<result column="reportDate" property="reportDate"/>
+			<result column="examFinding" property="examFinding"/>
+			<result column="examConclusion" property="examConclusion"/>
+			<result column="pathologicalSampleFlag" property="pathologicalSampleFlag"/>
+			<result column="bodyCode" property="bodyCode"/>
+			<result column="bodyPart" property="bodyPart"/>
+			<result column="nidusCode" property="nidusCode"/>
+			<result column="nidus" property="nidus"/>
+			<result column="nidusSourceFlag" property="nidusSourceFlag"/>
+			<result column="longestDiameter" property="longestDiameter"/>
+			<result column="shortestDiameter" property="shortestDiameter"/>
+			<result column="examWay" property="examWay"/>
+			<result column="pathologicalSampleType" property="pathologicalSampleType"/>
+			<result column="preservationOrganization" property="preservationOrganization"/>
+			<result column="collectionTime" property="collectionTime"/>
+			<result column="collectionWay" property="collectionWay"/>
+			<result column="medicalRecordNumber" property="medicalRecordNumber"/>
+			<result column="productionType" property="productionType"/>
+			<result column="productionTypeDescription" property="productionTypeDescription"/>
+			<result column="pathologicalTissueOrigin" property="pathologicalTissueOrigin"/>
+			<result column="createTime" property="createTime"/>
+			<result column="updateTime" property="updateTime"/>
+			<result column="parentCrfCourseItemId" property="parentCrfCourseItemId"/>
+			<result column="parentCrfObserveId" property="parentCrfObserveId"/>
+			<result column="parentSubjectElementId" property="parentSubjectElementId"/>
+			<result column="dataSourceType" property="dataSourceType"/>
+			<result column="dataSourceTypeName" property="dataSourceTypeName"/>
+			<result column="dataSourceTime" property="dataSourceTime"/>
+			<result column="emrId" property="emrId"/>
+			
+			<collection property="examResultDetailList" javaType="ArrayList" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultExamDetail">
+				<id column="crfExamResultDetailId" property="crfExamResultDetailId"/>
+				<result column="detail_seqNo" property="seqNo"/>
+				<result column="detail_organCode" property="organCode"/>
+				<result column="detail_organ" property="organ"/>
+				<result column="detail_nidusCode" property="nidusCode"/>
+				<result column="detail_nidus" property="nidus"/>
+				<result column="detail_nidusSourceFlag" property="nidusSourceFlag"/>
+				<result column="detail_longestDiameter" property="longestDiameter"/>
+				<result column="detail_shortestDiameter" property="shortestDiameter"/>
+				<result column="detail_flag" property="flag"/>
+				<result column="detail_createTime" property="createTime"/>
+				<result column="detail_updateTime" property="updateTime"/>
+			</collection>
+		</collection>
+	</resultMap>
+	
+	<resultMap type="com.esuizhen.cloudservice.research.model.result.TCrfResultExam" id="baseCrfResultExamsResultMap">
+		<id column="crfExamResultId" property="crfExamResultId"/>
+		<result column="crfResultId" property="crfResultId"/>
+		<result column="examParentTypeId" property="examParentTypeId"/>
+		<result column="examTypeId" property="examTypeId"/>
+		<result column="examTypeName" property="examTypeName"/>
+		<result column="excuteDate" property="excuteDate"/>
+		<result column="reportDate" property="reportDate"/>
+		<result column="examFinding" property="examFinding"/>
+		<result column="examConclusion" property="examConclusion"/>
+		<result column="pathologicalSampleFlag" property="pathologicalSampleFlag"/>
+		<result column="bodyCode" property="bodyCode"/>
+		<result column="bodyPart" property="bodyPart"/>
+		<result column="nidusCode" property="nidusCode"/>
+		<result column="nidus" property="nidus"/>
+		<result column="nidusSourceFlag" property="nidusSourceFlag"/>
+		<result column="longestDiameter" property="longestDiameter"/>
+		<result column="shortestDiameter" property="shortestDiameter"/>
+		<result column="examWay" property="examWay"/>
+		<result column="pathologicalSampleType" property="pathologicalSampleType"/>
+		<result column="preservationOrganization" property="preservationOrganization"/>
+		<result column="collectionTime" property="collectionTime"/>
+		<result column="collectionWay" property="collectionWay"/>
+		<result column="medicalRecordNumber" property="medicalRecordNumber"/>
+		<result column="productionType" property="productionType"/>
+		<result column="productionTypeDescription" property="productionTypeDescription"/>
+		<result column="pathologicalTissueOrigin" property="pathologicalTissueOrigin"/>
+		<result column="createTime" property="createTime"/>
+		<result column="updateTime" property="updateTime"/>
+		
+		<collection property="examResultDetailList" javaType="ArrayList" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultExamDetail">
+			<id column="crfExamResultDetailId" property="crfExamResultDetailId"/>
+			<result column="detail_seqNo" property="seqNo"/>
+			<result column="detail_organCode" property="organCode"/>
+			<result column="detail_organ" property="organ"/>
+			<result column="detail_nidusCode" property="nidusCode"/>
+			<result column="detail_nidus" property="nidus"/>
+			<result column="detail_nidusSourceFlag" property="nidusSourceFlag"/>
+			<result column="detail_longestDiameter" property="longestDiameter"/>
+			<result column="detail_shortestDiameter" property="shortestDiameter"/>
+			<result column="detail_flag" property="flag"/>
+			<result column="detail_createTime" property="createTime"/>
+			<result column="detail_updateTime" property="updateTime"/>
+		</collection>
+	</resultMap>
+	
+	<select id="findCrfResultExamExcuteDatesRecord" resultType="com.esuizhen.cloudservice.research.model.result.TCrfResultExam">
+		SELECT * FROM(
+			SELECT
+				t1.crfExamResultId, t1.excuteDate, t1.examParentTypeId, t1.examTypeId, t1.examTypeName
+			FROM
+				pro_db.crf_result_exam t1
+			INNER JOIN pro_db.crf_result_main t2 ON t1.crfResultId = t2.crfResultId
+			WHERE
+				t2.projectId = #{projectId}
+				AND t2.patientId = #{patientId}
+				<if test="examParentTypeId != null">
+					AND t1.examParentTypeId = #{examParentTypeId}
+				</if>
+			ORDER BY t1.createTime DESC
+		) f1
+		GROUP BY f1.examParentTypeId, f1.examTypeId, f1.excuteDate
+		ORDER BY f1.excuteDate
+		<choose>
+			<when test="orderType == 'ASC'">
+				ASC
+			</when>
+			<otherwise>
+				DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findCrfResultExamsRecord" resultMap="baseTCrfResultMainInfoCrfResultExamsResultMap">
+		SELECT
+			t2.crfObserveId, t2.subjectElementId, t2.projectId, t2.crfCourseItemTime, t2.creatorId, t2.patientId,
+			<include refid="base_column_list"></include>,
+			<include refid="base_detail_column_list"></include>,
+			t4.crfCourseItemId parentCrfCourseItemId,
+			t4.crfObserveId parentCrfObserveId,
+			t4.subjectElementId parentSubjectElementId
+		FROM pro_db.crf_result_exam t1
+			LEFT JOIN pro_db.crf_result_main t2 ON t1.crfResultId=t2.crfResultId
+			LEFT JOIN pro_db.crf_result_exam_detail d1 ON t1.crfExamResultId = d1.crfExamResultId
+			INNER JOIN pro_db.crf_observation_subject_element t3 ON t2.crfObserveId = t3.crfObserveId
+			INNER JOIN pro_db.crf_observation_subject_element t4 ON t3.parentId = t4.subjectElementId AND t3.crfCourseItemId = t4.crfCourseItemId
+		WHERE t2.projectId = #{projectId} AND t2.patientId = #{patientId}
+		AND DATE_FORMAT(t1.excuteDate, '%Y-%m-%d') = DATE_FORMAT(#{excuteDate}, '%Y-%m-%d')
+		<if test="examParentTypeId != null">
+			AND t1.examParentTypeId = #{examParentTypeId}
+		</if>
+		AND t1.examTypeId = #{examTypeId}
+		AND t1.crfExamResultId = #{crfExamResultId}
+		ORDER BY t1.createTime DESC
+	</select>
+	
+	<select id="findCrfResultExams" resultMap="baseTCrfResultMainInfoCrfResultExamsResultMap">
+		SELECT
+			t2.crfObserveId, t2.subjectElementId, t2.projectId, t2.crfCourseItemTime, t2.creatorId, t2.patientId,
+			<include refid="base_column_list"></include>,
+			<include refid="base_detail_column_list"></include>
+		FROM pro_db.crf_result_exam t1
+			LEFT JOIN pro_db.crf_result_main t2 ON t1.crfResultId=t2.crfResultId
+			LEFT JOIN pro_db.crf_observation_subject_element t3 ON t2.crfObserveId=t3.crfObserveId
+			LEFT JOIN pro_db.crf_result_exam_detail d1 ON t1.crfExamResultId = d1.crfExamResultId
+		WHERE t3.crfObserveId = #{crfObserveId} AND t2.patientId = #{patientId}
+		ORDER BY t1.`index` ASC, d1.seqNo ASC
+	</select>
+	
+	<sql id="base_column_list">
+		t1.crfExamResultId, 
+		t1.crfResultId, 
+		t1.examParentTypeId, 
+		t1.examTypeId, 
+		t1.examTypeName, 
+		t1.excuteDate, 
+		t1.reportDate, 
+		t1.examFinding,
+		t1.examConclusion, 
+		t1.pathologicalSampleFlag, 
+		t1.bodyCode, 
+		t1.bodyPart, 
+		t1.nidusCode, 
+		t1.nidus, 
+		t1.nidusSourceFlag, 
+		t1.longestDiameter,
+		t1.shortestDiameter, 
+		t1.examWay, 
+		t1.pathologicalSampleType, 
+		t1.preservationOrganization, 
+		t1.collectionTime, 
+		t1.collectionWay,
+		t1.medicalRecordNumber, 
+		t1.productionType, 
+		t1.productionTypeDescription, 
+		t1.pathologicalTissueOrigin, 
+		t1.createTime, 
+		t1.updateTime,
+		t1.dataSourceType,
+		(CASE WHEN t1.dataSourceType = 1 THEN '患者上传' WHEN t1.dataSourceType = 3 THEN '院内检查' END) dataSourceTypeName,
+		t1.dataSourceTime,
+		t1.emrId
+	</sql>
+	
+	<sql id="base_detail_column_list">
+		d1.crfExamResultDetailId, 
+		d1.seqNo detail_seqNo, 
+		d1.organCode detail_organCode, 
+		d1.organ detail_organ,
+		d1.nidusCode detail_nidusCode, 
+		d1.nidus detail_nidus, 
+		d1.nidusSourceFlag detail_nidusSourceFlag,
+		d1.longestDiameter detail_longestDiameter, 
+		d1.shortestDiameter detail_shortestDiameter, 
+		d1.flag detail_flag,
+		d1.createTime detail_createTime, 
+		d1.updateTime detail_updateTime
+	</sql>
+	
+	<select id="queryMedicalRecordDataSources" resultMap="medicalRecordExamsResultMap">
+		<if test="record.sourceFlag == 1 or record.sourceFlag == 2">
+			SELECT
+				m1.emrId,
+				m1.visitTime happenTime,
+				m2.ocrFlag,
+				m2.picFileUrl
+			FROM ehr_db.e_medical_record m1
+				INNER JOIN ehr_db.e_medical_photo_ocrs m2 ON m1.emrId = m2.emrId
+			WHERE m1.visitTime >= DATE_ADD(DATE_FORMAT(#{record.crfCourseItemTime},'%Y-%c-%D'), INTERVAL -7 DAY)
+				<![CDATA[
+					AND m1.visitTime <= DATE_ADD(DATE_FORMAT(#{record.crfCourseItemTime},'%Y-%c-%D'), INTERVAL 8 DAY)
+				]]>
+				AND m1.sourceFlag IN(1, 2)
+				AND m1.patientId = #{record.patientId}
+				AND m1.emrSubType = 1
+		</if>
+		<if test="record.sourceFlag == 3">
+			SELECT
+				m1.emrId,
+				m2.excuteTime happenTime,
+				NULL picFileUrl
+			FROM ehr_db.e_medical_record m1
+				INNER JOIN lis_db.eci_exam_report m2 ON m1.emrId = m2.emrId
+			WHERE m2.excuteTime >= DATE_ADD(DATE_FORMAT(#{record.crfCourseItemTime},'%Y-%c-%D'), INTERVAL -7 DAY)
+				<![CDATA[
+					AND m2.excuteTime <= DATE_ADD(DATE_FORMAT(#{record.crfCourseItemTime},'%Y-%c-%D'), INTERVAL 8 DAY)
+				]]>
+				AND m1.sourceFlag = #{record.sourceFlag}
+				<choose>
+					<when test="record.hospitalId == null or record.hospitalId == 0">
+						AND (m2.hospitalId IS NULL OR m2.hospitalId = 0)
+					</when>
+					<otherwise>
+						AND (m2.hospitalId = #{record.hospitalId} OR m2.hospitalId IS NULL OR m2.hospitalId = 0)
+					</otherwise>
+				</choose>
+				AND m2.patientId = #{record.patientId}
+				AND m2.examTypeId = #{record.typeId}
+				AND m2.examChildTypeId = #{record.subTypeId}
+		</if>
+	</select>
+	
+	<resultMap type="com.esuizhen.cloudservice.research.model.result.TCrfResultMainInfo" id="medicalRecordExamsResultMap">
+		<id column="emrId" property="emrId"/>
+		<result column="happenTime" property="happenTime"/>
+		<result column="ocrFlag" property="ocrFlag"/>
+		
+		<collection property="photoList" javaType="ArrayList" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultMainInfo">
+			<result column="picFileUrl" property="picFileUrl"/>
+		</collection>
+	</resultMap>
+	
+	<resultMap type="com.esuizhen.cloudservice.research.model.result.TCrfResultMainInfo" id="medicalRecordExamDataResultMap">
+		<id column="crfResultId" property="crfResultId"/>
+		<result column="crfObserveId" property="crfObserveId"/>
+		<result column="subjectElementId" property="subjectElementId"/>
+		<result column="projectId" property="projectId"/>
+		<result column="crfCourseItemTime" property="crfCourseItemTime"/>
+		<result column="happenTime" property="happenTime"/>
+		<result column="creatorId" property="creatorId"/>
+		<result column="patientId" property="patientId"/>
+		<result column="dataSourceType" property="dataSourceType"/>
+		<result column="dataSourceTypeName" property="dataSourceTypeName"/>
+		
+		<collection property="crfResult" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultExam">
+			<id column="crfExamResultId" property="crfExamResultId"/>
+			<result column="crfResultId" property="crfResultId"/>
+			<result column="examParentTypeId" property="examParentTypeId"/>
+			<result column="examTypeId" property="examTypeId"/>
+			<result column="examTypeName" property="examTypeName"/>
+			<result column="excuteDate" property="excuteDate"/>
+			<result column="reportDate" property="reportDate"/>
+			<result column="examFinding" property="examFinding"/>
+			<result column="examConclusion" property="examConclusion"/>
+			<result column="pathologicalSampleFlag" property="pathologicalSampleFlag"/>
+			<result column="bodyCode" property="bodyCode"/>
+			<result column="bodyPart" property="bodyPart"/>
+			<result column="nidusCode" property="nidusCode"/>
+			<result column="nidus" property="nidus"/>
+			<result column="nidusSourceFlag" property="nidusSourceFlag"/>
+			<result column="longestDiameter" property="longestDiameter"/>
+			<result column="shortestDiameter" property="shortestDiameter"/>
+			<result column="examWay" property="examWay"/>
+			<result column="pathologicalSampleType" property="pathologicalSampleType"/>
+			<result column="preservationOrganization" property="preservationOrganization"/>
+			<result column="collectionTime" property="collectionTime"/>
+			<result column="collectionWay" property="collectionWay"/>
+			<result column="medicalRecordNumber" property="medicalRecordNumber"/>
+			<result column="productionType" property="productionType"/>
+			<result column="productionTypeDescription" property="productionTypeDescription"/>
+			<result column="pathologicalTissueOrigin" property="pathologicalTissueOrigin"/>
+			<result column="createTime" property="createTime"/>
+			<result column="updateTime" property="updateTime"/>
+			<result column="parentCrfCourseItemId" property="parentCrfCourseItemId"/>
+			<result column="parentCrfObserveId" property="parentCrfObserveId"/>
+			<result column="parentSubjectElementId" property="parentSubjectElementId"/>
+			
+			<collection property="examResultDetailList" javaType="ArrayList" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultExamDetail">
+				<id column="crfExamResultDetailId" property="crfExamResultDetailId"/>
+				<result column="detail_seqNo" property="seqNo"/>
+				<result column="detail_organCode" property="organCode"/>
+				<result column="detail_organ" property="organ"/>
+				<result column="detail_nidusCode" property="nidusCode"/>
+				<result column="detail_nidus" property="nidus"/>
+				<result column="detail_nidusSourceFlag" property="nidusSourceFlag"/>
+				<result column="detail_longestDiameter" property="longestDiameter"/>
+				<result column="detail_shortestDiameter" property="shortestDiameter"/>
+				<result column="detail_flag" property="flag"/>
+				<result column="detail_createTime" property="createTime"/>
+				<result column="detail_updateTime" property="updateTime"/>
+			</collection>
+		</collection>
+	</resultMap>
+	
+	<select id="queryMedicalRecordData" resultMap="medicalRecordExamDataResultMap">
+		SELECT
+			m2.excuteTime happenTime,
+			3 dataSourceType,
+			'院内检查' dataSourceTypeName,
+			m2.examTypeId examParentTypeId,
+			m2.examChildTypeId examTypeId,
+			m2.examWay examWay,
+			m2.examFinding examFinding,
+			m2.examConclusion examConclusion,
+			m2.excuteTime excuteDate,
+			m2.reportTime reportDate,
+			m2.organCode detail_organCode,
+			m2.organ detail_organ,
+			m2.bodyCode detail_bodyCode,
+			m2.nidusCode detail_nidusCode,
+			m2.nidus detail_nidus,
+			m2.nidusSourceFlag detail_nidusSourceFlag,
+			m2.longestDiameter detail_longestDiameter,
+			m2.shortestDiameter detail_shortestDiameter
+		FROM ehr_db.e_medical_record m1
+			INNER JOIN lis_db.eci_exam_report m2 ON m1.emrId = m2.emrId
+		WHERE m1.emrId = #{emrId}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pro_db.crf_result_exam(
+			crfExamResultId, 
+			crfResultId, 
+			examParentTypeId, 
+			examTypeId, 
+			examTypeName, 
+			excuteDate, 
+			reportDate, 
+			examFinding,
+			examConclusion, 
+			pathologicalSampleFlag, 
+			bodyCode,
+			bodyPart,
+			nidusCode,
+			nidus,
+			nidusSourceFlag, 
+			longestDiameter,
+			shortestDiameter, 
+			examWay, 
+			pathologicalSampleType,
+			preservationOrganization,
+			collectionTime,
+			collectionWay,
+			medicalRecordNumber,
+			productionType, 
+			productionTypeDescription,
+			pathologicalTissueOrigin, 
+			`index`,
+			createTime, 
+			updateTime,
+			dataSourceType,
+			dataSourceTime,
+			emrId
+		)VALUES(
+			#{record.crfExamResultId},
+			#{record.crfResultId},
+			#{record.examParentTypeId},
+			#{record.examTypeId},
+			#{record.examTypeName},
+			#{record.excuteDate},
+			#{record.reportDate},
+			#{record.examFinding},
+			#{record.examConclusion},
+			#{record.pathologicalSampleFlag},
+			#{record.bodyCode},
+			#{record.bodyPart},
+			#{record.nidusCode},
+			#{record.nidus},
+			#{record.nidusSourceFlag},
+			#{record.longestDiameter},
+			#{record.shortestDiameter},
+			#{record.examWay},
+			#{record.pathologicalSampleType},
+			#{record.preservationOrganization},
+			#{record.collectionTime},
+			#{record.collectionWay},
+			#{record.medicalRecordNumber},
+			#{record.productionType},
+			#{record.productionTypeDescription},
+			#{record.pathologicalTissueOrigin},
+			#{record.index},
+			NOW(),
+			NOW(),
+			#{record.dataSourceType},
+			#{record.dataSourceTime},
+			#{record.emrId}
+		)
+	</insert>
+	
+	<insert id="insertByBatch">
+		INSERT INTO pro_db.crf_result_exam(
+			crfExamResultId,
+			crfResultId,
+			examParentTypeId,
+			examTypeId,
+			examTypeName,
+			excuteDate,
+			reportDate,
+			examFinding,
+			examConclusion,
+			pathologicalSampleFlag,
+			bodyCode,
+			bodyPart,
+			nidusCode, 
+			nidus, 
+			nidusSourceFlag, 
+			longestDiameter,
+			shortestDiameter, 
+			examWay, 
+			pathologicalSampleType, 
+			preservationOrganization,
+			collectionTime,
+			collectionWay,
+			medicalRecordNumber,
+			productionType, 
+			productionTypeDescription,
+			pathologicalTissueOrigin, 
+			`index`,
+			createTime, 
+			updateTime,
+			dataSourceType,
+			dataSourceTime,
+			emrId
+		)VALUES
+		<foreach collection="crfResultExams" item="item" index="index" separator=",">
+			(
+				#{item.crfExamResultId},
+				#{item.crfResultId},
+				#{item.examParentTypeId},
+				#{item.examTypeId},
+				#{item.examTypeName},
+				#{item.excuteDate},
+				#{item.reportDate},
+				#{item.examFinding},
+				#{item.examConclusion},
+				#{item.pathologicalSampleFlag},
+				#{item.bodyCode},
+				#{item.bodyPart},
+				#{item.nidusCode},
+				#{item.nidus},
+				#{item.nidusSourceFlag},
+				#{item.longestDiameter},
+				#{item.shortestDiameter},
+				#{item.examWay},
+				#{item.pathologicalSampleType},
+				#{item.preservationOrganization},
+				#{item.collectionTime},
+				#{item.collectionWay},
+				#{item.medicalRecordNumber},
+				#{item.productionType},
+				#{item.productionTypeDescription},
+				#{item.pathologicalTissueOrigin},
+				#{item.index},
+				NOW(),
+				NOW(),
+				#{item.dataSourceType}
+				#{item.dataSourceTime}
+				#{item.emrId}
+			)
+		</foreach>
+	</insert>
+	
+	<delete id="deleteByCrfResultIdAndPatientId">
+		DELETE FROM pro_db.crf_result_exam WHERE crfResultId = #{crfResultId}
+	</delete>
+	
+	<delete id="deleteByProjectId">
+		DELETE
+			i6.*
+		FROM pro_db.crf_result_main i1,
+			pro_db.crf_observation_subject_element i2,
+			pro_db.crf_course_detail i3,
+			pro_db.crf_course i4,
+			pro_db.r_crftemplate_project i5,
+			pro_db.crf_result_exam i6
+		WHERE i1.crfObserveId = i2.crfObserveId
+			AND i2.crfCourseItemId = i3.crfCourseItemId
+			AND i3.crfCourseId = i4.crfCourseId
+			AND i4.crfTemplateId = i5.crfTemplateId
+			AND i5.projectId = #{projectId}
+	</delete>
+</mapper>

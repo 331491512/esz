@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.treatment.TreatmentRadiotherapyInfoDao" >
+  <resultMap id="BaseResultMap" type="com.esuizhen.cloudservice.ehr.model.treatment.TreatmentRadiotherapyInfo" >
+    <id column="treatmentRadiotherapyRecordId" property="treatmentRadiotherapyRecordId" jdbcType="VARCHAR" />
+    <result column="treatmentId" property="treatmentId" jdbcType="VARCHAR" />
+    <result column="inhospitalId" property="inhospitalId" jdbcType="VARCHAR" />
+    <result column="clinicMedicalId" property="clinicMedicalId" jdbcType="VARCHAR" />
+    <result column="patientId" property="patientId" jdbcType="BIGINT" />
+    <result column="patientNo" property="patientNo" jdbcType="VARCHAR" />
+    <result column="hospitalId" property="hospitalId" jdbcType="INTEGER" />
+    <result column="radiotherapyType" property="radiotherapyType" jdbcType="VARCHAR" />
+    <result column="radiotherapyTypeDesc" property="radiotherapyTypeDesc" jdbcType="VARCHAR" />
+    <result column="irradiationWay" property="irradiationWay" jdbcType="VARCHAR" />
+    <result column="irradiationWayDesc" property="irradiationWayDesc" jdbcType="VARCHAR" />
+    <result column="radiationSource" property="radiationSource" jdbcType="VARCHAR" />
+    <result column="radiationSourceDesc" property="radiationSourceDesc" jdbcType="VARCHAR" />
+    <result column="bodyPosition" property="bodyPosition" jdbcType="VARCHAR" />
+    <result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <resultMap id="DetailResultMap" type="com.esuizhen.cloudservice.ehr.model.treatment.TreatmentRadiotherapyInfo" extends="BaseResultMap">
+    <collection property="radiotherapyDetailInfos" column="treatmentRadiotherapyRecordId" select="com.esuizhen.cloudservice.ehr.dao.treatment.TreatmentRadiotherapyDetailInfoDao.queryList"/>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    treatmentRadiotherapyRecordId, treatmentId, inhospitalId, clinicMedicalId,patientId, patientNo, hospitalId, 
+    radiotherapyType, radiotherapyTypeDesc, irradiationWay, irradiationWayDesc, radiationSource, 
+    radiationSourceDesc, bodyPosition, createTime, updateTime
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from eci_treatment_radiotherapy
+    where treatmentRadiotherapyRecordId = #{treatmentRadiotherapyRecordId,jdbcType=VARCHAR}
+  </select>
+  
+  <select id="queryList" resultMap="DetailResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from eci_treatment_radiotherapy
+    where patientId=#{patientId}
+    <choose>
+    	<when test="clinicMedicalId != null">
+    		and clinicMedicalId=#{clinicMedicalId}
+    	</when>
+    	<otherwise>
+    		and inhospitalId=#{inhospitalId}
+    	</otherwise>
+    </choose>
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from eci_treatment_radiotherapy
+    where treatmentRadiotherapyRecordId = #{treatmentRadiotherapyRecordId,jdbcType=VARCHAR}
+  </delete>
+  
+  <delete id="deleteRadiotherapyInfo">
+    delete from eci_treatment_radiotherapy
+    where treatmentId = #{treatmentId}
+    <if test="treatmentRadiotherapyRecordId != null">
+    	AND treatmentRadiotherapyRecordId=#{treatmentRadiotherapyRecordId}
+    </if>
+    <if test="inhospitalId != null">
+   		and inhospitalId=#{inhospitalId}
+   	</if>
+   	<if test="clinicMedicalId != null">
+   		and clinicMedicalId=#{clinicMedicalId}
+   	</if>
+  </delete>
+  
+  <insert id="insert" parameterType="com.esuizhen.cloudservice.ehr.model.treatment.TreatmentRadiotherapyInfo" >
+    insert into eci_treatment_radiotherapy (treatmentRadiotherapyRecordId, treatmentId, 
+      inhospitalId,  clinicMedicalId,patientId, patientNo, 
+      hospitalId, radiotherapyType, radiotherapyTypeDesc, 
+      irradiationWay, irradiationWayDesc, radiationSource, 
+      radiationSourceDesc, bodyPosition, createTime, 
+      updateTime)
+    values (#{treatmentRadiotherapyRecordId,jdbcType=VARCHAR}, #{treatmentId,jdbcType=VARCHAR}, 
+      #{inhospitalId,jdbcType=VARCHAR}, #{clinicMedicalId,jdbcType=VARCHAR},#{patientId,jdbcType=BIGINT}, #{patientNo,jdbcType=VARCHAR}, 
+      #{hospitalId,jdbcType=INTEGER}, #{radiotherapyType,jdbcType=VARCHAR}, #{radiotherapyTypeDesc,jdbcType=VARCHAR}, 
+      #{irradiationWay,jdbcType=VARCHAR}, #{irradiationWayDesc,jdbcType=VARCHAR}, #{radiationSource,jdbcType=VARCHAR}, 
+      #{radiationSourceDesc,jdbcType=VARCHAR}, #{bodyPosition,jdbcType=VARCHAR}, NOW(), 
+      NOW())
+  </insert>
+  <insert id="insertSelective" parameterType="com.esuizhen.cloudservice.ehr.model.treatment.TreatmentRadiotherapyInfo" >
+    insert into eci_treatment_radiotherapy
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="treatmentRadiotherapyRecordId != null" >
+        treatmentRadiotherapyRecordId,
+      </if>
+      <if test="treatmentId != null" >
+        treatmentId,
+      </if>
+      <if test="inhospitalId != null" >
+        inhospitalId,
+      </if>
+      <if test="clinicMedicalId != null" >
+        clinicMedicalId,
+      </if>
+      <if test="patientId != null" >
+        patientId,
+      </if>
+      <if test="patientNo != null" >
+        patientNo,
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId,
+      </if>
+      <if test="radiotherapyType != null" >
+        radiotherapyType,
+      </if>
+      <if test="radiotherapyTypeDesc != null" >
+        radiotherapyTypeDesc,
+      </if>
+      <if test="irradiationWay != null" >
+        irradiationWay,
+      </if>
+      <if test="irradiationWayDesc != null" >
+        irradiationWayDesc,
+      </if>
+      <if test="radiationSource != null" >
+        radiationSource,
+      </if>
+      <if test="radiationSourceDesc != null" >
+        radiationSourceDesc,
+      </if>
+      <if test="bodyPosition != null" >
+        bodyPosition,
+      </if>
+      createTime,
+      updateTime
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="treatmentRadiotherapyRecordId != null" >
+        #{treatmentRadiotherapyRecordId,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentId != null" >
+        #{treatmentId,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalId != null" >
+        #{inhospitalId,jdbcType=VARCHAR},
+      </if>
+      <if test="clinicMedicalId != null" >
+        #{clinicMedicalId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="radiotherapyType != null" >
+        #{radiotherapyType,jdbcType=VARCHAR},
+      </if>
+      <if test="radiotherapyTypeDesc != null" >
+        #{radiotherapyTypeDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="irradiationWay != null" >
+        #{irradiationWay,jdbcType=VARCHAR},
+      </if>
+      <if test="irradiationWayDesc != null" >
+        #{irradiationWayDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="radiationSource != null" >
+        #{radiationSource,jdbcType=VARCHAR},
+      </if>
+      <if test="radiationSourceDesc != null" >
+        #{radiationSourceDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="bodyPosition != null" >
+        #{bodyPosition,jdbcType=VARCHAR},
+      </if>
+      NOW(),
+      NOW()
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.cloudservice.ehr.model.treatment.TreatmentRadiotherapyInfo" >
+    update eci_treatment_radiotherapy
+    <set >
+      <if test="treatmentId != null" >
+        treatmentId = #{treatmentId,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalId != null" >
+        inhospitalId = #{inhospitalId,jdbcType=VARCHAR},
+      </if>
+      <if test="clinicMedicalId != null" >
+        clinicMedicalId = #{clinicMedicalId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        patientId = #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        patientNo = #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="radiotherapyType != null" >
+        radiotherapyType = #{radiotherapyType,jdbcType=VARCHAR},
+      </if>
+      <if test="radiotherapyTypeDesc != null" >
+        radiotherapyTypeDesc = #{radiotherapyTypeDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="irradiationWay != null" >
+        irradiationWay = #{irradiationWay,jdbcType=VARCHAR},
+      </if>
+      <if test="irradiationWayDesc != null" >
+        irradiationWayDesc = #{irradiationWayDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="radiationSource != null" >
+        radiationSource = #{radiationSource,jdbcType=VARCHAR},
+      </if>
+      <if test="radiationSourceDesc != null" >
+        radiationSourceDesc = #{radiationSourceDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="bodyPosition != null" >
+        bodyPosition = #{bodyPosition,jdbcType=VARCHAR},
+      </if>
+      updateTime = NOW()
+    </set>
+    where treatmentRadiotherapyRecordId = #{treatmentRadiotherapyRecordId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.esuizhen.cloudservice.ehr.model.treatment.TreatmentRadiotherapyInfo" >
+    update eci_treatment_radiotherapy
+    set treatmentId = #{treatmentId,jdbcType=VARCHAR},
+      inhospitalId = #{inhospitalId,jdbcType=VARCHAR},
+      clinicMedicalId = #{clinicMedicalId,jdbcType=VARCHAR},
+      patientId = #{patientId,jdbcType=BIGINT},
+      patientNo = #{patientNo,jdbcType=VARCHAR},
+      hospitalId = #{hospitalId,jdbcType=INTEGER},
+      radiotherapyType = #{radiotherapyType,jdbcType=VARCHAR},
+      radiotherapyTypeDesc = #{radiotherapyTypeDesc,jdbcType=VARCHAR},
+      irradiationWay = #{irradiationWay,jdbcType=VARCHAR},
+      irradiationWayDesc = #{irradiationWayDesc,jdbcType=VARCHAR},
+      radiationSource = #{radiationSource,jdbcType=VARCHAR},
+      radiationSourceDesc = #{radiationSourceDesc,jdbcType=VARCHAR},
+      bodyPosition = #{bodyPosition,jdbcType=VARCHAR},
+      updateTime = NOW()
+    where treatmentRadiotherapyRecordId = #{treatmentRadiotherapyRecordId,jdbcType=VARCHAR}
+  </update>
+</mapper>

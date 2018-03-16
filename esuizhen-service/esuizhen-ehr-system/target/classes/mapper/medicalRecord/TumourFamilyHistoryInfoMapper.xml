@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.medicalRecord.TumourFamilyHistoryInfoDao" >
+  <resultMap id="BaseResultMap" type="com.esuizhen.cloudservice.ehr.bean.TumourFamilyHistoryInfo" >
+    <id column="familyHistoryId" property="familyHistoryId" jdbcType="VARCHAR" />
+    <result column="patientId" property="patientId" jdbcType="BIGINT" />
+    <result column="inhospitalId" property="inhospitalId" jdbcType="VARCHAR" />
+    <result column="clinicMedicalId" property="clinicMedicalId" jdbcType="VARCHAR" />
+    <result column="relationId" property="relationId" jdbcType="INTEGER" />
+    <result column="relationName" property="relationName" jdbcType="VARCHAR" />
+    <result column="diseaseTypeId" property="diseaseTypeId" jdbcType="VARCHAR" />
+    <result column="diseaseTypeName" property="diseaseTypeName" jdbcType="VARCHAR" />
+    <result column="morbidityTime" property="morbidityTime" jdbcType="TIMESTAMP" />
+    <result column="morbidityAge" property="morbidityAge" jdbcType="INTEGER" />
+    <result column="author" property="author" jdbcType="BIGINT" />
+    <result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    familyHistoryId, patientId, inhospitalId, clinicMedicalId,relationId, relationName, diseaseTypeId, 
+    diseaseTypeName, morbidityTime, morbidityAge, author, createTime, updateTime
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from e_tumour_family_history
+    where familyHistoryId = #{familyHistoryId,jdbcType=VARCHAR}
+  </select>
+  <select id="queryOne" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from e_tumour_family_history
+    where familyHistoryId = #{familyHistoryId,jdbcType=VARCHAR}
+  </select>
+  
+  <select id="queryList" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from e_tumour_family_history
+    where patientId = #{patientId}
+    <choose>
+    	<when test="clinicMedicalId != null">
+    		AND clinicMedicalId=#{clinicMedicalId}
+    	</when>
+    	<otherwise>
+    		AND inhospitalId=#{inhospitalId}
+    	</otherwise>
+    </choose>
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from e_tumour_family_history
+    where familyHistoryId = #{familyHistoryId,jdbcType=VARCHAR}
+  </delete>
+  
+  <delete id="deleteTumourFamilyHistoryInfo">
+    delete from e_tumour_family_history
+    where patientId = #{patientId}
+    <choose>
+    	<when test="clinicMedicalId != null">
+    		and clinicMedicalId=#{clinicMedicalId}
+    	</when>
+    	<otherwise>
+    		and inhospitalId=#{inhospitalId}
+    	</otherwise>
+    </choose>
+  </delete>
+  
+  <insert id="insert" parameterType="com.esuizhen.cloudservice.ehr.bean.TumourFamilyHistoryInfo" >
+    insert into e_tumour_family_history (familyHistoryId, patientId, inhospitalId, clinicMedicalId,
+      relationId, relationName, diseaseTypeId, 
+      diseaseTypeName, morbidityTime, morbidityAge, 
+      author, createTime, updateTime
+      )
+    values (#{familyHistoryId,jdbcType=VARCHAR}, #{patientId,jdbcType=BIGINT}, #{inhospitalId,jdbcType=VARCHAR},#{clinicMedicalId,jdbcType=VARCHAR},  
+      #{relationId,jdbcType=INTEGER}, #{relationName,jdbcType=VARCHAR}, #{diseaseTypeId,jdbcType=VARCHAR}, 
+      #{diseaseTypeName,jdbcType=VARCHAR}, #{morbidityTime,jdbcType=TIMESTAMP}, #{morbidityAge,jdbcType=INTEGER}, 
+      #{author,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.esuizhen.cloudservice.ehr.bean.TumourFamilyHistoryInfo" >
+    insert into e_tumour_family_history
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="familyHistoryId != null" >
+        familyHistoryId,
+      </if>
+      <if test="patientId != null" >
+        patientId,
+      </if>
+      <if test="inhospitalId != null" >
+        inhospitalId,
+      </if>
+      <if test="clinicMedicalId != null" >
+        clinicMedicalId,
+      </if>
+      <if test="relationId != null" >
+        relationId,
+      </if>
+      <if test="relationName != null" >
+        relationName,
+      </if>
+      <if test="diseaseTypeId != null" >
+        diseaseTypeId,
+      </if>
+      <if test="diseaseTypeName != null" >
+        diseaseTypeName,
+      </if>
+      <if test="morbidityTime != null" >
+        morbidityTime,
+      </if>
+      <if test="morbidityAge != null" >
+        morbidityAge,
+      </if>
+      <if test="author != null" >
+        author,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+      <if test="updateTime != null" >
+        updateTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="familyHistoryId != null" >
+        #{familyHistoryId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="inhospitalId != null" >
+        #{inhospitalId,jdbcType=VARCHAR},
+      </if>
+       <if test="clinicMedicalId != null" >
+        #{clinicMedicalId,jdbcType=VARCHAR},
+      </if>
+      <if test="relationId != null" >
+        #{relationId,jdbcType=INTEGER},
+      </if>
+      <if test="relationName != null" >
+        #{relationName,jdbcType=VARCHAR},
+      </if>
+      <if test="diseaseTypeId != null" >
+        #{diseaseTypeId,jdbcType=VARCHAR},
+      </if>
+      <if test="diseaseTypeName != null" >
+        #{diseaseTypeName,jdbcType=VARCHAR},
+      </if>
+      <if test="morbidityTime != null" >
+        #{morbidityTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="morbidityAge != null" >
+        #{morbidityAge,jdbcType=INTEGER},
+      </if>
+      <if test="author != null" >
+        #{author,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.cloudservice.ehr.bean.TumourFamilyHistoryInfo" >
+    update e_tumour_family_history
+    <set >
+      <if test="patientId != null" >
+        patientId = #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="inhospitalId != null" >
+        inhospitalId = #{inhospitalId,jdbcType=VARCHAR},
+      </if>
+      <if test="clinicMedicalId != null" >
+        clinicMedicalId = #{clinicMedicalId,jdbcType=VARCHAR},
+      </if>
+      <if test="relationId != null" >
+        relationId = #{relationId,jdbcType=INTEGER},
+      </if>
+      <if test="relationName != null" >
+        relationName = #{relationName,jdbcType=VARCHAR},
+      </if>
+      <if test="diseaseTypeId != null" >
+        diseaseTypeId = #{diseaseTypeId,jdbcType=VARCHAR},
+      </if>
+      <if test="diseaseTypeName != null" >
+        diseaseTypeName = #{diseaseTypeName,jdbcType=VARCHAR},
+      </if>
+      <if test="morbidityTime != null" >
+        morbidityTime = #{morbidityTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="morbidityAge != null" >
+        morbidityAge = #{morbidityAge,jdbcType=INTEGER},
+      </if>
+      <if test="author != null" >
+        author = #{author,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where familyHistoryId = #{familyHistoryId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.esuizhen.cloudservice.ehr.bean.TumourFamilyHistoryInfo" >
+    update e_tumour_family_history
+    set patientId = #{patientId,jdbcType=BIGINT},
+      inhospitalId = #{inhospitalId,jdbcType=VARCHAR},
+      clinicMedicalId = #{clinicMedicalId,jdbcType=VARCHAR},
+      relationId = #{relationId,jdbcType=INTEGER},
+      relationName = #{relationName,jdbcType=VARCHAR},
+      diseaseTypeId = #{diseaseTypeId,jdbcType=VARCHAR},
+      diseaseTypeName = #{diseaseTypeName,jdbcType=VARCHAR},
+      morbidityTime = #{morbidityTime,jdbcType=TIMESTAMP},
+      morbidityAge = #{morbidityAge,jdbcType=INTEGER},
+      author = #{author,jdbcType=BIGINT},
+      createTime = #{createTime,jdbcType=TIMESTAMP},
+      updateTime = #{updateTime,jdbcType=TIMESTAMP}
+    where familyHistoryId = #{familyHistoryId,jdbcType=VARCHAR}
+  </update>
+</mapper>

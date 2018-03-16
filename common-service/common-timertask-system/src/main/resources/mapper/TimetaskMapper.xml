@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.westangel.timertask.dao.TimertaskDao">
+
+	<insert id="insertTimetask" parameterType="com.westangel.common.bean.timertask.Timertask">
+        INSERT INTO timertask (
+        	timerTaskId ,
+        	taskType ,
+        	userId,
+        	contactMobile,
+        	serviceTargetId,
+        	actionType ,
+        	actionPushType ,
+        	pushContent ,
+        	sqlContent ,
+        	procedureContent ,
+        	httpUrl ,
+        	httpContent ,
+        	serviceType ,
+        	actionTime ,
+        	wxTemplateName ,
+        	wxTemplateUrl ,
+        	taskTag ,
+        	createTime
+        ) VALUES (
+        	#{timerTaskId} ,
+        	#{taskType} ,
+        	#{userId},
+        	#{contactMobile},
+        	#{serviceTargetId},
+        	#{actionType} ,
+        	#{actionPushType} ,
+        	#{pushContent} ,
+        	#{sqlContent} ,
+        	#{procedureContent} ,
+        	#{httpUrl} ,
+        	#{httpContent} ,
+        	#{serviceType} ,
+        	#{actionTime} ,
+        	#{wxTemplateName} ,
+        	#{wxTemplateUrl} ,
+        	#{taskTag} ,
+        	NOW()
+        )
+	</insert>
+    
+    <!-- 添加随访计划模版详情 -->
+	<insert id="insertTimetaskList"  parameterType="java.util.List">
+		 INSERT INTO timertask (
+        	timerTaskId ,
+        	taskType ,
+        	userId,
+        	contactMobile,
+        	serviceTargetId,
+        	actionType ,
+        	actionPushType ,
+        	pushContent ,
+        	sqlContent ,
+        	procedureContent ,
+        	httpUrl ,
+        	httpContent ,
+        	serviceType ,
+        	actionTime ,
+        	wxProductId,
+        	wxTemplateName ,
+        	wxTemplateUrl ,
+        	taskTag ,
+        	createTime
+        )
+		VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+			(
+        	#{item.timerTaskId} ,
+        	#{item.taskType} ,
+        	#{item.userId},
+        	#{item.contactMobile},
+        	#{item.serviceTargetId},
+        	#{item.actionType} ,
+        	#{item.actionPushType} ,
+        	#{item.pushContent} ,
+        	#{item.sqlContent} ,
+        	#{item.procedureContent} ,
+        	#{item.httpUrl} ,
+        	#{item.httpContent} ,
+        	#{item.serviceType} ,
+        	#{item.actionTime} ,
+        	#{item.wxProductId} ,
+        	#{item.wxTemplateName} ,
+        	#{item.wxTemplateUrl} ,
+        	#{item.taskTag} ,
+        	NOW()
+        )
+		</foreach>
+	</insert>
+	
+	<update id="updateTimetask" parameterType="com.westangel.common.bean.timertask.Timertask">
+        UPDATE timertask 
+        <set>
+	        <if test="taskType != null">
+                taskType = #{taskType} ,
+            </if>
+	        <if test="actionType != null">
+                actionType = #{actionType} ,
+            </if>
+	        <if test="actionPushType != null">
+                actionPushType = #{actionPushType} ,
+            </if>
+	        <if test="pushContent != null">
+                pushContent = #{pushContent} ,
+            </if>
+	        <if test="sqlContent != null">
+                sqlContent = #{sqlContent} ,
+            </if>
+	        <if test="procedureContent != null">
+                procedureContent = #{procedureContent} ,
+            </if>
+	        <if test="httpUrl != null">
+                httpUrl = #{httpUrl} ,
+            </if>
+	        <if test="httpContent != null">
+                httpContent = #{httpContent} ,
+            </if>
+	        <if test="serviceType != null">
+                serviceType = #{serviceType} ,
+            </if>
+            <if test="actionTime != null">
+	            <choose>
+	            	<when test="periodType!=null and periodType!=0">
+	            		<choose>
+	            			<when test="periodType==1">
+	            				actionTime = DATE_ADD(#{actionTime},INTERVAL ${expr} DAY),
+	            			</when>
+	            			<when test="periodType==2">
+	            				actionTime = DATE_ADD(#{actionTime},INTERVAL ${expr} WEEK),
+	            			</when>
+	            			<when test="periodType==3">
+	            				actionTime = DATE_ADD(#{actionTime},INTERVAL ${expr} MONTH),
+	            			</when>
+	            			<when test="periodType==4">
+	            				actionTime = DATE_ADD(#{actionTime},INTERVAL ${expr} YEAR),
+	            			</when>
+	            		</choose>
+	            	</when>
+	            	<otherwise>
+			                actionTime = #{actionTime} ,
+	            	</otherwise>
+	            </choose>
+            </if>
+            <if test="retry != null">
+                retry = #{retry} ,
+            </if>
+            
+        </set>
+        WHERE 
+	        timerTaskId = #{timerTaskId} 
+	</update>
+
+    <delete id="deleteTimetask">
+        DELETE FROM timertask WHERE timerTaskId = #{timetaskId} 
+    </delete>
+    
+    <delete id="deleteTimetaskByTargetId">
+        DELETE FROM timertask 
+        WHERE serviceTargetId = #{serviceTargetId} 
+        AND serviceType=#{serviceType}
+        <if test="taskTag != null">
+            AND taskTag=#{taskTag}
+        </if>
+         
+    </delete>
+    
+    <select id="queryTimetaskById" resultType="com.westangel.common.bean.timertask.Timertask">
+		SELECT 
+        	timerTaskId,
+        	taskType,
+        	userId,
+        	contactMobile,
+        	serviceTargetId,
+        	actionType,
+        	actionPushType,
+        	pushContent,
+        	sqlContent,
+        	procedureContent,
+        	httpUrl,
+        	httpContent,
+        	serviceType,
+        	wxProductId,
+        	wxTemplateName ,
+        	wxTemplateUrl ,
+        	retry,
+        	actionTime
+		FROM timertask 
+	    WHERE 
+	        timerTaskId = #{timetaskId} 
+	</select>
+	
+	<select id="queryTimetaskByServiceType" resultType="com.westangel.common.bean.timertask.Timertask">
+		SELECT 
+        	t1.timerTaskId,
+        	t1.taskType,
+        	t1.userId,
+        	t1.contactMobile,
+        	t1.serviceTargetId,
+        	t1.actionType,
+        	t1.actionPushType,
+        	t1.pushContent,
+        	t1.sqlContent,
+        	t1.procedureContent,
+        	t1.httpUrl,
+        	t1.httpContent,
+        	t1.serviceType,
+        	t1.wxProductId,
+        	t1.wxTemplateName ,
+        	t1.wxTemplateUrl ,
+        	t1.retry ,
+        	t1.actionTime,
+        	t2.actionTime time,
+        	t2.periodType,
+        	t2.expr
+		FROM timertask t1 , conf_timer t2
+	    WHERE t1.serviceType=t2.serviceType
+	    <if test="serviceType!=null">
+	    	AND t1.serviceType = #{serviceType}
+	    </if>
+	    <if test="serviceTargetId!=null">
+	    	AND t1.serviceTargetId = #{serviceTargetId}
+	    </if>
+	    <if test="periodType!=null">
+	    	AND t2.periodType = #{periodType}
+	    </if>
+	    AND t1.actionTime&lt;=NOW()  
+	</select>
+	
+	<select id="queryTimetaskByServiceTypes" resultType="com.westangel.common.bean.timertask.Timertask">
+		SELECT 
+        	timerTaskId,
+        	taskType,
+        	userId,
+        	contactMobile,
+        	serviceTargetId,
+        	actionType,
+        	actionPushType,
+        	pushContent,
+        	sqlContent,
+        	procedureContent,
+        	httpUrl,
+        	httpContent,
+        	serviceType,
+        	wxProductId,
+        	wxTemplateName ,
+        	wxTemplateUrl ,
+        	retry ,
+        	actionTime
+		FROM timertask 
+	    WHERE 
+	        serviceType in (${serviceTypes})
+	</select>
+	
+	<select id="queryUserOpenId" resultType="java.lang.String">
+		SELECT openId FROM user_db.u_thirdparty WHERE userId= #{userId} 
+		<choose>
+			<when test="productId!=null">
+				and productId = #{productId}
+			</when>
+			<otherwise>
+				and productId=2
+			</otherwise>
+		</choose>
+		LIMIT 1
+	</select>
+	
+	<select id="getUserTrueName" resultType="java.lang.String">
+		SELECT
+		   trueName 
+		FROM 
+		   user_db.u_patient 
+		WHERE 
+		   userId = #{userId}
+	</select>
+	
+	<select id="callProcedure" statementType="CALLABLE">
+		{${sql}}
+	</select>
+</mapper>
+

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_match_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.match.MatchHospitalPatientDao" >
+	
+	<resultMap type="com.esuizhen.cloudservice.sync.model.HospitalPatient" id="baseResultMap">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="patientId" property="patientId" jdbcType="BIGINT" />
+		<result column="patientNo" property="patientNo" jdbcType="VARCHAR" />
+		<result column="patientUuid" property="patientUuid" jdbcType="VARCHAR" />
+		<result column="hospitalId" property="hospitalId" jdbcType="INTEGER" />
+		<result column="hospitalUuid" property="hospitalUuid" jdbcType="VARCHAR" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<sql id="base_column_list">
+		t1.id, t1.hospitalId, t1.hospitalUuid, t1.patientId, t1.patientNo, t1.patientUuid, t1.createTime
+	</sql>
+	
+	<select id="findByPatientUuid" resultMap="baseResultMap" parameterType="java.lang.String">
+		SELECT <include refid="base_column_list"></include>
+			FROM cloud_sync_match_db.r_hospital_patient t1
+			WHERE t1.patientUuid=#{patientFinalUuid,jdbcType=VARCHAR}
+	</select>
+
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.sync.model.HospitalPatient" >
+		<selectKey resultType="long" keyProperty="doctorId" order="AFTER" >
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO cloud_sync_match_db.r_hospital_patient(
+			hospitalId, 
+			hospitalUuid, 
+			patientUuid, 
+			patientNo, 
+			inhospitalDate, 
+			createTime
+		)VALUES(
+			#{hospitalId},
+			#{hospitalUuid},
+			#{patientUuid},
+			#{patientNo},
+			#{inhospitalDate},
+			#{createTime}
+		)
+	 </insert>
+	 
+	 <update id="updatePatientUuid">
+	 	UPDATE cloud_sync_match_db.r_hospital_patient
+	 	<set>
+	 		<if test="uuidFinal != null">
+	 			patientUuid=#{uuidFinal,jdbcType=VARCHAR}
+	 		</if>
+	 	</set>
+	 	WHERE patientUuid IN
+		(
+			<foreach collection="uuidRelationships" item="uuidRelationship" index="index" separator=",">
+				#{uuidRelationship.uuid,jdbcType=VARCHAR}
+			</foreach>
+		)
+	 </update>
+	 
+	 <delete id="delete">
+	 	DELETE FROM cloud_sync_match_db.r_hospital_patient WHERE id=#{id}
+	 </delete>
+	 
+</mapper>

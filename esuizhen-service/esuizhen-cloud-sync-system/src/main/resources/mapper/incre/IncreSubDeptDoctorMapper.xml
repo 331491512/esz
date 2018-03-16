@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_incre_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.incre.IncreSubDeptDoctorDao" >
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.sync.model.SubDeptDoctor">
+		INSERT INTO cloud_sync_incre_db.r_subdept_doctor(deptUuid, subDeptUuid, doctorUuid, positionTitle, createTime)
+		VALUES(#{deptUuid,jdbcType=VARCHAR},
+			#{subDeptUuid,jdbcType=VARCHAR},
+			#{doctorUuid,jdbcType=VARCHAR},
+			#{positionTitle,jdbcType=INTEGER},
+			#{createTime,jdbcType=TIMESTAMP})
+	</insert>
+	 
+	 <delete id="delete">
+	 	DELETE FROM cloud_sync_incre_db.r_hospital_doctor WHERE id=#{id,jdbcType=BIGINT}
+	 </delete>
+</mapper>

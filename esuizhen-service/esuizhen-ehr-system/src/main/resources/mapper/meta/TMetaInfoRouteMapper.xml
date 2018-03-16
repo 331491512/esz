@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.meta.TMetaInfoRouteDao" >
+  <resultMap id="BaseResultMap" type="com.esuizhen.cloudservice.ehr.model.meta.TMetaInfoRoute" >
+    <id column="routeId" property="routeId" jdbcType="INTEGER" />
+    <result column="routeCode" property="routeCode" jdbcType="VARCHAR" />
+    <result column="routeName" property="routeName" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    routeId, routeCode, routeName
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from meta_info_route
+    where routeId = #{routeId,jdbcType=INTEGER}
+  </select>
+  
+  <select id="queryList" resultMap="BaseResultMap" >
+    select 
+    <include refid="Base_Column_List" />
+    from meta_info_route
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from meta_info_route
+    where routeId = #{routeId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.esuizhen.cloudservice.ehr.model.meta.TMetaInfoRoute" >
+    insert into meta_info_route (routeId, routeCode, routeName
+      )
+    values (#{routeId,jdbcType=INTEGER}, #{routeCode,jdbcType=VARCHAR}, #{routeName,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.esuizhen.cloudservice.ehr.model.meta.TMetaInfoRoute" >
+    insert into meta_info_route
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="routeId != null" >
+        routeId,
+      </if>
+      <if test="routeCode != null" >
+        routeCode,
+      </if>
+      <if test="routeName != null" >
+        routeName,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="routeId != null" >
+        #{routeId,jdbcType=INTEGER},
+      </if>
+      <if test="routeCode != null" >
+        #{routeCode,jdbcType=VARCHAR},
+      </if>
+      <if test="routeName != null" >
+        #{routeName,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.cloudservice.ehr.model.meta.TMetaInfoRoute" >
+    update meta_info_route
+    <set >
+      <if test="routeCode != null" >
+        routeCode = #{routeCode,jdbcType=VARCHAR},
+      </if>
+      <if test="routeName != null" >
+        routeName = #{routeName,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where routeId = #{routeId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.esuizhen.cloudservice.ehr.model.meta.TMetaInfoRoute" >
+    update meta_info_route
+    set routeCode = #{routeCode,jdbcType=VARCHAR},
+      routeName = #{routeName,jdbcType=VARCHAR}
+    where routeId = #{routeId,jdbcType=INTEGER}
+  </update>
+</mapper>

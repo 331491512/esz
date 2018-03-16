@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.business.dao.business.mdt.MdtDoctorOptionDao">
+	<update id="updateMdtapplyInfo" parameterType="com.esuizhen.cloudservice.business.bean.MdtDoctorOptionInfo">
+		UPDATE hds_db.s_mdt_apply
+		<set>
+		<if test="mdtFlowStateId!=null">
+			mdtFlowStateId=#{mdtFlowStateId},
+		</if>
+		<if test="needRadiateFlag!=null">
+			needRadiateFlag=#{needRadiateFlag},
+			radiateUserId=#{radiateUserId},
+		</if>
+		<if test="specimenIntactFlag!=null">
+			specimenIntactFlag=#{specimenIntactFlag},
+			specimenDestroyReson=#{specimenDestroyReson},
+		</if>
+		<if test="acceptanceTimeFlag!=null">
+			acceptanceTime=now()
+		</if>
+		</set>
+		<where>
+			productApplyId=#{productApplyId}
+		</where>
+	</update>
+		
+	<update id="updateDoctorOption" parameterType="com.esuizhen.cloudservice.business.bean.MdtDoctorOptionInfo">
+		UPDATE hds_db.s_mdt_doctor_opinion mdo 
+		<set>
+		<if test="productApplyId!=null">
+			mdo.productApplyId=#{productApplyId},
+		</if>
+		<if test="doctorUserId!=null">
+			mdo.doctorUserId=#{doctorUserId},
+		</if>
+		<if test="opinion!=null">
+			mdo.opinion=#{opinion},
+		</if>
+		<if test="temporaryFlag!=null">
+			mdo.temporaryFlag=#{temporaryFlag},
+		</if>
+		<if test="doctorName!=null">
+			mdo.doctorName=#{doctorName}
+		</if>
+		</set>
+		Where 1=1 And id=#{id}
+	</update>
+	
+	<insert id="insertDoctorOption"  parameterType="com.esuizhen.cloudservice.business.bean.MdtDoctorOptionInfo">
+		INSERT INTO hds_db.s_mdt_doctor_opinion(
+			productApplyId,
+			groupType,
+			doctorUserId,
+			opinion,
+			doctorName,
+			doctorSignatureUrl,
+			temporaryFlag,
+			createTime
+		)VALUES(
+			#{productApplyId},
+			#{groupType},
+			#{doctorUserId},
+			#{opinion},
+			#{doctorName},
+			(SELECT b.doctorSignatureUrl FROM com_trade_db.product_group b INNER JOIN hds_db.s_product_service_apply a ON b.productid=a.productid AND b.orderId=a.orderId WHERE a.productApplyId=#{productApplyId}),
+			#{temporaryFlag},NOW()
+		)
+	</insert>
+	
+	<select id="getOpinionInfoById" resultType="com.esuizhen.cloudservice.business.bean.MdtDoctorOptionInfo">
+		SELECT
+			t1.id,
+			t1.productApplyId,
+			t1.doctorUserId,
+			t1.doctorName,
+			t1.opinion,
+			t1.createTime,
+			t1.temporaryFlag,
+			t4.signatureUrl,
+			t3.groupType,
+			t6.hospitalId,
+			t6.hospitalName
+		FROM
+			hds_db.s_mdt_doctor_opinion t1
+			INNER JOIN hds_db.s_product_service_apply t2 ON t1.productApplyId = t2.productApplyId
+			INNER JOIN hds_db.r_mdt_apply_doctor t3 ON t3.productApplyId = t2.productApplyId AND t3.groupType = t1.groupType
+			INNER JOIN user_db.u_doctor t4 ON t4.userId = t3.doctorUserId
+			LEFT JOIN user_db.r_hospital_doctor t5 ON t5.doctorId = t4.doctorId
+			LEFT JOIN user_db.u_hospital t6 ON t6.hospitalId = t5.hospitalId
+		WHERE
+			t1.productApplyId = #{productApplyId}
+		ORDER BY
+			t3.groupType ASC
+		<!-- 
+		SELECT 
+		<include refid="Base_Column_List"></include>,
+		(SELECT hospitalName FROM user_db.u_hospital WHERE userId=t1.doctorUserId) hospitalName
+		from hds_db.s_mdt_doctor_opinion t1
+		INNER JOIN hds_db.s_product_service_apply t2 ON t1.productApplyId=t2.productApplyId
+		INNER JOIN com_trade_db.product_group t3 ON t2.productId=t3.productId AND t1.doctorUserId=t3.memberVendor
+		WHERE t1.productApplyId=#{productApplyId}
+		ORDER BY t3.groupType
+		 -->
+	</select>
+
+	<sql id="Base_Column_List">
+		t1.id,
+		t1.productApplyId,
+		t1.doctorUserId,
+		t1.doctorName,
+		t1.opinion,
+		t1.createTime,
+		t1.temporaryFlag,
+		t3.doctorSignatureUrl,
+		t3.groupType
+	</sql>
+</mapper>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.business.dao.business.BusinessSendDao">
+	<!-- 患教知识入医生库 -->
+	<insert id="createDoctorKnowledgeArticle">
+		INSERT INTO 
+		user_db.r_doctor_knowledge_article(doctorId,articleId,createTime) 
+		VALUE(#{doctorId},#{articleId},NOW()) 
+		ON DUPLICATE KEY 
+		UPDATE 
+		updateTime=NOW()
+	</insert>
+	
+	<!-- 患教知识标题获取 -->
+	<select id="queryKnowledgeArticleTitle" resultType="java.lang.String">
+		SELECT
+			articleTitle
+		FROM
+			com_sys_db.sys_knowledge_article
+		WHERE
+			articleId=#{articleId}
+	</select>
+	
+	<!-- 随访问卷标题获取 -->
+	<select id="queryQuestionnaireSubject" resultType="java.lang.String">
+		SELECT
+			subject
+		FROM
+			followup_db.questionnaire
+		WHERE
+			questionnaireId = #{questionnaireId}
+	</select>
+	
+	<!-- 获取医院的某项服务 -->
+	<select id="getProductIdByHospitalId" resultType="java.util.LinkedHashMap">
+		SELECT
+			productId,p.vendor
+		FROM
+			user_db.u_hospital u,
+			com_trade_db.product p
+		WHERE
+			u.hospitalId = #{hospitalId}
+		AND u.userId = p.vendor
+		AND p.state = 1
+		AND p.productType = #{productType}
+	</select>
+	
+	<!-- 插入复查提醒信息 -->
+	<insert id="insertFolloupReviewAppoint">
+		INSERT INTO followup_db.followup_review_appoint (
+			appointId,
+			hospitalId,
+			appointDoctorId,
+			appointDoctorName,
+			appointDeptName,
+			appointDate,
+			appointCheckItems,
+			appointDetails,
+			sourceFlag,
+			createTime
+		)
+		VALUE
+			(
+			#{appointId},
+			#{hospitalId},
+			#{appointDoctorId},
+			#{appointDoctorName},
+			#{appointDeptName},
+			#{appointDate},
+			#{appointCheckItems},
+			#{appointDetails},
+			#{sourceFlag},
+			now()
+			)
+	</insert>
+	
+	<!-- 复查预约信息获取 -->
+	<select id="queryReviewAppointInfo" resultType="java.util.LinkedHashMap">
+		SELECT
+			t1.appointId,
+			t1.appointDate,
+			t1.appointDoctorId,
+			IFNULL(t2.trueName,t1.appointDoctorName) appointDoctorName,
+			t2.userId doctorUserId,
+			t1.appointDeptName,
+			(SELECT deptName FROM user_db.u_department t WHERE t.deptId = t3.deptId LIMIT 1)appointDept,
+			t1.hospitalId,
+			t1.appointCheckItems,
+			t1.appointDetails,
+			t1.sourceFlag
+		FROM
+			followup_db.followup_review_appoint t1
+		LEFT JOIN user_db.u_doctor t2 ON t1.appointDoctorId = t2.doctorId
+		LEFT JOIN user_db.r_hospital_doctor t3 ON t3.doctorId = t1.appointDoctorId
+		WHERE
+			appointId = #{appointId}
+		LIMIT 1
+	</select>
+</mapper>

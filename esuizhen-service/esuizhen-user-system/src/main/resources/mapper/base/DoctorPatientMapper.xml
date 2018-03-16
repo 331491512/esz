@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.DoctorPatientDao">
+	<resultMap id="baseResultMap" type="com.westangel.common.bean.DoctorPatient">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="patientId" property="patientId" jdbcType="BIGINT" />
+		<result column="doctorId" property="doctorId" jdbcType="BIGINT" />
+		<result column="hasMedicalRecord" property="hasMedicalRecord"
+			jdbcType="INTEGER" />
+		<result column="attentionTime" property="attentionTime"
+			jdbcType="TIMESTAMP" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="source_flag" property="sourceFlag" jdbcType="INTEGER" />
+	</resultMap>
+	
+	<sql id="base_column_list">
+		r1.id, r1.patientId, r1.doctorId, r1.hasMedicalRecord, r1.attentionTime, r1.createTime,
+		r1.sourceFlag source_flag
+	</sql>
+
+	<insert id="insert" parameterType="com.westangel.common.bean.DoctorPatient">
+		insert into
+		r_doctor_patient(patientId,doctorId,hasMedicalRecord,attentionTime,createTime,sourceFlag)
+		values(#{patientId,jdbcType=BIGINT},#{doctorId,jdbcType=BIGINT},#{hasMedicalRecord,jdbcType=INTEGER},
+		#{attentionTime,jdbcType=TIMESTAMP},#{createTime,jdbcType=TIMESTAMP},#{sourceFlag,jdbcType=INTEGER})
+	</insert>
+	
+	<select id="screening" resultMap="baseResultMap">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM user_db.r_doctor_patient r1
+		WHERE r1.patientId=#{cloudPatientId} AND
+			r1.doctorId IN(SELECT r2.doctorId FROM user_db.r_doctor_patient r2 WHERE r2.patientId=#{tobPatientId})
+	</select>
+
+	<select id="findByHospitalIdAndDoctorId" resultMap="baseResultMap">
+		SELECT
+		t1.userId doctorUserId, t1.doctorId, t3.patientId, t3.hasMedicalRecord
+		FROM u_doctor t1
+		INNER JOIN r_hospital_doctor t2 ON t1.doctorId=t2.doctorId
+		INNER JOIN
+		r_doctor_patient t3 ON t1.doctorId=t3.doctorId
+		WHERE
+		t2.hospitalId=#{hospitalId,jdbcType=BIGINT} AND
+		t3.doctorId=#{doctorId,jdbcType=BIGINT}
+	</select>
+
+	<select id="searchDoctorPatient" parameterType="com.westangel.common.bean.DoctorPatient"
+		resultMap="baseResultMap">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM r_doctor_patient r1
+		WHERE r1.patientId=#{patientId,jdbcType=BIGINT} AND
+			r1.doctorId=#{doctorId,jdbcType=BIGINT}
+	</select>
+
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from r_doctor_patient where id=#{id,jdbcType=BIGINT}
+	</delete>
+
+	<delete id="deleteByDcotorIdAndPatientId">
+		delete from r_doctor_patient where doctorId=#{doctorId,jdbcType=BIGINT} AND
+		patientId=#{patientId,jdbcType=BIGINT}
+	</delete>
+
+	<delete id="deleteByPatientId">
+		DELETE FROM r_doctor_patient WHERE patientId=#{patientId}
+	</delete>
+	
+	<delete id="deleteMedicalByPatientId">
+		DELETE FROM ehr_db.var_patient_doctor_medical WHERE patientId=#{patientId}
+	</delete>
+	
+	<delete id="deleteDoctorPatient">
+		<if test="doctorId!=null">
+			delete from r_doctor_patient where doctorId = #{doctorId,jdbcType=BIGINT}
+		</if>
+		<if test="patientId!=null">
+			delete from r_doctor_patient where patientId = #{patientId,jdbcType=BIGINT}
+		</if>
+	</delete>
+
+	<update id="updateHasMedicalRecord" parameterType="com.westangel.common.bean.DoctorPatient">
+		update r_doctor_patient
+		<set>
+			<if test="hasMedicalRecord != null">
+				hasMedicalRecord=#{hasMedicalRecord,jdbcType=INTEGER}
+			</if>
+		</set>
+		where id=#{id,jdbcType=BIGINT}
+	</update>
+	
+	<update id="updateToBDoctorPatientToCloudRelation">
+		UPDATE user_db.r_doctor_patient
+		<set>
+			patientId=#{cloudPatientId},
+			attentionTime=NOW()
+		</set>
+		WHERE patientId=#{tobPatientId}
+		<if test="doctorPatients != null">
+			AND doctorId NOT IN
+			<foreach collection="doctorPatients" item="doctorPatient" index="index" open="(" separator="," close=")">
+				#{doctorPatient.doctorId}
+			</foreach>
+		</if>
+	</update>
+	
+	<update id="updateDoctorPatient" >
+		UPDATE user_db.r_doctor_patient
+		<set>
+			<if test="sourceFlag!=null">
+				sourceFlag=#{sourceFlag}
+			</if>
+			<if test="attentionTime!=null">
+				attentionTime=#{attentionTime}
+			</if>
+		</set>
+		WHERE
+			id=#{id}
+
+	</update>
+</mapper>

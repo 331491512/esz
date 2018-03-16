@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- ehr_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.CloudDiseaseTypeICD10Dao" >
+
+	<resultMap type="com.esuizhen.cloudservice.sync.model.DiseaseTypeICD10" id="baseResultMap">
+		<id column="deptId" property="deptId" jdbcType="INTEGER" />
+		<result column="hospitalId" property="hospitalId" jdbcType="INTEGER" />
+		<result column="diseaseBodyPartId" property="diseaseBodyPartId" jdbcType="INTEGER" />
+		<result column="diseaseTypeId" property="diseaseTypeId" jdbcType="INTEGER" />
+		<result column="diseaseCode" property="diseaseCode" jdbcType="VARCHAR" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<select id="findByDiseaseCode" resultMap="baseResultMap">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM ehr_db.meta_r_disease_type_icd_10 t1
+			INNER JOIN ehr_db.meta_c_disease_type t2 ON t1.diseaseTypeId=t2.diseaseTypeId
+		WHERE (LEFT(t1.diseaseCode, #{length})=#{diseaseCode} OR t1.diseaseCode=#{diseaseCode})
+			AND t1.hospitalId=#{hospitalId}
+	</select>
+	
+	<select id="findByDiseaseContent" resultMap="baseResultMap">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM ehr_db.meta_r_disease_type_icd_10 t1
+			INNER JOIN ehr_db.meta_c_disease_type t2 ON t1.diseaseTypeId=t2.diseaseTypeId
+			INNER JOIN ehr_db.meta_r_disease_type_keyword t3 ON t1.diseaseTypeId=t3.diseaseTypeId
+		WHERE LOCATE(t3.keyword, #{diseaseContent})
+			AND NOT LOCATE(
+				(CASE WHEN t3.excludeKeyword IS NULL || t3.excludeKeyword='' THEN '$XXXXX$' 
+				ELSE t3.excludeKeyword END)
+				, #{diseaseContent})
+			AND t1.hospitalId=#{hospitalId}
+	</select>
+
+	<sql id="base_column_list">
+		t1.id, t1.hospitalId, t2.diseaseBodyPartId, t1.diseaseTypeId, t1.diseaseCode, t1.diseaseTypeName
+	</sql>
+
+</mapper>

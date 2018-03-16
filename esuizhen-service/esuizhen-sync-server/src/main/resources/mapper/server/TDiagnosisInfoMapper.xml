@@ -1,0 +1,654 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.server.TDiagnosisInfoDao" >
+
+  <insert id="insertSelective" parameterType="com.esuizhen.server.sync.bean.server.DiagnosisInfoRes" >
+    insert into ehr_db.e_diagnosis_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="diagnosisId != null" >
+        diagnosisId,
+      </if>
+      <if test="emrId != null" >
+        emrId,
+      </if>
+      <if test="patientId != null" >
+        patientId,
+      </if>
+      <if test="patientNo != null" >
+        patientNo,
+      </if>
+      <if test="oldPatientNo != null" >
+        oldPatientNo,
+      </if>
+      <if test="inhospitalTimes != null" >
+        inhospitalTimes,
+      </if>
+      <if test="oldInhospitalTimes != null" >
+        oldInhospitalTimes,
+      </if>
+      <if test="inhospitalNo != null" >
+        inhospitalNo,
+      </if>
+      <if test="inhospitalId != null" >
+        inhospitalId,
+      </if>
+      <if test="diagnosisTypeId != null" >
+        diagnosisTypeId,
+      </if>
+      <if test="diagnosis != null" >
+        diagnosis,
+      </if>
+      <if test="diagnosisExplain != null" >
+        diagnosisExplain,
+      </if>
+      <if test="inHospitalCondition != null" >
+        inHospitalCondition,
+      </if>
+      <if test="icdDiseaseTypeId != null" >
+        icdDiseaseTypeId,
+      </if>
+      <if test="diseaseTypeId != null" >
+        diseaseTypeId,
+      </if>
+      <if test="diseaseBodyPartId != null" >
+        diseaseBodyPartId,
+      </if>
+      <if test="diseaseCode != null" >
+        diseaseCode,
+      </if>
+      <if test="zdyCode != null" >
+        zdyCode,
+      </if>
+      <if test="organCode != null" >
+        organCode,
+      </if>
+      <if test="organName != null" >
+        organName,
+      </if>
+      <if test="treatmentHistory != null" >
+        treatmentHistory,
+      </if>
+      <if test="isFollowup != null" >
+        isFollowup,
+      </if>
+      <if test="sourceCancerCount != null" >
+        sourceCancerCount,
+      </if>
+      <if test="diseaseBasis != null" >
+        diseaseBasis,
+      </if>
+      <if test="diagnosisBasisId != null" >
+        diagnosisBasisId,
+      </if>
+      <if test="pathologyDiagnosis != null" >
+        pathologyDiagnosis,
+      </if>
+      <if test="pathologyDiagnosisCode != null" >
+        pathologyDiagnosisCode,
+      </if>
+      <if test="isSourceDiagnosis != null" >
+        isSourceDiagnosis,
+      </if>
+      <if test="disagnosisPeriodizationId != null" >
+        disagnosisPeriodizationId,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="visitTime != null" >
+        visitTime,
+      </if>
+      <if test="creator != null" >
+        creator,
+      </if>
+      <if test="operatorId != null" >
+        operatorId,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+      <if test="updateTime != null" >
+        updateTime,
+      </if>
+      <if test="syncTime != null" >
+        syncTime,
+      </if>
+      <if test="outhospitalCondition != null" >
+        outhospitalCondition,
+      </if>
+      <if test="firstdiagnosisHospitalId != null" >
+        firstdiagnosisHospitalId,
+      </if>
+      <if test="firstdiagnosisHospitalName != null" >
+        firstdiagnosisHospitalName,
+      </if>
+      <if test="firstdiagnosisTime != null" >
+        firstdiagnosisTime,
+      </if>
+      <if test="specialDiseaseDiagnosisId != null" >
+        specialDiseaseDiagnosisId,
+      </if>
+      <if test="diagnosisDoctorId != null" >
+        diagnosisDoctorId,
+      </if>
+      <if test="diagnosisDoctorName != null" >
+        diagnosisDoctorName,
+      </if>
+      <if test="suspectedDiagnosisFlag != null" >
+        suspectedDiagnosisFlag,
+      </if>
+      <if test="surgeryFlag != null" >
+        surgeryFlag,
+      </if>
+      <if test="outhospitalDeptId != null" >
+        outhospitalDeptId,
+      </if>
+      <if test="outhospitalDeptUuid != null" >
+        outhospitalDeptUuid,
+      </if>
+      <if test="tumourPeriodizationT != null" >
+        tumourPeriodizationT,
+      </if>
+      <if test="tumourPeriodizationN != null" >
+        tumourPeriodizationN,
+      </if>
+      <if test="tumourPeriodizationM1 != null" >
+        tumourPeriodizationM1,
+      </if>
+      <if test="tumourPeriodizationClinic != null" >
+        tumourPeriodizationClinic,
+      </if>
+      <if test="tumourPeriodization != null" >
+        tumourPeriodization,
+      </if>
+      <if test="outhospitalDiagnosis != null" >
+        outhospitalDiagnosis,
+      </if>
+      <if test="outhospitalDiagnosisCode != null" >
+        outhospitalDiagnosisCode,
+      </if>
+      <if test="clinicNo != null" >
+        clinicNo,
+      </if>
+      <if test="mainID != null" >
+        mainID,
+      </if>
+      <if test="patientUuid != null" >
+        patientUuid,
+      </if>
+      <if test="creatorUuid != null" >
+        creatorUuid,
+      </if>
+      <if test="operatorUuid != null" >
+        operatorUuid,
+      </if>
+      <if test="diagnosisDoctorUuid != null" >
+        diagnosisDoctorUuid,
+      </if>
+      <if test="eszCode != null" >
+        eszCode,
+      </if>
+      <if test="rawCreateTime != null" >
+        rawCreateTime,
+      </if>
+      <if test="mergeFlag != null" >
+        mergeFlag,
+      </if>
+      <if test="mergeFrom != null" >
+        mergeFrom,
+      </if>
+      <if test="mergeTarget != null" >
+        mergeTarget,
+      </if>
+      <if test="mergeTime != null" >
+        mergeTime,
+      </if>
+      <if test="mergeFromUuid != null" >
+        mergeFromUuid,
+      </if>
+      <if test="mergeTargetUuid != null" >
+        mergeTargetUuid,
+      </if>
+      <if test="specialDiseaseRegisterId != null" >
+        specialDiseaseRegisterId,
+      </if>
+      <if test="tempId != null" >
+        tempId,
+      </if>
+      <if test="seq != null" >
+        seq,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="diagnosisId != null" >
+        #{diagnosisId,jdbcType=VARCHAR},
+      </if>
+      <if test="emrId != null" >
+        #{emrId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        #{patientNo,jdbcType=CHAR},
+      </if>
+      <if test="oldPatientNo != null" >
+        #{oldPatientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalTimes != null" >
+        #{inhospitalTimes,jdbcType=INTEGER},
+      </if>
+      <if test="oldInhospitalTimes != null" >
+        #{oldInhospitalTimes,jdbcType=INTEGER},
+      </if>
+      <if test="inhospitalNo != null" >
+        #{inhospitalNo,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalId != null" >
+        #{inhospitalId,jdbcType=VARCHAR},
+      </if>
+      <if test="diagnosisTypeId != null" >
+        #{diagnosisTypeId,jdbcType=INTEGER},
+      </if>
+      <if test="diagnosis != null" >
+        #{diagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="diagnosisExplain != null" >
+        #{diagnosisExplain,jdbcType=INTEGER},
+      </if>
+      <if test="inHospitalCondition != null" >
+        #{inHospitalCondition,jdbcType=INTEGER},
+      </if>
+      <if test="icdDiseaseTypeId != null" >
+        #{icdDiseaseTypeId,jdbcType=INTEGER},
+      </if>
+      <if test="diseaseTypeId != null" >
+        #{diseaseTypeId,jdbcType=INTEGER},
+      </if>
+      <if test="diseaseBodyPartId != null" >
+        #{diseaseBodyPartId,jdbcType=INTEGER},
+      </if>
+      <if test="diseaseCode != null" >
+        #{diseaseCode,jdbcType=VARCHAR},
+      </if>
+      <if test="zdyCode != null" >
+        #{zdyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="organCode != null" >
+        #{organCode,jdbcType=VARCHAR},
+      </if>
+      <if test="organName != null" >
+        #{organName,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentHistory != null" >
+        #{treatmentHistory,jdbcType=INTEGER},
+      </if>
+      <if test="isFollowup != null" >
+        #{isFollowup,jdbcType=INTEGER},
+      </if>
+      <if test="sourceCancerCount != null" >
+        #{sourceCancerCount,jdbcType=INTEGER},
+      </if>
+      <if test="diseaseBasis != null" >
+        #{diseaseBasis,jdbcType=VARCHAR},
+      </if>
+      <if test="diagnosisBasisId != null" >
+        #{diagnosisBasisId,jdbcType=INTEGER},
+      </if>
+      <if test="pathologyDiagnosis != null" >
+        #{pathologyDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="pathologyDiagnosisCode != null" >
+        #{pathologyDiagnosisCode,jdbcType=CHAR},
+      </if>
+      <if test="isSourceDiagnosis != null" >
+        #{isSourceDiagnosis,jdbcType=INTEGER},
+      </if>
+      <if test="disagnosisPeriodizationId != null" >
+        #{disagnosisPeriodizationId,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="visitTime != null" >
+        #{visitTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator != null" >
+        #{creator,jdbcType=BIGINT},
+      </if>
+      <if test="operatorId != null" >
+        #{operatorId,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncTime != null" >
+        #{syncTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="outhospitalCondition != null" >
+        #{outhospitalCondition,jdbcType=INTEGER},
+      </if>
+      <if test="firstdiagnosisHospitalId != null" >
+        #{firstdiagnosisHospitalId,jdbcType=BIGINT},
+      </if>
+      <if test="firstdiagnosisHospitalName != null" >
+        #{firstdiagnosisHospitalName,jdbcType=VARCHAR},
+      </if>
+      <if test="firstdiagnosisTime != null" >
+        #{firstdiagnosisTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="specialDiseaseDiagnosisId != null" >
+        #{specialDiseaseDiagnosisId,jdbcType=INTEGER},
+      </if>
+      <if test="diagnosisDoctorId != null" >
+        #{diagnosisDoctorId,jdbcType=BIGINT},
+      </if>
+      <if test="diagnosisDoctorName != null" >
+        #{diagnosisDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="suspectedDiagnosisFlag != null" >
+        #{suspectedDiagnosisFlag,jdbcType=INTEGER},
+      </if>
+      <if test="surgeryFlag != null" >
+        #{surgeryFlag,jdbcType=INTEGER},
+      </if>
+      <if test="outhospitalDeptId != null" >
+        #{outhospitalDeptId,jdbcType=INTEGER},
+      </if>
+      <if test="outhospitalDeptUuid != null" >
+        #{outhospitalDeptUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodizationT != null" >
+        #{tumourPeriodizationT,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodizationN != null" >
+        #{tumourPeriodizationN,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodizationM1 != null" >
+        #{tumourPeriodizationM1,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodizationClinic != null" >
+        #{tumourPeriodizationClinic,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodization != null" >
+        #{tumourPeriodization,jdbcType=VARCHAR},
+      </if>
+      <if test="outhospitalDiagnosis != null" >
+        #{outhospitalDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="outhospitalDiagnosisCode != null" >
+        #{outhospitalDiagnosisCode,jdbcType=VARCHAR},
+      </if>
+      <if test="clinicNo != null" >
+        #{clinicNo,jdbcType=VARCHAR},
+      </if>
+      <if test="mainID != null" >
+        #{mainID,jdbcType=VARCHAR},
+      </if>
+      <if test="patientUuid != null" >
+        #{patientUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="creatorUuid != null" >
+        #{creatorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="operatorUuid != null" >
+        #{operatorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="diagnosisDoctorUuid != null" >
+        #{diagnosisDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="eszCode != null" >
+        #{eszCode,jdbcType=VARCHAR},
+      </if>
+      <if test="rawCreateTime != null" >
+        #{rawCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFlag != null" >
+        #{mergeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mergeFrom != null" >
+        #{mergeFrom,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTarget != null" >
+        #{mergeTarget,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTime != null" >
+        #{mergeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFromUuid != null" >
+        #{mergeFromUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeTargetUuid != null" >
+        #{mergeTargetUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="specialDiseaseRegisterId != null" >
+        #{specialDiseaseRegisterId,jdbcType=BIGINT},
+      </if>
+      <if test="tempId != null" >
+        #{tempId,jdbcType=INTEGER},
+      </if>
+      <if test="seq != null" >
+        #{seq,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.server.sync.bean.server.DiagnosisInfoRes" >
+    update ehr_db.e_diagnosis_info
+    <set >
+      <if test="emrId != null" >
+        emrId = #{emrId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        patientId = #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        patientNo = #{patientNo,jdbcType=CHAR},
+      </if>
+      <if test="oldPatientNo != null" >
+        oldPatientNo = #{oldPatientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalTimes != null" >
+        inhospitalTimes = #{inhospitalTimes,jdbcType=INTEGER},
+      </if>
+      <if test="oldInhospitalTimes != null" >
+        oldInhospitalTimes = #{oldInhospitalTimes,jdbcType=INTEGER},
+      </if>
+      <if test="inhospitalNo != null" >
+        inhospitalNo = #{inhospitalNo,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalId != null" >
+        inhospitalId = #{inhospitalId,jdbcType=VARCHAR},
+      </if>
+      <if test="diagnosisTypeId != null" >
+        diagnosisTypeId = #{diagnosisTypeId,jdbcType=INTEGER},
+      </if>
+      <if test="diagnosis != null" >
+        diagnosis = #{diagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="diagnosisExplain != null" >
+        diagnosisExplain = #{diagnosisExplain,jdbcType=INTEGER},
+      </if>
+      <if test="inHospitalCondition != null" >
+        inHospitalCondition = #{inHospitalCondition,jdbcType=INTEGER},
+      </if>
+      <if test="icdDiseaseTypeId != null" >
+        icdDiseaseTypeId = #{icdDiseaseTypeId,jdbcType=INTEGER},
+      </if>
+      <if test="diseaseTypeId != null" >
+        diseaseTypeId = #{diseaseTypeId,jdbcType=INTEGER},
+      </if>
+      <if test="diseaseBodyPartId != null" >
+        diseaseBodyPartId = #{diseaseBodyPartId,jdbcType=INTEGER},
+      </if>
+      <if test="diseaseCode != null" >
+        diseaseCode = #{diseaseCode,jdbcType=VARCHAR},
+      </if>
+      <if test="zdyCode != null" >
+        zdyCode = #{zdyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="organCode != null" >
+        organCode = #{organCode,jdbcType=VARCHAR},
+      </if>
+      <if test="organName != null" >
+        organName = #{organName,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentHistory != null" >
+        treatmentHistory = #{treatmentHistory,jdbcType=INTEGER},
+      </if>
+      <if test="isFollowup != null" >
+        isFollowup = #{isFollowup,jdbcType=INTEGER},
+      </if>
+      <if test="sourceCancerCount != null" >
+        sourceCancerCount = #{sourceCancerCount,jdbcType=INTEGER},
+      </if>
+      <if test="diseaseBasis != null" >
+        diseaseBasis = #{diseaseBasis,jdbcType=VARCHAR},
+      </if>
+      <if test="diagnosisBasisId != null" >
+        diagnosisBasisId = #{diagnosisBasisId,jdbcType=INTEGER},
+      </if>
+      <if test="pathologyDiagnosis != null" >
+        pathologyDiagnosis = #{pathologyDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="pathologyDiagnosisCode != null" >
+        pathologyDiagnosisCode = #{pathologyDiagnosisCode,jdbcType=CHAR},
+      </if>
+      <if test="isSourceDiagnosis != null" >
+        isSourceDiagnosis = #{isSourceDiagnosis,jdbcType=INTEGER},
+      </if>
+      <if test="disagnosisPeriodizationId != null" >
+        disagnosisPeriodizationId = #{disagnosisPeriodizationId,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="visitTime != null" >
+        visitTime = #{visitTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator != null" >
+        creator = #{creator,jdbcType=BIGINT},
+      </if>
+      <if test="operatorId != null" >
+        operatorId = #{operatorId,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncTime != null" >
+        syncTime = #{syncTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="outhospitalCondition != null" >
+        outhospitalCondition = #{outhospitalCondition,jdbcType=INTEGER},
+      </if>
+      <if test="firstdiagnosisHospitalId != null" >
+        firstdiagnosisHospitalId = #{firstdiagnosisHospitalId,jdbcType=BIGINT},
+      </if>
+      <if test="firstdiagnosisHospitalName != null" >
+        firstdiagnosisHospitalName = #{firstdiagnosisHospitalName,jdbcType=VARCHAR},
+      </if>
+      <if test="firstdiagnosisTime != null" >
+        firstdiagnosisTime = #{firstdiagnosisTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="specialDiseaseDiagnosisId != null" >
+        specialDiseaseDiagnosisId = #{specialDiseaseDiagnosisId,jdbcType=INTEGER},
+      </if>
+      <if test="diagnosisDoctorId != null" >
+        diagnosisDoctorId = #{diagnosisDoctorId,jdbcType=BIGINT},
+      </if>
+      <if test="diagnosisDoctorName != null" >
+        diagnosisDoctorName = #{diagnosisDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="suspectedDiagnosisFlag != null" >
+        suspectedDiagnosisFlag = #{suspectedDiagnosisFlag,jdbcType=INTEGER},
+      </if>
+      <if test="surgeryFlag != null" >
+        surgeryFlag = #{surgeryFlag,jdbcType=INTEGER},
+      </if>
+      <if test="outhospitalDeptId != null" >
+        outhospitalDeptId = #{outhospitalDeptId,jdbcType=INTEGER},
+      </if>
+      <if test="outhospitalDeptUuid != null" >
+        outhospitalDeptUuid = #{outhospitalDeptUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodizationT != null" >
+        tumourPeriodizationT = #{tumourPeriodizationT,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodizationN != null" >
+        tumourPeriodizationN = #{tumourPeriodizationN,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodizationM1 != null" >
+        tumourPeriodizationM1 = #{tumourPeriodizationM1,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodizationClinic != null" >
+        tumourPeriodizationClinic = #{tumourPeriodizationClinic,jdbcType=VARCHAR},
+      </if>
+      <if test="tumourPeriodization != null" >
+        tumourPeriodization = #{tumourPeriodization,jdbcType=VARCHAR},
+      </if>
+      <if test="outhospitalDiagnosis != null" >
+        outhospitalDiagnosis = #{outhospitalDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="outhospitalDiagnosisCode != null" >
+        outhospitalDiagnosisCode = #{outhospitalDiagnosisCode,jdbcType=VARCHAR},
+      </if>
+      <if test="clinicNo != null" >
+        clinicNo = #{clinicNo,jdbcType=VARCHAR},
+      </if>
+      <if test="mainID != null" >
+        mainID = #{mainID,jdbcType=VARCHAR},
+      </if>
+      <if test="patientUuid != null" >
+        patientUuid = #{patientUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="creatorUuid != null" >
+        creatorUuid = #{creatorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="operatorUuid != null" >
+        operatorUuid = #{operatorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="diagnosisDoctorUuid != null" >
+        diagnosisDoctorUuid = #{diagnosisDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="eszCode != null" >
+        eszCode = #{eszCode,jdbcType=VARCHAR},
+      </if>
+      <if test="rawCreateTime != null" >
+        rawCreateTime = #{rawCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFlag != null" >
+        mergeFlag = #{mergeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mergeFrom != null" >
+        mergeFrom = #{mergeFrom,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTarget != null" >
+        mergeTarget = #{mergeTarget,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTime != null" >
+        mergeTime = #{mergeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFromUuid != null" >
+        mergeFromUuid = #{mergeFromUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeTargetUuid != null" >
+        mergeTargetUuid = #{mergeTargetUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="specialDiseaseRegisterId != null" >
+        specialDiseaseRegisterId = #{specialDiseaseRegisterId,jdbcType=BIGINT},
+      </if>
+      <if test="tempId != null" >
+        tempId = #{tempId,jdbcType=INTEGER},
+      </if>
+      <if test="seq != null" >
+        seq = #{seq,jdbcType=INTEGER},
+      </if>
+    </set>
+    where diagnosisId = #{diagnosisId,jdbcType=VARCHAR}
+  </update>
+</mapper>

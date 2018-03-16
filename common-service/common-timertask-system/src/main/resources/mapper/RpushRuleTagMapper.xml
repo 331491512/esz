@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.westangel.timertask.dao.RpushRuleTagDao">
+
+	<insert id="insertRpushRuleTag" useGeneratedKeys="true" parameterType="com.westangel.timertask.model.RpushRuleTag">
+		<selectKey resultType="long" keyProperty="id" order="AFTER" >
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+        INSERT INTO operation_db.r_push_rule_tag 
+        (
+        	pushRuleId ,
+        	articleTagId ,
+        	patientTagId ,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{pushRuleId} ,
+        	#{articleTagId} ,
+        	#{patientTagId} ,
+        	NOW() ,
+        	NOW() 
+        )
+	</insert>
+    
+	<update id="updateRpushRuleTag" parameterType="com.westangel.timertask.model.RpushRuleTag">
+        UPDATE operation_db.r_push_rule_tag 
+        <set>
+	        <if test="pushRuleId != null">
+                pushRuleId = #{pushRuleId} ,
+            </if>
+	        <if test="articleTagId != null">
+                articleTagId = #{articleTagId} ,
+            </if>
+	        <if test="patientTagId != null">
+                patientTagId = #{patientTagId} ,
+            </if>
+	        <if test="updateTime != null">
+                updateTime = NOW() ,
+            </if>
+        </set>
+        WHERE 
+	        id = #{id} 
+	</update>
+
+    <delete id="deleteRpushRuleTag">
+        DELETE FROM operation_db.r_push_rule_tag WHERE id = #{id} 
+    </delete>
+    
+    <select id="queryRpushRuleTagById" resultType="com.westangel.timertask.model.RpushRuleTag">
+		SELECT 
+        	id,
+        	pushRuleId,
+        	articleTagId,
+        	patientTagId,
+        	createTime,
+        	updateTime
+		FROM operation_db.r_push_rule_tag 
+	    WHERE 
+	        id = #{id} 
+	</select>
+	
+</mapper>
+

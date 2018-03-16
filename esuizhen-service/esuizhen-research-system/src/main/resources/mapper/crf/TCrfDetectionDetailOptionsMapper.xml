@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.crf.TCrfDetectionDetailDao">
+
+	<insert id="insertCrfObservationDetectionItemDetailOptions"  parameterType="com.esuizhen.cloudservice.research.model.crf.TCrfDetectionDetail">
+        INSERT INTO crf_observation_detection_item_detail_options 
+        (
+        	crfObserveItemId ,
+        	crfObserveId ,
+        	subjectElementId ,
+        	detectionTypeId ,
+        	detectionItemId ,
+        	unit,
+        	refrenceRangeMin,
+        	refrenceRangeMax,
+        	`index`,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{crfObserveItemId} ,
+        	#{crfObserveId} ,
+        	#{subjectElementId} ,
+        	#{detectionTypeId} ,
+        	#{detectionItemId} ,
+        	#{unit},
+        	#{refrenceRangeMin},
+        	#{refrenceRangeMax},
+        	#{index},
+        	NOW() ,
+        	NOW() 
+        )
+	</insert>
+    
+    <insert id="insertCrfObservationDetectionItemDetailOptionsList"  parameterType="java.util.List">
+        INSERT INTO crf_observation_detection_item_detail_options 
+        (
+        	crfObserveItemId ,
+        	crfObserveId ,
+        	subjectElementId ,
+        	detectionTypeId ,
+        	detectionItemId ,
+        	unit,
+        	refrenceRangeMin,
+        	refrenceRangeMax,
+        	`index`,
+        	createTime ,
+        	updateTime 
+        ) VALUES 
+        <foreach collection="list" index="index" item="item" separator=",">
+        (
+        	#{item.crfObserveItemId} ,
+        	#{item.crfObserveId} ,
+        	#{item.subjectElementId} ,
+        	#{item.detectionTypeId} ,
+        	#{item.detectionItemId} ,
+        	#{item.unit},
+        	#{item.refrenceRangeMin},
+        	#{item.refrenceRangeMax},
+        	#{item.index},
+        	NOW(),
+        	NOW() 
+        )
+        </foreach>
+	</insert>
+	
+	<update id="updateCrfObservationDetectionItemDetailOptions" parameterType="com.esuizhen.cloudservice.research.model.crf.TCrfDetectionDetail">
+        UPDATE crf_observation_detection_item_detail_options 
+        <set>
+	        <if test="crfObserveId != null">
+                crfObserveId = #{crfObserveId} ,
+            </if>
+	        <if test="subjectElementId != null">
+                subjectElementId = #{subjectElementId} ,
+            </if>
+	        <if test="detectionTypeId != null">
+                detectionTypeId = #{detectionTypeId} ,
+            </if>
+	        <if test="detectionItemId != null">
+                detectionItemId = #{detectionItemId} ,
+            </if>
+            <if test="unit != null">
+                unit = #{unit} ,
+            </if>
+            <if test="refrenceRangeMin != null">
+                refrenceRangeMin = #{refrenceRangeMin} ,
+            </if>
+            <if test="refrenceRangeMax != null">
+                refrenceRangeMax = #{refrenceRangeMax} ,
+            </if>
+	        <if test="createTime != null">
+                createTime = #{createTime} ,
+            </if>
+	        <if test="updateTime != null">
+                updateTime = #{updateTime} ,
+            </if>
+        </set>
+        WHERE 
+	        crfObserveItemId = #{crfObserveItemId} 
+	</update>
+
+    <delete id="deleteCrfObservationDetectionItemDetailOptions">
+        DELETE FROM crf_observation_detection_item_detail_options WHERE crfObserveItemId = #{crfObserveItemId} 
+    </delete>
+    
+    <delete id="deleteCrfObservationDetectionItemDetailOptionsByCrfObserveId">
+        DELETE FROM crf_observation_detection_item_detail_options WHERE crfObserveId = #{crfObserveId} 
+    </delete>
+    
+    <select id="queryCrfObservationDetectionItemDetailOptionsById" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfDetectionDetail">
+		SELECT 
+        	crfObserveItemId,
+        	crfObserveId,
+        	subjectElementId,
+        	detectionTypeId,
+        	detectionItemId,
+        	(SELECT detectionItemName FROM ehr_db.meta_e_detection_item WHERE detectionItemId=t1.detectionItemId) detectionItemName ,
+        	unit,
+        	refrenceRangeMin,
+        	refrenceRangeMax,
+        	createTime,
+        	updateTime
+		FROM crf_observation_detection_item_detail_options 
+	    WHERE 
+	        crfObserveItemId = #{crfObserveItemId} 
+	</select>
+	
+	<select id="queryCrfObservationDetectionItemDetailOptionsByCrfObserveId" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfDetectionDetail">
+		SELECT 
+        	t1.crfObserveItemId,
+        	t1.crfObserveId,
+        	t1.subjectElementId,
+        	t1.detectionTypeId,
+        	t2.detectionTypeName,
+        	t1.detectionItemId,
+        	(SELECT detectionItemName FROM ehr_db.meta_e_detection_item WHERE detectionItemId=t1.detectionItemId) detectionItemName ,
+        	t1.unit,
+        	t1.refrenceRangeMin,
+        	t1.refrenceRangeMax,
+        	t1.createTime,
+        	t1.updateTime
+		FROM crf_observation_detection_item_detail_options t1
+			INNER JOIN ehr_db.meta_e_detection_type t2 ON t1.detectionTypeId = t2.detectionTypeId
+	    WHERE crfObserveId = #{crfObserveId}
+	    ORDER BY t1.`index` ASC
+	</select>
+</mapper>
+

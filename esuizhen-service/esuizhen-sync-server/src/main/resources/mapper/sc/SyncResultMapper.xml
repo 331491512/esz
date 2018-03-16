@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+
+<mapper namespace="com.esuizhen.server.sync.dao.sc.SyncResultDao" >
+
+	<insert id="insert">
+		insert into ${tableName} (${idColumnName}, batchId, syncFlag,
+      				syncTime, cause, createTime,updateTime)
+    	values (#{id}, #{batchId,jdbcType=VARCHAR}, #{syncFlag,jdbcType=INTEGER},
+      			#{syncTime,jdbcType=TIMESTAMP}, #{cause,jdbcType=VARCHAR},
+      			#{createTime,jdbcType=TIMESTAMP},#{updateTime,jdbcType=TIMESTAMP})
+	</insert>
+
+	<update id="update">
+		update ${tableName}
+			<set >
+				<if test="batchId != null" >
+					batchId = #{batchId,jdbcType=VARCHAR},
+				</if>
+				<if test="syncFlag != null" >
+					syncFlag = #{syncFlag,jdbcType=INTEGER},
+				</if>
+				<if test="syncTime != null" >
+					syncTime = #{syncTime,jdbcType=TIMESTAMP},
+				</if>
+				<if test="cause != null" >
+					cause = #{cause,jdbcType=VARCHAR},
+				</if>
+				<if test="createTime != null" >
+					createTime = #{createTime,jdbcType=TIMESTAMP},
+				</if>
+				<if test="updateTime != null" >
+					updateTime = #{updateTime,jdbcType=TIMESTAMP},
+				</if>
+			</set>
+		where ${idColumnName} = #{id}
+	</update>
+
+	<select id="findByKey">
+		SELECT recordId, batchId, tableId, resultId, syncFlag, syncTime, cause, createTime, updateTime
+		FROM ${tableName}
+		WHERE ${idColumnName} = #{id}
+	</select>
+
+</mapper>

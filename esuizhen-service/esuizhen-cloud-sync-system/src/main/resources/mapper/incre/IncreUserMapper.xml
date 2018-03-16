@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_incre_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.incre.IncreUserDao">
+
+	<insert id="insert" parameterType="com.westangel.common.bean.User">
+		<selectKey resultType="long" keyProperty="userId" order="AFTER">
+			SELECT LAST_INSERT_ID() as userId
+		</selectKey>
+		insert into cloud_sync_incre_db.u_user (
+			uuid, 
+			userName,
+			cryptPasswd, 
+			trueName, 
+			nickName,
+			mobile, 
+			sex, 
+			birthDate,
+			userPictureUrl, 
+			email, 
+			nation,
+			country, 
+			cityCode, 
+			city,
+			address, 
+			nativePlace, 
+			profession,
+			rawOccupationId,
+			rawProfession,
+			company, 
+			idType, 
+			identification,
+			marriageStatus, 
+			signature, 
+			education,
+			school, interest, idFileUrl,
+			accountType, infoState, state,
+			role, subroles, points,
+			createTime, updateTime, firstLoginTime,
+			lastLoginTime, sourceFlag
+			,syncTime
+		)VALUES(
+			#{uuid,jdbcType=VARCHAR},
+			#{userName,jdbcType=VARCHAR},
+			#{cryptPasswd,jdbcType=VARCHAR},
+			#{trueName,jdbcType=VARCHAR},
+			#{nickName,jdbcType=VARCHAR},
+			#{mobile,jdbcType=VARCHAR},
+			#{sex,jdbcType=INTEGER},
+			#{birthDate,jdbcType=TIMESTAMP},
+			#{userPictureUrl,jdbcType=VARCHAR},
+			#{email,jdbcType=VARCHAR},
+			#{nation,jdbcType=VARCHAR},
+			#{country,jdbcType=VARCHAR},
+			#{cityCode,jdbcType=VARCHAR},
+			#{city,jdbcType=VARCHAR},
+			#{address,jdbcType=VARCHAR},
+			#{nativePlace,jdbcType=VARCHAR},
+			#{profession,jdbcType=VARCHAR},
+			#{rawOccupationId,jdbcType=VARCHAR},
+			#{rawProfession,jdbcType=VARCHAR},
+			#{company,jdbcType=VARCHAR},
+			#{idType,jdbcType=INTEGER},
+			#{identification,jdbcType=VARCHAR},
+			#{marriageStatus,jdbcType=INTEGER},
+			#{signature,jdbcType=VARCHAR},
+			#{education,jdbcType=INTEGER},
+			#{school,jdbcType=VARCHAR},
+			#{interest,jdbcType=VARCHAR},
+			#{idFileUrl,jdbcType=VARCHAR},
+			#{accountType,jdbcType=INTEGER},
+			#{infoState,jdbcType=INTEGER},
+			#{state,jdbcType=INTEGER},
+			#{role,jdbcType=INTEGER},
+			#{subroles,jdbcType=VARCHAR},
+			#{points,jdbcType=INTEGER},
+			#{createTime}, 
+			#{updateTime},
+			#{firstLoginTime,jdbcType=TIMESTAMP},
+			#{lastLoginTime,jdbcType=TIMESTAMP},
+			#{sourceFlag,jdbcType=INTEGER}
+			,NOW()
+		)
+	</insert>
+</mapper>

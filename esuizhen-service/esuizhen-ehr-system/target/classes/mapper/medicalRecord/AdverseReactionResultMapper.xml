@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.medicalRecord.AdverseReactionResultDao">
+	<select id="queryAdverseReactionResult" parameterType="com.esuizhen.cloudservice.ehr.bean.AttendPatientReq" resultType="com.esuizhen.cloudservice.ehr.model.medicalRecord.AdverseReactionResultInfo">
+		select * from e_adverse_reaction_result t1
+		<where>
+			<if test="patientId !=null">
+				and t1.patientId=#{patientId}
+			</if>
+			<if test="inhospitalId !=null">
+				and t1.inhospitalId=#{inhospitalId}
+			</if>
+			<if test="clinicMedicalId !=null">
+				and t1.clinicMedicalId=#{clinicMedicalId}
+			</if>
+		</where>
+	</select>
+	
+	<insert id="insertAdverseReactionResultInfo" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.AdverseReactionResultInfo" >
+        INSERT INTO e_adverse_reaction_result (
+        	adverseReactionRecordId,
+        	adverseReactionId,
+			patientId,
+			inhospitalId,
+			clinicMedicalId,
+			adverseReactionName,
+			level,
+			takeStepsId,
+			takeSteps,
+			treatmentRelationsId,
+			researchRelationship,
+			theOutcomeId,
+			theOutcome,
+			beginTime,
+			endTime,
+			sortNum,
+			createTime,
+			updateTime
+        ) VALUES (
+        	#{adverseReactionRecordId},
+        	#{adverseReactionId},
+			#{patientId},
+			#{inhospitalId},
+			#{clinicMedicalId},
+			#{adverseReactionName},
+			#{level},
+			#{takeStepsId},
+			#{takeSteps},
+			#{treatmentRelationsId},
+			#{researchRelationship},
+			#{theOutcomeId},
+			#{theOutcome},
+			#{beginTime},
+			#{endTime},
+			#{sortNum},
+        	NOW(),
+        	NOW() 
+        )
+	</insert>
+    
+	<update id="updateAdverseReactionResultInfo" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.AdverseReactionResultInfo">
+        UPDATE e_adverse_reaction_result set
+        		<!-- patientId=#{patientId},
+        		inhospitalId=#{inhospitalId},
+        		clinicMedicalId=#{clinicMedicalId},
+        		adverseReactionId=#{adverseReactionId}, -->
+        		adverseReactionName=#{adverseReactionName},
+        		level=#{level},
+        		takeStepsId=#{takeStepsId},
+        		takeSteps=#{takeSteps},
+        		treatmentRelationsId=#{treatmentRelationsId},
+        		researchRelationship=#{researchRelationship},
+        		theOutcomeId=#{theOutcomeId},
+        		theOutcome=#{theOutcome},
+        		beginTime=#{beginTime},
+        		endTime=#{endTime},
+        		sortNum=#{sortNum},
+                updateTime = NOW()
+        WHERE 
+	        adverseReactionRecordId = #{adverseReactionRecordId} 
+	</update>
+	<update id="updateAdverseReactionResultInfoSeletive" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.AdverseReactionResultInfo">
+        UPDATE e_adverse_reaction_result 
+        <set>
+        	<if test="patientId !=null">
+        		patientId=#{patientId},
+        	</if>
+        	<if test="inhospitalId !=null">
+        		inhospitalId=#{inhospitalId},
+        	</if>
+        	<if test="clinicMedicalId !=null">
+        		clinicMedicalId=#{clinicMedicalId},
+        	</if>
+        	<if test="adverseReactionId !=null">
+        		adverseReactionId=#{adverseReactionId},
+        	</if>
+        	<if test="adverseReactionName !=null">
+        		adverseReactionName=#{adverseReactionName},
+        	</if>
+        	<if test="level !=null">
+        		level=#{level},
+        	</if>
+        	<if test="takeStepsId !=null">
+        		takeStepsId=#{takeStepsId},
+        	</if>
+        	<if test="takeSteps !=null">
+        		takeSteps=#{takeSteps},
+        	</if>
+        	<if test="treatmentRelationsId !=null">
+        		treatmentRelationsId=#{treatmentRelationsId},
+        	</if>
+        	<if test="researchRelationship !=null">
+        		researchRelationship=#{researchRelationship},
+        	</if>
+        	<if test="theOutcomeId !=null">
+        		theOutcomeId=#{theOutcomeId},
+        	</if>
+        	<if test="theOutcome !=null">
+        		theOutcome=#{theOutcome},
+        	</if>
+        	<if test="beginTime !=null">
+        		beginTime=#{beginTime},
+        	</if>
+        	<if test="endTime !=null">
+        		endTime=#{endTime},
+        	</if>
+        	<if test="sortNum !=null">
+        		sortNum=#{sortNum},
+        	</if>
+	        <if test="1==1">
+                updateTime = NOW()
+            </if>
+        </set>
+        WHERE 
+	        adverseReactionRecordId = #{adverseReactionRecordId} 
+	</update>
+
+    <delete id="deleteAdverseReactionResultInfo">
+        DELETE FROM e_adverse_reaction_result WHERE
+        adverseReactionRecordId = #{adverseReactionRecordId} 
+    </delete>
+	
+</mapper>
+

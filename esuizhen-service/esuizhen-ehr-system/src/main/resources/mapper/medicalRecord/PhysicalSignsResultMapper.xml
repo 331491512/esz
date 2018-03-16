@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.medicalRecord.PhysicalSignsResultDao">
+	
+	<select id="queryPhysicalSigns" parameterType="com.esuizhen.cloudservice.ehr.bean.AttendPatientReq" resultType="com.esuizhen.cloudservice.ehr.model.medicalRecord.PhysicalSigns">
+		select * from e_physical_signs_result t1
+		<where>
+			<if test="patientId !=null">
+				and t1.patientId=#{patientId}
+			</if>
+			<if test="inhospitalId !=null">
+				and t1.inhospitalId=#{inhospitalId}
+			</if>
+			<if test="clinicMedicalId !=null">
+				and t1.clinicMedicalId=#{clinicMedicalId}
+			</if>
+		</where>
+	</select>
+	
+	<insert id="insertPhysicalSigns" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.PhysicalSigns" >
+        INSERT INTO e_physical_signs_result (
+        	physicalSignsResultId,
+			patientId,
+			inhospitalId,
+			clinicMedicalId,
+			physicalSignsName,
+			physicalSignsId,
+			checkDate,
+			signsStatus,
+			description,
+			createTime,
+			updateTime
+        ) VALUES (
+        	#{physicalSignsResultId},
+			#{patientId},
+			#{inhospitalId},
+			#{clinicMedicalId},
+			#{physicalSignsName},
+			#{physicalSignsId},
+			#{checkDate},
+			#{signsStatus},
+			#{description},
+        	NOW() ,
+        	NOW() 
+        )
+	</insert>
+    
+	<update id="updatePhysicalSigns" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.PhysicalSigns">
+        UPDATE e_physical_signs_result 
+        <set>
+        	<if test="patientId !=null">
+        		patientId=#{patientId},
+        	</if>
+        	<if test="inhospitalId !=null">
+        		inhospitalId=#{inhospitalId},
+        	</if>
+        	<if test="clinicMedicalId !=null">
+        		clinicMedicalId=#{clinicMedicalId},
+        	</if>
+        	<if test="physicalSignsName !=null">
+        		physicalSignsName=#{physicalSignsName},
+        	</if>
+        	<if test="physicalSignsId !=null">
+        		physicalSignsId=#{physicalSignsId},
+        	</if>
+        	<if test="checkDate !=null">
+        		checkDate=#{checkDate},
+        	</if>
+        	<if test="signsStatus !=null">
+        		signsStatus=#{signsStatus},
+        	</if>
+        	<if test="description !=null">
+        		description=#{description},
+        	</if>
+	        <if test="1==1">
+                updateTime = NOW()
+            </if>
+        </set>
+        WHERE 
+	        physicalSignsResultId = #{physicalSignsResultId} 
+	</update>
+
+    <delete id="deletePhysicalSigns">
+        DELETE FROM e_physical_signs_result WHERE
+        physicalSignsResultId = #{physicalSignsResultId} 
+    </delete>
+	
+</mapper>
+

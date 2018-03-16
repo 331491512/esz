@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.HospitalGuideDao">
+	<!-- 获取就医指南列表 -->
+	<select id="queryHospitalGuideList" resultType="com.esuizhen.cloudservice.user.bean.THospitalGuideInfo">
+		<if test="keyword!=null">
+				<bind name="pattern" value="'%' + keyword + '%'" />
+ 		</if>
+		SELECT
+			title,id guideId
+		FROM
+			user_db.u_hospital_guide
+		WHERE
+			hospitalId=#{hospitalId}
+		<if test="keyword!=null">
+			AND (title LIKE #{pattern} OR content LIKE #{pattern})
+		</if>
+		ORDER BY sortIndex ASC
+	</select>
+	
+	<!-- 获取就医指南信息 -->
+	<select id="queryHospitalGuideInfo" resultType="com.esuizhen.cloudservice.user.bean.THospitalGuideInfo">
+		SELECT
+			title,content
+		FROM
+			user_db.u_hospital_guide
+		WHERE
+			id=#{guideId}
+	</select>
+</mapper>

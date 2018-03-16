@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.westangel.commonservice.authorization.dao.RConfFuncPrivilegeDao">
+	<select id="findUserRoleCount" resultType="java.lang.Integer">
+		SELECT COUNT(0) FROM user_db.r_conf_func_privilege t1
+		WHERE t1.userRole = #{userRole}
+	</select>
+	
+	<select id="find" resultType="com.westangel.common.bean.authorization.RConfFuncPrivilege">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM user_db.r_conf_func_privilege t1
+	</select>
+	
+	<sql id="base_column_list">
+		t1.id,
+		t1.userRole,
+		t1.resourceId,
+		t1.remark,
+		t1.createTime,
+		t1.updateTime
+	</sql>
+	
+	<insert id="batchInsert">
+		INSERT INTO user_db.r_conf_func_privilege(
+			userRole,
+			resourceId,
+			remark,
+			createTime,
+			updateTime
+		)VALUES
+		<foreach collection="confFuncPrivileges" item="item" separator=",">
+			(
+				#{item.userRole},
+				#{item.resourceId},
+				#{item.remark},
+				NOW(),
+				NOW()
+			)
+		</foreach>
+	</insert>
+	
+	<delete id="deleteByUserRole">
+		DELETE FROM user_db.r_conf_func_privilege WHERE userRole = #{userRole}
+		<if test="resourceType != null">
+			AND resourceId IN(SELECT t1.resourceId FROM user_db.meta_resource t1 WHERE t1.resourceType = #{resourceType})
+		</if>
+	</delete>
+</mapper>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.CloudReviewOrderDao" >
+  	<!-- 获取未同步复查预约信息 -->
+	<select id="getReviewOrderByHospital" parameterType="java.lang.Integer" resultType="com.esuizhen.cloudservice.sync.bean.TSyncReviewRecord">
+		SELECT
+			s.consultOrderTime,s.remark,s.state,s.productApplyId
+		FROM hds_db.s_product_service_apply s
+			INNER JOIN user_db.u_hospital h1 ON h1.hospitalId=#{hospitalId} AND h1.userId=s.vendor
+		WHERE s.productType=12 AND s.syncFlag=0 AND <![CDATA[s.auditState>0]]>
+	</select>
+	
+</mapper>

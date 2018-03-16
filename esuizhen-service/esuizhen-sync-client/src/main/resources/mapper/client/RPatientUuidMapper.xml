@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.client.sync.dao.RPatientUuidDao" >	
+  	
+	<select id="getBatchSyncRPatientUuid" resultType="java.util.LinkedHashMap" parameterType="com.esuizhen.client.sync.model.TBatchDetailInfo">
+		SELECT
+			t1.id,t1.uuid,t1.patientId,t2.uuid AS patientUuid,t1.patientNo,t1.newPatientNo,
+			t1.type,t1.flag,t1.createTime,t1.updateTime,IFNULL(t1.hospitalId,#{detailInfo.hospitalId}) hospitalId
+		FROM
+			 user_db.r_uuid_patientno t1
+		JOIN user_db.u_patient t2 ON t1.patientId = t2.patientId 
+    	JOIN sc_db.u_patient_sync_result_client t3 ON t2.uuid = t3.uuid
+    	JOIN sc_db.r_uuid_patientno_sync_result_client t4 ON t1.id = t4.id
+		WHERE
+			t3.syncFlag = 1 AND t4.syncFlag = 0
+		LIMIT #{detailInfo.syncSize}
+  	</select>
+  	  	
+  	<update id="updateRPatientUuidSyncflag" parameterType="java.lang.String">
+		UPDATE sc_db.r_uuid_patientno_sync_result_client t1
+		SET t1.opFlag=IF(t1.syncFlag=0,1,2),t1.syncFlag = 9 , t1.syncTime=NOW(),t1.updateTime = NOW()
+		WHERE
+			t1.id IN (${ids})
+	</update>
+	
+	<update id="updateSyncResult" parameterType="com.esuizhen.client.sync.bean.TBatchDataResultInfo">
+		UPDATE sc_db.r_uuid_patientno_sync_result_client t1
+		SET 
+		    t1.batchId = #{tBatchDataResultInfo.batchId},
+		    t1.syncFlag = #{tBatchDataResultInfo.syncFlag},
+			t1.cause = #{tBatchDataResultInfo.cause},
+			t1.updateTime = NOW()
+		WHERE
+			t1.id = #{tBatchDataResultInfo.resultId} and t1.syncFlag = 9
+	</update>
+</mapper>

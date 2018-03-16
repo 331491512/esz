@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.HospitalDoctorDao">
+
+	<select id="findByDoctorId" resultType="com.westangel.common.bean.HospitalDoctor">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM user_db.r_hospital_doctor t1
+		WHERE t1.doctorId = #{doctorId}
+	</select>
+	
+	<sql id="base_column_list">
+		t1.hospitalId,
+		t1.doctorId,
+		t1.hospitalName,
+		t1.deptId,
+		t1.positionTitle,
+		t1.staffNo,
+		t1.createTime
+	</sql>
+
+	<insert id="insert">
+		INSERT INTO user_db.r_hospital_doctor(
+			hospitalId,
+			doctorId,
+			hospitalName,
+			deptId,
+			positionTitle,
+			staffNo,
+			createTime
+		)VALUES(
+			#{hospitalId},
+			#{doctorId},
+			#{hospitalName},
+			#{deptId},
+			#{positionTitle},
+			#{staffNo},
+			NOW()
+		)
+	</insert>
+</mapper>

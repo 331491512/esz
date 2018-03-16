@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followup.FollowupMetaDao">
+	<!-- 随访元数据详情 -->
+	<resultMap id="followupMetaResultMap" type="com.esuizhen.cloudservice.followup.model.meta.TReviewItemInfo" >
+    	<result property="ItemId" column="ItemId"/>
+    	<result property="ItemName" column="ItemName"/>
+  		<collection property="chileItems" ofType="com.esuizhen.cloudservice.followup.model.meta.TReviewItemInfo">
+    		<result property="ItemId" column="cItemId"/>
+    		<result property="ItemName" column="cItemName"/>
+    	</collection>
+	</resultMap>
+
+	<select id="queryFollowupReviewDetection" resultMap="followupMetaResultMap">
+		SELECT t1.detectionTypeId ItemId,t1.detectionTypeName ItemName,t2.detectionTypeId cItemId,t2.detectionTypeName cItemName 
+		FROM ehr_db.meta_e_detection_type t1
+		LEFT JOIN 
+		ehr_db.meta_e_detection_type t2
+		ON t2.parentId=t1.detectionTypeId AND t2.creator = 0 AND t2.reviewFlag=1
+		where t1.creator = 0 AND t1.reviewFlag=1 AND t1.parentId=0
+	</select>
+	
+	<select id="queryFollowupReviewExam" resultMap="followupMetaResultMap">
+		SELECT t1.examTypeId+100 ItemId,t1.examTypeName ItemName,t2.examTypeId+100 cItemId,t2.examTypeName cItemName 
+		FROM ehr_db.meta_e_exam_type t1
+		LEFT JOIN 
+		ehr_db.meta_e_exam_type t2
+		ON t2.parentId=t1.examTypeId AND t2.creator = 0 AND t2.reviewFlag=1
+		where t1.creator = 0 AND t1.reviewFlag=1 AND t1.parentId=0
+	</select>
+    
+</mapper>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followupRecords.FollowupConvMainQuestionItemDao">
+	<select id="getMQIIdBypatientId" parameterType="java.lang.Integer" resultType="java.lang.Long">
+		SELECT m.mainQuestionItemId FROM  followup_db.followup_conv_main_question_item m 
+		INNER JOIN followup_db.followup_conv_question q ON q.patientId=#{patientId}
+			AND q.followupConvQuestionId=m.followupConvQuestionId
+	</select>
+	<select id="getMQIIdAndFCQId" parameterType="java.lang.Integer" resultType="com.esuizhen.cloudservice.followup.bean.FollowupConvMainQuestionItemReq">
+		SELECT m.mainQuestionItemId,q.followupConvQuestionId FROM  followup_db.followup_conv_main_question_item m 
+		INNER JOIN followup_db.followup_conv_question q ON q.patientId=#{patientId}
+			AND q.followupConvQuestionId=m.followupConvQuestionId
+	</select>
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupConvMainQuestionItemReq">
+		<selectKey resultType="java.lang.Long" keyProperty="mainQuestionItemId" order="AFTER">
+			SELECT
+			LAST_INSERT_ID() as mainQuestionItemId
+		</selectKey>
+		INSERT INTO followup_db.followup_conv_main_question_item (
+			<!-- mainQuestionItemId, -->
+			followupConvQuestionId,
+			questionType,
+			createTime,
+			updateTime
+		) VALUES (
+			<!-- #{hm.mainQuestionItemId}, -->
+			#{followupConvQuestionId},
+			#{questionType},
+			NOW(),
+			NOW()
+		)
+	</insert>
+	<delete id="deleteByMQIId" parameterType="java.lang.Long">
+		DELETE FROM followup_db.followup_conv_main_question_item
+		WHERE  mainQuestionItemId=#{mainQuestionItemId}
+	</delete>
+</mapper>

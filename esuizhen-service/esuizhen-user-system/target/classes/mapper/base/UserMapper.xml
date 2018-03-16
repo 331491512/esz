@@ -1,0 +1,834 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.UserDao">
+	<resultMap id="baseResultMap" type="com.westangel.common.bean.User">
+		<id column="userId" property="userId" jdbcType="BIGINT" />
+		<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+		<result column="syncFlag" property="syncFlag" jdbcType="INTEGER" />
+		<result column="userName" property="userName" jdbcType="VARCHAR" />
+		<result column="cryptPasswd" property="cryptPasswd" jdbcType="VARCHAR" />
+		<result column="trueName" property="trueName" jdbcType="VARCHAR" />
+		<result column="nickName" property="nickName" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="sex" property="sex" jdbcType="INTEGER" />
+		<result column="birthDate" property="birthDate" jdbcType="TIMESTAMP" />
+		<result column="userPictureUrl" property="userPictureUrl" jdbcType="VARCHAR" />
+		<result column="email" property="email" jdbcType="VARCHAR" />
+		<result column="nation" property="nation" jdbcType="VARCHAR" />
+		<result column="country" property="country" jdbcType="VARCHAR" />
+		<result column="cityCode" property="cityCode" jdbcType="VARCHAR" />
+		<result column="city" property="city" jdbcType="VARCHAR" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="nativePlace" property="nativePlace" jdbcType="VARCHAR" />
+		<result column="profession" property="profession" jdbcType="VARCHAR" />
+		<result column="company" property="company" jdbcType="VARCHAR" />
+		<result column="idType" property="idType" jdbcType="INTEGER" />
+		<result column="identification" property="identification" jdbcType="VARCHAR" />
+		<result column="marriageStatus" property="marriageStatus" jdbcType="INTEGER" />
+		<result column="signature" property="signature" jdbcType="VARCHAR" />
+		<result column="education" property="education" jdbcType="INTEGER" />
+		<result column="school" property="school" jdbcType="VARCHAR" />
+		<result column="interest" property="interest" jdbcType="VARCHAR" />
+		<result column="idFileUrl" property="idFileUrl" jdbcType="VARCHAR" />
+		<result column="accountType" property="accountType" jdbcType="INTEGER" />
+		<result column="infoState" property="infoState" jdbcType="INTEGER" />
+		<result column="state" property="state" jdbcType="INTEGER" />
+		<result column="role" property="role" jdbcType="INTEGER" />
+		<result column="subroles" property="subroles" jdbcType="VARCHAR" />
+		<result column="points" property="points" jdbcType="INTEGER" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+		<result column="firstLoginTime" property="firstLoginTime" jdbcType="TIMESTAMP" />
+		<result column="lastLoginTime" property="lastLoginTime" jdbcType="TIMESTAMP" />
+		<result column="sourceFlag" property="sourceFlag" jdbcType="INTEGER" />
+		<result column="weixinFlag" property="weixinFlag" jdbcType="INTEGER" />
+	</resultMap>
+
+	<resultMap id="UserPorfileResultMap" type="com.westangel.common.bean.UserProfile">
+		<id column="userId" property="userId" jdbcType="BIGINT" />
+		<result column="userName" property="userName" jdbcType="VARCHAR" />
+		<result column="trueName" property="trueName" jdbcType="VARCHAR" />
+		<result column="nickName" property="nickName" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="sex" property="sex" jdbcType="INTEGER" />
+		<result column="birthDate" property="birthDate" jdbcType="TIMESTAMP" />
+		<result column="userPictureUrl" property="userPictureUrl" jdbcType="VARCHAR" />
+		<result column="cityCode" property="cityCode" jdbcType="VARCHAR" />
+		<result column="city" property="city" jdbcType="VARCHAR" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="idType" property="idType" jdbcType="INTEGER" />
+		<result column="identification" property="identification" jdbcType="VARCHAR" />
+		<result column="preIdentification" property="preIdentification" jdbcType="VARCHAR" />
+		<result column="idFileUrl" property="idFileUrl" jdbcType="VARCHAR" />
+		<result column="signature" property="signature" jdbcType="VARCHAR" />
+		<result column="accountType" property="accountType" jdbcType="INTEGER" />
+		<result column="infoState" property="infoState" jdbcType="INTEGER" />
+		<result column="role" property="role" jdbcType="INTEGER" />
+		<result column="subroles" property="subroles" jdbcType="VARCHAR" />
+		<result column="points" property="points" jdbcType="INTEGER" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+		<result column="sourceFlag" property="sourceFlag" jdbcType="INTEGER" />
+		<result column="birthPlaceAddress" property="birthPlaceAddress" jdbcType="VARCHAR" />
+		<result column="weixinFlag" property="weixinFlag" jdbcType="INTEGER" />
+		<result column="tobFlag" property="tobFlag" jdbcType="INTEGER" />
+	</resultMap>
+
+	<sql id="base_column_list">
+		userId,
+		uuid,
+		syncFlag,
+		userName,
+		cryptPasswd,
+		trueName,
+		nickName,
+		mobile,
+		sex,
+		birthDate,
+		userPictureUrl,
+		email,
+		nation,
+		country,
+		cityCode,
+		city,
+		address,
+		nativePlace,
+		profession,
+		company,
+		idType,
+		identification,
+		marriageStatus,
+		signature,
+		education,
+		school,
+		interest,
+		idFileUrl,
+		accountType,
+		infoState,
+		state,
+		role,
+		subroles, 
+		points,
+		createTime,
+		updateTime,
+		firstLoginTime,
+		lastLoginTime,
+		sourceFlag
+	</sql>
+
+	<sql id="user_Profile_Column_List">
+		userId, 
+		userName, 
+		trueName, 
+		nickName, 
+		sex, 
+		birthDate, 
+		mobile, 
+		city, 
+		cityCode,
+		address, 
+		signature, 
+		userPictureUrl, 
+		idType, 
+		identification, 
+		preIdentification, 
+		idFileUrl, 
+		role,
+		subroles, 
+		infoState, 
+		points, 
+		accountType, 
+		createTime, 
+		updateTime, 
+		sourceFlag,
+		birthPlaceAddress,
+		tobFlag,
+		weixinFlag
+	</sql>
+
+	<select id="findUserProfileByUserId" resultMap="UserPorfileResultMap" parameterType="java.lang.Long">
+		SELECT
+		 <include refid="user_Profile_Column_List"></include>
+		from u_user
+		where userId=#{userid,jdbcType=BIGINT}
+	</select>
+
+	<select id="existUserNameOrMobile" resultType="java.lang.Integer">
+		SELECT
+			COUNT(1)
+		from u_user
+		where (userName=#{username,jdbcType=VARCHAR} OR mobile=#{username,jdbcType=VARCHAR})
+		<if test="role != null">
+			AND role=#{role,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="findByUserId" resultMap="baseResultMap" parameterType="java.lang.Long">
+		select
+			<include refid="base_column_list" />
+			,(SELECT MAX(productId) FROM user_db.u_thirdparty th1 WHERE th1.userId = t1.userId AND th1.state=1 ) weixinFlag
+		from u_user t1
+		where userId = #{userid,jdbcType=BIGINT}
+	</select>
+
+	<select id="findByMobile" resultMap="baseResultMap">
+		select
+			<include refid="base_column_list" />
+		from u_user
+		WHERE mobile=#{mobile,jdbcType=VARCHAR}
+		<choose>
+			<when test="accountTypeFlag">
+				AND accountType<![CDATA[>]]>0
+			</when>
+			<otherwise>
+				AND accountType=0
+			</otherwise>
+		</choose>
+		<if test="role != null">
+			AND role=#{role,jdbcType=INTEGER}
+		</if>
+	</select>
+	
+	<!-- 获取被动患者用户信息 -->
+	<select id="findPatientUserByMobile" resultMap="baseResultMap">
+		select
+			#{mobile} AS mobile,<include refid="base_column_list" />
+		from 
+		(
+			SELECT t1.* from user_db.u_user t1
+			JOIN user_db.u_patient t2 ON t1.userId = t2.userId
+			LEFT JOIN user_db.u_patient_family t3 ON t2.patientId=t3.patientId
+			WHERE t1.role=1 AND t1.accountType=0 AND (t1.mobile=#{mobile} OR t2.mobile=#{mobile} OR t3.familyPhone=#{mobile})
+			LIMIT 1
+		)t
+	</select>
+
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from u_user where userId = #{userId,jdbcType=BIGINT}
+	</delete>
+	
+	<insert id="insert" parameterType="com.westangel.common.bean.User">
+		<selectKey resultType="long" keyProperty="userId" order="AFTER">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		insert into u_user (
+			uuid, 
+			userName,
+			cryptPasswd, 
+			trueName, 
+			nickName,
+			mobile, 
+			sex, 
+			birthDate,
+			userPictureUrl, 
+			email, 
+			nation,
+			country, 
+			cityCode, 
+			city,
+			address, 
+			nativePlace, 
+			profession,
+			company, 
+			idType, 
+			identification,
+			marriageStatus, 
+			signature, 
+			education,
+			school, 
+			interest, 
+			idFileUrl,
+			accountType, 
+			infoState, 
+			state,
+			role, 
+			subroles, 
+			points,
+			syncFlag,
+			createTime, 
+			updateTime, 
+			firstLoginTime,
+			lastLoginTime, 
+			sourceFlag
+			<if test="appFlag!=null">
+				,appFlag
+			</if>
+		)VALUES(
+			<choose>
+				<when test="sourceFlag!=3">
+					CONCAT("c_",REPLACE(UUID(),'-','')),
+				</when>
+				<otherwise>
+					REPLACE(UUID(),'-',''),
+				</otherwise>
+			</choose>
+			#{userName,jdbcType=VARCHAR},
+			#{cryptPasswd,jdbcType=VARCHAR},
+			#{trueName,jdbcType=VARCHAR},
+			#{nickName,jdbcType=VARCHAR},
+			#{mobile,jdbcType=VARCHAR},
+			#{sex,jdbcType=INTEGER},
+			#{birthDate,jdbcType=TIMESTAMP},
+			#{userPictureUrl,jdbcType=VARCHAR},
+			#{email,jdbcType=VARCHAR},
+			#{nation,jdbcType=VARCHAR},
+			#{country,jdbcType=VARCHAR},
+			#{cityCode,jdbcType=VARCHAR},
+			#{city,jdbcType=VARCHAR},
+			#{address,jdbcType=VARCHAR},
+			#{nativePlace,jdbcType=VARCHAR},
+			#{profession,jdbcType=VARCHAR},
+			#{company,jdbcType=VARCHAR},
+			#{idType,jdbcType=INTEGER},
+			#{identification,jdbcType=VARCHAR},
+			#{marriageStatus,jdbcType=INTEGER},
+			#{signature,jdbcType=VARCHAR},
+			#{education,jdbcType=INTEGER},
+			#{school,jdbcType=VARCHAR},
+			#{interest,jdbcType=VARCHAR},
+			#{idFileUrl,jdbcType=VARCHAR},
+			#{accountType,jdbcType=INTEGER},
+			#{infoState,jdbcType=INTEGER},
+			#{state,jdbcType=INTEGER},
+			#{role,jdbcType=INTEGER},
+			#{subroles,jdbcType=VARCHAR},
+			#{points,jdbcType=INTEGER},
+			#{syncFlag,jdbcType=INTEGER},
+			NOW(), NOW(),
+			#{firstLoginTime,jdbcType=TIMESTAMP},
+			#{lastLoginTime,jdbcType=TIMESTAMP},
+			#{sourceFlag,jdbcType=INTEGER}
+		<if test="appFlag!=null">
+			,#{appFlag,jdbcType=INTEGER}
+		</if>
+		)
+	</insert>
+
+	<update id="updateUserWithBind">
+		update u_user
+		<set>
+			<if test="record.userName != null">
+				userName=#{record.userName,jdbcType=VARCHAR},
+			</if>
+			<if test="record.mobile != null">
+				mobile=#{record.mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="record.trueName != null">
+				trueName=#{record.trueName,jdbcType=VARCHAR},
+			</if>
+			<if test="record.accountType != null">
+				accountType=#{record.accountType,jdbcType=INTEGER},
+			</if>
+			<if test="record.infoState != null">
+				infoState=#{record.infoState,jdbcType=INTEGER},
+			</if>
+			<if test="record.appFlag!=null">
+				appFlag=#{record.appFlag},
+			</if>
+			<if test="record.firstLoginTime!=null">
+				firstLoginTime=#{record.firstLoginTime},
+			</if>
+			updateTime = NOW()
+		</set>
+		where userId=#{record.userId,jdbcType=BIGINT}
+	</update>
+
+	<update id="updateUser" parameterType="map">
+		update u_user
+		<set>
+			<if test="record.trueName != null">
+				trueName=#{record.trueName,jdbcType=VARCHAR},
+			</if>
+			<if test="record.nickName != null">
+				nickName=#{record.nickName,jdbcType=VARCHAR},
+			</if>
+			<if test="record.mobile != null">
+				mobile=#{record.mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="record.sex != null">
+				sex=#{record.sex,jdbcType=INTEGER},
+			</if>
+			<if test="record.birthDate != null">
+				birthDate=#{record.birthDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="record.userPictureUrl != null">
+				userPictureUrl=#{record.userPictureUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="record.email != null">
+				email=#{record.email,jdbcType=VARCHAR},
+			</if>
+			<if test="record.nation != null">
+				nation=#{record.nation,jdbcType=VARCHAR},
+			</if>
+			<if test="record.country != null">
+				country=#{record.country,jdbcType=VARCHAR},
+			</if>
+			<if test="record.cityId != null">
+				cityId=#{record.cityId,jdbcType=INTEGER},
+			</if>
+			<if test="record.cityCode != null">
+				cityCode=#{record.cityCode,jdbcType=VARCHAR},
+			</if>
+			<if test="record.city != null">
+				city=#{record.city,jdbcType=VARCHAR},
+			</if>
+			<if test="record.address != null">
+				address=#{record.address,jdbcType=VARCHAR},
+			</if>
+			<if test="record.nativePlace != null">
+				nativePlace=#{record.nativePlace,jdbcType=VARCHAR},
+			</if>
+			<if test="record.profession != null">
+				profession=#{record.profession,jdbcType=VARCHAR},
+			</if>
+			<if test="record.company != null">
+				company=#{record.company,jdbcType=VARCHAR},
+			</if>
+			<if test="record.idType != null and record.identification != null">
+				idType=#{record.idType,jdbcType=VARCHAR},
+				identification=#{record.identification,jdbcType=VARCHAR},
+			</if>
+			<if test="record.idType != null and record.preIdentification != null">
+				idType=#{record.idType,jdbcType=VARCHAR},
+				preIdentification=#{record.preIdentification,jdbcType=VARCHAR},
+			</if>
+			<if test="record.marriageStatus != null">
+				marriageStatus=#{record.marriageStatus,jdbcType=BIGINT},
+			</if>
+			<if test="record.signature != null">
+				signature=#{record.signature,jdbcType=VARCHAR},
+			</if>
+			<if test="record.education != null">
+				education=#{record.education,jdbcType=BIGINT},
+			</if>
+			<if test="record.school != null">
+				school=#{record.school,jdbcType=VARCHAR},
+			</if>
+			<if test="record.interest != null">
+				interest=#{record.interest,jdbcType=VARCHAR},
+			</if>
+			<if test="record.idFileUrl != null">
+				idFileUrl=#{record.idFileUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="record.infoState != null">
+				infoState=#{record.infoState,jdbcType=INTEGER},
+			</if>
+			<if test="record.accountType != null">
+				accountType=#{record.accountType,jdbcType=INTEGER},
+			</if>
+			<if test="record.state != null">
+				state=#{record.state,jdbcType=INTEGER},
+			</if>
+			<if test="record.birthPlaceAddress!=null">
+				birthPlaceAddress=#{record.birthPlaceAddress,jdbcType=VARCHAR},
+			</if>
+			updateTime=NOW()
+		</set>
+		where userId=#{record.userId,jdbcType=BIGINT}
+	</update>
+
+	<update id="updateByPrimaryKey" parameterType="com.westangel.common.bean.User">
+		update u_user
+		<set>
+			<if test="userName != null">
+				userName = #{userName,jdbcType=VARCHAR},
+			</if>
+			<if test="cryptPasswd != null">
+				cryptPasswd = #{cryptPasswd,jdbcType=VARCHAR},
+			</if>
+			<if test="trueName != null">
+				trueName = #{trueName,jdbcType=VARCHAR},
+			</if>
+			<if test="nickName != null">
+				nickName = #{nickName,jdbcType=VARCHAR},
+			</if>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="sex != null">
+				sex = #{sex,jdbcType=INTEGER},
+			</if>
+			<if test="birthDate != null">
+				birthDate = #{birthDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="userPictureUrl != null">
+				userPictureUrl = #{userPictureUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="email != null">
+				email = #{email,jdbcType=VARCHAR},
+			</if>
+			<if test="nation != null">
+				nation = #{nation,jdbcType=VARCHAR},
+			</if>
+			<if test="country != null">
+				country = #{country,jdbcType=VARCHAR},
+			</if>
+			<if test="cityCode != null">
+				cityCode = #{cityCode,jdbcType=VARCHAR},
+			</if>
+			<if test="city != null">
+				city = #{city,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null">
+				address = #{address,jdbcType=VARCHAR},
+			</if>
+			<if test="nativePlace != null">
+				nativePlace = #{nativePlace,jdbcType=VARCHAR},
+			</if>
+			<if test="profession != null">
+				profession = #{profession,jdbcType=VARCHAR},
+			</if>
+			<if test="company != null">
+				company = #{company,jdbcType=VARCHAR},
+			</if>
+			<if test="idType != null">
+				idType = #{idType,jdbcType=INTEGER},
+			</if>
+			<if test="identification != null">
+				identification = #{identification,jdbcType=VARCHAR},
+			</if>
+			<if test="marriageStatus != null">
+				marriageStatus = #{marriageStatus,jdbcType=INTEGER},
+			</if>
+			<if test="signature != null">
+				signature = #{signature,jdbcType=VARCHAR},
+			</if>
+			<if test="education != null">
+				education = #{education,jdbcType=INTEGER},
+			</if>
+			<if test="school != null">
+				school = #{school,jdbcType=VARCHAR},
+			</if>
+			<if test="interest != null">
+				interest = #{interest,jdbcType=VARCHAR},
+			</if>
+			<if test="idFileUrl != null">
+				idFileUrl = #{idFileUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="accountType != null">
+				accountType = #{accountType,jdbcType=INTEGER},
+			</if>
+			<if test="infoState != null">
+				infoState = #{infoState,jdbcType=INTEGER},
+			</if>
+			<if test="state != null">
+				state = #{state,jdbcType=INTEGER},
+			</if>
+			<if test="role != null">
+				role = #{role,jdbcType=INTEGER},
+			</if>
+			<if test="subroles != null">
+				subroles = #{subroles,jdbcType=VARCHAR},
+			</if>
+			<if test="points != null">
+				points = #{points,jdbcType=INTEGER},
+			</if>
+			<if test="lastLoginTime != null">
+				lastLoginTime=#{lastLoginTime,jdbcType=TIMESTAMP},
+			</if>
+			<!-- <if test="sourceFlag != null">
+				sourceFlag=#{sourceFlag},
+			</if> -->
+			<if test="syncFlag != null">
+				syncFlag = #{syncFlag},
+			</if>
+			<if test="uuid != null">
+				uuid = #{uuid},
+			</if>
+			<if test="birthPlaceCode != null">
+				birthPlaceCode = #{birthPlaceCode,jdbcType=VARCHAR},
+			</if>
+			<if test="birthPlaceAddress != null">
+				birthPlaceAddress = #{birthPlaceAddress,jdbcType=VARCHAR},
+			</if>
+			updateTime = NOW()
+		</set>
+		where userId = #{userId,jdbcType=BIGINT}
+	</update>
+
+	<update id="updateInfoState" parameterType="com.westangel.common.bean.User">
+		update u_user
+		<set>
+			<if test="infoState != null">
+				infoState = #{infoState,jdbcType=INTEGER},
+			</if>
+			updateTime = #{updateTime,jdbcType=TIMESTAMP}
+		</set>
+		where userId = #{userId,jdbcType=BIGINT}
+	</update>
+	
+	<update id="updateLastLogin" parameterType="com.westangel.common.bean.User">
+		UPDATE user_db.u_user
+		<set>
+			<if test="appFlag != null">
+				appFlag = #{appFlag},
+			</if>
+			<if test="weixinFlag != null">
+				weixinFlag = #{weixinFlag},
+			</if>
+			<if test="pcFlag != null">
+				pcFlag = #{pcFlag},
+			</if>
+			<if test="userFlag != null">
+				userFlag = #{userFlag},
+			</if>
+			<if test="migrateFlag != null">
+				migrateFlag = #{migrateFlag},
+			</if>
+			<if test="state!=null">
+				state = #{state},
+			</if>
+			lastLoginTime = NOW()
+		</set>
+		WHERE userId=#{userId}
+	</update>
+	
+	<!-- 最后退出登录时间 -->
+	<update id="updateLastLoginOut" parameterType="com.westangel.common.bean.User">
+		UPDATE user_db.u_user
+		<set>
+			lastLogoutTime = NOW()
+		</set>
+		WHERE userId=#{userId}
+	</update>
+	
+	<update id="updatePassword" parameterType="com.westangel.common.bean.User">
+		update u_user
+		<set>
+			<if test="cryptPasswd != null">
+				cryptPasswd = #{cryptPasswd,jdbcType=VARCHAR},
+			</if>
+			updateTime = NOW()
+		</set>
+		where userId = #{userId,jdbcType=BIGINT}
+	</update>
+
+	<select id="findByUserName" resultMap="baseResultMap">
+		SELECT
+			<include refid="base_column_list" />
+		FROM u_user
+		WHERE (userName=#{userName,jdbcType=VARCHAR} OR mobile=#{userName,jdbcType=VARCHAR})
+		<if test="role != null">
+			AND role=#{role,jdbcType=INTEGER}
+		</if>
+		AND accountType >0
+	</select>
+	
+	<select id="findByUuid" resultMap="baseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="base_column_list" />
+		from u_user where uuid=#{uuid,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 根据userId得到用户姓名 -->
+	<select id="findUserTrueName" resultType="java.lang.String">
+		SELECT trueName FROM u_user WHERE userId=#{userId}
+	</select>
+	<!-- 根据userId 判断是否有微信 -->
+	<select id="findUserOpenId" resultType="java.lang.String">
+		SELECT
+			openId
+		FROM u_thirdparty WHERE userId=#{userId} LIMIT 1
+	</select>
+	<!-- 获取用户活跃的productId -->
+	<select id="findUserProductId" resultType="java.lang.Integer">
+		SELECT
+			productId
+		FROM u_thirdparty WHERE userId=#{userId} AND state=1 order by createTime desc LIMIT 1
+	</select>
+	<!-- 根据userId 判断是否有微信 -->
+	<select id="findOpenIdTotalByUserId" resultType="java.lang.Integer">
+		SELECT COUNT(0) FROM user_db.u_thirdparty 
+		WHERE state=1
+		<if test="userId!=null">
+			AND userId = #{userId}
+		</if>
+	</select>
+	
+	<!-- 获取没有城市的用户 -->
+	<select id="queryNotHasCityUser" resultType="java.util.LinkedHashMap">
+	SELECT
+		t1.userId userId,
+		t2.openId openId,
+		t2.businessId,
+		t2.productId 
+	FROM user_db.u_user t1, user_db.u_thirdparty t2 
+	WHERE t1.role =1 and t1.userId = t2.userId and t1.cityId is null
+	GROUP BY t1.userId
+	</select>
+	
+	<!-- 取消关注事件设定 -->
+	<update id="settingThridCancelTime">
+		update user_db.u_thirdparty
+		<set>
+			<if test="flag==1">
+				state=1,
+				releaseTime=NULL,				
+			</if>
+			<if test="flag==-2">
+				state=-2,
+				releaseTime=NOW(),
+			</if>
+			updateTime=NOW() 
+		</set>
+		where 1
+		<if test="userId!=null">
+			AND userId=#{userId}
+		</if>
+		<if test="openId!=null">
+			AND openId=#{openId}
+		</if>
+		<!-- 避免每次请求都操作该表  -->
+		<if test="flag==1">
+			AND state=-2
+		</if>
+	</update>
+	
+	<!-- 修改用户信息 -->
+	<update id="modifyUserCity">
+		update temp_user_db.temp_user_city
+		<set>
+			weixinCityId = #{cityId},
+			weixinCityName=#{cityName}
+		</set>
+		where userId=#{userId}
+	</update>
+	
+	<insert id="insertUserCity">
+		INSERT INTO temp_user_db.temp_user_city(
+			userId,
+			weixinCityId,
+			weixinCityName
+		)VALUES(
+			#{userId},
+			#{cityId},
+			#{cityName}
+		)
+	</insert>
+	
+	<!-- 获取用户所在城市 -->
+	<select id="queryUserCityId" resultType="java.lang.Integer">
+		select
+			cityId
+		from user_db.meta_city
+		where cityName like "${cityName}%"
+		UNION
+		select
+			cityId
+		from user_db.meta_city t1, user_db.meta_province t2
+		where t1.provinceId=t2.provinceId and provinceName LIKE "${cityName}%"
+		LIMIT 1
+	</select>
+	
+	<update id="updateFollowupPatientByPrimaryKey" parameterType="com.westangel.common.bean.User">
+		update u_user SET
+			trueName = #{trueName,jdbcType=VARCHAR},
+			mobile = #{mobile,jdbcType=VARCHAR},
+			sex = #{sex,jdbcType=INTEGER},
+			birthDate = #{birthDate,jdbcType=TIMESTAMP},
+			nationId = #{nationId},
+			nation = #{nation,jdbcType=VARCHAR},
+			nationalityId=#{nationalityId},
+			country = #{country,jdbcType=VARCHAR},
+			birthPlaceAddress = #{birthPlaceAddress,jdbcType=VARCHAR},
+			birthPlaceCode = #{birthPlaceCode,jdbcType=VARCHAR},
+			nativePlace = #{nativePlace,jdbcType=VARCHAR},
+			occupationId=#{occupationId},
+			profession = #{profession,jdbcType=VARCHAR},
+			identification = #{identification,jdbcType=VARCHAR},
+			marriageStatus = #{marriageStatus,jdbcType=INTEGER},
+			updateTime = NOW()
+		where userId = #{userId,jdbcType=BIGINT}
+	</update>
+	<!-- 查询user是否重复 -->
+	<select id="existsUser" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		select
+			COUNT(*)
+		from u_user
+		WHERE mobile=#{mobile,jdbcType=VARCHAR}
+		AND accountType=#{accountType}
+		AND role=#{role,jdbcType=INTEGER}
+	</select>
+	<!-- add by fanpanwei -->
+	<update id="updateAutiCancerUser" parameterType="com.esuizhen.cloudservice.user.bean.AutiCancerPatientInfo">
+		update user_db.u_user a SET
+			trueName = #{patientName,jdbcType=VARCHAR},
+			address=#{address},
+			mobile = #{mobile,jdbcType=VARCHAR},
+			sex = #{sex,jdbcType=INTEGER},
+			birthDate = #{birthDate,jdbcType=TIMESTAMP},
+			nationId = #{nationId},
+			nation = #{nation,jdbcType=VARCHAR},
+			nationalityId=#{nationalityId},
+			country = #{country,jdbcType=VARCHAR},
+			birthPlaceAddress = #{birthPlaceAddress,jdbcType=VARCHAR},
+			birthPlaceCode = #{birthPlaceCode,jdbcType=VARCHAR},
+			nativePlace = #{nativePlace,jdbcType=VARCHAR},
+			occupationId=#{occupationId},
+			profession = (SELECT mo.occupationName From user_db.meta_occupation mo WHERE mo.occupationId=#{occupationId}),
+			identification = #{idNo,jdbcType=VARCHAR},
+			marriageStatus = #{marriageStatus,jdbcType=INTEGER},
+			company = #{companyAddress},
+			companyTel = #{companyTel},
+			comZipCode = #{comZipCode},
+			updateTime = NOW()
+		where EXISTS(select 1 from user_db.u_patient b where b.patientId = #{patientId} AND b.userid=a.userid) 
+	</update>
+	<insert id="insertAutiCancerUser" parameterType="com.esuizhen.cloudservice.user.bean.AutiCancerPatientInfo">
+		<selectKey resultType="long" keyProperty="userId" order="AFTER">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO user_db.u_user(
+			uuid,role,accountType,infoState,syncFlag,cryptPasswd,state,
+			points,sourceFlag,userFlag,migrateFlag,appFlag,weixinFlag,idType,
+			address,trueName,mobile,sex,birthDate,
+			nationId,nation,nationalityId,country,birthPlaceAddress,
+			birthPlaceCode,nativePlace,occupationId,
+			profession,
+			identification,marriageStatus,company,companyTel,comZipCode,createTime,updateTime
+		)VALUES(
+			REPLACE(UUID(),'-',''),1,<if test="mobile!=null">0</if><if test="mobile==null">-1</if>,1,0,'123456',1,0,3,0,0,0,0,1,
+			#{address},#{patientName,jdbcType=VARCHAR},#{mobile,jdbcType=VARCHAR},#{sex,jdbcType=INTEGER},#{birthDate,jdbcType=TIMESTAMP},
+			#{nationId},#{nation,jdbcType=VARCHAR},#{nationalityId},#{country,jdbcType=VARCHAR},#{birthPlaceAddress,jdbcType=VARCHAR},
+			#{birthPlaceCode,jdbcType=VARCHAR},#{nativePlace,jdbcType=VARCHAR},#{occupationId},
+			(SELECT mo.occupationName From user_db.meta_occupation mo WHERE mo.occupationId=#{occupationId}),
+			#{idNo,jdbcType=VARCHAR},#{marriageStatus,jdbcType=INTEGER},#{companyAddress},#{companyTel},#{comZipCode},NOW(),NOW()
+		)
+	</insert>
+	<!-- end by fanpanwei -->
+	
+	<select id="findByIdentificationCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(0)
+		FROM 
+		<if test="role==1">
+			u_patient t1
+		</if>
+		<if test="role==2">
+			u_doctor t1
+		</if>
+		JOIN u_user t2 ON t1.userId=t2.userId
+		WHERE t2.idType=#{idType} AND t2.identification=#{identification}
+		<if test="auditState != null">
+			AND t1.auditState=#{auditState}
+		</if>
+		<if test="auditState == null">
+			AND t1.auditState<![CDATA[>]]>0
+		</if>
+		AND t2.accountType<![CDATA[>]]>0
+		<if test="userId != null">
+			AND t2.userId !=#{userId}
+		</if>
+	</select>
+	
+	<select id="findUserByUserName" resultMap="baseResultMap">
+		SELECT
+			<include refid="base_column_list" />
+		FROM u_user
+		WHERE userName=#{userName,jdbcType=VARCHAR}
+		<if test="role != null">
+			AND role=#{role,jdbcType=INTEGER}
+		</if>
+		AND accountType >0
+	</select>
+</mapper>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.westangel.commonservice.authorization.dao.RUserRoleDao">
+
+	<select id="userRoleRelation" resultType="java.lang.Integer">
+		SELECT
+			COUNT(1)
+		FROM user_db.r_user_role t1
+		WHERE 1 = 1
+		<if test="userId != null">
+			AND t1.userId = #{userId}
+		</if>
+		<if test="userRole != null">
+			AND t1.userRole = #{userRole}
+		</if>
+	</select>
+
+	<select id="findByUserId" resultType="com.westangel.common.bean.authorization.RUserRole">
+		SELECT
+			t2.userRole,
+			t2.roleName,
+			t2.roleType,
+			t2.deptId,
+			t2.remark,
+			(
+				SELECT
+					CASE WHEN COUNT(1) > 0 THEN 1 ELSE 0 END
+				FROM user_db.r_user_role r1
+				WHERE r1.userRole = t2.userRole
+			)useFlag
+			<if test="userId != null">
+				, <include refid="base_column_list"></include>
+			</if>
+		FROM user_db.meta_role t2
+		<if test="userId != null">
+				INNER JOIN user_db.r_user_role t1 ON t2.userRole = t1.userRole
+			WHERE t1.userId = #{userId}
+		</if>
+	</select>
+
+	<sql id="base_column_list">
+		t1.userId,
+		t1.userRole,
+		t1.createTime,
+		t1.updateTime
+	</sql>
+
+	<insert id="insert">
+		INSERT INTO user_db.r_user_role(
+			userId,
+			userRole,
+			createTime,
+			updateTime
+		)VALUES(
+			#{userId},
+			#{userRole},
+			NOW(),
+			NOW()
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE user_db.r_user_role
+		<set>
+			userRole = #{userRole},
+			updateTime = NOW()
+		</set>
+		WHERE userId = #{userId}
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM user_db.r_user_role WHERE id=#{id}
+	</delete>
+	
+	<delete id="deleteByUserId">
+		DELETE FROM user_db.r_user_role
+		WHERE userId = #{userId}
+		<if test="userRole != null">
+			AND userRole = #{userRole}
+		</if>
+	</delete>
+</mapper>

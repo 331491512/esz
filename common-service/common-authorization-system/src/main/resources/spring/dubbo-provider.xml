@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<beans xmlns="http://www.springframework.org/schema/beans"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+    xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"  
+    xsi:schemaLocation="http://www.springframework.org/schema/beans  http://www.springframework.org/schema/beans/spring-beans.xsd  
+        http://code.alibabatech.com/schema/dubbo  http://code.alibabatech.com/schema/dubbo/dubbo.xsd ">  
+	
+	<!-- 分配权限服务对外提供的接口 -->
+    <dubbo:service interface="com.westangel.common.service.AuthorizationService" protocol="dubbo" ref="authorCommonService" retries="0" timeout="10000"/>    
+    <bean id="authorCommonService" class="com.westangel.commonservice.authorization.service.impl.AuthorizationServiceImpl" />
+</beans>  

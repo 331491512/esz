@@ -1,0 +1,627 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.server.TSurgeryNoteDao" >
+
+  <insert id="insertSelective" parameterType="com.esuizhen.server.sync.bean.server.SurgeryNoteRes" >
+    insert into ehr_db.eci_surgery_note
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="surgeryId != null" >
+        surgeryId,
+      </if>
+      <if test="emrId != null" >
+        emrId,
+      </if>
+      <if test="patientId != null" >
+        patientId,
+      </if>
+      <if test="inhospitalId != null" >
+        inhospitalId,
+      </if>
+      <if test="patientNo != null" >
+        patientNo,
+      </if>
+      <if test="oldPatientNo != null" >
+        oldPatientNo,
+      </if>
+      <if test="inhospitalTimes != null" >
+        inhospitalTimes,
+      </if>
+      <if test="oldInhospitalTimes != null" >
+        oldInhospitalTimes,
+      </if>
+      <if test="inhospitalNo != null" >
+        inhospitalNo,
+      </if>
+      <if test="patientUuid != null" >
+        patientUuid,
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId,
+      </if>
+      <if test="deptId != null" >
+        deptId,
+      </if>
+      <if test="bedNo != null" >
+        bedNo,
+      </if>
+      <if test="opCode != null" >
+        opCode,
+      </if>
+      <if test="surgeryName != null" >
+        surgeryName,
+      </if>
+      <if test="surgeryDoctor != null" >
+        surgeryDoctor,
+      </if>
+      <if test="surgeryAssistant1 != null" >
+        surgeryAssistant1,
+      </if>
+      <if test="surgeryAssistant2 != null" >
+        surgeryAssistant2,
+      </if>
+      <if test="surgeryDate != null" >
+        surgeryDate,
+      </if>
+      <if test="surgeryBeginTime != null" >
+        surgeryBeginTime,
+      </if>
+      <if test="surgeryEndTime != null" >
+        surgeryEndTime,
+      </if>
+      <if test="anesthesiaDoctor != null" >
+        anesthesiaDoctor,
+      </if>
+      <if test="anesthesiaWay != null" >
+        anesthesiaWay,
+      </if>
+      <if test="preOperativeDiagnosis != null" >
+        preOperativeDiagnosis,
+      </if>
+      <if test="inOperativeDiagnosis != null" >
+        inOperativeDiagnosis,
+      </if>
+      <if test="bodyPosture != null" >
+        bodyPosture,
+      </if>
+      <if test="transfusion != null" >
+        transfusion,
+      </if>
+      <if test="surgeryNurses != null" >
+        surgeryNurses,
+      </if>
+      <if test="operativeApproach != null" >
+        operativeApproach,
+      </if>
+      <if test="operativeProbe != null" >
+        operativeProbe,
+      </if>
+      <if test="operativeMeasures != null" >
+        operativeMeasures,
+      </if>
+      <if test="operativeSituation != null" >
+        operativeSituation,
+      </if>
+      <if test="woundClosureWay != null" >
+        woundClosureWay,
+      </if>
+      <if test="incisionBandagedWay != null" >
+        incisionBandagedWay,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+      <if test="updateTime != null" >
+        updateTime,
+      </if>
+      <if test="deptUuid != null" >
+        deptUuid,
+      </if>
+      <if test="surgeryDoctorUuid != null" >
+        surgeryDoctorUuid,
+      </if>
+      <if test="surgeryAssistant1Uuid != null" >
+        surgeryAssistant1Uuid,
+      </if>
+      <if test="surgeryAssistant2Uuid != null" >
+        surgeryAssistant2Uuid,
+      </if>
+      <if test="anesthesiaDoctorUuid != null" >
+        anesthesiaDoctorUuid,
+      </if>
+      <if test="mainID != null" >
+        mainID,
+      </if>
+      <if test="opLevel != null" >
+        opLevel,
+      </if>
+      <if test="surgeryDoctorName != null" >
+        surgeryDoctorName,
+      </if>
+      <if test="anesthesiaDoctorName != null" >
+        anesthesiaDoctorName,
+      </if>
+      <if test="incisionHealingId != null" >
+        incisionHealingId,
+      </if>
+      <if test="incisionHealing != null" >
+        incisionHealing,
+      </if>
+      <if test="treatmentSchemeId != null" >
+        treatmentSchemeId,
+      </if>
+      <if test="treatmentSchemeName != null" >
+        treatmentSchemeName,
+      </if>
+      <if test="rawCreateTime != null" >
+        rawCreateTime,
+      </if>
+      <if test="syncTime != null" >
+        syncTime,
+      </if>
+      <if test="surgeryAssistant1Name != null" >
+        surgeryAssistant1Name,
+      </if>
+      <if test="surgeryAssistant2Name != null" >
+        surgeryAssistant2Name,
+      </if>
+      <if test="mergeFlag != null" >
+        mergeFlag,
+      </if>
+      <if test="mergeFrom != null" >
+        mergeFrom,
+      </if>
+      <if test="mergeTarget != null" >
+        mergeTarget,
+      </if>
+      <if test="mergeTime != null" >
+        mergeTime,
+      </if>
+      <if test="mergeFromUuid != null" >
+        mergeFromUuid,
+      </if>
+      <if test="mergeTargetUuid != null" >
+        mergeTargetUuid,
+      </if>
+      <if test="tempId != null" >
+        tempId,
+      </if>
+      <if test="surgeryNursesUuid != null" >
+        surgeryNursesUuid,
+      </if>
+      <if test="operatorName != null" >
+        operatorName,
+      </if>
+      <if test="serialNum != null" >
+        serialNum,
+      </if>
+      <if test="incisionGroup != null" >
+        incisionGroup,
+      </if>
+      <if test="incisionHealLevel != null" >
+        incisionHealLevel,
+      </if>
+      <if test="rawAnesthesiaWayId != null" >
+        rawAnesthesiaWayId,
+      </if>
+      <if test="anesthesiaWayId != null" >
+        anesthesiaWayId,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="surgeryId != null" >
+        #{surgeryId,jdbcType=VARCHAR},
+      </if>
+      <if test="emrId != null" >
+        #{emrId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="inhospitalId != null" >
+        #{inhospitalId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientNo != null" >
+        #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="oldPatientNo != null" >
+        #{oldPatientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalTimes != null" >
+        #{inhospitalTimes,jdbcType=INTEGER},
+      </if>
+      <if test="oldInhospitalTimes != null" >
+        #{oldInhospitalTimes,jdbcType=INTEGER},
+      </if>
+      <if test="inhospitalNo != null" >
+        #{inhospitalNo,jdbcType=VARCHAR},
+      </if>
+      <if test="patientUuid != null" >
+        #{patientUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="deptId != null" >
+        #{deptId,jdbcType=INTEGER},
+      </if>
+      <if test="bedNo != null" >
+        #{bedNo,jdbcType=CHAR},
+      </if>
+      <if test="opCode != null" >
+        #{opCode,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryName != null" >
+        #{surgeryName,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryDoctor != null" >
+        #{surgeryDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="surgeryAssistant1 != null" >
+        #{surgeryAssistant1,jdbcType=INTEGER},
+      </if>
+      <if test="surgeryAssistant2 != null" >
+        #{surgeryAssistant2,jdbcType=INTEGER},
+      </if>
+      <if test="surgeryDate != null" >
+        #{surgeryDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="surgeryBeginTime != null" >
+        #{surgeryBeginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="surgeryEndTime != null" >
+        #{surgeryEndTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="anesthesiaDoctor != null" >
+        #{anesthesiaDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="anesthesiaWay != null" >
+        #{anesthesiaWay,jdbcType=VARCHAR},
+      </if>
+      <if test="preOperativeDiagnosis != null" >
+        #{preOperativeDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="inOperativeDiagnosis != null" >
+        #{inOperativeDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="bodyPosture != null" >
+        #{bodyPosture,jdbcType=VARCHAR},
+      </if>
+      <if test="transfusion != null" >
+        #{transfusion,jdbcType=INTEGER},
+      </if>
+      <if test="surgeryNurses != null" >
+        #{surgeryNurses,jdbcType=VARCHAR},
+      </if>
+      <if test="operativeApproach != null" >
+        #{operativeApproach,jdbcType=VARCHAR},
+      </if>
+      <if test="operativeProbe != null" >
+        #{operativeProbe,jdbcType=VARCHAR},
+      </if>
+      <if test="operativeMeasures != null" >
+        #{operativeMeasures,jdbcType=VARCHAR},
+      </if>
+      <if test="operativeSituation != null" >
+        #{operativeSituation,jdbcType=VARCHAR},
+      </if>
+      <if test="woundClosureWay != null" >
+        #{woundClosureWay,jdbcType=VARCHAR},
+      </if>
+      <if test="incisionBandagedWay != null" >
+        #{incisionBandagedWay,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="deptUuid != null" >
+        #{deptUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryDoctorUuid != null" >
+        #{surgeryDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryAssistant1Uuid != null" >
+        #{surgeryAssistant1Uuid,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryAssistant2Uuid != null" >
+        #{surgeryAssistant2Uuid,jdbcType=VARCHAR},
+      </if>
+      <if test="anesthesiaDoctorUuid != null" >
+        #{anesthesiaDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mainID != null" >
+        #{mainID,jdbcType=VARCHAR},
+      </if>
+      <if test="opLevel != null" >
+        #{opLevel,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryDoctorName != null" >
+        #{surgeryDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="anesthesiaDoctorName != null" >
+        #{anesthesiaDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="incisionHealingId != null" >
+        #{incisionHealingId,jdbcType=INTEGER},
+      </if>
+      <if test="incisionHealing != null" >
+        #{incisionHealing,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentSchemeId != null" >
+        #{treatmentSchemeId,jdbcType=INTEGER},
+      </if>
+      <if test="treatmentSchemeName != null" >
+        #{treatmentSchemeName,jdbcType=VARCHAR},
+      </if>
+      <if test="rawCreateTime != null" >
+        #{rawCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncTime != null" >
+        #{syncTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="surgeryAssistant1Name != null" >
+        #{surgeryAssistant1Name,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryAssistant2Name != null" >
+        #{surgeryAssistant2Name,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeFlag != null" >
+        #{mergeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mergeFrom != null" >
+        #{mergeFrom,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTarget != null" >
+        #{mergeTarget,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTime != null" >
+        #{mergeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFromUuid != null" >
+        #{mergeFromUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeTargetUuid != null" >
+        #{mergeTargetUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="tempId != null" >
+        #{tempId,jdbcType=INTEGER},
+      </if>
+      <if test="surgeryNursesUuid != null" >
+        #{surgeryNursesUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="operatorName != null" >
+        #{operatorName,jdbcType=VARCHAR},
+      </if>
+      <if test="serialNum != null" >
+        #{serialNum,jdbcType=INTEGER},
+      </if>
+      <if test="incisionGroup != null" >
+        #{incisionGroup,jdbcType=INTEGER},
+      </if>
+      <if test="incisionHealLevel != null" >
+        #{incisionHealLevel,jdbcType=INTEGER},
+      </if>
+      <if test="rawAnesthesiaWayId != null" >
+        #{rawAnesthesiaWayId,jdbcType=INTEGER},
+      </if>
+      <if test="anesthesiaWayId != null" >
+        #{anesthesiaWayId,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.server.sync.model.server.TSurgeryNote" >
+    update ehr_db.eci_surgery_note
+    <set >
+      <if test="emrId != null" >
+        emrId = #{emrId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        patientId = #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="inhospitalId != null" >
+        inhospitalId = #{inhospitalId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientNo != null" >
+        patientNo = #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="oldPatientNo != null" >
+        oldPatientNo = #{oldPatientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="inhospitalTimes != null" >
+        inhospitalTimes = #{inhospitalTimes,jdbcType=INTEGER},
+      </if>
+      <if test="oldInhospitalTimes != null" >
+        oldInhospitalTimes = #{oldInhospitalTimes,jdbcType=INTEGER},
+      </if>
+      <if test="inhospitalNo != null" >
+        inhospitalNo = #{inhospitalNo,jdbcType=VARCHAR},
+      </if>
+      <if test="patientUuid != null" >
+        patientUuid = #{patientUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="deptId != null" >
+        deptId = #{deptId,jdbcType=INTEGER},
+      </if>
+      <if test="bedNo != null" >
+        bedNo = #{bedNo,jdbcType=CHAR},
+      </if>
+      <if test="opCode != null" >
+        opCode = #{opCode,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryName != null" >
+        surgeryName = #{surgeryName,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryDoctor != null" >
+        surgeryDoctor = #{surgeryDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="surgeryAssistant1 != null" >
+        surgeryAssistant1 = #{surgeryAssistant1,jdbcType=INTEGER},
+      </if>
+      <if test="surgeryAssistant2 != null" >
+        surgeryAssistant2 = #{surgeryAssistant2,jdbcType=INTEGER},
+      </if>
+      <if test="surgeryDate != null" >
+        surgeryDate = #{surgeryDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="surgeryBeginTime != null" >
+        surgeryBeginTime = #{surgeryBeginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="surgeryEndTime != null" >
+        surgeryEndTime = #{surgeryEndTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="anesthesiaDoctor != null" >
+        anesthesiaDoctor = #{anesthesiaDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="anesthesiaWay != null" >
+        anesthesiaWay = #{anesthesiaWay,jdbcType=VARCHAR},
+      </if>
+      <if test="preOperativeDiagnosis != null" >
+        preOperativeDiagnosis = #{preOperativeDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="inOperativeDiagnosis != null" >
+        inOperativeDiagnosis = #{inOperativeDiagnosis,jdbcType=VARCHAR},
+      </if>
+      <if test="bodyPosture != null" >
+        bodyPosture = #{bodyPosture,jdbcType=VARCHAR},
+      </if>
+      <if test="transfusion != null" >
+        transfusion = #{transfusion,jdbcType=INTEGER},
+      </if>
+      <if test="surgeryNurses != null" >
+        surgeryNurses = #{surgeryNurses,jdbcType=VARCHAR},
+      </if>
+      <if test="operativeApproach != null" >
+        operativeApproach = #{operativeApproach,jdbcType=VARCHAR},
+      </if>
+      <if test="operativeProbe != null" >
+        operativeProbe = #{operativeProbe,jdbcType=VARCHAR},
+      </if>
+      <if test="operativeMeasures != null" >
+        operativeMeasures = #{operativeMeasures,jdbcType=VARCHAR},
+      </if>
+      <if test="operativeSituation != null" >
+        operativeSituation = #{operativeSituation,jdbcType=VARCHAR},
+      </if>
+      <if test="woundClosureWay != null" >
+        woundClosureWay = #{woundClosureWay,jdbcType=VARCHAR},
+      </if>
+      <if test="incisionBandagedWay != null" >
+        incisionBandagedWay = #{incisionBandagedWay,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="deptUuid != null" >
+        deptUuid = #{deptUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryDoctorUuid != null" >
+        surgeryDoctorUuid = #{surgeryDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryAssistant1Uuid != null" >
+        surgeryAssistant1Uuid = #{surgeryAssistant1Uuid,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryAssistant2Uuid != null" >
+        surgeryAssistant2Uuid = #{surgeryAssistant2Uuid,jdbcType=VARCHAR},
+      </if>
+      <if test="anesthesiaDoctorUuid != null" >
+        anesthesiaDoctorUuid = #{anesthesiaDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mainID != null" >
+        mainID = #{mainID,jdbcType=VARCHAR},
+      </if>
+      <if test="opLevel != null" >
+        opLevel = #{opLevel,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryDoctorName != null" >
+        surgeryDoctorName = #{surgeryDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="anesthesiaDoctorName != null" >
+        anesthesiaDoctorName = #{anesthesiaDoctorName,jdbcType=VARCHAR},
+      </if>
+      <if test="incisionHealingId != null" >
+        incisionHealingId = #{incisionHealingId,jdbcType=INTEGER},
+      </if>
+      <if test="incisionHealing != null" >
+        incisionHealing = #{incisionHealing,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentSchemeId != null" >
+        treatmentSchemeId = #{treatmentSchemeId,jdbcType=INTEGER},
+      </if>
+      <if test="treatmentSchemeName != null" >
+        treatmentSchemeName = #{treatmentSchemeName,jdbcType=VARCHAR},
+      </if>
+      <if test="rawCreateTime != null" >
+        rawCreateTime = #{rawCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="syncTime != null" >
+        syncTime = #{syncTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="surgeryAssistant1Name != null" >
+        surgeryAssistant1Name = #{surgeryAssistant1Name,jdbcType=VARCHAR},
+      </if>
+      <if test="surgeryAssistant2Name != null" >
+        surgeryAssistant2Name = #{surgeryAssistant2Name,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeFlag != null" >
+        mergeFlag = #{mergeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mergeFrom != null" >
+        mergeFrom = #{mergeFrom,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTarget != null" >
+        mergeTarget = #{mergeTarget,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTime != null" >
+        mergeTime = #{mergeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFromUuid != null" >
+        mergeFromUuid = #{mergeFromUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeTargetUuid != null" >
+        mergeTargetUuid = #{mergeTargetUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="tempId != null" >
+        tempId = #{tempId,jdbcType=INTEGER},
+      </if>
+      <if test="surgeryNursesUuid != null" >
+        surgeryNursesUuid = #{surgeryNursesUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="operatorName != null" >
+        operatorName = #{operatorName,jdbcType=VARCHAR},
+      </if>
+      <if test="serialNum != null" >
+        serialNum = #{serialNum,jdbcType=INTEGER},
+      </if>
+      <if test="incisionGroup != null" >
+        incisionGroup = #{incisionGroup,jdbcType=INTEGER},
+      </if>
+      <if test="incisionHealLevel != null" >
+        incisionHealLevel = #{incisionHealLevel,jdbcType=INTEGER},
+      </if>
+      <if test="rawAnesthesiaWayId != null" >
+        rawAnesthesiaWayId = #{rawAnesthesiaWayId,jdbcType=INTEGER},
+      </if>
+      <if test="anesthesiaWayId != null" >
+        anesthesiaWayId = #{anesthesiaWayId,jdbcType=INTEGER},
+      </if>
+    </set>
+    where surgeryId = #{surgeryId,jdbcType=VARCHAR}
+  </update>
+</mapper>

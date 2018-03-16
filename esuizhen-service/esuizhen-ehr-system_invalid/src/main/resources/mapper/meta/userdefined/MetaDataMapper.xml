@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.meta.userdefined.MetaDataDao">
+   <!--录入元数据  -->
+	<insert id="insertMetaData"  parameterType="com.westangel.common.bean.UserDefinedMetaData">
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+        INSERT INTO ${metaDataTable} (
+        <if test="mainKeyField !=null">
+        	${mainKeyField},
+        </if>
+        	${metaNameField},
+        	<if test="parentKeyField !=null">
+        		${parentKeyField},
+        	</if>
+        	<if test="flagKeyField !=null">
+        		${flagKeyField},
+        	</if>
+        	creator,
+        	useCount,
+        	metaDataType,
+        	createTime,
+        	updateTime
+        ) VALUES (
+         <if test="mainKey !=null">
+        	#{mainKey},
+        </if>
+        	#{metaName},
+        	<if test="parentKey !=null">
+        		${parentKey},
+        	</if>
+        	<if test="flagKey !=null">
+        		${flagKey},
+        	</if>
+        	#{creator},
+        	1,
+        	1,
+        	now(),
+        	now()
+        )
+	</insert>
+	
+    <!--更新元数据  -->
+	<update id="updateMetaData" parameterType="com.westangel.common.bean.UserDefinedMetaData">
+        UPDATE ${metaDataTable} 
+        <set>
+	        <if test="useCount != null">
+                useCount = #{useCount} ,
+            </if>
+        </set>
+        WHERE 
+	        ${mainKeyField}=#{mainKey}
+	</update>
+
+	<!--查询使用数  -->
+    <select id="getUseCount" resultType="Integer" parameterType="com.westangel.common.bean.UserDefinedMetaData">
+		SELECT useCount FROM ${metaDataTable} where ${mainKeyField}=#{mainKey}
+	</select>
+	
+	<!--根据名称查询是否已存在  -->
+    <select id="getMetaDataCountByName" resultType="java.lang.Integer" parameterType="com.westangel.common.bean.UserDefinedMetaData">
+		SELECT ${mainKeyField} FROM ${metaDataTable} where ${metaNameField}=#{metaName}
+		<if test="parentKey != null and parentKeyField!=null">
+		 AND ${parentKeyField} = #{parentKey}
+		</if>
+	</select>
+</mapper>
+

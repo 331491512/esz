@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.esuizhen.cloudservice.business.dao.business.mdt.MdtProductDao">
+	<sql id="where_page_condition">
+		<where>
+			<if test="userId != null and mdtRole == null">
+				AND t2.agentApplicant=#{userId}
+			</if>
+			<if test="mdtFlowStateId != null and flag == null">
+				AND t1.mdtFlowStateId=#{mdtFlowStateId}
+			</if>
+			<if test="mdtRole != null and mdtRole == 0">
+			AND (
+				<if test="userRole != null and userRole == 51">
+					t2.agentApplicant IN(
+					    SELECT
+						    t14.userId
+						FROM
+							user_db.r_hospital_doctor t11,
+							user_db.u_doctor t12,
+					     	user_db.r_hospital_doctor t13,
+					     	user_db.u_doctor t14
+						WHERE
+							t11.doctorId = t12.doctorId
+							AND t12.userId = #{userId}
+					    	AND t11.hospitalId=t13.hospitalId
+					    	AND t13.doctorId=t14.doctorId
+				    )
+				    OR
+				</if>
+				t2.agentApplicant = #{userId}
+			)
+			</if>
+			<if test="mdtRole != null and mdtRole != 0">
+				AND t2.productApplyId IN(
+					SELECT
+						i1.productApplyId
+					FROM hds_db.r_mdt_apply_doctor i1
+					WHERE i1.state = 1
+						AND i1.doctorUserId = #{userId}
+						AND i1.groupType = #{mdtRole}
+					GROUP BY i1.productApplyId
+				)
+				<!-- 
+				<choose>
+					<when test="mdtRole == 3">
+						AND t2.productId IN(SELECT productId FROM com_trade_db.product_group WHERE groupType=#{mdtRole} AND productId=t2.productId AND memberVendor=#{userId}) AND radiateUserId=#{userId}
+					</when>
+					<otherwise>
+						AND t2.productId IN(SELECT productId FROM com_trade_db.product_group WHERE groupType=#{mdtRole} AND productId=t2.productId AND memberVendor=#{userId})
+					</otherwise>
+				</choose>
+				 -->
+			</if>
+			<if test="flag != null and flag==0">
+				AND t1.mdtFlowStateId=(SELECT mdtFlowStateId FROM meta_mdt_flow_state WHERE sortIndex=(SELECT sortIndex-1 FROM meta_mdt_flow_state WHERE mdtFlowStateId=#{mdtFlowStateId}))
+			</if>
+			<if test="flag != null and flag==1">
+				AND t1.mdtFlowStateId IN(SELECT mdtFlowStateId FROM meta_mdt_flow_state WHERE sortIndex <![CDATA[>=]]> (SELECT sortIndex FROM meta_mdt_flow_state WHERE mdtFlowStateId=#{mdtFlowStateId}))
+			</if>
+			<if test="flag != null and flag==2">
+				AND t1.mdtFlowStateId IN(SELECT tm.mdtFlowStateId FROM(
+					SELECT mdtFlowStateId FROM meta_mdt_flow_state WHERE sortIndex=(SELECT sortIndex-1 FROM meta_mdt_flow_state WHERE mdtFlowStateId=#{mdtFlowStateId}) 
+					UNION
+					SELECT mdtFlowStateId FROM meta_mdt_flow_state WHERE sortIndex <![CDATA[>=]]> (SELECT sortIndex FROM meta_mdt_flow_state WHERE mdtFlowStateId=#{mdtFlowStateId})
+				) tm)
+			</if>
+			<if test="doctorName != null">
+				AND t2.agentApplicant IN(SELECT userId FROM user_db.u_doctor WHERE trueName LIKE '%${doctorName}%')
+			</if>
+			<if test="recommendedDoctorMobile != null">
+				AND t1.recommendedDoctorMobile LIKE '%${recommendedDoctorMobile}%'
+			</if>
+			<if test="startDate != null">
+				AND t1.createTime <![CDATA[>=]]> CONCAT(#{startDate},' 00:00:00')
+			</if>
+			<if test="endDate != null">
+				AND t1.createTime <![CDATA[<=]]> CONCAT(#{endDate},' 23:59:59')
+			</if>
+			<if test="trueName != null">
+				AND t3.trueName LIKE '%${trueName}%'
+			</if>
+			<if test="mobile != null">
+				AND t3.mobile LIKE '%${mobile}%'
+			</if>
+			<if test="sampleNo != null">
+				AND t1.sampleNo LIKE '%${sampleNo}%'
+			</if>
+			<if test="mdtApplyNo != null">
+				AND t1.mdtApplyNo LIKE '%${mdtApplyNo}%'
+			</if>
+			AND t2.applySource = 4
+		</where>
+	</sql>
+	<!-- 查看MDT人次 -->
+	<select id="getMdtStatis" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT
+			COUNT(0)
+		FROM hds_db.s_mdt_apply t1
+			INNER JOIN hds_db.s_product_service_apply t2 ON t1.productApplyId=t2.productApplyId
+		<include refid="where_page_condition"></include>
+	</select>
+	<!-- 查看MDT列表信息 -->
+	<select id="queryMdtList" resultType="com.esuizhen.cloudservice.business.bean.TMDTApplyInfo">
+		SELECT 
+			t1.id,
+			t1.productApplyId,
+			t1.mdtApplyNo,
+			t1.createTime,
+			t1.applyHospitalId,
+			t1.goal,
+			t1.mdtFlowStateId,
+			t1.clinicImpression,
+			t1.pathologySectionFlag,
+			t2.agentApplicant,
+			t2.summarization,
+			t3.trueName,
+			CASE WHEN t3.sex=1 THEN '男' WHEN t3.sex=2 THEN '女' END sex,
+			t3.mobile,
+			t4.productName,
+			(SELECT hospitalName FROM user_db.u_hospital WHERE hospitalId=t1.applyHospitalId) applyHospitalName,
+			(SELECT trueName FROM user_db.u_doctor WHERE userId=t2.agentApplicant) agentApplicantName,
+			(SELECT showName FROM meta_mdt_flow_state WHERE mdtFlowStateId=t1.mdtFlowStateId) mdtFlowStateName,
+			(SELECT t11.patientNo FROM user_db.r_hospital_patient t11 INNER JOIN user_db.u_patient t22 ON t11.patientId=t22.patientId WHERE t22.userId=buyer AND t11.hospitalId=t1.applyHospitalId) patientNo
+		FROM hds_db.s_mdt_apply t1
+			INNER JOIN hds_db.s_product_service_apply t2 ON t1.productApplyId=t2.productApplyId
+			INNER JOIN user_db.u_patient t3 ON t2.buyer=t3.userId
+			LEFT JOIN com_trade_db.product t4 ON t2.productId=t4.productId
+		<include refid="where_page_condition"></include>
+		<if test="startRow != null">
+			LIMIT #{startRow}, #{pageSize}
+		</if>
+		ORDER BY t1.createTime DESC
+	</select>
+</mapper>

@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.westangel.commonservice.trade.dao.OrderDao">
+	
+	
+	
+	<!-- 创建订单，由服务系统ProductApply接口内部调用 -->
+	<insert id="createOrder"
+		parameterType="com.westangel.commonservice.trade.model.order.TOrderDetailInfo">
+		INSERT INTO
+		     `order`(orderId,orderNo,orderTitle,buyer,vendor,submitTime,totalPrice,realPrice,discount,plusPrice,
+		             contactMobile,state,remark,description,attachement,createTime,subscriptionFlag,inPackage,quota,`usage`,parentProductName,
+		             recommendedDoctor,agentApplicant,wxProductId,discountPrice,couponIds)
+		VALUES(#{orderId},#{orderNo},#{orderTitle},#{buyer},#{vendor},NOW(),#{totalPrice}*100,#{realPrice}*100,#{discount},#{plusPrice}*100,
+		             #{contactMobile},#{state},#{remark},#{description},#{attachement},NOW(),
+		             #{subscriptionFlag},#{inPackage},#{quota},#{usage},#{parentProductName},#{recommendedDoctor},#{agentApplicant},#{wxProductId},#{discountPrice}*100,#{couponIds})
+	</insert>
+	
+	<!-- 添加订单商品列表 -->
+	<insert id="createOrderProductRelation"  parameterType="java.util.List">
+		INSERT INTO r_order_product
+		(orderId , productId , productType, amount , realPrice , createTime ,productSubType)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.orderId},#{item.productId},#{item.productType},#{item.amount},#{item.realPrice}*100,NOW(),#{item.productSubType})
+		</foreach>
+	</insert>
+	
+	<!-- 获取订单列表 -->
+	<select id="listOrder" resultType="com.westangel.commonservice.trade.model.order.TOrderSimpleInfo">
+	   SELECT  
+	         t1.orderId,t1.orderTitle,
+	         t2.userId oppositeUserId,
+	         t2.trueName oppositeTrueName,t2.userPictureUrl oppositeUserPicUrl,
+	         t1.state,t3.stateName,t1.createTime,t1.updateTime,t5.productType,
+	         t1.inPackage,t1.quota,t1.`usage` ,t1.parentProductName
+	   FROM
+	         com_trade_db.`order` t1,user_db.`u_user` t2,com_trade_db.`meta_order_state` t3,com_trade_db.`r_order_product` t4,
+	         com_trade_db.`product` t5
+	   
+	   WHERE
+	         t4.productId=t5.productId AND t1.orderId=t4.orderId AND t1.state=t3.state  AND t1.state>0
+	   		<choose>
+	   			<when test="role==1">
+	   	         AND  t1.vendor=t2.userId AND  t1.buyer=#{userId} 
+	   			</when>
+	   			<when test="role==2">
+	   	         AND  t1.buyer=t2.userId AND  t1.vendor=#{userId} 
+	   			</when>
+			</choose>      
+		   <if test="productType!=null">
+	   		 AND t5.productType=#{productType}
+	       </if>      
+	         
+	   ORDER BY 
+             createTime DESC     
+	    
+	</select>
+	
+	<!-- 获取订单详情 -->
+	<select id="getOrderDetail" resultType="com.westangel.commonservice.trade.model.order.TOrderDetailInfo">
+	   SELECT  
+	         t1.orderId,t1.orderTitle,t1.buyer,t2.trueName buyerName,t1.vendor,t1.contactMobile,
+	         t1.state,t3.stateName,t1.createTime,t1.updateTime,
+	         t1.totalPrice/100 as totalPrice,t1.realPrice/100 as realPrice,t1.plusPrice/100 as plusPrice,t1.remark,
+	         t1.description,t1.attachement,t1.subscriptionFlag,t1.wxProductId,t4.agentPayFlag
+	   FROM
+	         com_trade_db.`order` t1
+	         JOIN user_db.`u_user` t2 ON t1.buyer=t2.userId
+	         JOIN com_trade_db.`meta_order_state` t3 ON t1.state=t3.state
+	         LEFT JOIN com_trade_db.order_payment t4 ON t1.orderId = t4.orderId
+	   WHERE
+	         t1.orderId=#{orderId}
+	         AND  (t1.vendor=#{userId} OR t1.buyer=#{userId}) 
+	</select>
+	
+	<!-- 获取代支付订单信息 -->
+	<select id="getAgentPayInfo" resultType="com.westangel.commonservice.trade.model.order.TAgentPayInfo">
+		SELECT
+			agentOrderId,
+			onlinePayAccountInfo agentPayAccountInfo,
+			onlinePayAccount agentPayAccountNo,
+			payCompleteTime,
+			onlinePayWay,
+			state,
+			remark
+		FROM
+			com_trade_db.order_agent_payment
+		WHERE
+			orderId = #{orderId}
+			AND	payCompleteTime IS NOT NULL
+	</select>
+
+	<!-- 获取订单支付项明细 -->
+	<select id="getOrderPaymentItemInfo" resultType="com.westangel.common.bean.trade.TOrderPaymentItemInfo">
+		SELECT
+			t1.orderItemId,
+			t1.paymentItemId,
+			t1.orderId,
+			t1.unitPrice/100 as unitPrice,
+			t1.num,
+			t1.price/100 as price,
+			t2.itemName,
+			t2.paymentType
+		FROM com_trade_db.order_payment_item t1
+		JOIN com_trade_db.meta_payment_item t2 ON t1.paymentItemId=t2.paymentItemId
+		WHERE t1.orderId=#{orderId}
+	</select>
+
+	<!-- 生成订单支付项明细 -->
+	<insert id="createOrderPaymentItemInfo">
+		INSERT INTO com_trade_db.order_payment_item(paymentItemId,orderId,unitPrice,num,price,createTime,updateTime)
+		VALUES 
+		<foreach collection="orderPaymentItems" item="item" separator=",">
+			(#{item.paymentItemId},#{orderId},#{item.unitPrice}*100,#{item.num},#{item.price}*100,now(),now())
+		</foreach>
+	</insert>
+
+    <!-- 获取订单发布信息 -->
+	<select id="getOrderPublishInfo" resultType="com.westangel.common.bean.trade.TOrderPublishInfo">
+	    SELECT  
+	         t1.orderId,t1.orderTitle,t1.buyer,t1.vendor,t2.productSubType,
+	         t1.realPrice/100 as realPrice,t1.plusPrice/100 as plusPrice,t1.remark,t1.contactMobile,t1.state,
+	         t2.productId,t2.productType,t1.description,t1.attachement,t1.recommendedDoctor,t1.agentApplicant,t1.wxProductId
+	   FROM
+	         com_trade_db.`order` t1, com_trade_db.r_order_product t2
+	   WHERE
+	         t1.orderId=#{orderId} AND t1.orderId=t2.orderId
+	   ORDER BY
+	         t2.createTime DESC
+	   LIMIT 0,1      
+	         
+	      
+	    
+	</select>
+	
+	
+	<!-- 获取订单最简信息 -->
+	<select id="getOrderMinInfo" resultType="com.westangel.common.bean.trade.TOrderMinInfo">
+	   SELECT  
+	         t1.orderId,t1.orderTitle,t1.buyer,t1.vendor,
+	         t1.realPrice/100 as realPrice,
+	         t1.description as description,
+	         t1.discountPrice/100 as discountPrice,t1.couponIds,t1.totalPrice/100 as totalPrice
+	   FROM
+	         com_trade_db.`order` t1
+	   WHERE
+	         t1.orderId=#{orderId}
+	</select>
+	
+	<!-- 生成订单支付记录，由服务系统内部调用 -->
+	<insert id="payOrder"
+		parameterType="com.westangel.common.bean.trade.TOrderPayInfo">
+		INSERT INTO
+		     `order_payment`(payId,orderId,buyer,vendor,state,remark,
+		       points,pointsPayValue,balancePayValue,onlinePayValue,
+		       onlinePayWay,onlinePayAccount,onlinePayNo,
+		       coupons,couponsPayValue,
+		       payCompleteTime,createTime,updateTime)
+		VALUES(#{payId},#{orderId},#{buyer},#{vendor},#{state},#{remark},
+		       #{points},#{pointsPayValue}*100,#{balancePayValue}*100,#{onlinePayValue}*100,
+		       #{onlinePayWay},#{onlinePayAccount},#{onlinePayNo},
+		       #{coupons},#{couponsPayValue}*100,
+		       #{payCompleteTime},NOW(),NOW())
+	</insert>
+	
+	<!-- 生成代理订单支付记录 -->
+	<insert id="payAgentOrder">
+		INSERT INTO
+		     `order_agent_payment`(agentPayId,orderId,agentOrderId,state,remark,
+		       onlinePayValue,onlinePayWay,onlinePayAccount,onlinePayAccountInfo,
+		       createTime,updateTime)
+		VALUES(#{agentPayId},#{orderId},#{agentOrderId},#{state},#{remark},
+		       #{onlinePayValue}*100,#{onlinePayWay},#{onlinePayAccount},#{onlinePayAccountInfo},
+		       NOW(),NOW())
+	</insert>
+	
+	<!--  更新订单状态，由服务系统内部调用 -->
+	<update id="updateOrderState">
+	    UPDATE 
+	       `order`
+	    <set>
+	        <if test="remark!=null">
+	         remark=#{remark},       
+	        </if>
+	        state=#{state},
+	        subscriptionFlag=#{subscriptionFlag},
+	        updateTime=NOW()
+	    </set>
+	    WHERE
+	        orderId=#{orderId}
+	    
+	</update>
+	
+	<!-- 修改订单 -->
+	<update id="modifyOrder">
+	    UPDATE 
+	       `order`
+	    <set>
+	        <if test="wxProductId!=null">
+	         wxProductId=#{wxProductId},       
+	        </if>
+	        <if test="totalPrice!=null">
+	         totalPrice=#{totalPrice}*100,       
+	        </if>
+	        <if test="realPrice!=null">
+	         realPrice=#{realPrice}*100,       
+	        </if>
+	        <if test="plusPrice!=null">
+	         plusPrice=#{plusPrice}*100,       
+	        </if>
+	        <if test="discountPrice!=null">
+	         discountPrice=#{discountPrice}*100,       
+	        </if>
+	        <if test="couponIds!=null">
+	         couponIds=#{couponIds},       
+	        </if>
+	        updateTime=NOW()
+	    </set>
+	    WHERE
+	        orderId=#{orderId}
+	    
+	</update>
+	
+	<!--  检查预支付订单是否存在。根据state=0判断 -->
+	<select id="isPreOrderExist" resultType="java.lang.String">
+	    SELECT
+	    	orderId
+	    FROM
+	    	`order`
+	    where 
+	    	orderId=#{orderId} AND state=0
+	</select>
+	
+	<!--  检查代支付订单是否存在。根据state=2判断 -->
+	<select id="isPreAgentOrderExist" resultType="java.lang.String">
+	    SELECT
+	    	orderId
+	    FROM
+	    	`order_agent_payment`
+	    where 
+	    	agentOrderId=#{agentOrderId} AND state=2
+	</select>
+	
+		<!--  检查订单是否存在。 -->
+	<select id="isOrderExist" resultType="java.lang.String">
+	    SELECT
+	    	orderId
+	    FROM
+	    	`order`
+	    where 
+	    	orderId=#{orderId}
+	</select>
+	
+	<!-- 获得产品订购关系 -->
+	<select id="getProductSubscriptionInfo" resultType="com.westangel.commonservice.trade.model.order.TProductSubscriptionInfo">
+	   SELECT  
+	         t2.productId,t1.subscriptionFlag,t1.buyer,t4.repurchaseFlag
+	        
+	   FROM
+	         com_trade_db.`order` t1,com_trade_db.product t2,com_trade_db.r_order_product t3,com_trade_db.product_template t4
+	   WHERE
+	         t2.productTemplateId = t4.productTemplateId
+	         AND t2.productId=t3.productId AND t2.productId=#{productId} 
+	         AND t1.buyer=#{buyer} AND t1.orderId=t3.orderId AND t3.productId=#{productId}
+	         AND t1.subscriptionFlag>-1
+	   LIMIT 0,1
+	</select>
+	
+	
+</mapper>

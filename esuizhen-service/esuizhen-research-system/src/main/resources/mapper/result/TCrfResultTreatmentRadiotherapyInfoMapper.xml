@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TCrfResultTreatmentRadiotherapyInfoDao">
+
+	<resultMap id="crfResultTreatmentRadiotherapyInfoMap" type="com.esuizhen.cloudservice.research.model.result.TCrfResultMainInfo" >
+		<result property="crfResultId" column="crfResultId" />
+		<result property="crfObserveId" column="crfObserveId" />
+		<result property="subjectElementId" column="subjectElementId" />
+		<result property="projectId" column="projectId" />
+		<result property="patientId" column="patientId" />
+		<result property="creatorId" column="creatorId" />
+		<result property="happenTime" column="happenTime"/>
+		<result property="crfCourseItemTime" column="crfCourseItemTime" />
+		
+		<collection property="crfResult" javaType="ArrayList" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentRadiotherapyInfo">
+			<result property="crfTreatmentRadiotherapyResultId" column="crfTreatmentRadiotherapyResultId" />
+			<result property="crfResultId" column="crfResultId" />
+			<result property="treatmentSchemeId" column="treatmentSchemeId" />
+			<result property="schemeIndex" column="schemeIndex" />
+			<result property="schemeName" column="schemeName" />
+			<result property="index" column="index" />
+			<result property="radiotherapyType" column="radiotherapyType" />
+			<result property="radiotherapyTypeDesc" column="radiotherapyTypeDesc" />
+			<result property="irradiationWay" column="irradiationWay" />
+			<result property="irradiationWayDesc" column="irradiationWayDesc" />
+			<result property="beginTime" column="beginTime" />
+			<result property="endTime" column="endTime" />
+			
+			<collection property="crfResultTreatmentRadiotherapyDetailList" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentRadiotherapyDetail">
+				<result property="crfTreatmentRadiotherapyResultDetailId" column="crfTreatmentRadiotherapyResultDetailId" />
+				<result property="crfTreatmentRadiotherapyResultId" column="crfTreatmentRadiotherapyResultId" />
+				<result property="radiotherapyBodyPart" column="radiotherapyBodyPart" />
+				<result property="radiotherapyPartName" column="radiotherapyPartName" />
+				<result property="totalDose" column="totalDose" />
+				<result property="singleDose" column="singleDose" />
+				<result property="counts" column="counts" />
+				<result property="beginTime" column="beginTime2" />
+				<result property="endTime" column="endTime2" />
+			</collection>
+		</collection>
+	</resultMap>
+	
+	<insert id="insertCrfResultTreatmentRadiotherapy" parameterType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentRadiotherapyInfo">
+        INSERT INTO crf_result_treatment_radiotherapy 
+        (
+        	crfTreatmentRadiotherapyResultId ,
+        	crfResultId ,
+        	treatmentSchemeId ,
+        	schemeIndex ,
+        	schemeName ,
+        	`index` ,
+        	radiotherapyType ,
+        	radiotherapyTypeDesc ,
+        	irradiationWay ,
+        	irradiationWayDesc ,
+        	beginTime ,
+        	endTime ,
+        	createTime ,
+        	updateTime 
+        ) VALUES 
+        (
+        	#{crfTreatmentRadiotherapyResultId} ,
+        	#{crfResultId} ,
+        	#{treatmentSchemeId} ,
+        	#{schemeIndex} ,
+        	#{schemeName} ,
+        	#{index} ,
+        	#{radiotherapyType} ,
+        	#{radiotherapyTypeDesc} ,
+        	#{irradiationWay} ,
+        	#{irradiationWayDesc} ,
+        	#{beginTime} ,
+        	#{endTime} ,
+        	NOW() ,
+        	NOW()
+        )
+	</insert>
+    
+	<update id="updateCrfResultTreatmentRadiotherapy" parameterType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentRadiotherapyInfo">
+        UPDATE crf_result_treatment_radiotherapy 
+        <set>
+	        <if test="crfResultId != null">
+                crfResultId = #{crfResultId} ,
+            </if>
+	        <if test="treatmentSchemeId != null">
+                treatmentSchemeId = #{treatmentSchemeId} ,
+            </if>
+	        <if test="schemeName != null">
+                schemeName = #{schemeName} ,
+            </if>
+	        <if test="index != null">
+                `index` = #{index} ,
+            </if>
+	        <if test="radiotherapyType != null">
+                radiotherapyType = #{radiotherapyType} ,
+            </if>
+	        <if test="radiotherapyTypeDesc != null">
+                radiotherapyTypeDesc = #{radiotherapyTypeDesc} ,
+            </if>
+	        <if test="irradiationWay != null">
+                irradiationWay = #{irradiationWay} ,
+            </if>
+	        <if test="irradiationWayDesc != null">
+                irradiationWayDesc = #{irradiationWayDesc} ,
+            </if>
+	        <if test="beginTime != null">
+                beginTime = #{beginTime} ,
+            </if>
+	        <if test="endTime != null">
+                endTime = #{endTime} ,
+            </if>
+	        <if test="1==1">
+                updateTime = NOW() ,
+            </if>
+        </set>
+        WHERE 
+	        crfTreatmentRadiotherapyResultId = #{crfTreatmentRadiotherapyResultId} 
+	</update>
+
+    <delete id="deleteCrfResultTreatmentRadiotherapy">
+        DELETE FROM crf_result_treatment_radiotherapy WHERE crfTreatmentRadiotherapyResultId = #{crfTreatmentRadiotherapyResultId} 
+    </delete>
+    
+    <delete id="deleteCrfResultTreatmentRadiotherapyByCrfResultId">
+        DELETE FROM crf_result_treatment_radiotherapy WHERE crfResultId = #{crfResultId} 
+    </delete>
+    
+    <select id="queryCrfResultTreatmentRadiotherapyById" resultType="com.esuizhen.cloudservice.research.model.result.TCrfResultTreatmentRadiotherapyInfo">
+		SELECT 
+        	crfTreatmentRadiotherapyResultId,
+        	crfResultId,
+        	treatmentSchemeId,
+        	schemeIndex,
+        	schemeName,
+        	`index`,
+        	radiotherapyType,
+        	radiotherapyTypeDesc,
+        	irradiationWay,
+        	irradiationWayDesc,
+        	beginTime,
+        	endTime,
+        	createTime,
+        	updateTime
+		FROM crf_result_treatment_radiotherapy 
+	    WHERE 
+	        crfTreatmentRadiotherapyResultId = #{crfTreatmentRadiotherapyResultId} 
+	</select>
+	
+	<select id="queryCrfResultTreatmentRadiotherapyByCrfObserveIdAndPatientId" resultMap="crfResultTreatmentRadiotherapyInfoMap">
+		SELECT 
+			t1.crfResultId,
+	    	t1.crfObserveId,
+	    	t1.subjectElementId,
+	    	t1.projectId,
+	    	t1.patientId,
+	    	t1.creatorId,
+        	t2.crfTreatmentRadiotherapyResultId,
+        	t2.treatmentSchemeId,
+        	t2.schemeIndex,
+        	t2.schemeName,
+        	t2.`index`,
+        	t2.radiotherapyType,
+        	t2.radiotherapyTypeDesc,
+        	t2.irradiationWay,
+        	t2.irradiationWayDesc,
+        	t2.beginTime,
+        	t2.endTime,
+        	t3.crfTreatmentRadiotherapyResultDetailId,
+        	t3.radiotherapyBodyPart,
+        	t3.radiotherapyPartName,
+        	t3.totalDose,
+        	t3.singleDose,
+        	t3.counts,
+        	t3.beginTime beginTime2,
+        	t3.endTime endTime2
+		FROM crf_result_main t1 , crf_result_treatment_radiotherapy t2 , crf_result_treatment_radiotherapy_detail t3
+	    WHERE t1.crfResultId=t2.crfResultId
+		AND t2.crfTreatmentRadiotherapyResultId=t3.crfTreatmentRadiotherapyResultId
+		AND t1.crfObserveId=#{crfObserveId}
+		AND t1.patientId=#{patientId}
+	    ORDER BY t2.index
+	</select>
+        	
+	<delete id="deleteByProjectId">
+		DELETE
+			i6.*
+		FROM pro_db.crf_result_main i1,
+			pro_db.crf_observation_subject_element i2,
+			pro_db.crf_course_detail i3,
+			pro_db.crf_course i4,
+			pro_db.r_crftemplate_project i5,
+			pro_db.crf_result_treatment_radiotherapy i6
+		WHERE i1.crfObserveId = i2.crfObserveId
+			AND i2.crfCourseItemId = i3.crfCourseItemId
+			AND i3.crfCourseId = i4.crfCourseId
+			AND i4.crfTemplateId = i5.crfTemplateId
+			AND i5.projectId = #{projectId}
+	</delete>
+</mapper>
+

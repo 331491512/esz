@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TProjectSubcenterDao">
+	
+	<select id="existProjectSubcenterName" resultType="java.lang.Integer">
+		SELECT
+			COUNT(0)
+		FROM pro_db.project_subcenter t1
+		WHERE t1.subcenterName = #{subcenterName} AND t1.projectId = #{projectId}
+	</select>
+	
+	<select id="findByDoctorId" resultType="com.esuizhen.cloudservice.research.model.result.TProjectSubcenter">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM pro_db.project_subcenter t1
+		WHERE t1.subcenterDirector = #{doctorId} AND t1.projectId = #{projectId}
+		
+		UNION ALL
+		
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM pro_db.project_subcenter t1
+			INNER JOIN pro_db.r_subcenter_doctor t2 ON t2.subcenterId = t1.subcenterId
+		WHERE t2.doctorId = #{doctorId} AND t1.projectId = #{projectId}
+	</select>
+
+	<select id="findProjectSubcenters" resultType="com.esuizhen.cloudservice.research.model.result.TProjectSubcenter">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM pro_db.project_subcenter t1
+		WHERE t1.projectId = #{projectId}
+	</select>
+	
+	<select id="findBySubcenterId" resultType="com.esuizhen.cloudservice.research.model.result.TProjectSubcenter">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM pro_db.project_subcenter t1
+		WHERE t1.subcenterId = #{subcenterId}
+			<if test="doctorId != null">
+				AND t1.subcenterDirector = #{doctorId}
+			</if>
+	</select>
+	
+	<sql id="base_column_list">
+		t1.subcenterId,
+		t1.projectId,
+		t1.subcenterNo,
+		t1.subcenterName,
+		t1.subcenterDirector,
+		t1.state,
+		t1.description,
+		t1.createTime,
+		t1.updateTime
+	</sql>
+	
+	<insert id="insert">
+		<selectKey resultType="long" keyProperty="subcenterId" order="AFTER">
+			SELECT LAST_INSERT_ID() as subcenterId
+		</selectKey>
+		INSERT INTO pro_db.project_subcenter(
+			projectId,
+			subcenterNo,
+			subcenterName,
+			subcenterDirector,
+			state,
+			description,
+			createTime,
+			updateTime
+		)VALUES(
+			#{projectId},
+			#{subcenterNo},
+			#{subcenterName},
+			#{subcenterDirector},
+			1,
+			#{description},
+			NOW(),
+			NOW()
+		)
+	</insert>
+	
+	<delete id="delete">
+		DELETE FROM pro_db.project_subcenter WHERE subcenterId = #{subcenterId}
+	</delete>
+	
+	<delete id="deleteByProjectId">
+		DELETE FROM pro_db.project_subcenter WHERE projectId = #{projectId}
+	</delete>
+</mapper>

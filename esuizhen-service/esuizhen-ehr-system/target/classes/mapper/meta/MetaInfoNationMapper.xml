@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.meta.MetaInfoNationDao">
+    
+    <select id="getMetaInfoNationList" resultType="com.esuizhen.cloudservice.ehr.model.meta.TMetaInfoNation">
+		SELECT 
+        	nationId,
+        	nationCode,
+        	nationName,
+        	romeCode,
+        	pyCode
+		FROM user_db.meta_nation WHERE romeCode=1 <if test="nationName!=null">AND nationName LIKE CONCAT(#{nationName},'%')</if>
+		UNION
+		SELECT 
+        	nationId,
+        	nationCode,
+        	nationName,
+        	romeCode,
+        	pyCode
+		FROM user_db.meta_nation WHERE romeCode>1 <if test="nationName!=null">AND nationName LIKE CONCAT(#{nationName},'%')</if>
+	</select>
+	
+    <select id="getMetaInfoNationListByName" resultType="com.esuizhen.cloudservice.ehr.model.meta.TMetaInfoNation">
+		SELECT 
+        	nationId,
+        	nationCode,
+        	nationName,
+        	romeCode,
+        	pyCode
+		FROM user_db.meta_nation WHERE romeCode=1 
+		<if test="nationName!=null">AND (nationName =#{nationName} or nationCode=#{nationName})</if>
+		UNION
+		SELECT 
+        	nationId,
+        	nationCode,
+        	nationName,
+        	romeCode,
+        	pyCode
+		FROM user_db.meta_nation WHERE romeCode>1 
+		<if test="nationName!=null">AND (nationName =#{nationName} or nationCode=#{nationName})</if>
+	</select>
+	
+</mapper>
+

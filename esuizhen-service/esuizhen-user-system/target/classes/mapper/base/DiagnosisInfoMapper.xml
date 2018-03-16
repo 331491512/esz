@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.DiagnosisInfoDao">
+	<select id="findByPatientId" resultType="com.westangel.common.bean.ehr.DiagnosisInfo">
+		SELECT
+			<include refid="base_column_list" />
+		FROM ehr_db.e_diagnosis_info t1
+		WHERE t1.patientId=#{patientId} AND t1.isSourceDiagnosis=#{isSourceDiagnosis}
+		ORDER BY t1.visitTime DESC
+	</select>
+	
+	<select id="findByDiagnosisCode" resultType="com.westangel.common.bean.ehr.DiagnosisInfo">
+		SELECT
+			c1.diseaseCode, c1.diseaseName, c1.sexLimit, c1.curativeEffect, c1.helpRememberCode, c1.createtime
+		FROM ehr_db.meta_e_icd_10 c1
+		WHERE c1.diseaseCode=#{diseaseCode}
+	</select>
+	
+	<sql id="base_column_list">
+		t1.diagnosisId, t1.emrId, t1.patientId, t1.patientNo, t1.diagnosisTypeId, t1.diagnosis, t1.diseaseTypeId,
+		t1.diseaseBodyPartId, t1.diseaseCode, t1.pathologyDiagnosis, t1.pathologyDiagnosisCode, t1.isSourceDiagnosis,
+		t1.remark, t1.visitTime, t1.createTime, t1.updateTime
+	</sql>
+	
+	<update id="update">
+		UPDATE ehr_db.e_diagnosis_info
+		<set>
+			patientId=#{cloudPatientId},
+			updateTime=NOW()
+		</set> 
+		WHERE patientId=#{tobPatientId}
+	</update>
+</mapper>

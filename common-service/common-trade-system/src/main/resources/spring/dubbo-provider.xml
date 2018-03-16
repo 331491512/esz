@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<beans xmlns="http://www.springframework.org/schema/beans"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+    xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"  
+    xsi:schemaLocation="http://www.springframework.org/schema/beans  http://www.springframework.org/schema/beans/spring-beans.xsd  
+        http://code.alibabatech.com/schema/dubbo  http://code.alibabatech.com/schema/dubbo/dubbo.xsd ">  
+
+	<bean id="orderService" class="com.westangel.commonservice.trade.service.impl.order.OrderServiceImpl" />
+    <bean id="accountService" class="com.westangel.commonservice.trade.service.impl.account.AccountServiceImpl" />
+   	<bean id="productService" class="com.westangel.commonservice.trade.service.impl.product.ProductServiceImpl" />
+   	<bean id="payService" class="com.westangel.commonservice.trade.service.impl.pay.PayServiceImpl" />
+   	<bean id="couponService" class="com.westangel.commonservice.trade.service.impl.coupon.CouponServiceImpl" />
+   	
+    
+    <dubbo:service interface="com.westangel.common.service.OrderService" protocol="dubbo" ref="orderService" retries="0" timeout="10000"/>    
+    <dubbo:service interface="com.westangel.common.service.AccountService" protocol="dubbo" ref="accountService" retries="0" timeout="10000"/>    
+    <dubbo:service interface="com.westangel.common.service.ProductService" protocol="dubbo" ref="productService" retries="0" timeout="10000"/>    
+    <dubbo:service interface="com.westangel.common.service.PayService" protocol="dubbo" ref="payService" retries="0" timeout="10000"/>
+    <dubbo:service interface="com.westangel.common.service.CouponInnerService" protocol="dubbo" ref="couponService" retries="0" timeout="10000"/>
+    
+</beans>  

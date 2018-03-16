@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.lisrealtime.ReportPushLogDao">
+
+  <insert id="insertReportPushLog" parameterType="com.esuizhen.cloudservice.ehr.model.lisrealtime.TReportPushBatch" useGeneratedKeys="true">
+  	<selectKey resultType="Long" keyProperty="reportPushRecordId" order="AFTER">
+  		select LAST_INSERT_ID()
+  	</selectKey>
+  	insert into lis_realtime_db.ctl_report_push_log(
+  		reportPushBatchId,firstText,type,reportId,userId,patientId,pushState,failCause,pushTime,promptFlag,pushItemName,itemCheckTime,doctorId,doctorUserId,reportTime,applyTime,sampleTime,createTime,updateTime
+  	)
+  	values(
+  		#{reportPushBatchId},#{firstText},#{type},#{reportId},#{userId},#{patientId},#{pushState},#{failCause},#{pushTime},#{promptFlag},#{pushItemName},#{itemCheckTime},#{doctorId},#{doctorUserId},#{reportTime},#{applyTime},#{sampleTime},now(),now()
+  	)
+  </insert>
+</mapper>

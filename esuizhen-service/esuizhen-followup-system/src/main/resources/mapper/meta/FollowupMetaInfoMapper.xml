@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.meta.FollowupMetaInfoDao">
+	
+	<!-- 从任务分配表查询随访人员 -->
+	<select id="getFollowupOperatorListInTask" resultType="com.esuizhen.cloudservice.followup.model.meta.FollowupOperatorInfo">
+		SELECT 
+		   t1.operator,
+		   t2.trueName as operatorName
+		FROM 
+		   followup_db.r_followup_task_assign t1,
+		   user_db.u_doctor t2
+		   <if test="sql != null and sql != ''">
+		   	join 
+		   	(
+		   		${sql}
+		   	) s on s.doctorId = t2.doctorId
+		   </if>
+		WHERE
+		   t1.followupTaskId=#{followupTaskId}
+		   AND t1.operator=t2.doctorId
+		   
+	</select>
+	
+	<!-- 从u_doctor表查询随访人员 -->
+	<select id="getAllOpertorList" resultType="com.esuizhen.cloudservice.followup.model.meta.FollowupOperatorInfo">
+		SELECT 
+		   DISTINCT(t1.doctorId) as operator,
+		   t1.trueName as operatorName
+		FROM user_db.u_doctor t1
+		<if test="hospitalId!=null">
+		INNER JOIN user_db.r_hospital_doctor h ON h.doctorId=t1.doctorId AND h.hospitalId=#{hospitalId}
+		</if>
+		<if test="sql != null and sql != ''">
+		   	join 
+		   	(
+		   		${sql}
+		   	) s on s.doctorId = t1.doctorId
+		   </if>
+		INNER JOIN user_db.r_user_role t2 ON t1.userId=t2.userId
+		INNER JOIN user_db.meta_role t3 ON t2.userRole=t3.userRole AND t3.userRole !=12
+	</select>
+	
+	
+	<select id="getMetaInfoFollowupResultValueList" parameterType="java.lang.Integer" resultType="com.esuizhen.cloudservice.followup.model.meta.FollowupResultValue">
+		SELECT 
+		   t1.followupResultValueId,
+		   t1.followupResultValueName,
+		   t1.type
+		FROM 
+		   followup_db.meta_followup_result_value t1
+		<if test="type!=null">   
+		WHERE
+		   t1.type=#{type}
+		</if>   
+	</select>
+	
+	<select id="getMetaInfoFollowupWayList" resultType="com.esuizhen.cloudservice.followup.model.meta.FollowupWay">
+		SELECT 
+		   t1.followupWayId as followupWay,
+		   t1.followupWayName
+		FROM 
+		   followup_db.meta_followup_way t1
+	</select>
+	
+	<!-- 查询随访类型 通过类型Id -->
+	<select id="getMetaInfoFollowupWayByFollowupWayId" resultType="com.esuizhen.cloudservice.followup.model.meta.FollowupWay">
+		SELECT 
+		   t1.followupWayId as followupWay,
+		   t1.followupWayName
+		FROM 
+		   followup_db.meta_followup_way t1
+		 WHERE
+		 	followupWayId = #{followupWayId}
+	</select>
+	
+	<!-- 根据ID查找随访结果元数据 -->
+	<select id="getMetaInfoFollowupResultValueById" resultType="com.esuizhen.cloudservice.followup.model.meta.FollowupResultValue">
+		SELECT 
+		   *
+		FROM 
+		   followup_db.meta_followup_result_value
+		WHERE
+		   followupResultValueId=#{followupResultValueId}
+	</select>
+	
+	<select id="getMetaInfoFollowupWayById" resultType="com.esuizhen.cloudservice.followup.model.meta.FollowupWay">
+		SELECT 
+		   t1.followupWayId as followupWay,
+		   t1.followupWayName
+		FROM 
+		   followup_db.meta_followup_way t1
+		WHERE
+		   followupWayId=#{followupWayId}
+	</select>
+	
+	<select id="getFollowupOperatorById" resultType="com.esuizhen.cloudservice.followup.model.meta.FollowupOperatorInfo">
+		SELECT 
+		   t1.doctorId,
+		   t1.trueName as operatorName
+		FROM 
+		   user_db.u_doctor t1
+		WHERE
+		   t1.doctorId=#{operator}
+	</select>
+	
+	
+	<update id="updateFollowupResultValueType" parameterType="com.esuizhen.cloudservice.followup.model.meta.FollowupResultValue">
+		update followup_db.meta_followup_result_value set type=#{type} where followupResultValueId=#{followupResultValueId}
+	</update>
+	
+</mapper>
+

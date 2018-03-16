@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.medicalRecord.RiskfactorsExerciseInfoDao" >
+  <resultMap id="BaseResultMap" type="com.esuizhen.cloudservice.ehr.bean.RiskfactorsExerciseInfo" >
+    <id column="exerciseInfoId" property="exerciseInfoId" jdbcType="VARCHAR" />
+    <result column="riskfactorsId" property="riskfactorsId" jdbcType="VARCHAR" />
+    <result column="sustainYear" property="sustainYear" jdbcType="INTEGER" />
+    <result column="weekCount" property="weekCount" jdbcType="INTEGER" />
+    <result column="everyTimeMinute" property="everyTimeMinute" jdbcType="INTEGER" />
+    <result column="exerciseWay" property="exerciseWay" jdbcType="VARCHAR" />
+    <result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    exerciseInfoId, riskfactorsId, sustainYear, weekCount, everyTimeMinute, exerciseWay, 
+    createTime, updateTime
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from e_riskfactors_exercise_info
+    where exerciseInfoId = #{exerciseInfoId,jdbcType=VARCHAR}
+  </select>
+  
+  <select id="queryOne" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from e_riskfactors_exercise_info
+    where riskfactorsId = #{riskfactorsId}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from e_riskfactors_exercise_info
+    where exerciseInfoId = #{primaryKeyId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.esuizhen.cloudservice.ehr.bean.RiskfactorsExerciseInfo" >
+    insert into e_riskfactors_exercise_info (exerciseInfoId, riskfactorsId, sustainYear, 
+      weekCount, everyTimeMinute, exerciseWay, 
+      createTime, updateTime)
+    values (#{exerciseInfoId,jdbcType=VARCHAR}, #{riskfactorsId,jdbcType=VARCHAR}, #{sustainYear,jdbcType=INTEGER}, 
+      #{weekCount,jdbcType=INTEGER}, #{everyTimeMinute,jdbcType=INTEGER}, #{exerciseWay,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.esuizhen.cloudservice.ehr.bean.RiskfactorsExerciseInfo" >
+    insert into e_riskfactors_exercise_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="exerciseInfoId != null" >
+        exerciseInfoId,
+      </if>
+      <if test="riskfactorsId != null" >
+        riskfactorsId,
+      </if>
+      <if test="sustainYear != null" >
+        sustainYear,
+      </if>
+      <if test="weekCount != null" >
+        weekCount,
+      </if>
+      <if test="everyTimeMinute != null" >
+        everyTimeMinute,
+      </if>
+      <if test="exerciseWay != null" >
+        exerciseWay,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+      <if test="updateTime != null" >
+        updateTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="exerciseInfoId != null" >
+        #{exerciseInfoId,jdbcType=VARCHAR},
+      </if>
+      <if test="riskfactorsId != null" >
+        #{riskfactorsId,jdbcType=VARCHAR},
+      </if>
+      <if test="sustainYear != null" >
+        #{sustainYear,jdbcType=INTEGER},
+      </if>
+      <if test="weekCount != null" >
+        #{weekCount,jdbcType=INTEGER},
+      </if>
+      <if test="everyTimeMinute != null" >
+        #{everyTimeMinute,jdbcType=INTEGER},
+      </if>
+      <if test="exerciseWay != null" >
+        #{exerciseWay,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.cloudservice.ehr.bean.RiskfactorsExerciseInfo" >
+    update e_riskfactors_exercise_info
+    <set >
+      <if test="riskfactorsId != null" >
+        riskfactorsId = #{riskfactorsId,jdbcType=VARCHAR},
+      </if>
+      <if test="sustainYear != null" >
+        sustainYear = #{sustainYear,jdbcType=INTEGER},
+      </if>
+      <if test="weekCount != null" >
+        weekCount = #{weekCount,jdbcType=INTEGER},
+      </if>
+      <if test="everyTimeMinute != null" >
+        everyTimeMinute = #{everyTimeMinute,jdbcType=INTEGER},
+      </if>
+      <if test="exerciseWay != null" >
+        exerciseWay = #{exerciseWay,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where exerciseInfoId = #{exerciseInfoId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.esuizhen.cloudservice.ehr.bean.RiskfactorsExerciseInfo" >
+    update e_riskfactors_exercise_info
+    set riskfactorsId = #{riskfactorsId,jdbcType=VARCHAR},
+      sustainYear = #{sustainYear,jdbcType=INTEGER},
+      weekCount = #{weekCount,jdbcType=INTEGER},
+      everyTimeMinute = #{everyTimeMinute,jdbcType=INTEGER},
+      exerciseWay = #{exerciseWay,jdbcType=VARCHAR},
+      createTime = #{createTime,jdbcType=TIMESTAMP},
+      updateTime = #{updateTime,jdbcType=TIMESTAMP}
+    where exerciseInfoId = #{exerciseInfoId,jdbcType=VARCHAR}
+  </update>
+</mapper>

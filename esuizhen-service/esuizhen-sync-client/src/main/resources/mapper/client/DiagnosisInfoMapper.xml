@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.client.sync.dao.DiagnosisInfoDao" >	
+	
+	<select id="getBatchSyncDiagnosisInfo" resultType="java.util.LinkedHashMap" parameterType="com.esuizhen.client.sync.model.TBatchDetailInfo">
+       	SELECT
+			t1.diagnosisId,t1.emrId,t1.mainID,t1.tempId,t1.patientId,t2.uuid as patientUuid,t1.patientNo,t1.oldPatientNo,
+			t1.inhospitalTimes,t1.oldInhospitalTimes,t1.inhospitalNo,t1.inhospitalId,t1.diagnosisTypeId,t1.diagnosis,t1.diseaseCode,
+			t1.zdyCode,t1.eszCode,t1.diseaseTypeId,t1.icdDiseaseTypeId,t1.diseaseBasis,t1.diagnosisExplain,t1.inHospitalCondition,t1.organCode,
+			t1.organName,t1.treatmentHistory,t1.isFollowup,t1.sourceCancerCount,t1.diseaseBodyPartId,t1.pathologyDiagnosis,
+			t1.pathologyDiagnosisCode,t1.disagnosisPeriodizationId,t1.diagnosisBasisId,t1.isSourceDiagnosis,t1.remark,t1.visitTime,
+			t1.operatorId,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.operatorId) as operatorUuid,
+			t1.createTime,t1.updateTime,t1.outhospitalCondition,t1.firstdiagnosisHospitalId,t1.firstdiagnosisHospitalName,
+			t1.firstdiagnosisTime,t1.specialDiseaseDiagnosisId,t1.diagnosisDoctorId,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.diagnosisDoctorId) as diagnosisDoctorUuid,
+			t1.diagnosisDoctorName,t1.suspectedDiagnosisFlag,t1.surgeryFlag,t1.outhospitalDeptId,t6.uuid outhospitalDeptUuid,t1.tumourPeriodizationT,
+			t1.tumourPeriodizationN,t1.tumourPeriodizationM1,t1.tumourPeriodizationClinic,t1.tumourPeriodization,t1.outhospitalDiagnosis,t1.outhospitalDiagnosisCode,
+			t1.clinicNo,t1.rawCreateTime,t1.seq,t1.creator,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.creator) as creatorUuid,
+			t1.mergeFlag,t1.mergeFrom,
+			IFNULL(t1.mergeFromUuid,(SELECT uuid FROM user_db.u_patient WHERE patientId =t1.mergeFrom)) AS mergeFromUuid,
+			t1.mergeTarget,
+			IFNULL(t1.mergeTargetUuid,(SELECT uuid FROM user_db.u_patient WHERE patientId =t1.mergeTarget)) AS mergeTargetUuid,
+			t1.mergeTime,t1.specialDiseaseRegisterId,IFNUll(t5.sourceFlag,3) as sourceFlag
+		FROM
+		     ehr_db.e_diagnosis_info t1
+		JOIN user_db.u_patient t2 ON t1.patientId = t2.patientId
+		JOIN sc_db.u_patient_sync_result_client t3 ON t2.uuid = t3.uuid	
+		JOIN sc_db.e_diagnosis_info_sync_result_client t4 ON t1.diagnosisId = t4.diagnosisId
+		LEFT JOIN ehr_db.e_medical_record t5 ON t1.emrId = t5.emrId
+		LEFT JOIN user_db.u_department t6 ON t1.outhospitalDeptId=t6.deptId
+		WHERE
+		   t3.syncFlag=1 AND t4.syncFlag = 0
+	    LIMIT #{detailInfo.syncSize}
+  	</select>
+  	
+  	<update id="updateDiagnosisInfoSyncflag" parameterType="java.lang.String">
+		UPDATE sc_db.e_diagnosis_info_sync_result_client t1
+		SET t1.opFlag=IF(t1.syncFlag=0,1,2),t1.syncFlag = 9 , t1.syncTime=NOW(),t1.updateTime = NOW()
+		WHERE
+			t1.diagnosisId IN (${diagnosisIds})
+	</update>
+	
+	<update id="updateSyncResult" parameterType="com.esuizhen.client.sync.bean.TBatchDataResultInfo">
+		UPDATE sc_db.e_diagnosis_info_sync_result_client t1
+		SET 
+		    t1.batchId = #{tBatchDataResultInfo.batchId},
+		    t1.syncFlag = #{tBatchDataResultInfo.syncFlag},
+			t1.cause = #{tBatchDataResultInfo.cause},
+			t1.updateTime = NOW()
+		WHERE
+			t1.diagnosisId = #{tBatchDataResultInfo.resultId} and t1.syncFlag = 9
+	</update>
+</mapper>

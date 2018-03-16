@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.CloudHospitalDoctorDao" >
+	<resultMap type="com.esuizhen.cloudservice.sync.model.HospitalDoctor" id="baseResultMap">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="doctorId" property="doctorId" jdbcType="BIGINT" />
+		<result column="doctorUuid" property="doctorUuid" jdbcType="VARCHAR" />
+		<result column="hospitalId" property="hospitalId" jdbcType="INTEGER" />
+		<result column="hospitalUuid" property="hospitalUuid" jdbcType="VARCHAR" />
+		<result column="deptId" property="deptId" jdbcType="INTEGER" />
+		<result column="deptUuid" property="deptUuid" jdbcType="VARCHAR" />
+		<result column="positionTitle" property="positionTitle" jdbcType="INTEGER" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<sql id="base_column_list">
+		t1.id, t1.hospitalId, t1.deptId, t1.doctorId, t1.positionTitle, t1.createTime
+	</sql>
+	
+	<select id="find" resultMap="baseResultMap">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM user_db.r_hospital_doctor t1
+		WHERE t1.hospitalId=#{hospitalId,jdbcType=BIGINT}
+			AND t1.doctorId=#{doctorId,jdbcType=BIGINT}
+	</select>
+	
+	<select id="findByDoctorId" resultMap="baseResultMap">
+		SELECT
+			<include refid="base_column_list"></include>,t2.uuid hospitalUuid, t3.uuid deptUuid, t5.uuid doctorUuid
+		FROM user_db.r_hospital_doctor t1
+			INNER JOIN user_db.u_hospital t2 ON t1.hospitalId=t2.hospitalId
+			INNER JOIN user_db.u_department t3 ON t1.deptId=t3.deptId
+			INNER JOIN user_db.u_doctor t4 ON t1.doctorId=t4.doctorId
+			INNER JOIN user_db.u_user t5 ON t4.userId=t5.userId
+		WHERE t1.doctorId=#{doctorId,jdbcType=BIGINT}
+		<if test="hospitalId != null">
+			 AND t1.hospitalId=#{hospitalId}
+		</if>
+	</select>
+	
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.sync.model.HospitalDoctor">
+		INSERT INTO user_db.r_hospital_doctor(
+			hospitalId,
+			deptId, 
+			doctorId, 
+			positionTitle, 
+			staffNo, 
+			createTime
+		)VALUES(
+			#{hospitalId,jdbcType=BIGINT},
+			#{deptId,jdbcType=BIGINT},
+			#{doctorId,jdbcType=BIGINT},
+			#{positionTitle,jdbcType=INTEGER},
+			#{staffNo,jdbcType=VARCHAR},
+			#{createTime}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE user_db.r_hospital_doctor
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="hospitalId != null">
+				hospitalId=#{hospitalId,jdbcType=BIGINT},
+			</if>
+			<if test="deptId != null">
+				deptId=#{deptId,jdbcType=BIGINT},
+			</if>
+			<if test="doctorId != null">
+				doctorId=#{doctorId,jdbcType=BIGINT},
+			</if>
+			<if test="positionTitle != null">
+				positionTitle=#{positionTitle,jdbcType=BIGINT},
+			</if>
+			<if test="staffNo != null">
+				staffNo=#{staffNo,jdbcType=VARCHAR},
+			</if>
+		</trim>
+		WHERE id=#{id,jdbcType=BIGINT}
+	</update>
+</mapper>

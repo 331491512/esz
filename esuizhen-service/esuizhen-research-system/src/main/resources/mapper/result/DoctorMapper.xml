@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.DoctorDao">
+	<select id="findByMobile" resultType="com.westangel.common.bean.Doctor">
+		SELECT
+			t1.userId,
+			t1.doctorId,
+			t1.mobile,
+			t1.trueName,
+			t1.auditState,
+			t1.professionalRank,
+			t1.positionTitle,
+			t3.deptId
+		FROM user_db.u_doctor t1
+			INNER JOIN user_db.u_user t2 ON t2.userId = t1.userId
+			LEFT JOIN user_db.r_hospital_doctor t3 ON t3.doctorId = t1.doctorId
+		WHERE t1.mobile = #{mobile}
+			AND t2.role = 2
+			ORDER BY t2.accountType DESC
+	</select>
+	
+	<select id="findByDoctorId" resultType="com.westangel.common.bean.Doctor">
+		SELECT
+			t1.userId,
+			t1.doctorId,
+			t1.mobile,
+			t1.trueName,
+			t1.auditState,
+			t1.professionalRank,
+			t1.positionTitle,
+			t2.email
+		FROM user_db.u_doctor t1,
+			user_db.u_user t2
+		WHERE t2.userId = t1.userId
+			AND t1.doctorId = #{doctorId}
+	</select>
+	
+	<insert id="insert">
+		<selectKey resultType="long" keyProperty="doctorId" order="AFTER">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO user_db.u_doctor(
+			userId,
+			mobile,
+			trueName,
+			syncFlag,
+			auditState,
+			professionalRank,
+			createTime,
+			updateTime
+		)VALUES(
+			#{userId},
+			#{mobile},
+			#{trueName},
+			1,
+			0,
+			#{professionalRank},
+			NOW(),
+			NOW()
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE user_db.u_doctor
+		<set>
+			<if test="trueName != null">
+				trueName = #{trueName},
+			</if>
+			<if test="professionalRank != null">
+				professionalRank = #{professionalRank},
+			</if>
+			updateTime = NOW()
+		</set>
+		WHERE doctorId = #{doctorId}
+	</update>
+</mapper>

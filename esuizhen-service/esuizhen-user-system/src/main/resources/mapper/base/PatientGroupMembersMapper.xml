@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.PatientGroupMembersDao">
+	<resultMap id="baseResultMap" type="com.westangel.common.bean.PatientGroupMembers">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="groupId" property="groupId" jdbcType="BIGINT" />
+		<result column="patientId" property="patientId" jdbcType="BIGINT" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<select id="searchAutoPatientGroupMembers" resultMap="baseResultMap">
+		select a.patientId from u_patient a inner join r_doctor_patient b on
+		a.patientId=b.patientId
+		where (a.sourceDiseaseTypeId=#{groupId,jdbcType=BIGINT} or
+		a.sourceDiseaseTypeId2=#{groupId,jdbcType=BIGINT} or
+		a.sourceDiseaseTypeId3=#{groupId,jdbcType=BIGINT}) and
+		b.doctorId=#{doctorId,jdbcType=BIGINT}
+	</select>
+
+	<resultMap id="patientSimpleInfoBaseResultMap" type="com.westangel.common.bean.PatientSimpleInfo">
+		<id column="patientId" property="patientId" jdbcType="BIGINT" />
+		<result column="userId" property="userId" jdbcType="BIGINT" />
+		<result column="trueName" property="trueName" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="userPictureUrl" property="userPictureUrl" jdbcType="VARCHAR" />
+		<result column="birthDate" property="birthDate" jdbcType="TIMESTAMP" />
+		<result column="age" property="age" jdbcType="INTEGER" />
+		<result column="patientRelation" property="patientRelation" jdbcType="INTEGER" />
+		<result column="sex" property="sex" jdbcType="INTEGER" />
+		<result column="sourceDiagnosis" property="sourceDiagnosis" jdbcType="VARCHAR" />
+		<result column="sourceDiseaseCode" property="sourceDiseaseCode" jdbcType="VARCHAR" />
+		<result column="sourcePathologyDiagnosis" property="sourcePathologyDiagnosis" jdbcType="VARCHAR" />
+		<result column="sourcePathologyDiseaseCode" property="sourcePathologyDiseaseCode" jdbcType="VARCHAR" />
+		<result column="confirmedDate" property="confirmedDate" jdbcType="TIMESTAMP" />
+		<result column="confirmedMonths" property="confirmedMonths" jdbcType="INTEGER" />
+		<result column="currFollowupPerformDays" property="currFollowupPerformDays" jdbcType="INTEGER" />
+		<result column="attentionTime" property="attentionTime" jdbcType="TIMESTAMP" />
+		<result column="hasVisibleMedicalRecord" property="hasVisibleMedicalRecord" jdbcType="INTEGER" />
+		<result column="followupState" property="followupState" jdbcType="INTEGER" />
+		<result column="followupResultValue" property="followupResultValue" jdbcType="INTEGER" />
+		<result column="projectFollowupState" property="projectFollowupState" jdbcType="INTEGER" />
+		<result column="subcenterName" property="subcenterName" jdbcType="VARCHAR" />
+		<result column="infoState" property="infoState" jdbcType="INTEGER" />
+		<result column="source_flag" property="sourceFlag" jdbcType="INTEGER" />
+		<result column="accountType" property="accountType" jdbcType="INTEGER" />
+		<result column="medicalRecordCount" property="medicalRecordCount" jdbcType="INTEGER" />
+		<result column="liveStatus" property="liveStatus" jdbcType="INTEGER" />
+		<result column="outPatientFlag" property="outPatientFlag" jdbcType="INTEGER" />
+		<result column="inhospitalState" property="inhospitalState" jdbcType="INTEGER" />
+		<collection column="patientId" property="serviceSubscriptionInfo" ofType="com.westangel.common.bean.user.ServiceSubscriptionInfo">
+			<id column="var_id" property="id" jdbcType="BIGINT" />
+			<result column="var_doctorId" property="doctorId" jdbcType="BIGINT" />
+			<result column="var_subscriptionFlag" property="subscriptionFlag" jdbcType="INTEGER" />
+			<result column="var_vipFlag" property="vipFlag" jdbcType="INTEGER" />
+			<result column="var_periodFeeType" property="periodFeeType" jdbcType="INTEGER" />
+			<result column="var_vipBeginTime" property="vipBeginTime" jdbcType="TIMESTAMP" />
+			<result column="var_vipEndTime" property="vipEndTime" jdbcType="TIMESTAMP" />
+			<result column="var_vipProductName" property="vipProductName" jdbcType="VARCHAR" />
+			<result column="var_createTime" property="createTime" jdbcType="TIMESTAMP" />
+			<result column="var_updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+		</collection>
+	</resultMap>
+
+	<select id="searchSimplePatientInfoList" resultMap="patientSimpleInfoBaseResultMap">
+		SELECT u1.userId, u1.patientId, u2.userName, u1.trueName,
+		u1.userPictureUrl, u1.mobile, u1.birthDate, u1.sex,
+		u1.patientRelation,
+		u1.sourceDiagnosis, u1.sourceDiseaseCode,
+		u1.confirmedDate, u1.sourcePathologyDiagnosis,
+		u1.sourcePathologyDiseaseCode,
+		u1.liveStatus,
+		u1.outPatientFlag,u1.inhospitalState,
+		CASE WHEN u1.birthDate IS NULL THEN 0 ELSE  TIMESTAMPDIFF(YEAR, u1.birthDate, now()) END age,
+		PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(u1.confirmedDate,'%Y%m'))
+		confirmedMonths, u3.createTime attentionTime,
+		u1.hasVisibleMedicalRecord, u4.followupState, u4.followupResultValue,
+		u4.projectFollowupState, u4.currFollowupPerformDays,
+		u3.vipFlag, NULL
+		subcenterName, u2.accountType, u2.infoState, u3.sourceFlag
+		source_flag, u5.latestMedicalRecordUploadTime,
+		u6.doctorId
+		var_doctorId, u6.subscriptionFlag var_subscriptionFlag, u6.vipFlag
+		var_vipFlag, u6.periodFeeType var_periodFeeType,
+		u6.vipBeginTime
+		var_vipBeginTime, u6.vipEndTime var_vipEndTime, u6.vipProductName
+		var_vipProductName,
+		(CASE WHEN(u6.vipFlag IS NULL OR u6.vipFlag=0) THEN
+		NULL ELSE u6.createTime END) var_createTime, u6.updateTime
+		var_updateTime,u7.medicalRecordCount
+		<if test="groupWay==8">
+			,g2.createTime r_group_createTime
+		</if>
+		FROM u_patient u1 
+		<if test="sql!=null and groupWay!=8 and groupWay!=9 and groupWay!=10">
+		JOIN (
+				${sql}
+			) t ON u1.patientId = t.patientId
+		</if>
+		<if test="groupWay==10 or groupWay==8">
+			JOIN user_db.u_patient_group g1 ON g1.creator = #{doctorId}
+			<if test="groupWay!=null">
+				AND g1.groupWay = #{groupWay}
+			</if>
+			<if test="groupNo!=null">
+				AND g1.groupNo =#{groupNo}
+			</if>
+			JOIN user_db.u_patient_group_members g2 ON g1.groupNo = g2.groupNo AND g2.patientId = u1.patientId
+		</if>
+		<if test="groupWay==9">
+			JOIN (SELECT t1.patientId FROM (
+					(
+						SELECT
+							patientId
+						FROM
+							user_db.r_doctor_patient
+						WHERE
+							doctorId = #{doctorId,jdbcType=BIGINT}
+						AND sourceFlag = 7
+					)
+					UNION ALL
+						(
+							SELECT
+								t4.patientId
+							FROM
+								(
+									SELECT
+										t1.patientId,
+										t2.UserId doctorUserId,
+										t3.userId patientUserId
+									FROM
+										user_db.r_doctor_patient t1,
+										user_db.u_doctor t2,
+										user_db.u_patient t3
+									WHERE
+										t1.doctorId = #{doctorId,jdbcType=BIGINT}
+									AND t1.doctorId = t2.doctorId
+									AND t3.patientId = t1.patientId
+								) t4,
+								hds_db.s_product_service_apply t5
+							WHERE
+								t4.doctorUserId = t5.agentApplicant
+							AND t4.patientUserId = t5.buyer
+							GROUP BY
+								t4.patientId
+						)
+						UNION
+						(
+							select t3.patientId from user_db.u_doctor t
+							JOIN 
+							com_trade_db.product_group t1 ON t.userId = t1.memberVendor
+							JOIN
+							hds_db.s_product_service_apply t2 ON t2.productId=t1.productId AND t2.orderId = t1.orderId
+							JOIN
+							user_db.u_patient t3 ON t3.userId = t2.buyer
+							WHERE
+							t.doctorId = #{doctorId,jdbcType=BIGINT}
+						)
+						)t1
+						JOIN user_db.r_doctor_patient t2 ON doctorId = #{doctorId,jdbcType=BIGINT} AND t1.patientId=t2.patientId
+				)t ON u1.patientId = t.patientId
+		</if>
+		JOIN u_user u2 ON u1.userId=u2.userId AND u1.patientType=1
+		LEFT JOIN r_doctor_patient u3 ON u1.patientId=u3.patientId AND u3.doctorId=#{doctorId}
+		LEFT JOIN followup_db.var_patient_followup u4 ON u1.patientId=u4.patientId
+		LEFT JOIN ehr_db.var_patient_medical u5 ON u1.patientId=u5.patientId
+		LEFT JOIN hds_db.var_patient_business u6 ON u1.patientId=u6.patientId AND u6.doctorId = u3.doctorId
+		LEFT JOIN ehr_db.var_patient_doctor_medical u7 ON u1.patientId=u7.patientId AND u7.doctorId = u3.doctorId
+		<where>
+		<choose>
+			<when test="groupWay==11 and groupNo==20">
+				u1.inhospitalState=0
+			</when>
+			<when test="groupWay==11 and groupNo==1">
+				u1.outPatientFlag=1
+			</when>
+			<when test="groupNo == '-1'">
+				u1.sourceDiseaseTypeId IS NULL
+			</when>
+			<when test="groupWay!=null and (groupWay==1 or groupWay==2)">
+				u1.sourceDiseaseTypeId=#{groupNo}
+			</when>
+		</choose>
+		</where>
+		GROUP BY u1.patientId
+		ORDER BY var_createTime DESC
+		<if test="groupWay==8">
+			,r_group_createTime DESC
+		</if>
+		,attentionTime DESC
+	</select>
+	
+	
+	<!-- 插入组内患者 -->
+	<insert id="createPatientGroupMembers">
+		REPLACE INTO 
+		user_db.u_patient_group_members(groupNo,patientId,createTime)
+		VALUES(#{groupNo},#{patientId},NOW())
+	</insert>
+	
+	<!-- 删除患者组 -->
+	<delete id="deletePatientOfGroupMember">
+		DELETE FROM user_db.u_patient_group_members 
+		WHERE 
+		groupNo IN 
+		(SELECT groupNo from user_db.u_patient_group where creator = #{doctorId})
+		AND patientId = #{patientId}
+	</delete>
+	
+	<!-- 删除组内患者  -->
+	<delete id="deletePatientGroupMember">
+		DELETE FROM user_db.u_patient_group_members 
+		WHERE 
+		patientId IN 
+		<foreach collection="patients" item="patient" open="(" close=")" separator=",">
+			#{patient}
+		</foreach>
+		AND groupNo = #{groupNo}
+	</delete>
+</mapper>

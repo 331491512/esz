@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TCrfResultBasicPastmedicalHistoryDao">
+	<resultMap type="com.esuizhen.cloudservice.research.model.result.TCrfResultMainInfo" id="baseTCrfResultMainInfoCrfResultBasicPastmedicalHistoryResultMap">
+		<id column="crfResultId" property="crfResultId"/>
+		<result column="crfObserveId" property="crfObserveId"/>
+		<result column="subjectElementId" property="subjectElementId"/>
+		<result column="projectId" property="projectId"/>
+		<result column="crfCourseItemTime" property="crfCourseItemTime"/>
+		<result column="creatorId" property="creatorId"/>
+		<result column="patientId" property="patientId"/>
+		
+		<collection property="crfResult" javaType="ArrayList" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultBasicPastmedicalHistory">
+			<id column="crfPastmedicalResultId" property="crfPastmedicalResultId"/>
+			<result column="crfResultId" property="crfResultId"/>
+			<result column="pastmedicalName" property="pastmedicalName"/>
+			<result column="confirmedDate" property="confirmedDate"/>
+			<result column="confirmedHospital" property="confirmedHospital"/>
+			<result column="treatment" property="treatment"/>
+			<result column="currentState" property="currentState"/>
+			<result column="createTime" property="createTime"/>
+			<result column="updateTime" property="updateTime"/>
+		</collection>
+	</resultMap>
+
+	<resultMap type="com.esuizhen.cloudservice.research.model.result.TCrfResultBasicPastmedicalHistory" id="baseCrfResultBasicPastmedicalHistoryResultMap">
+		<id column="crfPastmedicalResultId" property="crfPastmedicalResultId"/>
+		<result column="crfResultId" property="crfResultId"/>
+		<result column="pastmedicalName" property="pastmedicalName"/>
+		<result column="confirmedDate" property="confirmedDate"/>
+		<result column="confirmedHospital" property="confirmedHospital"/>
+		<result column="treatment" property="treatment"/>
+		<result column="currentState" property="currentState"/>
+		<result column="createTime" property="createTime"/>
+		<result column="updateTime" property="updateTime"/>
+	</resultMap>
+
+	<select id="findCrfResultBasicPastmedicalHistory" resultMap="baseTCrfResultMainInfoCrfResultBasicPastmedicalHistoryResultMap">
+		SELECT
+			t2.crfObserveId, t2.subjectElementId, t2.projectId, t2.crfCourseItemTime, t2.creatorId, t2.patientId,
+			<include refid="base_column_list"></include>
+		FROM pro_db.crf_result_main t2
+			LEFT JOIN pro_db.crf_result_basic_pastmedical_history t1 ON t1.crfResultId=t2.crfResultId
+			LEFT JOIN pro_db.crf_observation_subject_element t3 ON t2.crfObserveId=t3.crfObserveId
+		WHERE t3.crfObserveId = #{crfObserveId} AND t2.patientId = #{patientId}
+		ORDER BY t1.`index`
+	</select>
+
+	<sql id="base_column_list">
+		t1.crfPastmedicalResultId, t1.crfResultId, t1.pastmedicalName, t1.confirmedDate, t1.confirmedHospital,
+		t1.treatment, t1.currentState, t1.createTime, t1.updateTime
+	</sql>
+
+	<insert id="insertByBatch">
+		INSERT INTO pro_db.crf_result_basic_pastmedical_history(
+			crfPastmedicalResultId, crfResultId, pastmedicalName, confirmedDate,
+			confirmedHospital, treatment, currentState, `index`, createTime, updateTime
+		)VALUES
+		<foreach collection="crfResultBasicPastmedicalHistories" item="crfResultBasicPastmedicalHistory" index="index" separator=",">
+			(
+				#{crfResultBasicPastmedicalHistory.crfPastmedicalResultId}, 
+				#{crfResultBasicPastmedicalHistory.crfResultId}, 
+				#{crfResultBasicPastmedicalHistory.pastmedicalName}, 
+				#{crfResultBasicPastmedicalHistory.confirmedDate},
+				#{crfResultBasicPastmedicalHistory.confirmedHospital}, 
+				#{crfResultBasicPastmedicalHistory.treatment}, 
+				#{crfResultBasicPastmedicalHistory.currentState},
+				#{crfResultBasicPastmedicalHistory.index},
+				NOW(), NOW()
+			)
+		</foreach>
+	</insert>
+	
+	<update id="update">
+		UPDATE pro_db.crf_result_basic_pastmedical_history
+		<set>
+			<if test="crfResultId != null">
+				crfResultId = #{crfResultId},
+			</if>
+			<if test="pastmedicalName != null">
+				pastmedicalName = #{pastmedicalName},
+			</if>
+			<if test="confirmedDate != null">
+				confirmedDate = #{confirmedDate},
+			</if>
+			<if test="confirmedHospital != null">
+				confirmedHospital = #{confirmedHospital},
+			</if>
+			<if test="treatment != null">
+				treatment = #{treatment},
+			</if>
+			<if test="currentState != null">
+				currentState = #{currentState},
+			</if>
+			<if test="index != null">
+				`index` = #{index}
+			</if>
+			updateTime = NOW()
+		</set>
+		WHERE crfPastmedicalResultId = #{crfPastmedicalResultId}
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM pro_db.crf_result_basic_pastmedical_history WHERE crfPastmedicalResultId = #{crfPastmedicalResultId}
+	</delete>
+	
+	<delete id="deleteByCrfResultIdAndPatientId">
+		DELETE FROM pro_db.crf_result_basic_pastmedical_history WHERE crfResultId = #{crfResultId}
+	</delete>
+	
+	<delete id="deleteByProjectId">
+		DELETE
+			i6.*
+		FROM pro_db.crf_result_main i1,
+			pro_db.crf_observation_subject_element i2,
+			pro_db.crf_course_detail i3,
+			pro_db.crf_course i4,
+			pro_db.r_crftemplate_project i5,
+			pro_db.crf_result_basic_pastmedical_history i6
+		WHERE i1.crfObserveId = i2.crfObserveId
+			AND i2.crfCourseItemId = i3.crfCourseItemId
+			AND i3.crfCourseId = i4.crfCourseId
+			AND i4.crfTemplateId = i5.crfTemplateId
+			AND i5.projectId = #{projectId}
+	</delete>
+</mapper>

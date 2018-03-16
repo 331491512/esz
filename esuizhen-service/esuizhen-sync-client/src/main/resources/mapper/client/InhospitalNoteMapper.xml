@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- user_db -->
+<mapper namespace="com.esuizhen.client.sync.dao.InhospitalNoteDao" >	
+	
+	<select id="getBatchSyncInhospitalNote" resultType="java.util.LinkedHashMap" parameterType="com.esuizhen.client.sync.model.TBatchDetailInfo">
+		SELECT
+			t1.inhospitalId,t1.inhospitalNo,IF(t4.syncFlag=2,1,t4.syncFlag) as opFlag,t1.emrId,t1.tempId,t1.patientId,t2.uuid AS patientUuid,t1.patientNo,t1.inpatientNo,t1.inhospitalTimes,
+			t1.oldPatientNo,t1.oldInhospitalTimes,t1.hospitalId,t1.medicalPayType,t1.flag,t1.healthCardNo,t1.inhospitalWay,t1.inhospitalSource,
+			t1.inhospitalDate,t1.inhospitalDeptId,
+			(SELECT uuid FROM user_db.u_department WHERE deptId=inhospitalDeptId) AS inhospitalDeptUuid,
+			t1.inhospitalWard,t1.inhospitalLastTime,t1.turnDeptId,
+			(SELECT uuid FROM user_db.u_department WHERE deptId=turnDeptId) AS turnDeptUuid,
+			t1.turnDeptDate,t1.turnDept,t1.outhospitalDate,t1.outhospitalDeptId,
+			(SELECT uuid FROM user_db.u_department WHERE deptId=outhospitalDeptId) AS outhospitalDeptUuid,
+			t1.outhospitalWard,t1.outhoispitalWay,t1.inhospitalDays,t1.diagnose,t1.diseaseCode,t1.deptDoctor,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.deptDoctor) as deptDoctorUuid,
+			t1.deptDoctorName,t1.directorDoctor,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.directorDoctor) as directorDoctorUuid,
+			t1.directorDoctorName,t1.inchargeDoctor,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.inchargeDoctor) as inchargeDoctorUuid,
+			t1.inchargeDoctorName,t1.inhospitalDoctor,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.inhospitalDoctor) as inhospitalDoctorUuid,
+			t1.inhospitalDoctorName,t1.attendingDoctor,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.attendingDoctor) as attendingDoctorUuid,
+			t1.attendingDoctorName,t1.dutyNurse,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.dutyNurse) as dutyNurseUuid,
+			t1.dutyNurseName,t1.postgraduateDoctor,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.postgraduateDoctor) as postgraduateDoctorUuid,
+			t1.postgraduateDoctorName,t1.internshipDoctor,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.internshipDoctor) as internshipDoctorUuid,
+			t1.internshipDoctorName,t1.codePerson,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.codePerson) as codePersonUuid,
+			t1.codePersonName,t1.medicalRecordsQuality,t1.qualityControlDoctor,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.qualityControlDoctor) as qualityControlDoctorUuid,
+			t1.qualityControlDoctorName,t1.qualityControlNurse,
+			(SELECT uuid FROM user_db.u_doctor WHERE doctorId = t1.qualityControlNurse) as qualityControlNurseUuid,
+			t1.qualityControlNurseName,t1.qualityControlDate,t1.mainDiagnosis,t1.mainDiagnosisCode,t1.inhospitalCondition,
+			IFNUll(t5.sourceFlag,3) as sourceFlag,t1.historyCuration,t1.sourceCancerNum,t1.age,t1.occupationId,t1.idType,t1.identification,t1.marriageStatus,
+			t1.outhospitalCondition,t1.reInhospitalPlan31Days,t1.reInhospitalTarget31Days,t1.preComaHour,t1.preComaMinute,t1.inComaHour,t1.inComaMinute,
+			t1.inviabilityScore,t1.outviabilityScore,t1.babyAge,t1.babyBornWeight,t1.babyWeightInHospital,t1.transfusion,t1.respiratorUseTime,
+			t1.isAllergy,t1.allergyDesc,t1.autopsy,t1.aboBlood,t1.rhBlood,t1.redBloodCell,t1.platelet,t1.plasma,
+			t1.wholeBlood,t1.other,t1.pathologyNo,t1.poisoningReason,t1.poisoningDiseaseCode,t1.recHospitalName,t1.tumourPeriodizationT,
+			t1.tumourPeriodizationN,t1.tumourPeriodizationM1,t1.tumourPeriodizationM2,t1.tumourPeriodizationClinic,t1.tumourPeriodization,t1.pathologyDiagnosis,
+			t1.pathologyDiagnosisCode,t1.nationalityId,t1.nativePlaceCityCode,t1.nativePlaceAddress,t1.householdZipCode,t1.householdCountyCode,
+			t1.householdAddress,t1.companyZipCode,t1.companyCountyCode,t1.companyAddress,t1.companyTel,t1.liveZipCode,t1.liveCountyCode,t1.liveAddress,t1.liveTel,
+			t1.familyName,t1.patientRelation,t1.familyCountyCode,t1.familyAddress,t1.familyTel,t1.deathTime,t1.deathCause,t1.createTime,t1.updateTime,
+			t1.deleteFlag,t1.operatorId,t1.operatorName,t1.catalogState,t1.rawCreateTime,t1.mergeFlag,t1.mergeFrom,
+			IFNULL(t1.mergeFromUuid,(SELECT uuid FROM user_db.u_patient WHERE patientId =t1.mergeFrom)) AS mergeFromUuid,
+			t1.mergeTarget,
+			IFNULL(t1.mergeTargetUuid,(SELECT uuid FROM user_db.u_patient WHERE patientId =t1.mergeTarget)) AS mergeTargetUuid,
+			t1.mergeTime,t1.oldinhospitalid,t1.infoState,t1.dataSource
+		FROM
+		     ehr_db.ei_inhospital_note t1
+		JOIN user_db.u_patient t2 ON t1.patientId = t2.patientId
+		JOIN sc_db.u_patient_sync_result_client t3 ON t2.uuid = t3.uuid
+		JOIN sc_db.ei_inhospital_note_sync_result_client t4 ON t4.inhospitalId = t1.inhospitalId
+		LEFT JOIN ehr_db.e_medical_record  t5 ON t1.emrId = t5.emrId 
+		WHERE
+			t3.syncFlag = 1 AND t4.syncFlag in (0,2) 
+	    LIMIT #{detailInfo.syncSize}
+  	</select>
+  	
+  	<update id="updateInhospitalNoteSyncflag" parameterType="java.lang.String">
+		UPDATE sc_db.ei_inhospital_note_sync_result_client t1
+		SET t1.opFlag=IF(t1.syncFlag=0,1,2),t1.syncFlag = 9 , t1.syncTime=NOW(),t1.updateTime = NOW()
+		WHERE
+			t1.inhospitalId IN (${inhospitalIds})
+	</update>
+	
+	<update id="updateSyncResult" parameterType="com.esuizhen.client.sync.bean.TBatchDataResultInfo">
+		UPDATE sc_db.ei_inhospital_note_sync_result_client t1
+		SET 
+		    t1.batchId = #{tBatchDataResultInfo.batchId},
+		    t1.syncFlag = #{tBatchDataResultInfo.syncFlag},
+			t1.cause = #{tBatchDataResultInfo.cause},
+			t1.updateTime = NOW()
+		WHERE
+			t1.inhospitalId = #{tBatchDataResultInfo.resultId} and t1.syncFlag = 9
+	</update>
+</mapper>

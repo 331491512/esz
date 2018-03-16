@@ -1,0 +1,1235 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.statistics.dao.SurvivalDao">
+<!-- ！=null 分母  1： 随访期间  2：随访前失访且在随访期间 3：随访前死亡 4：仅随访前失访-->
+	<sql id="condition_sql">
+		CASE
+		<choose>
+			<when test="subReq!=null">
+				<if test="subReq.followupDateStart!=null">
+				<!-- 如果死亡进入分母  -->
+				<if test="reqFlag==1">
+					WHEN t1.liveStatus=0 AND (SELECT 0 FROM followup_db.followup_result WHERE mergeFlag!=2 and patientId=t1.patientId AND followupResultValue=4 AND followupTime <![CDATA[<]]>#{subReq.followupDateStart} LIMIT 1) IS NOT NULL THEN 3
+				</if>
+				WHEN t1.liveStatus!=0 AND t1.followupFlag=2 AND t1.lostFollowupTime <![CDATA[<]]>#{subReq.followupDateStart} AND f.patientId IS NOT NULL THEN 2
+				WHEN t1.liveStatus!=0 AND t1.followupFlag=2 AND t1.lostFollowupTime <![CDATA[<]]>#{subReq.followupDateStart} THEN 4
+				</if>
+				WHEN f.patientId IS NOT NULL THEN 1
+			</when>
+			<otherwise>
+				WHEN u1.patientId IS NOT NULL THEN 1
+			</otherwise>
+		</choose>
+		ELSE 0 END
+	</sql>
+	<sql id="sourceTumorFlag_sql">
+		<if test="followupRangeFlag==0">
+			AND t1.sourceTumorFlag = 1
+		</if>
+		<if test="followupRangeFlag==1 and sourceTumorFlags!=null">
+			AND t1.sourceTumorFlag IN (${sourceTumorFlags})
+		</if>
+		<if test="followupRangeFlag==2">
+			AND exists(select diseaseTypeId from followup_db.conf_followup_range_disease_type where t1.sourceDiseaseTypeId=diseaseTypeId)
+		</if>
+		<if test="followupRangeFlag==3">
+			AND (
+				t1.icdDiseaseTypeId IN (select icdDiseaseTypeId from followup_db.conf_followup_range_icd where flag=1)
+				OR t1.sourceDiseaseCode IN (select diseaseCode from followup_db.conf_followup_range_icd_code where flag=1)
+			)
+		</if>
+	</sql>
+	<sql id="followupRangeDeach_sql">
+		<if test="subReq!=null">
+			AND (SELECT 0 FROM followup_db.followup_result 
+			WHERE
+			patientId=t1.patientId AND followupResultValue=4 and mergeFlag!=2
+			<if test="subReq.followupDateStart!=null">
+				AND followupTime>=#{subReq.followupDateStart}
+			</if>
+			<if test="subReq.followupDateEnd!=null">
+				AND #{subReq.followupDateEnd}>=followupTime
+			</if>
+			LIMIT 1
+			)IS NOT NULL
+		</if>
+	</sql>
+	
+	<sql id="join_data_privilege">
+  	<choose>
+		<!-- 数据权限1全院查询 -->
+		<when test="dataId!=null and dataId==1 and operator!=null">
+			select dp.patientId from user_db.r_doctor_patient dp where dp.doctorId=#{operator}
+			UNION
+			select hp.patientId from user_db.r_hospital_doctor hd join user_db.r_hospital_patient hp on hd.doctorId=#{operator} AND hd.hospitalId=hp.hospitalId
+		</when>
+		<!-- 数据权限4查询本医生 -->
+		<when test="dataId!=null and dataId==4 and operator!=null">
+			select t1.patientId from user_db.r_doctor_patient t1 where t1.doctorId=#{operator}
+		</when>
+		<!-- 云端默认查询本医生 -->
+		<when test="deployLocation != null and deployLocation==2 and operator!=null">
+			select t1.patientId from user_db.r_doctor_patient t1 
+			LEFT JOIN user_db.r_doctor t2 ON t1.doctorId = t2.doctorId AND t2.state = 1
+			where 1
+			<choose>
+				<when test="doctorLevel != null and doctorLevel==1">
+					AND t2.deanDoctorId=#{operator}
+				</when>
+				<when test="doctorLevel != null and doctorLevel==2">
+					AND t2.deptDoctorId=#{operator}
+				</when>
+				<when test="doctorLevel != null and doctorLevel==21">
+					AND t2.deptSecDoctorId=#{operator}
+				</when>
+				<when test="doctorLevel != null and doctorLevel==3">
+					AND t2.directorDoctorId=#{operator}
+				</when>
+				<when test="doctorLevel != null and doctorLevel==4">
+					AND t2.inchargeDoctorId=#{operator}
+				</when>
+				<otherwise>
+					AND t1.doctorId=#{operator}
+				</otherwise>
+			</choose>
+			GROUP BY t1.patientId
+			<if test="doctorLevel != null and doctorLevel==1">
+			UNION
+				SELECT
+					t1.patientId
+				FROM
+					user_db.r_hospital_patient t1
+				JOIN user_db.r_hospital_doctor t2 ON t1.hospitalId = t2.hospitalId
+				WHERE
+					t2.doctorId = #{operator}
+				GROUP BY t1.patientId
+			</if>
+		</when>
+	</choose>
+  </sql>
+  
+	<!-- 插入查询中间表 -->
+	<insert id="insertSearchPatientStaticPatient">
+		INSERT INTO
+		<choose>
+			<when test="searchTableName!=null">
+				${searchTableName}	
+			</when>
+			<otherwise>
+				var_search_patient
+			</otherwise>
+		</choose> 
+		(searchId,patientId,conditionId,flag)
+		SELECT #{searchId},t1.patientId
+		<choose>
+			<when test="staticType==1">
+				,t3.outhospitalDeptId
+				<!-- ,t4.deptId -->
+			</when>
+			<when test="staticType==2">
+				,t1.sourceDiseaseTypeId
+				<!-- ,t5.diseaseTypeId -->
+			</when>
+			<when test="staticType==3">
+				,t2.doctorId
+			</when>
+			<when test="staticType==5">
+				,t2.patientId
+			</when>
+			<otherwise>
+				,0
+			</otherwise>
+		</choose> 
+		 conditionId,
+		<include refid="condition_sql"/>
+		flag
+		FROM user_db.u_patient t1
+		<!-- 
+		<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+			JOIN (<include refid="join_data_privilege"></include>) t5 ON t1.patientId=t5.patientId
+		</if>
+		 -->
+		<if test="privilegeSql != null and privilegeSql != ''">
+				join
+				(
+				${privilegeSql}
+				) ps on ps.patientId = t1.patientId
+		</if>
+		<!-- 只统计自己的生存率  -->
+		<!-- <if test="userRole==1">
+			JOIN user_db.r_doctor_patient r1 ON r1.doctorId=#{operator} AND r1.patientId = t1.patientId
+		</if> -->
+		LEFT JOIN followup_db.var_patient_followup u1 ON t1.patientId = u1.patientId
+		<if test="staticType==1 or outHospitalDateStart!=null or outHospitalDateEnd!=null">
+			JOIN 
+			(
+			SELECT patientId,if(outhospitalDeptId IS NOT NULL,outhospitalDeptId,inhospitalDeptId) outhospitalDeptId
+			FROM ehr_db.ei_inhospital_note t3 WHERE 1
+			<if test="outHospitalDateStart!=null">
+				AND t3.outhospitalDate >= #{outHospitalDateStart}
+			</if>
+			<if test="outHospitalDateEnd!=null">
+				AND #{outHospitalDateEnd} >= t3.outhospitalDate
+			</if>
+			<choose>
+				<when test="outHospitalSort==1">
+					AND t3.inhospitalTimes =1
+				</when>
+				<when test="outHospitalSort==0">
+					AND t3.inhospitalLastTime =1
+				</when>
+			</choose>
+			) 
+			t3 ON t3.patientId = t1.patientId 
+		</if>
+		<choose>
+			<!-- <when test="staticType==1">
+				JOIN user_db.u_department t4 ON t4.deptId = t3.outhospitalDeptId
+			</when>
+			<when test="staticType==2">
+				JOIN ehr_db.meta_c_disease_type t5 ON t1.sourceDiseaseTypeId = t5.diseaseTypeId
+			</when> -->
+			<when test="staticType==3">
+				JOIN user_db.r_doctor_patient t2 ON t2.patientId = t1.patientId AND t2.firstVisitFlag=1
+				<!-- JOIN user_db.r_doctor_patient t6 ON t6.patientId = t1.patientId AND t6.firstVisitFlag=1
+				JOIN user_db.u_doctor t2 ON t2.doctorId = t6.doctorId -->
+			</when>
+			<when test="staticType==5">
+				JOIN ehr_db.var_patient_medical t2 ON t2.patientId = t1.patientId
+			</when>
+			<when test="staticType==4">
+				JOIN (${sql}) t ON t.patientId = t1.patientId
+			</when>
+		</choose>
+		<if test="subReq!=null">
+			Left JOIN (SELECT patientId FROM followup_db.followup_result f WHERE 1 and f.mergeFlag!=2
+			<if test="subReq.followupDateStart!=null">
+					AND f.followupTime>=#{subReq.followupDateStart}
+			</if>
+			<if test="subReq.followupDateEnd!=null">
+					AND #{subReq.followupDateEnd}>=f.followupTime
+			</if>
+			) f ON f.patientId=t1.patientId
+		</if>
+		WHERE
+		t1.patientType=1 
+		<if test="outPatientFlag != null"> AND t1.outPatientFlag = 2 </if>AND t1.mergeFlag!=2
+		<include refid="sourceTumorFlag_sql"/>
+		<!-- <if test="outHospitalDateStart!=null or outHospitalDateEnd!=null">
+			<if test="outHospitalDateStart!=null">
+				AND t3.outhospitalDate >= #{outHospitalDateStart}
+			</if>
+			<if test="outHospitalDateEnd!=null">
+				AND #{outHospitalDateEnd} >= t3.outhospitalDate
+			</if>
+			<choose>
+				<when test="outHospitalSort==1">
+					AND t3.inhospitalTimes =1
+				</when>
+				<when test="outHospitalSort==0">
+					AND t3.inhospitalLastTime =1
+				</when>
+			</choose>
+		</if> -->
+		<choose>
+			<when test="staticType==1">
+				<!-- <choose>
+					<when test="outHospitalSort==1">
+						AND t3.inhospitalTimes =1
+					</when>
+					<when test="outHospitalSort==0">
+						AND t3.inhospitalLastTime =1
+					</when>
+				</choose> -->
+				<if test="deptIds!=null and deptIds.size != 0">
+					<!-- AND t4.deptId IN  -->
+					AND t3.outhospitalDeptId IN 
+					<foreach collection="deptIds" item="item" open="(" close=")" separator=",">
+						#{item}
+					</foreach>
+				</if>
+				AND t3.outhospitalDeptId IS NOT NULL
+			</when>
+			<when test="staticType==2">
+				<if test="diseaseTypeIds!=null and diseaseTypeIds.size != 0">
+					AND t1.sourceDiseaseTypeId IN 
+					<!-- AND t5.diseaseTypeId IN  -->
+					<foreach collection="diseaseTypeIds" item="item" open="(" close=")" separator=",">
+						#{item}
+					</foreach>
+				</if>
+				AND t1.sourceDiseaseTypeId IS NOT NULL
+			</when>
+			<when test="staticType==3">
+				<if test="doctorIds!=null and doctorIds.size != 0">
+					AND t2.doctorId IN
+					<foreach collection="doctorIds" item="item" open="(" close=")" separator=",">
+						#{item}
+					</foreach>
+				</if>
+			</when>
+			<when test="staticType==5">
+				<if test="treatmentTypeIds!=null and treatmentTypeIds.size != 0">
+					AND 
+					<foreach collection="treatmentTypeIds" item="item" open="(" close=")" separator="OR">
+						<if test="item==1">
+							t2.operationFlag=1
+						</if>
+						<if test="item==2">
+							t2.chemotherapyFlag=1
+						</if>
+						<if test="item==3">
+							t2.radiotherapyFlag=1
+						</if>
+						<if test="item==4">
+							t2.interventionalTherapyFlag=1
+						</if>
+						<if test="item==5">
+							t2.biologicalTreatmentFlag=1
+						</if>
+						<if test="item==6">
+							t2.endocrineTherapyFlag=1
+						</if>
+						<if test="item==7">
+							t2.laserTreatmentFlag=1
+						</if>
+						<if test="item==8">
+							t2.traditionalChineseMedicineFlag=1
+						</if>
+						<if test="item==9">
+							t2.isotopeTreatmentFlag=1
+						</if>
+						<if test="item==10">
+							t2.rfAblationFlag=1
+						</if>
+						<if test="item==11">
+							t2.otherFlag=1
+						</if>
+						<if test="item==12">
+							t2.targetedTherapyFlag=1
+						</if>
+						<if test="item==16">
+							t2.immunotherapyFlag=1
+						</if>
+						<if test="item==17">
+							t2.analgesicTherapyFlag=1
+						</if>
+						<if test="item==0">
+							t2.unknownFlag=1 OR t2.isHaveTherapy=0
+						</if>
+						<if test="item==9999">
+							t2.untreatedFlag=1
+						</if>
+					</foreach>
+				</if>
+			</when>
+		</choose>
+		<if test="confirmedDateStart!=null">
+			AND confirmedDate>=#{confirmedDateStart}
+		</if>
+		<if test="confirmedDateEnd!=null">
+			AND #{confirmedDateEnd}>=confirmedDate
+		</if>
+		group by conditionId,patientId
+	</insert>
+	
+	
+	
+	<!-- 修改查询中间表 -->
+	<update id="updateSearchPatientStaticPatient">
+		update ${searchTableName} search,
+		(
+			SELECT t1.patientId,
+			<include refid="condition_sql"/>
+			flag
+			FROM user_db.u_patient t1
+			<!-- 
+			<if test="operator!=null and ((dataId != null and dataId==4) or (deployLocation != null and deployLocation==2))">
+				JOIN (<include refid="join_data_privilege"></include>) t2 ON t1.patientId=t2.patientId
+			</if>
+			 -->
+			<if test="privilegeSql != null and privilegeSql != ''">
+				join
+				(
+				${privilegeSql}
+				) ps on ps.patientId = t1.patientId
+			</if>
+			<!-- <if test="userRole==1">
+				JOIN user_db.r_doctor_patient r1 ON r1.doctorId=#{operator} AND r1.patientId = t1.patientId
+			</if> -->
+			LEFT JOIN followup_db.var_patient_followup u1 ON t1.patientId = u1.patientId
+			JOIN (${sql}) t ON t.patientId = t1.patientId
+			<if test="subReq!=null">
+				LEFT JOIN followup_db.followup_result f ON f.patientId=t1.patientId 
+				<if test="subReq.followupDateStart!=null">
+						AND f.followupTime>=#{subReq.followupDateStart}
+				</if>
+				<if test="subReq.followupDateEnd!=null">
+						AND #{subReq.followupDateEnd}>=f.followupTime
+				</if>
+			</if>
+			WHERE
+			<if test="outPatientFlag != null">t1.outPatientFlag = 2 AND </if>t1.patientType=1 AND t1.mergeFlag!=2
+			<include refid="sourceTumorFlag_sql"/>
+			GROUP BY t1.patientId
+		) t SET search.${searchColumn} = t.flag 
+		WHERE search.patientId = t.patientId
+	</update>
+	
+	<!-- 随访信息统计 -->
+	<select id="queryFollowupSurvival" resultType="com.esuizhen.cloudservice.statistics.bean.TSurvivalRateInfo">
+		<choose>
+			<when test="staticType==5 and treatmentTypeStatisticsResult != null and treatmentTypeStatisticsResult==2">
+				SELECT t.totalNum,t.beginLostFollowupNum,t.beginFollowupDeathNum,t.followupNum,t.validNum,t.unvalidNum,t.deathNum,t.conditionId typeId,t.typeName
+				,CONCAT(ROUND((followupNum+beginFollowupDeathNum)/totalNum*100,2),"%") followupRate
+				,CONCAT(ROUND((validNum+beginFollowupDeathNum)/totalNum*100,2),"%") validRate
+				,CONCAT(ROUND(unValidNum/totalNum*100,2),"%") unvalidRate
+				,CONCAT(ROUND((deathNum+beginFollowupDeathNum)/totalNum*100,2),"%") deathRate
+				FROM
+				(
+				SELECT t.*,followupNum - validNum unValidNum
+				FROM
+				(
+				SELECT 
+				COUNT(0) totalNum,v1.conditionId,v1.typeName,
+				<choose>
+					<when test="staticType==4">
+						COUNT(CASE WHEN v1.${searchColumn} IN (4) THEN v1.patientId END) beginLostFollowupNum,
+						COUNT(CASE WHEN v1.${searchColumn}=3 THEN v1.patientId END) beginFollowupDeathNum,
+						COUNT(CASE WHEN v1.${searchColumn} IN (1,2) THEN v1.patientId END) followupNum,
+						COUNT(CASE WHEN v1.${searchColumn} IN (1,2) 
+						AND ( SELECT COUNT(*) FROM followup_db.followup_result r1 JOIN followup_db.meta_followup_result_value r2 ON r1.followupResultValue = r2.followupResultValueId 
+						<!-- <if test="privilegeSql != null and privilegeSql != ''">
+							join
+							(
+								${privilegeSql}
+							) s2 on s2.patientId = r1.patientId
+						</if> -->
+						WHERE r1.patientId = v1.patientId AND r2.type = 1 and r1.mergeFlag!=2
+							<if test="subReq!=null">
+								<if test="subReq.followupDateStart!=null">
+										AND r1.followupTime>=#{subReq.followupDateStart}
+								</if>
+								<if test="subReq.followupDateEnd!=null">
+										AND #{subReq.followupDateEnd}>=r1.followupTime
+								</if>
+							</if>
+						) >= 1 
+						THEN v1.patientId END) validNum,
+						COUNT(CASE WHEN v1.${searchColumn}=1 AND v1.liveStatus=0
+						<if test="subReq!=null">
+							AND (SELECT 0 FROM followup_db.followup_result 
+							<!-- <if test="privilegeSql != null and privilegeSql != ''">
+								join
+								(
+									${privilegeSql}
+								) s3 on s3.patientId = patientId
+							</if> -->
+							WHERE
+							patientId=v1.patientId AND followupResultValue=4
+							<if test="subReq.followupDateStart!=null">
+								AND followupTime>=#{subReq.followupDateStart}
+							</if>
+							<if test="subReq.followupDateEnd!=null">
+								AND #{subReq.followupDateEnd}>=followupTime
+							</if>
+							LIMIT 1
+							)IS NOT NULL
+						</if>
+						 THEN v1.patientId END)deathNum
+					</when>
+					<otherwise>
+						COUNT(CASE WHEN v1.flag IN (4) THEN v1.patientId END) beginLostFollowupNum,
+						COUNT(CASE WHEN v1.flag=3 THEN v1.patientId END) beginFollowupDeathNum,
+						COUNT(CASE WHEN v1.flag IN (1,2) THEN v1.patientId END) followupNum,
+						COUNT(CASE WHEN v1.flag IN (1,2) 
+						AND ( SELECT COUNT(*) FROM followup_db.followup_result r1 JOIN followup_db.meta_followup_result_value r2 ON r1.followupResultValue = r2.followupResultValueId 
+						<!-- <if test="privilegeSql != null and privilegeSql != ''">
+							join
+							(
+								${privilegeSql}
+							) s4 on s4.patientId = r1.patientId
+						</if> -->
+						WHERE r1.patientId = v1.patientId AND r2.type = 1 and r1.mergeFlag!=2
+							<if test="subReq!=null">
+								<if test="subReq.followupDateStart!=null">
+										AND r1.followupTime>=#{subReq.followupDateStart}
+								</if>
+								<if test="subReq.followupDateEnd!=null">
+										AND #{subReq.followupDateEnd}>=r1.followupTime
+								</if>
+							</if>
+						) >= 1 
+						THEN v1.patientId END) validNum,
+						COUNT(CASE WHEN v1.flag=1 AND v1.liveStatus=0
+						<if test="subReq!=null">
+							AND (SELECT 0 FROM followup_db.followup_result
+							<!-- <if test="privilegeSql != null and privilegeSql != ''">
+							join
+							(
+								${privilegeSql}
+							) s5 on s5.patientId = patientId
+						</if> -->
+							 WHERE
+							patientId=v1.patientId AND followupResultValue=4
+							<if test="subReq.followupDateStart!=null">
+								AND followupTime>=#{subReq.followupDateStart}
+							</if>
+							<if test="subReq.followupDateEnd!=null">
+								AND #{subReq.followupDateEnd}>=followupTime
+							</if>
+							LIMIT 1
+							)IS NOT NULL
+						</if>
+						 THEN v1.patientId END) deathNum
+					</otherwise>
+				</choose>
+				FROM (SELECT 
+					t1.patientId,t1.liveStatus,
+					t4.flag,
+					CASE 
+						WHEN t55.isHaveTherapy=0 THEN 9
+						WHEN t55.operationFlag=1 AND t55.radiotherapyFlag=1 AND t55.chemotherapyFlag=1 THEN 7
+						WHEN t55.operationFlag=1 AND t55.radiotherapyFlag=1 THEN 4
+						WHEN t55.operationFlag=1 AND t55.chemotherapyFlag=1 THEN 5
+						WHEN t55.radiotherapyFlag=1 AND t55.chemotherapyFlag=1 THEN 6
+						WHEN t55.operationFlag=1 THEN 1
+						WHEN t55.radiotherapyFlag=1 THEN 2
+						WHEN t55.chemotherapyFlag=1 THEN 3
+						ELSE 8
+					END conditionId,
+					CASE 
+						WHEN t55.isHaveTherapy=0 THEN '治疗未知'
+						WHEN t55.operationFlag=1 AND t55.radiotherapyFlag=1 AND t55.chemotherapyFlag=1 THEN '术放化'
+						WHEN t55.operationFlag=1 AND t55.radiotherapyFlag=1 THEN '术放'
+						WHEN t55.operationFlag=1 AND t55.chemotherapyFlag=1 THEN '术化'
+						WHEN t55.radiotherapyFlag=1 AND t55.chemotherapyFlag=1 THEN '放化'
+						WHEN t55.operationFlag=1 THEN '术'
+						WHEN t55.radiotherapyFlag=1 THEN '放'
+						WHEN t55.chemotherapyFlag=1 THEN '化'
+						ELSE '其他'
+					END typeName
+				FROM user_db.u_patient t1
+				JOIN 
+				<choose>
+					<when test="searchTableName!=null">
+						${searchTableName}
+					</when>
+					<otherwise>
+						var_search_patient
+					</otherwise>
+				</choose>
+				 t4 
+				 <choose>
+				 	<when test="staticType==4">
+				 		ON ${searchColumn} IS NOT NULL 
+				 	</when>
+				 	<otherwise>
+						 ON t4.searchId=#{searchId} 
+				 	</otherwise>
+				 </choose>
+				 AND t4.patientId = t1.patientId 
+				LEFT JOIN ehr_db.var_patient_medical t55 ON t55.patientId = t1.patientId
+				LEFT JOIN followup_db.var_patient_followup t2 ON t1.patientId = t2.patientId
+				LEFT JOIN followup_db.meta_followup_result_value t3 ON t2.followupResultValue = t3.followupResultValueId
+				<if test="privilegeSql != null and privilegeSql != ''">
+					join
+					(
+						${privilegeSql}
+					) s on s.patientId = t1.patientId
+				</if>
+				WHERE t1.patientType=1 AND t1.mergeFlag!=2
+				) v1
+				<choose>
+					<when test="staticType!=4">
+						GROUP BY v1.conditionId
+					</when>
+				</choose>
+				)t
+				)t
+			</when>
+			<otherwise>
+				SELECT t.totalNum,t.beginLostFollowupNum,t.beginFollowupDeathNum,t.followupNum,t.validNum,t.unvalidNum,t.deathNum,t.conditionId typeId,t.typeName
+				,CONCAT(ROUND((followupNum+beginFollowupDeathNum)/totalNum*100,2),"%") followupRate
+				,CONCAT(ROUND((validNum+beginFollowupDeathNum)/totalNum*100,2),"%") validRate
+				,CONCAT(ROUND(unValidNum/totalNum*100,2),"%") unvalidRate
+				,CONCAT(ROUND((deathNum+beginFollowupDeathNum)/totalNum*100,2),"%") deathRate
+				FROM
+				(
+				SELECT t.*,followupNum - validNum unValidNum
+				FROM
+				(
+				SELECT 
+				COUNT(0) totalNum,
+				<choose>
+					<when test="staticType==4">
+						COUNT(CASE WHEN t4.${searchColumn} IN (4) THEN t1.patientId END) beginLostFollowupNum,
+						COUNT(CASE WHEN t4.${searchColumn}=3 THEN t1.patientId END) beginFollowupDeathNum,
+						COUNT(CASE WHEN t4.${searchColumn} IN (1,2) THEN t1.patientId END) followupNum,
+						COUNT(CASE WHEN t4.${searchColumn} IN (1,2) 
+						AND ( SELECT COUNT(*) FROM followup_db.followup_result r1 JOIN followup_db.meta_followup_result_value r2 ON r1.followupResultValue = r2.followupResultValueId 
+						<!-- <if test="privilegeSql != null and privilegeSql != ''">
+							join
+							(
+								${privilegeSql}
+							) s6 on s6.patientId = r1.patientId
+						</if> -->
+						WHERE r1.patientId = t1.patientId AND r2.type = 1 and r1.mergeFlag!=2
+							<if test="subReq!=null">
+								<if test="subReq.followupDateStart!=null">
+										AND r1.followupTime>=#{subReq.followupDateStart}
+								</if>
+								<if test="subReq.followupDateEnd!=null">
+										AND #{subReq.followupDateEnd}>=r1.followupTime
+								</if>
+							</if>
+						) >= 1 
+						THEN t1.patientId END) validNum,
+						COUNT(CASE WHEN t4.${searchColumn}=1 AND t1.liveStatus=0
+						<include refid="followupRangeDeach_sql"/>
+						 THEN t1.patientId END)deathNum
+					</when>
+					<otherwise>
+						COUNT(CASE WHEN t4.flag IN (4) THEN t1.patientId END) beginLostFollowupNum,
+						COUNT(CASE WHEN t4.flag=3 THEN t1.patientId END) beginFollowupDeathNum,
+						COUNT(CASE WHEN t4.flag IN (1,2) THEN t1.patientId END) followupNum,
+						COUNT(CASE WHEN t4.flag IN (1,2) 
+						AND ( SELECT COUNT(*) FROM followup_db.followup_result r1 JOIN followup_db.meta_followup_result_value r2 ON r1.followupResultValue = r2.followupResultValueId 
+						<!-- <if test="privilegeSql != null and privilegeSql != ''">
+							join
+							(
+								${privilegeSql}
+							) s7 on s7.patientId = r1.patientId
+						</if> -->
+						WHERE r1.patientId = t1.patientId AND r2.type = 1 and r1.mergeFlag!=2
+							<if test="subReq!=null">
+								<if test="subReq.followupDateStart!=null">
+										AND r1.followupTime>=#{subReq.followupDateStart}
+								</if>
+								<if test="subReq.followupDateEnd!=null">
+										AND #{subReq.followupDateEnd}>=r1.followupTime
+								</if>
+							</if>
+						) >= 1 
+						THEN t1.patientId END) validNum,
+						COUNT(CASE WHEN t4.flag=1 AND t1.liveStatus=0
+						<include refid="followupRangeDeach_sql"/>
+						 THEN t1.patientId END) deathNum
+					</otherwise>
+				</choose>
+				<choose>
+					<when test="staticType==1">
+						,t4.conditionId
+						,t5.deptName typeName
+					</when>
+					<when test="staticType==2">
+						,t4.conditionId
+						,t5.diseaseTypeName typeName
+					</when>
+					<when test="staticType==3">
+						,t4.conditionId
+						,t5.trueName typeName
+					</when>
+					<when test="staticType==5">
+						,t5.conditionId
+						,t5.typeName
+					</when>
+					<otherwise>
+						,0 conditionId
+						,"合计" typeName
+					</otherwise>
+				</choose>
+				FROM user_db.u_patient t1
+				JOIN 
+				<choose>
+					<when test="searchTableName!=null">
+						${searchTableName}
+					</when>
+					<otherwise>
+						var_search_patient
+					</otherwise>
+				</choose>
+				 t4 
+				 <choose>
+				 	<when test="staticType==4">
+				 		ON ${searchColumn} IS NOT NULL 
+				 	</when>
+				 	<otherwise>
+						 ON t4.searchId=#{searchId} 
+				 	</otherwise>
+				 </choose>
+				 AND t4.patientId = t1.patientId 
+				<choose>
+					<when test="staticType==1">
+						LEFT JOIN user_db.u_department t5 ON t5.deptId = t4.conditionId
+					</when>
+					<when test="staticType==2"><!-- 2017.9.6 left join 改成 join -->
+						JOIN ehr_db.meta_c_disease_type t5 ON t5.diseaseTypeId = t4.conditionId
+					</when>
+					<when test="staticType==3">
+						LEFT JOIN user_db.u_doctor t5 ON t5.doctorId = t4.conditionId
+					</when>
+					<when test="staticType==5">
+						<choose>
+							<when test="treatmentTypeIds != null and treatmentTypeIds.size()>0">
+								JOIN 
+								<foreach collection="treatmentTypeIds" item="item" open="(" close=")" separator="UNION">
+									<if test="item==1">
+										SELECT 
+											patientId,
+											1 conditionId,
+											'手术治疗' typeName
+										FROM ehr_db.var_patient_medical WHERE operationFlag=1
+									</if>
+									<if test="item==2">
+										SELECT 
+											patientId,
+											3 conditionId,
+											'化疗' typeName
+										FROM ehr_db.var_patient_medical WHERE chemotherapyFlag=1
+									</if>
+									<if test="item==3">
+										SELECT 
+											patientId,
+											2 conditionId,
+											'放疗' typeName
+										FROM ehr_db.var_patient_medical WHERE radiotherapyFlag=1
+									</if>
+									<if test="item==4">
+										SELECT 
+											patientId,
+											6 conditionId,
+											'介入治疗' typeName
+										FROM ehr_db.var_patient_medical WHERE interventionalTherapyFlag=1
+									</if>
+									<if test="item==5">
+										SELECT 
+											patientId,
+											9 conditionId,
+											'生物治疗' typeName
+										FROM ehr_db.var_patient_medical WHERE biologicalTreatmentFlag=1
+									</if>
+									<if test="item==6">
+										SELECT 
+											patientId,
+											5 conditionId,
+											'内分泌治疗' typeName
+										FROM ehr_db.var_patient_medical WHERE endocrineTherapyFlag=1
+									</if>
+									<if test="item==7">
+										SELECT 
+											patientId,
+											8 conditionId,
+											'激光治疗' typeName
+										FROM ehr_db.var_patient_medical WHERE laserTreatmentFlag=1
+									</if>
+									<if test="item==8">
+										SELECT 
+											patientId,
+											10 conditionId,
+											'中医药治疗' typeName
+										FROM ehr_db.var_patient_medical WHERE traditionalChineseMedicineFlag=1
+									</if>
+									<if test="item==9">
+										SELECT 
+											patientId,
+											11 conditionId,
+											'同位素治疗' typeName
+										FROM ehr_db.var_patient_medical WHERE isotopeTreatmentFlag=1
+									</if>
+									<if test="item==10">
+										SELECT 
+											patientId,
+											12 conditionId,
+											'射频消融' typeName
+										FROM ehr_db.var_patient_medical WHERE rfAblationFlag=1
+									</if>
+									<if test="item==11">
+										SELECT 
+											patientId,
+											14 conditionId,
+											'其他治疗' typeName
+										FROM ehr_db.var_patient_medical WHERE otherFlag=1
+									</if>
+									<if test="item==12">
+										SELECT 
+											patientId,
+											4 conditionId,
+											'靶向' typeName
+										FROM ehr_db.var_patient_medical WHERE targetedTherapyFlag=1
+									</if>
+									<if test="item==16">
+										SELECT 
+											patientId,
+											7 conditionId,
+											'免疫治疗' typeName
+										FROM ehr_db.var_patient_medical WHERE immunotherapyFlag=1
+									</if>
+									<if test="item==17">
+										SELECT 
+											patientId,
+											13 conditionId,
+											'止痛治疗' typeName
+										FROM ehr_db.var_patient_medical WHERE analgesicTherapyFlag=1
+									</if>
+									<if test="item==0">
+										SELECT 
+											patientId,
+											15 conditionId,
+											'治疗未知' typeName
+										FROM ehr_db.var_patient_medical WHERE unknownFlag=1 OR isHaveTherapy=0
+									</if>
+									<if test="item==9999">
+										SELECT 
+											patientId,
+											16 conditionId,
+											'未治' typeName
+										FROM ehr_db.var_patient_medical WHERE untreatedFlag=1
+									</if>
+								</foreach>
+								 t5 ON t5.patientId = t4.conditionId
+							</when>
+							<otherwise>
+								JOIN (
+									SELECT 
+										patientId,
+										1 conditionId,
+										'手术治疗' typeName
+									FROM ehr_db.var_patient_medical WHERE operationFlag=1
+									UNION
+									SELECT 
+										patientId,
+										2 conditionId,
+										'放疗' typeName
+									FROM ehr_db.var_patient_medical WHERE radiotherapyFlag=1
+									UNION
+									SELECT 
+										patientId,
+										3 conditionId,
+										'化疗' typeName
+									FROM ehr_db.var_patient_medical WHERE chemotherapyFlag=1
+									UNION
+									SELECT 
+										patientId,
+										4 conditionId,
+										'靶向' typeName
+									FROM ehr_db.var_patient_medical WHERE targetedTherapyFlag=1
+									UNION
+									SELECT 
+										patientId,
+										5 conditionId,
+										'内分泌治疗' typeName
+									FROM ehr_db.var_patient_medical WHERE endocrineTherapyFlag=1
+									UNION
+									SELECT 
+										patientId,
+										6 conditionId,
+										'介入治疗' typeName
+									FROM ehr_db.var_patient_medical WHERE interventionalTherapyFlag=1
+									UNION
+									SELECT 
+										patientId,
+										7 conditionId,
+										'免疫治疗' typeName
+									FROM ehr_db.var_patient_medical WHERE immunotherapyFlag=1
+									UNION
+									SELECT 
+										patientId,
+										8 conditionId,
+										'激光治疗' typeName
+									FROM ehr_db.var_patient_medical WHERE laserTreatmentFlag=1
+									UNION
+									SELECT 
+										patientId,
+										9 conditionId,
+										'生物治疗' typeName
+									FROM ehr_db.var_patient_medical WHERE biologicalTreatmentFlag=1
+									UNION
+									SELECT 
+										patientId,
+										10 conditionId,
+										'中医药治疗' typeName
+									FROM ehr_db.var_patient_medical WHERE traditionalChineseMedicineFlag=1
+									UNION
+									SELECT 
+										patientId,
+										11 conditionId,
+										'同位素治疗' typeName
+									FROM ehr_db.var_patient_medical WHERE isotopeTreatmentFlag=1
+									UNION
+									SELECT 
+										patientId,
+										12 conditionId,
+										'射频消融' typeName
+									FROM ehr_db.var_patient_medical WHERE rfAblationFlag=1
+									UNION
+									SELECT 
+										patientId,
+										13 conditionId,
+										'止痛治疗' typeName
+									FROM ehr_db.var_patient_medical WHERE analgesicTherapyFlag=1
+									UNION
+									SELECT 
+										patientId,
+										14 conditionId,
+										'其他治疗' typeName
+									FROM ehr_db.var_patient_medical WHERE otherFlag=1
+									UNION
+									SELECT 
+										patientId,
+										15 conditionId,
+										'治疗未知' typeName
+									FROM ehr_db.var_patient_medical WHERE unknownFlag=1 OR isHaveTherapy=0
+								UNION
+									SELECT 
+										patientId,
+										16 conditionId,
+										'未治' typeName
+									FROM ehr_db.var_patient_medical WHERE untreatedFlag=1
+								) t5 ON t5.patientId = t4.conditionId
+							</otherwise>
+						</choose>
+						
+					</when>
+				</choose>
+				LEFT JOIN followup_db.var_patient_followup t2 ON t1.patientId = t2.patientId
+				LEFT JOIN followup_db.meta_followup_result_value t3 ON t2.followupResultValue = t3.followupResultValueId
+				<if test="privilegeSql != null and privilegeSql != ''">
+					join
+					(
+						${privilegeSql}
+					) s1 on s1.patientId = t1.patientId
+				</if>
+				WHERE t1.patientType=1 AND t1.mergeFlag!=2
+				<choose>
+					<when test="staticType!=4">
+						<choose>
+							<when test="staticType==5">
+								GROUP BY t5.conditionId
+							</when>
+							<otherwise>
+								GROUP BY t4.conditionId
+							</otherwise>
+						</choose>
+					</when>
+				</choose>
+				)t
+				)t
+			</otherwise>
+		</choose>
+		
+	</select>
+	<!-- 随访全部统计 -->
+	<select id="queryFollowupSurvivalCount" resultType="com.esuizhen.cloudservice.statistics.bean.TSurvivalRateInfo">
+		SELECT t.totalNum,t.beginLostFollowupNum,t.beginFollowupDeathNum,t.followupNum,t.validNum,t.unvalidNum,t.deathNum,t.conditionId typeId,t.typeName
+		,CONCAT(ROUND((followupNum+beginFollowupDeathNum)/totalNum*100,2),"%") followupRate
+		,CONCAT(ROUND((validNum+beginFollowupDeathNum)/totalNum*100,2),"%") validRate
+		,CONCAT(ROUND(unValidNum/totalNum*100,2),"%") unvalidRate
+		,CONCAT(ROUND((deathNum+beginFollowupDeathNum)/totalNum*100,2),"%") deathRate
+		FROM
+		(
+		SELECT t.*,followupNum-validNum unValidNum
+		FROM
+		(
+		SELECT 
+		COUNT(0) totalNum,
+		COUNT(CASE WHEN t4.flag IN (4) THEN t1.patientId END) beginLostFollowupNum,
+		COUNT(CASE WHEN t4.flag=3 THEN t1.patientId END) beginFollowupDeathNum,
+		COUNT(CASE WHEN t4.flag IN (1,2) THEN t1.patientId END) followupNum,
+		COUNT(CASE WHEN t4.flag IN (1,2) 
+				AND ( SELECT COUNT(*) FROM followup_db.followup_result r1 JOIN followup_db.meta_followup_result_value r2 ON r1.followupResultValue = r2.followupResultValueId 
+				<!-- 
+				<if test="privilegeSql != null and privilegeSql != ''">
+					join
+					(
+						${privilegeSql}
+					) s1 on s1.patientId = r1.patientId
+				</if>
+				 -->
+				WHERE r1.patientId = t1.patientId AND r2.type = 1 and r1.mergeFlag!=2
+				<if test="subReq!=null">
+					<if test="subReq.followupDateStart!=null">
+							AND r1.followupTime>=#{subReq.followupDateStart}
+					</if>
+					<if test="subReq.followupDateEnd!=null">
+							AND #{subReq.followupDateEnd}>=r1.followupTime
+					</if>
+				</if>
+		) >= 1 
+		THEN t1.patientId END) validNum,
+		COUNT(CASE WHEN t4.flag=1 AND t1.liveStatus=0
+		<include refid="followupRangeDeach_sql"/>
+		 THEN t1.patientId END) deathNum
+		,0 conditionId
+		,"合计" typeName
+		FROM user_db.u_patient t1
+		JOIN (select * from ${searchTableName} where searchId=#{searchId} group by patientId) t4 ON t4.patientId = t1.patientId 
+		LEFT JOIN followup_db.var_patient_followup t2 ON t1.patientId = t2.patientId
+		LEFT JOIN followup_db.meta_followup_result_value t3 ON t2.followupResultValue = t3.followupResultValueId
+		<if test="privilegeSql != null and privilegeSql != ''">
+					join
+					(
+						${privilegeSql}
+					) s on s.patientId = t1.patientId
+				</if>
+		WHERE t1.patientType=1 AND t1.mergeFlag!=2
+		)t
+		)t
+	</select>
+	<!-- 生存率统计 -->
+	<select id="querySurvivalRate" resultType="java.util.LinkedHashMap">
+		select 
+		CASE 
+		WHEN MIN(mlive) IS NOT NULL THEN MIN(mlive)
+		ELSE
+		IF(MAX(llive) IS NOT NULL AND MIN(rlive) IS NOT NULL,ROUND((MIN(llive)+MAX(rlive))/2,1),"-")
+		END middlelive
+		,CASE WHEN @maxMonth>3 THEN CONCAT(ROUND(IF(MIN(3m) IS NULL,1,MIN(3m))*100,2),'%') ELSE "-" END 3live
+		,CASE WHEN @maxMonth>6 THEN CONCAT(ROUND(IF(MIN(6m) IS NULL,1,MIN(6m))*100,2),'%') ELSE "-" END 6live
+		,CASE WHEN @maxMonth>9 THEN CONCAT(ROUND(IF(MIN(9m) IS NULL,1,MIN(9m))*100,2),'%') ELSE "-" END 9live
+		,CASE WHEN @maxMonth>12 THEN CONCAT(ROUND(IF(MIN(12m) IS NULL,1,MIN(12m))*100,2),'%') ELSE "-" END 12live
+		,CASE WHEN @maxMonth>24 THEN CONCAT(ROUND(IF(MIN(2y) IS NULL,1,MIN(2y))*100,2),'%') ELSE "-" END 24live
+		,CASE WHEN @maxMonth>32 THEN CONCAT(ROUND(IF(MIN(3y) IS NULL,1,MIN(3y))*100,2),'%') ELSE "-" END 36live
+		,CASE WHEN @maxMonth>48 THEN CONCAT(ROUND(IF(MIN(4y) IS NULL,1,MIN(4y))*100,2),'%') ELSE "-" END 48live
+		,CASE WHEN @maxMonth>60 THEN CONCAT(ROUND(IF(MIN(5y) IS NULL,1,MIN(5y))*100,2),'%') ELSE "-" END 60live
+		FROM
+		(
+		SELECT @maxMonth:=liveMonth maxMonth
+		,@dethReat:=ROUND(t.live/incount,5) dethReat
+		,@csurReat:=1-@dethReat csurReat 
+		,@surReat:= CASE WHEN @surReat IS NULL THEN @csurReat ELSE ROUND(@csurReat*@surReat,5) END surReat
+		<![CDATA[
+		,IF(liveMonth<3,@thm:=@surReat,null) 3m
+		,IF(liveMonth<6,@sim:=@surReat,null) 6m
+		,IF(liveMonth<9,@nim:=@surReat,null) 9m
+		,IF(liveMonth<12,@twm:=@surReat,null) 12m
+		,IF(liveMonth<24,@twy:=@surReat,null) 2y
+		,IF(liveMonth<36,@thy:=@surReat,null) 3y
+		,IF(liveMonth<48,@foy:=@surReat,null) 4y
+		,IF(liveMonth<60,@fiy:=@surReat,null) 5y
+		,IF(@surReat=0.5,@m:=liveMonth,null) mlive
+		,IF(@surReat<0.5,@ml:=liveMonth,null) llive
+		,IF(@surReat>0.5,@m:=liveMonth,null) rlive
+		]]>
+		FROM
+		(
+		select t.*,
+		@row_count:=@row_count+1 incount FROM
+		(
+		SELECT
+			t1.trueName,
+			CASE WHEN t1.liveStatus=1 THEN 0 ELSE 1 END live,
+			t1.deathDate,
+			t2.latestFollowupTime,
+			t2.liveDay,
+			t2.liveMonth
+		FROM
+			user_db.u_patient t1
+			<choose>
+				<when test="staticType==4">
+					<include refid="seniorStatistics"/>
+				</when>
+				<otherwise>
+					<include refid="queryOneKeyStatistics"/>
+				</otherwise>
+			</choose>
+			LEFT JOIN followup_db.var_patient_followup t2 ON t1.patientId = t2.patientId
+			LEFT JOIN followup_db.meta_followup_result_value t3 ON t2.followupValidResultValue = t3.followupResultValueId AND t3.type=1
+			<!-- 
+			<if test="sql != null and sql != ''">
+				join 
+				(
+					${sql}				
+				) s2 on s2.patientId = t1.patientId
+			</if>
+            -->
+			WHERE
+			t1.liveStatus=1 OR (t1.liveStatus=0 AND t1.deathDate IS NOT NULL) AND t1.outPatientFlag=2 AND t1.patientType=1 AND t1.mergeFlag!=2
+			
+		ORDER BY
+			liveDay DESC,liveStatus DESC
+		)t,(SELECT @row_count:=0) n
+		ORDER BY incount DESC
+		)t,
+		(SELECT @deaReat:=0,@csurReat:=0,@surReat:=NULL
+		,@thm:=NULL,@sixm:=NULL,@nim:=NULL,@twm:=NULL,@twy:=NULL,@thy:=NULL,@foy:=NULL,@fiy:=NULL
+		,@ml:=NULL,@mr:=NULL,@m:=NULL,@maxMonth:=NULL
+		) n
+		)t
+	</select>
+	<!-- 一键统计关联查询 -->
+	<sql id="queryOneKeyStatistics">
+		JOIN 
+			<choose>
+				<when test="searchTableName!=null">
+					${searchTableName}
+				</when>
+				<otherwise>
+					var_search_patient
+				</otherwise>
+			</choose>
+		 	t4 ON t4.searchId=#{searchId} AND t4.patientId = t1.patientId AND t4.flag in (1,2,3)
+			<if test="conditionId!=null">
+				<choose>
+					<when test="staticType != null and staticType==5">
+						<choose>
+							<when test="treatmentTypeStatisticsResult != null and treatmentTypeStatisticsResult==2">
+								<if test="conditionId==1">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE operationFlag=1 AND  patientId = t4.patientId) 
+								</if>
+								<if test="conditionId==2">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE radiotherapyFlag=1 AND  patientId = t4.patientId) 
+								</if>
+								<if test="conditionId==3">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE chemotherapyFlag=1 AND  patientId = t4.patientId) 
+								</if>
+								<if test="conditionId==4">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE operationFlag=1 AND radiotherapyFlag=1 AND  patientId = t4.patientId) 
+								</if>
+								<if test="conditionId==5">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE operationFlag=1 AND chemotherapyFlag=1 AND  patientId = t4.patientId) 
+								</if>
+								<if test="conditionId==6">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE radiotherapyFlag=1 AND chemotherapyFlag=1 AND  patientId = t4.patientId) 
+								</if>
+								<if test="conditionId==7">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE operationFlag=1 AND radiotherapyFlag=1 AND chemotherapyFlag=1 AND  patientId = t4.patientId) 
+								</if>
+								<if test="conditionId==8">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE operationFlag=0 AND radiotherapyFlag=0 AND chemotherapyFlag=0 AND  patientId = t4.patientId) 
+								</if>
+								<if test="conditionId==9">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE patientId = t4.patientId AND isHaveTherapy=0) 
+								</if>
+							</when>
+							<otherwise>
+								<if test="conditionId==1">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE operationFlag=1 AND  patientId = t4.patientId) 
+								</if>
+								<if test="conditionId==3">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE chemotherapyFlag=1 AND  patientId = t4.patientId) 
+								</if>
+								<if test="conditionId==2">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE radiotherapyFlag=1 AND  patientId = t4.patientId) 
+								</if>
+								<if test="conditionId==6">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE interventionalTherapyFlag=1 AND  patientId = t4.patientId) 
+								</if>
+								<if test="conditionId==9">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE biologicalTreatmentFlag=1 AND  patientId = t4.patientId) 
+								</if>
+								<if test="conditionId==5">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE endocrineTherapyFlag=1 AND  patientId = t4.patientId) 
+								</if>
+								<if test="conditionId==8">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE laserTreatmentFlag=1 AND  patientId = t4.patientId) 
+								</if>
+								<if test="conditionId==10">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE traditionalChineseMedicineFlag=1 AND  patientId = t4.patientId) 
+								</if>
+								<if test="conditionId==11">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE isotopeTreatmentFlag=1 AND  patientId = t4.patientId) 
+								</if>
+								<if test="conditionId==12">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE rfAblationFlag=1 AND  patientId = t4.patientId) 
+								</if>
+								<if test="conditionId==14">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE otherFlag=1 AND  patientId = t1.patientId) 
+								</if>
+								<if test="conditionId==4">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE targetedTherapyFlag=1 AND  patientId = t1.patientId) 
+								</if>
+								<if test="conditionId==7">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE immunotherapyFlag=1 AND  patientId = t1.patientId) 
+								</if>
+								<if test="conditionId==13">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE analgesicTherapyFlag=1 AND  patientId = t1.patientId) 
+								</if>
+								<if test="conditionId==15">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE patientId = t4.patientId AND (unknownFlag=1 OR isHaveTherapy=0)) 
+								</if>
+								<if test="conditionId==16">
+									AND EXISTS(SELECT 
+										1
+									FROM ehr_db.var_patient_medical WHERE untreatedFlag=1 AND  patientId = t4.patientId) 
+								</if>
+							</otherwise>
+						</choose>
+					</when>
+					<otherwise>
+						AND t4.conditionId=#{conditionId}
+					</otherwise>
+				</choose>
+			</if>
+	</sql>
+	<!-- 高级检索关联查询 -->
+	<sql id="seniorStatistics">
+		JOIN ${searchTableName} t4 ON t4.${searchColumn} in (1,2,3) AND t4.patientId=t1.patientId
+	</sql>
+	
+	<!-- 导出模版查询 -->
+	<select id="queryExportTemplate" resultType="java.util.LinkedHashMap">
+		SELECT
+			*
+		FROM
+			user_db.u_patient_export_template
+		WHERE
+			exportTemplateId =#{exportTemplateId}
+	</select>
+	
+	<select id="queryPatientInfo" resultType="java.util.HashMap">
+		${sqlContent}
+	</select>
+</mapper>
+

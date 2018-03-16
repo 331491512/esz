@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TCrfResultTcmSymptomsDetailDao">
+
+	<insert id="insertCrfResultTcmSymptoms" parameterType="com.esuizhen.cloudservice.research.model.result.TCrfResultTcmSymptomsDetail">
+        INSERT INTO crf_result_tcm_symptoms 
+        (
+        	crfSymptomResultDetailId ,
+        	crfSymptomResultId ,
+        	tcmSymptomId ,
+        	tcmSymptomName ,
+        	description ,
+        	beginTime ,
+        	endTime ,
+        	tcmType,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{crfSymptomResultDetailId} ,
+        	#{crfSymptomResultId} ,
+        	#{tcmSymptomId} ,
+        	#{tcmSymptomName} ,
+        	#{description} ,
+        	#{beginTime} ,
+        	#{endTime} ,
+        	#{tcmType} ,
+        	NOW() ,
+        	NOW()
+        )
+	</insert>
+    
+    <insert id="insertCrfResultTcmSymptomsList" parameterType="java.util.List">
+        INSERT INTO crf_result_tcm_symptoms 
+        (
+        	crfSymptomResultDetailId ,
+        	crfSymptomResultId ,
+        	tcmSymptomId ,
+        	tcmSymptomName ,
+        	description ,
+        	beginTime ,
+        	endTime ,
+        	tcmType ,
+        	createTime ,
+        	updateTime 
+        ) VALUES 
+        <foreach collection="list" index="index" item="item" separator=",">
+        (
+        	#{item.crfSymptomResultDetailId} ,
+        	#{item.crfSymptomResultId} ,
+        	#{item.tcmSymptomId} ,
+        	#{item.tcmSymptomName} ,
+        	#{item.description} ,
+        	#{item.beginTime} ,
+        	#{item.endTime} ,
+        	#{item.tcmType} ,
+        	NOW() ,
+        	NOW()
+        )
+        </foreach>
+	</insert>
+	
+	<update id="updateCrfResultTcmSymptoms" parameterType="com.esuizhen.cloudservice.research.model.result.TCrfResultTcmSymptomsDetail">
+        UPDATE crf_result_tcm_symptoms 
+        <set>
+	        <if test="crfSymptomResultId != null">
+                crfSymptomResultId = #{crfSymptomResultId} ,
+            </if>
+	        <if test="tcmSymptomId != null">
+                tcmSymptomId = #{tcmSymptomId} ,
+            </if>
+	        <if test="tcmSymptomName != null">
+                tcmSymptomName = #{tcmSymptomName} ,
+            </if>
+	        <if test="description != null">
+                description = #{description} ,
+            </if>
+	        <if test="beginTime != null">
+                beginTime = #{beginTime} ,
+            </if>
+	        <if test="endTime != null">
+                endTime = #{endTime} ,
+            </if>
+            <if test="tcmType != null">
+                tcmType = #{tcmType} ,
+            </if>
+	        <if test="1==1">
+                updateTime = NOW() ,
+            </if>
+        </set>
+        WHERE 
+	        crfSymptomResultDetailId = #{crfSymptomResultDetailId} 
+	</update>
+
+    <delete id="deleteCrfResultTcmSymptoms">
+        DELETE FROM crf_result_tcm_symptoms WHERE crfSymptomResultDetailId = #{crfSymptomResultDetailId} 
+    </delete>
+    
+    <delete id="deleteCrfResultTcmSymptomsByCrfResultId">
+        DELETE t1.*
+        FROM crf_result_tcm_symptoms t1 , crf_result_clinical_symptoms t2
+        WHERE t1.crfSymptomResultId=t2.crfSymptomResultId
+        AND t2.crfResultId = #{crfResultId} 
+    </delete>
+    
+    <select id="queryCrfResultTcmSymptomsById" resultType="com.esuizhen.cloudservice.research.model.result.TCrfResultTcmSymptomsDetail">
+		SELECT 
+        	crfSymptomResultDetailId,
+        	crfSymptomResultId,
+        	tcmSymptomId,
+        	tcmSymptomName,
+        	description,
+        	beginTime,
+        	endTime,
+        	tcmType,
+        	createTime,
+        	updateTime
+		FROM crf_result_tcm_symptoms 
+	    WHERE 
+	        crfSymptomResultDetailId = #{crfSymptomResultDetailId} 
+	</select>
+	
+	<delete id="deleteByProjectId">
+		DELETE
+			i6.*
+		FROM pro_db.crf_result_main i1,
+			pro_db.crf_observation_subject_element i2,
+			pro_db.crf_course_detail i3,
+			pro_db.crf_course i4,
+			pro_db.r_crftemplate_project i5,
+			pro_db.crf_result_tcm_symptoms i6
+		WHERE i1.crfObserveId = i2.crfObserveId
+			AND i2.crfCourseItemId = i3.crfCourseItemId
+			AND i3.crfCourseId = i4.crfCourseId
+			AND i4.crfTemplateId = i5.crfTemplateId
+			AND i5.projectId = #{projectId}
+	</delete>
+</mapper>
+

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.FollowupContentTemplateInfoDao">
+	  <insert id="insertFollowupContentTemplateInfo" parameterType="com.esuizhen.cloudservice.sync.model.TFollowupContentTemplateInfo" >
+	    insert into followup_db.followup_content_template (contentTemplateId, contentTemplateName, 
+	      contentTemplateType, content, needReply, 
+	      author, isPublish, signature, autoReplyContent, createTime, updateTime
+	      )
+	    values (#{contentTemplateId}, #{contentTemplateName}, 
+	      #{contentTemplateType}, #{content}, #{needReply}, 
+	      #{author}, #{isPublish}, #{signature}, #{autoReplyContent}, now(), now()
+	      )
+	  </insert>
+	  
+	  <select id="queryFollowupContentTemplateInfo"  resultType="java.lang.Integer">
+		select
+			count(1)
+	    from followup_db.followup_content_template where contentTemplateId=#{contentTemplateId}
+	</select>
+</mapper>

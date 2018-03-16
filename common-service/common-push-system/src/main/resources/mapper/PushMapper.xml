@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.westangel.commonservice.push.dao.PushDao">
+<!-- 绑定用户 -->
+<insert id="addBind">
+	REPLACE INTO push_bind
+	(userId,userRole,businessId,productId,bindType,deviceType,deviceToken)
+	VALUES
+	(#{userId},#{userRole},#{businessId},#{productId},#{bindType},#{deviceType},#{deviceToken})
+</insert>
+  
+<!-- 通过用户获取绑定列表 -->
+<select id="binds4User" resultType="com.westangel.commonservice.push.model.PushBindInfo">
+ 	SELECT 
+ 	bindType as bindType,
+ 	deviceType as deviceType,
+ 	deviceToken as deviceToken,
+ 	businessId as businessId,
+ 	productId as productId
+ 	FROM push_bind
+ 	WHERE
+ 	(
+ 	userId=#{userId} and userRole=#{userRole} and businessId=#{businessId}
+ 	<if test="productId!=null">
+ 		and productId=#{productId}
+ 	</if>
+ 	)
+</select>
+ 
+<!-- 为用户添加别名 -->
+<insert id="addUserAlias" parameterType="com.westangel.common.bean.push.PushUserAlias">
+	INSERT INTO push_user_alias
+		(userId, userRole, businessId, productId, alias)
+	VALUSE
+		(#{userId}, #{userRole}, #{businessId}, #{productId}, #{alias})
+</insert>
+
+<!-- 删除用户别名 -->
+<delete id="removeUserAlias" parameterType="com.westangel.common.bean.push.PushUserAlias">
+ 	DELETE FROM 
+ 		push_user_alias
+ 	WHERE 
+ 		(
+ 			userId=#{userId} and 
+ 			userRole=#{userRole} and 
+ 			businessId=#{businessId} and 
+ 			productId=#{productId} and
+ 			alias=#{alias}
+ 		)
+</delete>
+
+<!-- 根据别名获取用户列表 -->
+<select id="userList4Alias" resultType="com.westangel.commonservice.push.model.PushUserBriefInfo">
+	SELECT 
+		userId, userRole
+	FROM
+		push_user_alias
+	WHERE
+		(
+			businessId=#{businessId} and 
+ 			alias=#{alias}
+		)
+</select>
+
+<select id="weixinChannelList" resultType="com.westangel.commonservice.push.model.weixin.WeixinChannelInfo">
+	SELECT 
+	businessId as businessId,
+	productId as productId,
+	serviceName as serviceName,
+	appId as appId,
+	appSecret as appSecret,
+	accessToken as accessToken,
+	jsTicket as jsTicket,
+	syncOutter as syncOutter,
+	remark as remark,
+	mchId,
+	certificatePath
+	FROM push_weixin_channel
+</select>
+
+<select id="getWeixinChannelInfo" resultType="com.westangel.commonservice.push.model.weixin.WeixinChannelInfo">
+	SELECT 
+	businessId as businessId,
+	productId as productId,
+	serviceName as serviceName,
+	appId as appId,
+	appSecret as appSecret,
+	accessToken as accessToken,
+	jsTicket as jsTicket,
+	syncOutter as syncOutter,
+	remark as remark
+	FROM push_weixin_channel
+	WHERE serviceName=#{serviceName}
+</select>
+
+<!-- 添加或者更新微信通道 -->
+<insert id="updateWeinxinChannel" parameterType="com.westangel.commonservice.push.model.weixin.WeixinChannelInfo">
+	REPLACE INTO push_weixin_channel
+	(businessId,productId,serviceName,appId,appSecret,accessToken,jsTicket,syncOutter,remark,mchId,certificatePath)
+	VALUES
+	(#{businessId},#{productId},#{serviceName},#{appId},#{appSecret},#{accessToken},#{jsTicket},#{syncOutter},#{remark},#{mchId},#{certificatePath})
+</insert>
+
+<!-- 查询 -->
+<select id="weixinTemplateList" resultType="com.westangel.commonservice.push.model.weixin.WeixinTemplateInfo">
+	SELECT 
+	id as id,
+	name as name,
+	weixinId as weixinId,
+	weixinExpression as weixinExpression,
+	remark as remark,
+	businessId as businessId,
+	productId as productId,
+	state as state
+	FROM push_weixin_template
+</select>
+
+<!-- 添加 -->
+<insert id="addWeixinTemplate" parameterType="com.westangel.commonservice.push.model.weixin.WeixinTemplateInfo">
+	<selectKey resultType="int" keyProperty="id" order="AFTER" >
+			SELECT
+			LAST_INSERT_ID() as id
+	</selectKey>
+	INSERT INTO push_weixin_template
+	(name,weixinId,weixinExpression,remark,businessId,productId,state)
+	VALUES
+	(#{name},#{weixinId},#{weixinExpression},#{remark},#{businessId},#{productId},#{state})
+</insert>
+
+<!-- 更新 -->
+<update id="updateWeixinTemplate" parameterType="com.westangel.commonservice.push.model.weixin.WeixinTemplateInfo">
+	UPDATE 
+		push_weixin_template
+	SET 
+		name=#{name},
+		weixinId=#{weixinId},
+		weixinExpression=#{weixinExpression},
+		remark=#{remark},
+		businessId=#{businessId},
+		productId=#{productId},
+		state=#{state}
+	WHERE
+		id=#{id} 
+</update>
+
+<!-- 小米推送管理 -->
+<select id="xiaomiChannelList" resultType="com.westangel.commonservice.push.model.xiaomi.XiaomiChannelInfo">
+	SELECT 
+	businessId as businessId,
+	productId as productId,
+	appType as appType,
+	appId as appId,
+	appKey as appKey,
+	appSecret as appSecret,
+	appPackageName as appPackageName,
+	useOfficial as useOfficial,
+	remark as remark
+	FROM push_xiaomi_channel
+</select>
+
+<!-- 添加或者更新小米通道 -->
+<insert id="updateXiaomiChannel" parameterType="com.westangel.commonservice.push.model.xiaomi.XiaomiChannelInfo">
+	REPLACE INTO push_xiaomi_channel
+	(businessId,productId,appType,appId,appKey,appSecret,appPackageName,useOfficial,remark)
+	VALUES
+	(#{businessId},#{productId},#{appType},#{appId},#{appKey},#{appSecret},#{appPackageName},#{useOfficial},#{remark})
+</insert>
+
+<!-- 获取内容 -->
+<select id="queryPushConten" resultType="com.westangel.common.bean.push.PushContent">
+	SELECT
+	pushContentId,
+	pushContent,
+	serviceType,
+	targetId,
+	tag
+	FROM
+		com_push_db.push_content
+	WHERE
+	tag = #{tag}
+	<if test="serviceType!=null">
+		AND serviceType = #{serviceType}
+	</if>
+	<if test="targetId!=null">
+		AND targetId = #{targetId}
+	</if>
+	LIMIT 1
+</select>
+</mapper>

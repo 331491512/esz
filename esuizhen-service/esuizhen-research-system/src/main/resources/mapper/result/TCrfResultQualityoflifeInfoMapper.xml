@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TCrfResultQualityoflifeInfoDao">
+
+	<resultMap id="crfResultQualityoflifeMap" type="com.esuizhen.cloudservice.research.model.result.TCrfResultMainInfo" >
+		<result property="crfResultId" column="crfResultId" />
+		<result property="crfObserveId" column="crfObserveId" />
+		<result property="subjectElementId" column="subjectElementId" />
+		<result property="projectId" column="projectId" />
+		<result property="patientId" column="patientId" />
+		<result property="creatorId" column="creatorId" />
+		<result property="happenTime" column="happenTime"/>
+		<result property="crfCourseItemTime" column="crfCourseItemTime" />
+		<result property="createTime" column="createTime" />
+		<collection property="crfResult" javaType="ArrayList" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultQualityoflifeInfo">
+			<result property="crfQolResultId" column="crfQolResultId" />
+			<result property="crfResultId" column="crfResultId" />
+			<result property="scaleId" column="scaleId" />
+			<result property="score" column="score" />
+		</collection>
+	</resultMap>
+	
+	<insert id="insertCrfResultQualityoflife" parameterType="com.esuizhen.cloudservice.research.model.result.TCrfResultQualityoflifeInfo">
+        INSERT INTO crf_result_qualityoflife 
+        (
+        	crfQolResultId ,
+        	crfResultId ,
+        	scaleId,
+        	score,
+        	createTime ,
+        	updateTime 
+        ) VALUES 
+        (
+        	#{crfQolResultId} ,
+        	#{crfResultId} ,
+        	#{scaleId},
+        	#{score},
+        	NOW() ,
+        	NOW() 
+        )
+	</insert>
+    
+    <insert id="insertCrfResultQualityoflifeList" parameterType="java.util.List">
+        INSERT INTO crf_result_qualityoflife 
+        (
+        	crfQolResultId ,
+        	crfResultId ,
+        	scaleId,
+        	score,
+        	createTime ,
+        	updateTime 
+        ) 
+        VALUES 
+        <foreach collection="list" item="item" separator="," index="index">
+        (
+        	#{item.crfQolResultId} ,
+        	#{item.crfResultId} ,
+        	#{item.scaleId},
+        	#{item.score},
+        	NOW() ,
+        	NOW() 
+        )
+        </foreach>
+	</insert>
+	
+	<update id="updateCrfResultQualityoflife" parameterType="com.esuizhen.cloudservice.research.model.result.TCrfResultQualityoflifeInfo">
+        UPDATE crf_result_qualityoflife 
+        <set>
+	        <if test="crfResultId != null">
+                crfResultId = #{crfResultId} ,
+            </if>
+            <if test="scaleId != null">
+            	scaleId = #{scaleId},
+            </if>
+            <if test="score != null">
+            	score = #{score},
+            </if>
+            updateTime = NOW()
+        </set>
+        WHERE crfQolResultId = #{crfQolResultId} 
+	</update>
+
+    <delete id="deleteCrfResultQualityoflife">
+        DELETE FROM crf_result_qualityoflife WHERE crfQolResultId = #{crfQolResultId} 
+    </delete>
+    
+    <delete id="deleteCrfResultQualityoflifeByCrfResultId">
+        DELETE FROM crf_result_qualityoflife WHERE crfResultId = #{crfResultId} 
+    </delete>
+    
+	<select id="queryCrfResultQualityoflifeById" resultType="com.esuizhen.cloudservice.research.model.result.TCrfResultQualityoflifeInfo">
+		SELECT 
+        	crfQolResultId,
+        	crfResultId,
+        	scaleId,
+        	score,
+        	createTime,
+        	updateTime
+		FROM crf_result_qualityoflife 
+	    WHERE 
+	        crfQolResultId = #{crfQolResultId} 
+	</select>
+	
+	<select id="queryCrfResultQualityoflifeByCrfObserveIdAndPatientId" resultMap="crfResultQualityoflifeMap">
+		SELECT 
+			t1.crfResultId,
+	    	t1.crfObserveId,
+	    	t1.subjectElementId,
+	    	t1.projectId,
+	    	t1.patientId,
+	    	t1.creatorId,
+	    	t1.createTime,
+        	t2.crfQolResultId,
+        	t2.scaleId,
+        	t2.score
+		FROM crf_result_main t1 , crf_result_qualityoflife t2
+	    WHERE t1.crfResultId=t2.crfResultId
+	    AND t1.crfObserveId = #{crfObserveId}
+	    AND t1.patientId = #{patientId}
+	</select>
+	
+	<select id="queryTCrfResultQualityoflifeInfoRecord" resultType="com.esuizhen.cloudservice.research.model.result.TCrfResultQualityoflifeInfo">
+		SELECT
+			*
+		FROM
+			(
+				SELECT
+					t1.crfResultId,
+					SUM(t2.score) QOLScore,
+					t1.createTime
+				FROM
+					crf_result_main t1,
+					crf_result_qualityoflife t2
+				WHERE
+					t1.crfResultId = t2.crfResultId
+					AND t1.projectId = #{projectId}
+				    AND t1.patientId = #{patientId}
+				GROUP BY t2.createTime
+			) f1
+		ORDER BY f1.createTime DESC
+	</select>
+	
+	<delete id="deleteByProjectId">
+		DELETE
+			i6.*
+		FROM pro_db.crf_result_main i1,
+			pro_db.crf_observation_subject_element i2,
+			pro_db.crf_course_detail i3,
+			pro_db.crf_course i4,
+			pro_db.r_crftemplate_project i5,
+			pro_db.crf_result_qualityoflife i6
+		WHERE i1.crfObserveId = i2.crfObserveId
+			AND i2.crfCourseItemId = i3.crfCourseItemId
+			AND i3.crfCourseId = i4.crfCourseId
+			AND i4.crfTemplateId = i5.crfTemplateId
+			AND i5.projectId = #{projectId}
+	</delete>
+</mapper>
+

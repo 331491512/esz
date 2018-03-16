@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.crf.TCrfMedicationInfoDao">
+
+	<insert id="insertCrfObservationChemotherapyMedicationDetailOptions" parameterType="com.esuizhen.cloudservice.research.model.crf.TCrfMedicationInfo">
+        INSERT INTO crf_observation_chemotherapy_medication_detail_options (
+        	crfObserveItemId ,
+        	crfObserveSchemeId ,
+        	medicationType ,
+        	medicationId ,
+        	medicationName ,
+        	commodityName ,
+        	computingMethod ,
+        	createTime ,
+        	updateTime ,
+        	theoreticalDose ,
+        	measurementUnit ,
+        	drugUsage ,
+        	treatmentPeriod ,
+        	totalCourse 
+        ) VALUES (
+        	#{crfObserveItemId} ,
+        	#{crfObserveSchemeId} ,
+        	#{medicationType} ,
+        	#{medicationId} ,
+        	#{medicationName} ,
+        	#{commodityName} ,
+        	#{computingMethod} ,
+        	NOW(),
+        	NOW() ,
+        	#{theoreticalDose} ,
+        	#{measurementUnit} ,
+        	#{drugUsage} ,
+        	#{treatmentPeriod} ,
+        	#{totalCourse} 
+        )
+	</insert>
+    
+    <insert id="insertCrfObservationChemotherapyMedicationDetailOptionsList" parameterType="java.util.List">
+        INSERT INTO crf_observation_chemotherapy_medication_detail_options 
+        (
+        	crfObserveItemId ,
+        	crfObserveSchemeId ,
+        	medicationType ,
+        	medicationId ,
+        	medicationName ,
+        	commodityName ,
+        	computingMethod ,
+        	createTime ,
+        	updateTime ,
+        	theoreticalDose ,
+        	measurementUnit ,
+        	drugUsage ,
+        	treatmentPeriod ,
+        	totalCourse,
+        	`index`
+        ) VALUES 
+        <foreach collection="list" item="item" index="index" separator=",">
+        (
+        	#{item.crfObserveItemId} ,
+        	#{item.crfObserveSchemeId} ,
+        	#{item.medicationType} ,
+        	#{item.medicationId} ,
+        	#{item.medicationName} ,
+        	#{item.commodityName} ,
+        	#{item.computingMethod} ,
+        	NOW(),
+        	NOW() ,
+        	#{item.theoreticalDose} ,
+        	#{item.measurementUnit} ,
+        	#{item.drugUsage} ,
+        	#{item.treatmentPeriod} ,
+        	#{item.totalCourse},
+        	#{item.index} 
+        )
+        </foreach>
+        
+	</insert>
+	<update id="updateCrfObservationChemotherapyMedicationDetailOptions" parameterType="com.esuizhen.cloudservice.research.model.crf.TCrfMedicationInfo">
+        UPDATE crf_observation_chemotherapy_medication_detail_options 
+        <set>
+	        <if test="crfObserveSchemeId != null">
+                crfObserveSchemeId = #{crfObserveSchemeId} ,
+            </if>
+	        <if test="medicationType != null">
+                medicationType = #{medicationType} ,
+            </if>
+	        <if test="medicationId != null">
+                medicationId = #{medicationId} ,
+            </if>
+	        <if test="medicationName != null">
+                medicationName = #{medicationName} ,
+            </if>
+	        <if test="commodityName != null">
+                commodityName = #{commodityName} ,
+            </if>
+	        <if test="computingMethod != null">
+                computingMethod = #{computingMethod} ,
+            </if>
+	        <if test="1==1">
+                updateTime = #{updateTime} ,
+            </if>
+	        <if test="theoreticalDose != null">
+                theoreticalDose = #{theoreticalDose} ,
+            </if>
+	        <if test="measurementUnit != null">
+                measurementUnit = #{measurementUnit} ,
+            </if>
+	        <if test="drugUsage != null">
+                drugUsage = #{drugUsage} ,
+            </if>
+	        <if test="treatmentPeriod != null">
+                treatmentPeriod = #{treatmentPeriod} ,
+            </if>
+	        <if test="totalCourse != null">
+                totalCourse = #{totalCourse} ,
+            </if>
+        </set>
+        WHERE 
+	        crfObserveItemId = #{crfObserveItemId} 
+	</update>
+
+    <delete id="deleteCrfObservationChemotherapyMedicationDetailOptions">
+        DELETE FROM crf_observation_chemotherapy_medication_detail_options WHERE crfObserveItemId = #{crfObserveItemId} 
+    </delete>
+    
+    <delete id="deleteCrfObservationTreatmentSchemeMedicationByCrfObserveId">
+        DELETE 
+        	t1.*
+		FROM crf_observation_chemotherapy_medication_detail_options t1 , crf_observation_treatment_scheme_options t2
+	    WHERE t1.crfObserveSchemeId=t2.crfObserveSchemeId 
+	    AND t2.crfObserveId=#{crfObserveId} 
+    </delete>
+    
+    <select id="queryCrfObservationChemotherapyMedicationDetailOptionsById" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfMedicationInfo">
+		SELECT 
+        	crfObserveItemId,
+        	crfObserveSchemeId,
+        	medicationType,
+        	medicationId,
+        	medicationName,
+        	commodityName,
+        	computingMethod,
+        	createTime,
+        	updateTime,
+        	theoreticalDose,
+        	measurementUnit,
+        	drugUsage,
+        	treatmentPeriod,
+        	totalCourse
+		FROM crf_observation_chemotherapy_medication_detail_options 
+	    WHERE 
+	        crfObserveItemId = #{crfObserveItemId} 
+	</select>
+
+</mapper>
+

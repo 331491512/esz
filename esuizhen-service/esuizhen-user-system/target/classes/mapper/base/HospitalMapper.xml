@@ -1,0 +1,619 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.HospitalDao">
+<!-- 	<resultMap id="BaseHospitalResultMap" type="com.westangel.common.bean.Hospital">
+		<id column="hospitalId" property="hospitalId" jdbcType="INTEGER" />
+		<result column="hospitalName" property="hospitalName" jdbcType="VARCHAR" />
+		<result column="nickName" property="nickName" jdbcType="VARCHAR" />
+		<result column="gradeId" property="gradeId" jdbcType="INTEGER" />
+		<result column="specialClinics" property="specialClinics" jdbcType="VARCHAR" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="busLines" property="busLines" jdbcType="VARCHAR" />
+		<result column="cityId" property="cityId" jdbcType="INTEGER" />
+		<result column="tel" property="tel" jdbcType="VARCHAR" />
+		<result column="introduction" property="introduction" jdbcType="VARCHAR" />
+		<result column="latitude" property="latitude" jdbcType="VARCHAR" />
+		<result column="longitude" property="longitude" jdbcType="VARCHAR" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+ -->
+ 	<sql id="base_Column_List">
+ 		t1.userId,
+		t1.hospitalId, 
+		t1.hospitalName, 
+		t1.nickName, 
+		t1.gradeId, 
+		t1.specialClinics, 
+		t1.tel, 
+		t1.introduction, 
+		t1.address, 
+		t1.busLines, 
+		t1.cityId,
+		t1.latitude, 
+		t1.longitude, 
+		t1.createTime, 
+		t1.updateTime, 
+		t1.uuid
+	</sql>
+ 
+	<resultMap id="baseHospitalProfileResultMap" type="com.westangel.common.bean.HospitalProfile">
+		<id column="hospitalId" property="hospitalId" jdbcType="INTEGER" />
+		<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+		<result column="hospitalName" property="hospitalName" jdbcType="VARCHAR" />
+		<result column="nickName" property="nickName" jdbcType="VARCHAR" />
+		<result column="gradeId" property="gradeId" jdbcType="INTEGER" />
+		<result column="specialClinics" property="specialClinics" jdbcType="VARCHAR" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="busLines" property="busLines" jdbcType="VARCHAR" />
+		<result column="cityId" property="cityId" jdbcType="INTEGER" />
+		<result column="cityCode" property="cityCode" jdbcType="VARCHAR" />
+		<result column="cityName" property="cityName" jdbcType="VARCHAR" />
+		<result column="tel" property="tel" jdbcType="VARCHAR" />
+		<result column="introduction" property="introduction" jdbcType="VARCHAR" />
+		<result column="latitude" property="latitude" jdbcType="FLOAT" />
+		<result column="longitude" property="longitude" jdbcType="FLOAT" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />	
+		<result column="userId" property="userId" jdbcType="INTEGER" />
+		<result column="pictureUrl" property="pictureUrl" jdbcType="VARCHAR" />
+		<result column="contactName" property="contactName" jdbcType="VARCHAR" />
+		<result column="contactMobile" property="contactMobile" jdbcType="VARCHAR" />
+		<result column="fax" property="fax" jdbcType="VARCHAR" />
+		<collection column="userId" property="productList" ofType="com.westangel.common.bean.ProductSimpleInfo" >
+    		<id column="productId" property="productId" />
+    		<result column="productName" property="productName" />
+    		<result column="productType"     property="productType" />
+    		<result column="unitPrice" property="unitPrice" />
+    		<result column="state" property="state" />
+    		<result column="hospitalCertificateFlag" property="hospitalCertificateFlag" />
+    		<result column="certificateFlag" property="certificateFlag" />
+         </collection>
+		<collection column="userId" property="specialtyList" ofType="com.westangel.common.bean.THospitalSpecialtyInfo" >
+    		<id column="specialtyId" property="specialtyId" />
+    		<result column="specialtyName" property="specialtyName" />
+         </collection>	
+	</resultMap>
+
+	<resultMap id="DoctorHospitalSimpleInfoResultMap" type="com.esuizhen.cloudservice.user.bean.DoctorHospitalSimpleInfo">
+		<result column="hospitalId" property="hospitalInfo.hospitalId" jdbcType="INTEGER" />
+		<result column="hospitalName" property="hospitalInfo.hospitalName" jdbcType="VARCHAR" />
+		<result column="tel" property="hospitalInfo.tel" jdbcType="VARCHAR" />
+		<result column="gradeId" property="hospitalInfo.gradeId" jdbcType="INTEGER" />
+		<result column="specialClinics" property="hospitalInfo.specialClinics" jdbcType="VARCHAR" />
+		<result column="address" property="hospitalInfo.address" jdbcType="VARCHAR" />
+		<result column="busLines" property="hospitalInfo.busLines" jdbcType="VARCHAR" />
+		<result column="cityId" property="hospitalInfo.cityId" jdbcType="INTEGER" />
+		<result column="introduction" property="hospitalInfo.introduction" jdbcType="VARCHAR" />
+		<result column="latitude" property="hospitalInfo.latitude" jdbcType="VARCHAR" />
+		<result column="longitude" property="hospitalInfo.longitude" jdbcType="VARCHAR" />
+		<result column="updateTime" property="hospitalInfo.updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	
+	<select id="existHospital" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+		SELECT COUNT(0) FROM u_hospital WHERE hospitalId=#{hospitalId}
+	</select>
+	
+	<select id="querySignHospitals" resultMap="baseHospitalProfileResultMap">
+		SELECT
+			<include refid="base_Column_List" />,
+		t1.pictureUrl
+		FROM user_db.u_hospital t1
+		INNER JOIN user_db.conf_hospital_signed t2 ON t1.hospitalId = t2.hospitalId
+	</select>
+	
+	<select id="findHospitalUuidByPatientUserId" resultMap="baseHospitalProfileResultMap" parameterType="java.lang.Long">
+		SELECT
+			<include refid="base_Column_List" />,t1.pictureUrl
+		FROM u_hospital t1
+		INNER JOIN r_hospital_patient t2 ON t1.hospitalId=t2.hospitalId
+		INNER JOIN u_patient t3 ON t2.patientId=t3.patientId
+		WHERE t3.userId=#{userId}
+	</select>
+	
+	<select id="findHospitalUuidByDoctorUserId" resultMap="baseHospitalProfileResultMap" parameterType="java.lang.Long">
+		SELECT
+			<include refid="base_Column_List" />,t1.pictureUrl
+		FROM u_hospital t1
+		INNER JOIN r_hospital_doctor t2 ON t1.hospitalId=t2.hospitalId
+		INNER JOIN u_doctor t3 ON t2.doctorId=t3.doctorId
+		WHERE t3.userId=#{userId}
+	</select>
+
+ 	<select id="findDoctorHospitalSimpleInfoesCount" resultType="java.lang.Integer">
+ 		<if test="keyword!=null">
+ 		<bind name="pattern" value="'%' + keyword + '%'" />
+ 		</if>
+		SELECT 
+			COUNT(0) 
+		FROM
+			u_hospital t1 
+		<if test="cityCode != null">
+			LEFT JOIN meta_city t2 ON t1.cityId=t2.cityId
+		</if>
+		<if test="userId!=null">
+			LEFT JOIN user_db.u_user t3 ON t1.userId = t3.userId
+			LEFT JOIN user_db.u_user t4 ON t4.userId = #{userId}
+		</if>
+		WHERE 1 
+		<if test="keyword!=null"> 
+		 AND
+			(
+					t1.hospitalName LIKE #{pattern,jdbcType=VARCHAR} 
+				OR 	t1.nickName LIKE #{pattern,jdbcType=VARCHAR}
+			)
+		</if>
+		<if test="cityCode != null">
+		 AND LEFT(t2.cityCode,#{prefixLen})=#{cityCode}
+		</if>
+		<if test="userId!=null">
+		<![CDATA[
+			AND (
+				t1.userId IS NULL OR t3.userFlag<=t4.userFlag
+			)
+		]]>
+		</if>		
+	</select>
+	
+	<select id="findDoctorHospitalSimpleInfoes" resultMap="DoctorHospitalSimpleInfoResultMap">
+		<if test="keyword!=null">
+			<bind name="pattern" value="'%' + keyword + '%'" />
+		</if>
+		SELECT
+			t1.hospitalName, 
+			t1.nickName,
+			t1.tel, 
+			t1.hospitalId,
+			t1.gradeId, 
+			t1.specialClinics, 
+			t1.address,
+			t1.busLines, 
+			t1.cityId,
+			t1.introduction,
+			t1.latitude,
+			t1.longitude,
+			t1.updateTime
+		FROM 
+			u_hospital t1 
+		<if test="cityCode != null">
+			LEFT JOIN meta_city t2 ON t1.cityId=t2.cityId
+		</if>
+		<if test="userId!=null">
+			LEFT JOIN user_db.u_user t3 ON t1.userId = t3.userId
+			LEFT JOIN user_db.u_user t4 ON t4.userId = #{userId}
+		</if>
+		WHERE 1 
+		<if test="keyword!=null">
+		 AND (
+					t1.hospitalName LIKE #{pattern,jdbcType=VARCHAR} 
+				OR 	t1.nickName LIKE #{pattern,jdbcType=VARCHAR}
+			)
+		</if>
+		<if test="cityCode != null">
+			AND LEFT(t2.cityCode,#{prefixLen})=#{cityCode}
+		</if>
+		<if test="userId!=null">
+		<![CDATA[
+			AND (
+				t1.userId IS NULL OR t3.userFlag<=t4.userFlag
+			)
+		]]>
+		</if>
+	</select>	
+
+	<!-- 查找医院 -->
+	<select id="searchHospitals" parameterType="com.westangel.common.bean.HospitalSearchReq" resultMap="baseHospitalProfileResultMap">
+		SELECT 
+			<include refid="base_Column_List" />
+			<choose>
+				<when test="defaultHospitalPictureUrl != null">
+					,(CASE WHEN t1.pictureUrl is not null THEN t1.pictureUrl ELSE #{defaultHospitalPictureUrl} END) pictureUrl
+				</when>
+				<otherwise>
+					,t1.pictureUrl
+				</otherwise>
+			</choose>
+			,t2.cityCode,t2.cityName
+			
+			,t4.productId
+			,t4.productName
+			,t4.productType
+			,t4.unitPrice/100 as unitPrice
+			,t4.state
+			,t4.hospitalCertificateFlag
+			,t4.certificateFlag
+		FROM 
+			u_hospital t1 
+		<if test="specialtyId!=null">
+			INNER JOIN user_db.r_hospital_specialty t3 ON t1.hospitalId=t3.hospitalId AND t3.specialtyId=#{specialtyId}
+		</if>	
+		LEFT JOIN
+			meta_city t2 ON t1.cityId=t2.cityId
+		LEFT JOIN com_trade_db.product t4 ON t1.userId=t4.vendor AND t4.state=1
+		<if test="patientId!=null">
+			LEFT JOIN user_db.u_user t5 ON t5.userId = t1.userId
+			LEFT JOIN user_db.u_patient t6 ON t6.patientId = #{patientId}
+			LEFT JOIN user_db.u_user t7 ON t7.userId = t6.userId
+		</if>
+		WHERE
+		t1.state=1
+		<if test="patientId!=null">
+			<![CDATA[
+				AND (t1.userId IS NULL OR t5.userFlag<=t7.userFlag) 
+			]]>
+		</if>
+		AND
+		(
+		t1.hospitalId in (
+			SELECT
+				hospitalId
+			FROM
+				user_db.conf_hospital_signed
+			) 
+		OR
+		t1.hospitalId in (
+			SELECT
+				hospitalId
+			FROM
+				user_db.r_hospital_patient
+		)
+		OR 
+		t1.hospitalId IN (
+			SELECT
+				hospitalId
+			FROM
+				user_db.r_hospital_doctor
+		)
+		)
+		<if test="hospitalName != null">
+			<bind name="pattern" value="'%' + hospitalName + '%'" />
+			AND t1.hospitalName LIKE #{pattern, jdbcType=VARCHAR}
+		</if>
+		<if test="cityCode != null">
+			AND t1.cityId in (SELECT cityId FROM meta_city WHERE LEFT(t2.cityCode,#{prefixLength})=#{cityCode}) 
+		</if>
+		<if test="reqFlag!=null and reqFlag==1">
+			AND t4.productId IS NOT NULL
+		</if>
+		ORDER BY t1.hospitalName
+	</select>
+
+	<!-- 添加医院 -->
+	<insert id="addHospital" parameterType="com.westangel.common.bean.HospitalProfile">
+		<selectKey resultType="java.lang.Integer" keyProperty="hospitalId" order="AFTER">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO u_hospital
+			(
+				userId,
+				hospitalName,gradeId,specialClinics,
+				address,busLines,cityId,tel,introduction,
+				latitude,longitude,
+				pictureUrl,contactName,contactMobile,metaDataType,creator,
+				createTime,updateTime
+			)
+		VALUES
+			(
+				#{userId},
+				#{hospitalName},#{gradeId},#{specialClinics},
+				#{address},#{busLines},#{cityId},#{tel},#{introduction},
+				#{latitude},#{longitude},
+				#{pictureUrl},#{contactName},#{contactMobile},#{metaDataType},#{creator},
+				NOW(),NOW()
+			)
+	</insert>
+	
+	<!-- 查找医院 -->
+	<select id="selectHospital" resultMap="baseHospitalProfileResultMap">
+		SELECT
+			<include refid="base_Column_List" />,t1.pictureUrl,t2.cityCode,t2.cityName,t1.contactName,t1.contactMobile,t1.fax
+			<if test="reqFlag==null">
+			,t3.productId
+			,t3.productName
+			,t3.productType
+			,t3.unitPrice/100 as unitPrice
+			,t3.state
+			,t3.hospitalCertificateFlag
+			,t3.certificateFlag
+			</if>
+			,t5.specialtyId
+			,t5.specialtyName
+		FROM 
+			u_hospital t1
+		LEFT JOIN
+			meta_city t2 ON t1.cityId=t2.cityId
+		<if test="reqFlag==null">
+		LEFT JOIN 
+		    com_trade_db.product t3 ON t1.userId=t3.vendor AND t3.state=1	
+	    </if>		
+		LEFT JOIN
+			r_hospital_specialty t4 ON t4.hospitalId=t1.hospitalId
+		LEFT JOIN
+			meta_hosiptal_specialty t5 ON t5.specialtyId=t4.specialtyId	
+		WHERE 
+			t1.hospitalId=#{hospitalId,jdbcType=INTEGER}
+	</select>
+	
+	<!-- 修改医院信息 -->
+	<update id="updateHospital" parameterType="com.westangel.common.bean.HospitalProfile">
+		UPDATE 
+			u_hospital
+		SET 
+			<if test="userId!=null">
+				userId=#{userId},
+			</if>
+			<if test="hospitalName!=null">
+				hospitalName=#{hospitalName},
+			</if>
+			<if test="nickName!=null">
+			nickName=#{nickName},
+			</if>
+			<if test="gradeId!=null">
+			gradeId=#{gradeId},
+			</if>
+			<if test="specialClinics!=null">
+			specialClinics=#{specialClinics},
+			</if>
+			<if test="address!=null">
+			address=#{address},
+			</if>
+			<if test="busLines!=null">
+			busLines=#{busLines},
+			</if>
+			<if test="cityId!=null">
+			cityId=#{cityId},
+			</if>
+			<if test="tel!=null">
+			tel=#{tel},
+			</if>
+			<if test="introduction!=null">
+			introduction=#{introduction},
+			</if>
+			<if test="latitude!=null">
+			latitude=#{latitude},
+			</if>
+			<if test="longitude!=null">
+			longitude=#{longitude},
+			</if>
+			<if test="pictureUrl!=null">
+				pictureUrl=#{pictureUrl},
+			</if>
+			<if test="contactName!=null">
+				contactName=#{contactName},
+			</if>
+			<if test="contactMobile!=null">
+				contactMobile=#{contactMobile},
+			</if>
+			<if test="fax!=null">
+				fax=#{fax},
+			</if>
+			updateTime=NOW()
+		WHERE 
+			hospitalId=#{hospitalId}
+	</update>
+	
+	<!-- 查找患者所在医院列表 -->
+	<select id="getHospitalsOfPatientList" resultType="com.esuizhen.cloudservice.user.bean.THospitalSimpleInfo">
+		SELECT
+			t1.userId,
+			t1.hospitalId,
+			t1.hospitalName,
+			t1.cityId,
+			t3.cityCode,
+			t3.cityName,
+			t2.patientNo
+			<choose>
+				<when test="defaultHospitalPictureUrl != null">
+					,(CASE WHEN t1.pictureUrl is not null THEN t1.pictureUrl ELSE #{defaultHospitalPictureUrl} END) pictureUrl
+				</when>
+				<otherwise>
+					,t1.pictureUrl
+				</otherwise>
+			</choose>
+		FROM u_hospital t1 
+		    JOIN r_hospital_patient t2 ON t1.hospitalId=t2.hospitalId
+		    LEFT JOIN meta_city t3 ON t1.cityId=t3.cityId
+		    <if test="productType!=null">
+		     JOIN com_trade_db.product t4 ON t1.userId = t4.vendor
+		    </if>
+		    JOIN user_db.u_patient t5 ON t5.patientId = t2.patientId 
+		    JOIN user_db.u_user t6 ON t6.userId = t1.userId 
+		    <![CDATA[
+		    JOIN user_db.u_user t7 ON t7.userId = t5.userId AND t6.userFlag <= t7.userFlag
+		    ]]>
+		WHERE 
+		   	t2.patientId=#{patientId}
+		    <if test="productType!=null">
+		    	AND t1.userId = t4.vendor
+				AND t4.productType=#{productType}
+		    </if>
+	</select>
+	
+	<!-- 查找有院级服务的医院 By Da Loong-->
+	<select id="queryHospitalHavingService" resultMap="baseHospitalProfileResultMap">
+		SELECT
+			<include refid="base_Column_List" />,t1.pictureUrl,t2.cityCode
+			,t3.productId
+			,t3.productName
+			,t3.productType
+			,t3.unitPrice/100 as unitPrice
+			,t3.state
+			,t3.hospitalCertificateFlag
+			,t3.certificateFlag
+		FROM 
+			u_hospital t1
+		INNER JOIN
+			user_db.conf_hospital_signed t4 ON t4.hospitalId=t1.hospitalId AND t4.signedFlag=1
+		LEFT JOIN
+			meta_city t2 ON t1.cityId=t2.cityId
+		INNER JOIN
+			user_db.u_user t5 ON t5.userId = t1.userId AND t5.userFlag=0
+		INNER JOIN 
+		    com_trade_db.product t3 ON t1.userId=t3.vendor	AND t3.state=1
+	</select>
+	
+	<!--  获取医院Profile. 包括开通的院级服务 By Da Loong-->
+	<select id="findHospitalProfileById" resultMap="baseHospitalProfileResultMap">
+		SELECT
+			<include refid="base_Column_List" />
+			<choose>
+			<when test="defaultHospitalPictureUrl!=null">
+				,(CASE WHEN t1.pictureUrl is not null THEN t1.pictureUrl ELSE #{defaultHospitalPictureUrl} END) pictureUrl
+			</when>
+			<otherwise>
+				,t1.pictureUrl
+			</otherwise>
+			</choose>
+			,t2.cityCode,
+			t3.productId,
+			t3.productName,
+			t3.productType,
+			t3.unitPrice/100 as unitPrice,
+			t3.state
+			,t3.hospitalCertificateFlag
+			,t3.certificateFlag
+		FROM 
+			u_hospital t1
+		LEFT JOIN
+			meta_city t2 ON t1.cityId=t2.cityId
+		LEFT JOIN 
+		    com_trade_db.product t3 ON t1.userId=t3.vendor AND t3.state=1
+		WHERE t1.hospitalId=#{hospitalId}
+		      AND t1.state=1
+	</select>
+	
+	<!-- 查找患者医院认证的医院列表 By Da Loong -->
+	<select id="findHospitalsCertificatedOfPatient" resultType="com.esuizhen.cloudservice.user.bean.THospitalSimpleInfo">
+		SELECT
+			t1.userId,
+			t1.hospitalId,
+			t1.hospitalName,
+			t1.cityId,
+			t3.cityCode,
+			t3.cityName,
+			t2.patientNo,
+			t1.pictureUrl
+			<if test="certificatedFlag!=null">
+				,t7.trueName,t7.mobile,t7.patientNo certificatedPatientNo,t7.failState
+			</if>
+		FROM 
+		    u_hospital t1
+		    JOIN r_hospital_patient t2 ON t1.hospitalId=t2.hospitalId
+		    LEFT JOIN meta_city t3 ON t1.cityId=t3.cityId
+		   	JOIN u_patient t4 ON t4.patientId = t2.patientId
+		   	JOIN u_user t5 ON t5.userId = t1.userId
+		   	<![CDATA[
+		   	JOIN u_user t6 ON t6.userId = t4.userId AND t5.userFlag <= t6.userFlag
+		   	]]>
+		   	<if test="certificatedFlag!=null">
+		   	LEFT JOIN user_db.u_hospital_patient_certificated_history t7 ON t1.hospitalId=t7.hospitalId AND t2.patientId=t7.patientId AND t7.certificatedState=#{certificatedFlag}
+		   	</if>
+		WHERE 
+		    1 
+		    AND t2.patientId=#{patientId}
+		    <if test="hospitalId!=null">
+		    	AND t2.hospitalId=#{hospitalId}
+		    </if>
+		    <if test="certificatedFlag==1">
+			    AND t2.hospitalCertificateState=2
+		    </if>
+	</select>
+	<!-- 医院认证中或未通过的 -->
+	<select id="findHospitalsCertificatedOfPatientExam" resultType="com.esuizhen.cloudservice.user.bean.THospitalSimpleInfo">
+		SELECT
+			t1.userId,
+			t1.hospitalId,
+			t1.hospitalName,
+			t1.cityId,
+			t3.cityCode,
+			t3.cityName,
+			t1.pictureUrl
+			,t2.trueName,t2.mobile,t2.patientNo certificatedPatientNo,
+			t2.certificatedState,t2.cause,t2.failState
+		FROM 
+		    u_hospital t1
+		    JOIN user_db.u_hospital_patient_certificated_history t2 ON t1.hospitalId=t2.hospitalId AND t2.certificatedState=#{certificatedFlag}
+		    LEFT JOIN meta_city t3 ON t1.cityId=t3.cityId
+		   	JOIN u_patient t4 ON t4.patientId = t2.patientId
+		   	JOIN u_user t5 ON t5.userId = t1.userId
+		   	<![CDATA[
+		   	JOIN u_user t6 ON t6.userId = t4.userId AND t5.userFlag <= t6.userFlag
+		   	]]>
+		WHERE 
+		    1 
+		    AND t2.patientId=#{patientId}
+		    <if test="hospitalId!=null">
+		    	AND t2.hospitalId=#{hospitalId}
+		    </if>
+	</select>
+	
+	<!-- 根据wxProductID, 获得独立公众号医院名称. By Da Loong -->
+	<select id="getHospitalNameByProductId" resultType="com.esuizhen.cloudservice.user.bean.THospitalSimpleInfo">
+		SELECT
+			t1.userId,
+			t1.hospitalId,
+			t1.hospitalName,
+			t1.cityId,
+			t2.cityCode
+		FROM 
+		    u_hospital t1,
+		    meta_city t2,
+		    conf_hospital_wx t3
+		   
+		WHERE 
+		    t1.cityId=t2.cityId
+		    AND t1.hospitalId=t3.hospitalId
+		    AND t3.productId=#{wxProductId}
+	</select>
+	
+	
+	<!-- 通过微信Id反查公众号对应的productId. By Da Loong -->
+	<select id="getWxProductIdInfo" resultType="com.westangel.common.bean.TWeixinProductIdInfo">
+		SELECT
+			t1.hospitalId,
+			t1.productId  as wxProductId,
+			t1.weixinName as wxName
+		FROM 
+		    conf_hospital_wx t1
+		   
+		WHERE 
+		   t1.weixinId=#{weixinId}
+	</select>
+	
+	<select id="findHospitalListInfo" resultType="com.westangel.common.bean.HospitalProfile">
+		SELECT
+			<include refid="base_Column_List"></include>,interconnectionFlag,signedFlag
+		FROM user_db.u_hospital t1
+		left join user_db.conf_hospital_signed t2 on t1.hospitalId=t2.hospitalId
+		<where>
+			<!-- <choose>
+				<when test="state == null">
+					t1.state = 1
+				</when>
+				<when test="state == -1">
+					1=1
+				</when>
+				<otherwise>
+					t1.state = #{state}
+				</otherwise>
+			</choose> -->
+			<if test="hospitalName != null">
+				<bind name="patternHospitalName" value="'%' + hospitalName + '%'" />
+				AND t1.hospitalName LIKE #{patternHospitalName}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 移除医院特色专科 -->
+	<delete id="removeHospitalSpecialtyList">
+		DELETE FROM user_db.r_hospital_specialty where hospitalId=#{hospitalId}
+	</delete>
+	<!-- 增加医院特色专科 -->
+	<insert id="insertHospitalSpecialty">
+		INSERT INTO r_hospital_specialty(hospitalId,specialtyId,createTime)
+		VALUES
+		<foreach collection="specialtys" item="item" index="index" separator=",">
+		(#{hospitalId},#{item.specialtyId},NOW())
+		</foreach>
+	</insert>
+</mapper>

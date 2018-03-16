@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.medicalRecord.EmedicalPhotoOcrsDao">
+
+	<!-- 录入病例照片和OCR表 -->
+	<insert id="insertEmedicalPhotoOcrs" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.EmedicalPhotoOcrs">
+        INSERT INTO e_medical_photo_ocrs (
+        	emrPhotoId ,
+        	emrId ,
+        	ocrApply ,
+        	ocrFlag ,
+        	picFileUrl ,
+        	plainContentType ,
+        	plainContent ,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{emrPhotoId} ,
+        	#{emrId} ,
+        	#{ocrApply} ,
+        	#{ocrFlag} ,
+        	#{picFileUrl} ,
+        	#{plainContentType} ,
+        	#{plainContent} ,
+        	NOW() ,
+        	IFNULL(#{updateTime},NOW())
+        )
+	</insert>
+    
+    <insert id="insertEmedicalPhotoOcrsList" parameterType="java.util.List">
+		INSERT INTO e_medical_photo_ocrs (
+			emrPhotoId ,
+        	emrId ,
+        	ocrApply ,
+        	ocrFlag ,
+        	picFileUrl ,
+        	plainContentType ,
+        	plainContent ,
+        	createTime ,
+        	updateTime 
+        ) VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+		(
+			#{item.emrPhotoId} ,
+        	#{item.emrId} ,
+        	#{item.ocrApply} ,
+        	#{item.ocrFlag} ,
+        	#{item.picFileUrl} ,
+        	#{item.plainContentType} ,
+        	#{item.plainContent} ,
+        	NOW() ,
+        	IFNULL(#{item.updateTime},NOW())
+        )
+		</foreach>
+	</insert>
+	
+    <!-- 修改病例照片和OCR表 -->
+	<update id="updateEmedicalPhotoOcrs" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.EmedicalPhotoOcrs">
+        UPDATE e_medical_photo_ocrs 
+        <set>
+	        <if test="emrId != null">
+                emrId = #{emrId} ,
+            </if>
+	        <if test="ocrApply != null">
+                ocrApply = #{ocrApply} ,
+            </if>
+	        <if test="ocrFlag != null">
+                ocrFlag = #{ocrFlag} ,
+            </if>
+	        <if test="picFileUrl != null">
+                picFileUrl = #{picFileUrl} ,
+            </if>
+	        <if test="plainContentType != null">
+                plainContentType = #{plainContentType} ,
+            </if>
+	        <if test="plainContent != null">
+                plainContent = #{plainContent} ,
+            </if>
+	        <if test="1=1">
+                updateTime = NOW() ,
+            </if>
+        </set>
+        WHERE 
+	        emrPhotoId = #{emrPhotoId} 
+	</update>
+
+	<!-- 删除病例照片和OCR表(ID) -->
+    <delete id="deleteEmedicalPhotoOcrs">
+        DELETE FROM e_medical_photo_ocrs WHERE
+        emrPhotoId = #{emrPhotoId} 
+    </delete>
+    
+    <!-- 删除病例照片和OCR表(根据电子病例ID) -->
+    <delete id="deleteEmedicalPhotoOcrsByEmrId">
+        DELETE FROM e_medical_photo_ocrs WHERE
+        emrId = #{emrId} 
+    </delete>
+    
+    <!-- 查询病例照片和OCR表 明细-->
+    <select id="queryEmedicalPhotoOcrsById" resultType="com.esuizhen.cloudservice.ehr.model.medicalRecord.EmedicalPhotoOcrs">
+		SELECT 
+        	emrPhotoId,
+        	emrId,
+        	ocrApply,
+        	ocrFlag,
+        	picFileUrl,
+        	plainContentType,
+        	plainContent,
+        	createTime,
+        	updateTime
+		FROM e_medical_photo_ocrs 
+	    WHERE 
+	        emrPhotoId = #{emrPhotoId} 
+	</select>
+	
+	<!-- 查询病例照片和OCR表列表 -->
+    <select id="selectEmedicalPhotoOcrsByEmrId" resultType="com.esuizhen.cloudservice.ehr.model.medicalRecord.EmedicalPhotoOcrs">
+		SELECT 
+        	emrPhotoId,
+        	emrId,
+        	ocrApply,
+        	ocrFlag,
+        	picFileUrl,
+        	plainContentType,
+        	plainContent,
+        	createTime,
+        	updateTime
+		FROM e_medical_photo_ocrs 
+	    WHERE 
+	        emrId = #{emrId} 
+	    ORDER BY createTime
+	</select>
+</mapper>
+

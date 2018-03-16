@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.lisrealtime.ReportPushBatchWaitDao">
+
+  <select id="queryReportPushBatchWait" resultType="com.esuizhen.cloudservice.ehr.model.lisrealtime.TReportPushBatch">
+  	select * from lis_realtime_db.ctl_report_push_batch_wait
+  </select>
+  
+  <insert id="insertReportPushBatchWait" parameterType="com.esuizhen.cloudservice.ehr.model.lisrealtime.TReportPushBatch">
+  	insert into lis_realtime_db.ctl_report_push_batch_wait(
+  		reportPushBatchId,userId,patientId,createTime,updateTime
+  	)
+  	values
+  		(#{reportPushBatchId},#{userId},#{patientId},now(),now())
+  </insert>
+  
+  <update id="updateReportPushBatchWait" parameterType="com.esuizhen.cloudservice.ehr.model.lisrealtime.TReportPushBatch">
+  	update lis_realtime_db.ctl_report_push_batch_wait
+  	<set>
+  		<if test="pushState!=null">
+  			pushState=#{pushState},
+  		</if>
+  		<if test="failCause!=null">
+  			failCause=#{failCause},
+  		</if>
+  		<if test="pushTime!=null">
+  			pushTime=#{pushTime},
+  		</if>
+  		<if test="pushCount!=null">
+  			pushCount=#{pushCount}
+  		</if>
+  	</set>
+  	<where>
+  		reportPushBatchId=#{reportPushBatchId}
+  	</where>
+  </update>
+  
+  <delete id="cascadeDeleteReportPushBatchWait">
+  	delete t1,t2
+  	from lis_realtime_db.ctl_report_push_batch_wait t1 join lis_realtime_db.ctl_report_push_batch_detail_wait t2
+  	on t1.reportPushBatchId=t2.reportPushBatchId
+  	where pushState=1 or pushCount>=3
+  </delete>
+</mapper>

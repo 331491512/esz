@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_incre_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.incre.IncreDoctorPatientDao" >
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.sync.model.DoctorPatient">
+		<selectKey resultType="long" keyProperty="doctorId" order="AFTER" >
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO cloud_sync_incre_db.r_doctor_patient(
+			patientUuid,
+			doctorUuid,
+			hospitalId,
+			sourceFlag,
+			sourceDiagnosisFlag,
+			firstVisitFlag,
+			attentionTime,
+			hasMedicalRecord,
+			vipFlag,
+			createTime
+		)VALUES(
+			#{patientUuid,jdbcType=VARCHAR},
+			#{doctorUuid,jdbcType=VARCHAR},
+			#{hospitalId,jdbcType=INTEGER},
+			#{sourceFlag},
+			#{sourceDiagnosisFlag},
+			#{firstVisitFlag},
+			#{attentionTime},
+			#{hasMedicalRecord},
+			#{vipFlag},
+			#{createTime}
+		)
+	</insert>
+	 
+	<delete id="delete">
+	 	DELETE FROM cloud_sync_incre_db.r_hospital_doctor WHERE id=#{id,jdbcType=BIGINT}
+	</delete>
+</mapper>

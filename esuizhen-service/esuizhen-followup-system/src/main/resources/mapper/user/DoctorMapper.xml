@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.user.DoctorDao">
+	<!-- 获取医生的信息 -->
+	<select id="getDoctorById" resultType="com.westangel.common.bean.Doctor">
+		SELECT doctorId,userId,trueName,mobile FROM user_db.u_doctor
+		WHERE doctorId = #{doctorId}
+	</select>
+	
+	<!-- 获取医生的数据访问权限信息 -->
+	<select id="getDataPrivilegeByDoctorId" resultType="com.westangel.common.bean.user.RConfDataPrivilege">
+		select t1.userRole,t1.dataId,t1.privilege 
+		FROM user_db.r_conf_data_privilege t1
+		JOIN user_db.r_user_role t2 ON t1.userRole=t2.userRole 
+		JOIN user_db.u_doctor t3 on t2.userId=t3.userId
+		where t3.doctorId=#{doctorId}
+	</select>
+</mapper>

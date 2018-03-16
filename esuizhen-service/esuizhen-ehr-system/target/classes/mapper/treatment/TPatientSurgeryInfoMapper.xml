@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.treatment.PatientSurgeryDao">
+
+	<insert id="insertPatientSurgeryInfo" parameterType="com.esuizhen.cloudservice.ehr.model.treatment.TPatientSurgeryInfo">
+        INSERT INTO eci_surgery_note (
+        	surgeryId,
+        	inhospitalId,
+        	clinicMedicalId,
+        	emrId ,
+        	patientId ,
+        	patientNo ,
+        	hospitalId ,
+        	deptId,
+        	bedNo,
+        	opCode,
+        	treatmentId,
+        	treatmentSchemeId,
+        	treatmentSchemeName,
+        	opLevel,
+        	opLevelName,
+        	surgeryName,
+        	surgeryDoctor,
+        	surgeryAssistant1,
+        	surgeryAssistant2,
+        	surgeryDate,
+        	surgeryBeginTime,
+        	surgeryEndTime,
+        	anesthesiaDoctor,
+        	anesthesiaWayId,
+        	anesthesiaWay,
+        	preOperativeDiagnosis,
+        	inOperativeDiagnosis,
+        	bodyPosture,
+        	surgeryNurses,
+        	operativeApproach,
+        	operativeProbe,
+        	operativeMeasures,
+        	operativeSituation,
+        	woundClosureWay,
+        	incisionBandagedWay,
+        	remark,
+        	createTime ,
+        	updateTime ,
+        	syncTime,
+        	incisionHealing,
+        	operatorName,
+        	surgeryDoctorName,
+        	surgeryAssistant1Name,
+        	surgeryAssistant2Name,
+        	anesthesiaDoctorName,
+        	serialNum,
+        	incisionHealingId,
+        	incisionLevelId,
+        	healingId,
+        	opCharacter,
+        	incisionCleanliness,
+        	ASALevel,
+        	nOperationLevel,
+        	operationDuration,
+        	incisionInfected,
+        	isEmergency,
+        	riskAssessment
+        ) VALUES (
+        	#{surgeryId} ,
+        	#{inhospitalId} ,
+        	#{clinicMedicalId} ,
+        	#{emrId} ,
+        	#{patientId} ,
+        	#{patientNo} ,
+        	#{hospitalId} ,
+        	#{deptId},
+        	#{bedNo},
+        	#{opCode},
+        	#{treatmentId},
+        	#{treatmentSchemeId},
+        	#{treatmentSchemeName},
+        	#{opLevel},
+        	#{opLevelName},
+        	#{surgeryName},
+        	#{surgeryDoctor},
+        	#{surgeryAssistant1},
+        	#{surgeryAssistant2},
+        	#{surgeryDate},
+        	#{surgeryBeginTime},
+        	#{surgeryEndTime},
+        	#{anesthesiaDoctor},
+        	#{anesthesiaWayId},
+        	#{anesthesiaWay},
+        	#{preOperativeDiagnosis},
+        	#{inOperativeDiagnosis},
+        	#{bodyPosture},
+        	#{surgeryNurses},
+        	#{operativeApproach},
+        	#{operativeProbe},
+        	#{operativeMeasures},
+        	#{operativeSituation},
+        	#{woundClosureWay},
+        	#{incisionBandagedWay},
+        	#{remark},
+        	now() ,
+        	now() ,
+        	#{syncTime},
+        	#{incisionHealing},
+        	#{operatorName},
+        	#{surgeryDoctorName},
+        	#{surgeryAssistant1Name},
+        	#{surgeryAssistant2Name},
+        	#{anesthesiaDoctorName},
+        	#{serialNum},
+        	#{incisionHealingId},
+        	#{incisionLevelId},
+        	#{healingId},
+        	#{opCharacter},
+        	#{incisionCleanliness},
+        	#{ASALevel},
+        	#{nOperationLevel},
+        	#{operationDuration},
+        	#{incisionInfected},
+        	#{isEmergency},
+        	#{riskAssessment}
+        )
+	</insert>
+    <update id="updatePatientSurgeryInfo" parameterType="com.esuizhen.cloudservice.ehr.model.treatment.TPatientSurgeryInfo">
+        UPDATE eci_surgery_note 
+        <set>
+	        <if test="patientNo != null">
+                patientNo = #{patientNo} ,
+            </if>
+	        <if test="bedNo != null">
+                bedNo = #{bedNo} ,
+            </if>
+            <if test="opCode != null">
+                opCode = #{opCode} ,
+            </if>
+	        <if test="treatmentId != null">
+                treatmentId = #{treatmentId} ,
+            </if>
+	        <if test="treatmentSchemeId != null">
+                treatmentSchemeId = #{treatmentSchemeId} ,
+            </if>
+	        <if test="treatmentSchemeName != null">
+                treatmentSchemeName = #{treatmentSchemeName} ,
+            </if>
+	        <if test="opLevel != null">
+                opLevel = #{opLevel} ,
+            </if>
+	        <if test="opLevelName != null">
+                opLevelName = #{opLevelName} ,
+            </if>
+	        <if test="surgeryName != null">
+                surgeryName = #{surgeryName} ,
+            </if>
+	        <if test="surgeryDoctor != null">
+                surgeryDoctor = #{surgeryDoctor} ,
+            </if>
+	        <if test="surgeryAssistant1 != null">
+                surgeryAssistant1 = #{surgeryAssistant1} ,
+            </if>
+	        <if test="surgeryAssistant2 != null">
+                surgeryAssistant2 = #{surgeryAssistant2} ,
+            </if>
+	        <if test="surgeryDate != null">
+                surgeryDate = #{surgeryDate} ,
+            </if>
+	        <if test="surgeryBeginTime != null">
+                surgeryBeginTime = #{surgeryBeginTime} ,
+            </if>
+	        <if test="surgeryEndTime != null">
+                surgeryEndTime = #{surgeryEndTime} ,
+            </if>
+	        <if test="anesthesiaDoctor != null">
+                anesthesiaDoctor = #{anesthesiaDoctor} ,
+            </if>
+	        <if test="anesthesiaWayId != null">
+                anesthesiaWayId = #{anesthesiaWayId} ,
+            </if>
+	        <if test="anesthesiaWay != null">
+                anesthesiaWay = #{anesthesiaWay} ,
+            </if>
+	        <if test="preOperativeDiagnosis != null">
+                preOperativeDiagnosis = #{preOperativeDiagnosis} ,
+            </if>
+	        <if test="inOperativeDiagnosis != null">
+                inOperativeDiagnosis = #{inOperativeDiagnosis} ,
+            </if>
+            <if test="bodyPosture != null">
+                bodyPosture = #{bodyPosture} ,
+            </if>
+	        <if test="surgeryNurses != null">
+                surgeryNurses = #{surgeryNurses} ,
+            </if>
+	        <if test="operativeApproach != null">
+                operativeApproach = #{operativeApproach} ,
+            </if>
+	        <if test="operativeProbe != null">
+                operativeProbe = #{operativeProbe} ,
+            </if>
+	        <if test="operativeMeasures != null">
+                operativeMeasures = #{operativeMeasures} ,
+            </if>
+	        <if test="operativeSituation != null">
+                operativeSituation = #{operativeSituation} ,
+            </if>
+	        <if test="woundClosureWay != null">
+                woundClosureWay = #{woundClosureWay} ,
+            </if>
+	        <if test="incisionBandagedWay != null">
+                incisionBandagedWay = #{incisionBandagedWay} ,
+            </if>
+	        <if test="remark != null">
+                remark = #{remark} ,
+            </if>
+                incisionHealing = #{incisionHealing} ,
+	        <if test="operatorName != null">
+                operatorName = #{operatorName} ,
+            </if>
+	        <if test="surgeryDoctorName != null">
+                surgeryDoctorName = #{surgeryDoctorName} ,
+            </if>
+	        <if test="surgeryAssistant1Name != null">
+                surgeryAssistant1Name = #{surgeryAssistant1Name} ,
+            </if>
+	        <if test="surgeryAssistant2Name != null">
+                surgeryAssistant2Name = #{surgeryAssistant2Name} ,
+            </if>
+	        <if test="anesthesiaDoctorName != null">
+                anesthesiaDoctorName = #{anesthesiaDoctorName} ,
+            </if>
+	        <if test="incisionHealingId != null">
+                incisionHealingId = #{incisionHealingId} ,
+            </if>
+                incisionLevelId = #{incisionLevelId} ,
+                healingId = #{healingId} ,
+	        <if test="opCharacter != null">
+                opCharacter = #{opCharacter} ,
+            </if>
+	        <if test="incisionCleanliness != null">
+                incisionCleanliness = #{incisionCleanliness} ,
+            </if>
+	        <if test="ASALevel != null">
+                ASALevel = #{ASALevel} ,
+            </if>
+	        <if test="nOperationLevel != null">
+                nOperationLevel = #{nOperationLevel} ,
+            </if>
+	        <if test="operationDuration != null">
+                operationDuration = #{operationDuration} ,
+            </if>
+	        <if test="incisionInfected != null">
+                incisionInfected = #{incisionInfected} ,
+            </if>
+	        <if test="isEmergency != null">
+                isEmergency = #{isEmergency} ,
+            </if>
+	        <if test="riskAssessment != null">
+                riskAssessment = #{riskAssessment} ,
+            </if>
+            updateTime = NOW() 
+        </set>
+        WHERE 
+	        surgeryId = #{surgeryId}
+	</update>
+
+    <delete id="deletePatientSurgeryInfo">
+        DELETE FROM eci_surgery_note WHERE 1
+        <choose>
+        <when test="surgeryId != null">
+        	and surgeryId = #{surgeryId}
+        </when>
+        <otherwise>
+	        <choose>
+		    	<when test="clinicMedicalId != null">
+		    		and clinicMedicalId=#{clinicMedicalId}
+		    	</when>
+		    	<otherwise>
+		    		and inhospitalId=#{inhospitalId}
+		    	</otherwise>
+		    </choose> 
+        </otherwise>
+        </choose>
+    </delete>
+    
+    <select id="queryPatientSurgeryInfoByInHospitalId" resultType="com.esuizhen.cloudservice.ehr.model.treatment.TPatientSurgeryInfo">
+		SELECT 
+        	surgeryId,
+        	inhospitalId,
+        	incisionHealingId,
+        	incisionLevelId,
+        	healingId,
+        	emrId ,
+        	patientId ,
+        	patientNo ,
+        	hospitalId ,
+        	deptId,
+        	bedNo,
+        	opCode,
+        	treatmentSchemeId,
+        	treatmentSchemeName,
+        	opLevel,
+        	opLevelName,
+        	surgeryName,
+        	surgeryDoctor,
+        	surgeryAssistant1,
+        	surgeryAssistant2,
+        	surgeryDate,
+        	surgeryBeginTime,
+        	surgeryEndTime,
+        	anesthesiaDoctor,
+        	anesthesiaWayId,
+        	CASE WHEN anesthesiaWayId IS NULL THEN anesthesiaWay ELSE (SELECT anesthesiaName FROM meta_e_anesthesia_way WHERE anesthesiaId=eci_surgery_note.anesthesiaWayId) END anesthesiaWay,
+        	preOperativeDiagnosis,
+        	inOperativeDiagnosis,
+        	bodyPosture,
+        	surgeryNurses,
+        	operativeApproach,
+        	operativeProbe,
+        	operativeMeasures,
+        	operativeSituation,
+        	woundClosureWay,
+        	incisionBandagedWay,
+        	remark,
+        	createTime ,
+        	updateTime ,
+        	syncTime,
+        	incisionHealing,
+        	operatorName,
+        	surgeryDoctorName,
+        	surgeryAssistant1Name,
+        	surgeryAssistant2Name,
+        	anesthesiaDoctorName,
+        	serialNum,
+        	opCharacter,
+        	(select operationNatureName from meta_operation_nature where operationNatureCode = opCharacter) opCharacterName,
+        	incisionCleanliness,
+        	ASALevel,
+        	nOperationLevel,
+        	operationDuration,
+        	incisionInfected,
+        	isEmergency,
+        	treatmentId,
+        	riskAssessment
+		FROM eci_surgery_note 
+	    WHERE 1
+	        <choose>
+	        	<when test="clinicMedicalId != null">
+	        		and clinicMedicalId=#{clinicMedicalId}
+	        	</when>
+	        	<otherwise>
+	        		and inhospitalId=#{inhospitalId}
+	        	</otherwise>
+	        </choose>
+	    <!-- 
+	    order by createTime,serialNum 
+	     -->
+	     order by operationNo
+	</select>
+	
+	<!-- 获取第一手术  -->
+	<select id="queryFirstOperatorByInHospitalId" resultType="com.esuizhen.cloudservice.ehr.model.treatment.TPatientSurgeryInfo">
+		SELECT 
+        	surgeryId,
+        	inhospitalId,
+        	incisionHealingId,
+        	incisionLevelId,
+        	healingId,
+        	emrId ,
+        	patientId ,
+        	patientNo ,
+        	hospitalId ,
+        	deptId,
+        	bedNo,
+        	opCode,
+        	treatmentSchemeId,
+        	treatmentSchemeName,
+        	opLevel,
+        	opLevelName,
+        	surgeryName,
+        	surgeryDoctor,
+        	surgeryAssistant1,
+        	surgeryAssistant2,
+        	min(surgeryDate) surgeryDate,
+        	surgeryBeginTime,
+        	surgeryEndTime,
+        	anesthesiaDoctor,
+        	CASE WHEN anesthesiaWayId IS NULL THEN anesthesiaWay ELSE (SELECT anesthesiaName FROM meta_e_anesthesia_way WHERE anesthesiaId=eci_surgery_note.anesthesiaWayId) END anesthesiaWay,
+        	preOperativeDiagnosis,
+        	inOperativeDiagnosis,
+        	bodyPosture,
+        	surgeryNurses,
+        	operativeApproach,
+        	operativeProbe,
+        	operativeMeasures,
+        	operativeSituation,
+        	woundClosureWay,
+        	incisionBandagedWay,
+        	remark,
+        	createTime ,
+        	updateTime ,
+        	syncTime,
+        	incisionHealing incisionHealingLevel,
+        	operatorName,
+        	surgeryDoctorName,
+        	surgeryAssistant1Name,
+        	surgeryAssistant2Name,
+        	anesthesiaDoctorName,
+        	serialNum,
+        	opCharacter,
+        	incisionCleanliness,
+        	ASALevel,
+        	nOperationLevel,
+        	operationDuration,
+        	incisionInfected,
+        	isEmergency,
+        	riskAssessment
+		FROM eci_surgery_note 
+	    WHERE 
+	        inhospitalId = #{inhospitalId}
+	</select>
+	<insert id="batchInsertSurgeryInfo">
+        INSERT INTO eci_surgery_note (
+        	surgeryId,
+        	inhospitalId,
+        	clinicMedicalId,
+        	emrId ,
+        	patientId ,
+        	patientNo ,
+        	hospitalId ,
+        	deptId,
+        	bedNo,
+        	opCode,
+        	treatmentSchemeId,
+        	treatmentSchemeName,
+        	opLevel,
+        	opLevelName,
+        	surgeryName,
+        	surgeryDoctor,
+        	surgeryAssistant1,
+        	surgeryAssistant2,
+        	surgeryDate,
+        	surgeryBeginTime,
+        	surgeryEndTime,
+        	anesthesiaDoctor,
+        	anesthesiaWay,
+        	preOperativeDiagnosis,
+        	inOperativeDiagnosis,
+        	bodyPosture,
+        	surgeryNurses,
+        	operativeApproach,
+        	operativeProbe,
+        	operativeMeasures,
+        	operativeSituation,
+        	woundClosureWay,
+        	incisionBandagedWay,
+        	remark,
+        	createTime ,
+        	updateTime ,
+        	syncTime,
+        	incisionHealing,
+        	operatorName,
+        	surgeryDoctorName,
+        	surgeryAssistant1Name,
+        	surgeryAssistant2Name,
+        	anesthesiaDoctorName,
+        	serialNum,
+        	incisionHealingId,
+        	incisionLevelId,
+        	healingId,
+        	anesthesiaWayId,
+        	opCharacter,
+        	incisionCleanliness,
+        	ASALevel,
+        	nOperationLevel,
+        	operationDuration,
+        	incisionInfected,
+        	isEmergency,
+        	riskAssessment
+        ) VALUES 
+        <foreach collection="surgeryList" item="item" separator=",">
+        	(
+	        	#{item.surgeryId} ,
+	        	#{item.inhospitalId} ,
+	        	#{item.clinicMedicalId} ,
+	        	1 ,
+	        	#{item.patientId} ,
+	        	#{item.patientNo} ,
+	        	#{item.hospitalId} ,
+	        	#{item.deptId},
+	        	#{item.bedNo},
+	        	#{item.opCode},
+	        	#{item.treatmentSchemeId},
+	        	#{item.treatmentSchemeName},
+	        	#{item.opLevel},
+	        	#{item.opLevelName},
+	        	#{item.surgeryName},
+	        	#{item.surgeryDoctor},
+	        	#{item.surgeryAssistant1},
+	        	#{item.surgeryAssistant2},
+	        	#{item.surgeryDate},
+	        	#{item.surgeryBeginTime},
+	        	#{item.surgeryEndTime},
+	        	#{item.anesthesiaDoctor},
+	        	#{item.anesthesiaWay},
+	        	#{item.preOperativeDiagnosis},
+	        	#{item.inOperativeDiagnosis},
+	        	#{item.bodyPosture},
+	        	#{item.surgeryNurses},
+	        	#{item.operativeApproach},
+	        	#{item.operativeProbe},
+	        	#{item.operativeMeasures},
+	        	#{item.operativeSituation},
+	        	#{item.woundClosureWay},
+	        	#{item.incisionBandagedWay},
+	        	#{item.remark},
+	        	now() ,
+	        	now() ,
+	        	#{item.syncTime},
+	        	#{item.incisionHealingLevel},
+	        	#{item.operatorName},
+	        	#{item.surgeryDoctorName},
+	        	#{item.surgeryAssistant1Name},
+	        	#{item.surgeryAssistant2Name},
+	        	#{item.anesthesiaDoctorName},
+	        	#{item.serialNum},
+	        	#{item.incisionHealingId},
+	        	#{item.incisionLevelId},
+        		#{item.healingId},
+	        	#{item.anesthesiaWayId},
+	        	#{item.opCharacter},
+	        	#{incisionCleanliness},
+	        	#{ASALevel},
+	        	#{nOperationLevel},
+	        	#{operationDuration},
+	        	#{incisionInfected},
+	        	#{isEmergency},
+	        	#{riskAssessment}
+	        )
+        </foreach>
+	</insert>
+</mapper>
+

@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_match_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.match.MatchDiagnosisInfoDao" >
+		<sql id="base_column_list">
+		diagnosisId,
+		icdDiseaseTypeId,
+		emrId,
+		mainID,
+		patientNo,
+		inhospitalNo,
+		isFollowup,
+		specialDiseaseDiagnosisId,
+		suspectedDiagnosisFlag,
+		surgeryFlag,
+		seq,
+		diseaseTypeId,
+		diagnosisTypeId,
+		diagnosis,
+		diseaseCode,
+		diseaseBodyPartId,
+		pathologyDiagnosis,
+		pathologyDiagnosisCode,
+		isSourceDiagnosis,
+		inhospitalId,
+		inhospitalTimes,
+		outHospitalCondition,
+		organCode,
+		organName,
+		diagnosisExplain,
+		diagnosisBasisId,
+		diseaseBasis,
+		inhospitalCondition,
+		patientId,
+		creator,
+		operatorId,
+		diagnosisDoctorId,
+		patientUuid,
+		creatorUuid,
+		operatorUuid,
+		diagnosisDoctorUuid,
+		firstdiagnosisHospitalId,
+		firstdiagnosisHospitalName,
+		firstdiagnosisTime,
+		diagnosisDoctorName,
+		remark,
+		zdyCode,
+		eszCode,
+		treatmentHistory,
+		sourceCancerCount,
+		disagnosisPeriodizationId,
+		clinicNo,
+		tumourPeriodizationClinic,
+		tumourPeriodization,
+		outhospitalDiagnosis,
+		outhospitalDiagnosisCode,
+		visitTime,
+		createTime,
+		updateTime,
+		rawCreateTime,
+		syncTime
+	</sql>
+	
+	<select id="findByPatientUuid" resultType="com.esuizhen.cloudservice.sync.bean.TPatientDiagnosisNoteDetailInfo" parameterType="java.lang.String">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM cloud_sync_match_db.e_diagnosis_info t1
+		WHERE t1.patientUuid=#{patientUuid,jdbcType=VARCHAR}
+	</select>
+	
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.sync.model.DiagnosisInfo" >
+		INSERT INTO cloud_sync_match_db.e_diagnosis_info(
+			diagnosisId,
+			icdDiseaseTypeId,
+			emrId,
+			mainID,  
+			patientNo,
+			inhospitalNo,
+			isFollowup,
+			specialDiseaseDiagnosisId,
+			suspectedDiagnosisFlag,
+			surgeryFlag,
+			seq,
+			diseaseTypeId,
+			diagnosisTypeId, 
+			diagnosis,
+			diseaseCode, 
+			diseaseBodyPartId, 
+			pathologyDiagnosis, 
+			pathologyDiagnosisCode, 
+			isSourceDiagnosis, 
+			inhospitalId,
+			inhospitalTimes,
+			outHospitalCondition,
+			organCode,
+			organName,
+			diagnosisExplain,
+			diagnosisBasisId,
+			diseaseBasis,
+			inhospitalCondition,
+			patientId,
+			creator,
+			operatorId,
+			diagnosisDoctorId,
+			patientUuid,
+			creatorUuid,
+			operatorUuid,
+			diagnosisDoctorUuid,
+			firstdiagnosisHospitalId,
+			firstdiagnosisHospitalName,
+			firstdiagnosisTime,
+			diagnosisDoctorName,
+			remark, 
+			zdyCode,
+			eszCode,
+			treatmentHistory,
+			sourceCancerCount,
+			disagnosisPeriodizationId,
+			clinicNo,
+			tumourPeriodizationClinic,
+			tumourPeriodization,
+			outhospitalDiagnosis,
+			outhospitalDiagnosisCode,
+			visitTime, 
+			createTime, 
+			updateTime,
+			rawCreateTime,
+			syncTime
+		)VALUES(
+			#{diagnosisId},
+			#{icdDiseaseTypeId},
+			#{emrId},
+			#{mainID},
+			#{patientNo},
+			#{inhospitalNo},
+			#{isFollowup},
+			#{specialDiseaseDiagnosisId},
+			#{suspectedDiagnosisFlag},
+			#{surgeryFlag},
+			#{seq},
+			#{diseaseTypeId},
+			#{diagnosisTypeId},
+			#{diagnosis},
+			#{diseaseCode},
+			#{diseaseBodyPartId},
+			#{pathologyDiagnosis},
+			#{pathologyDiagnosisCode},
+			#{isSourceDiagnosis},
+			#{inhospitalId},
+			#{inhospitalTimes},
+			#{outHospitalCondition},
+			#{organCode},
+			#{organName},
+			#{diagnosisExplain},
+			#{diagnosisBasisId},
+			#{diseaseBasis},
+			#{inhospitalCondition},
+			#{patientId},
+			#{creator},
+			#{operatorId},
+			#{diagnosisDoctorId},
+			#{patientUuid},
+			#{creatorUuid},
+			#{operatorUuid},
+			#{diagnosisDoctorUuid},
+			#{firstdiagnosisHospitalId},
+			#{firstdiagnosisHospitalName},
+			#{firstdiagnosisTime},
+			#{diagnosisDoctorName},
+			#{remark},
+			#{zdyCode},
+			#{eszCode},
+			#{treatmentHistory},
+			#{sourceCancerCount},
+			#{disagnosisPeriodizationId},
+			#{clinicNo},
+			#{tumourPeriodizationClinic},
+			#{tumourPeriodization},
+			#{outhospitalDiagnosis},
+			#{outhospitalDiagnosisCode},
+			#{visitTime},
+			#{createTime},
+			#{updateTime},
+			#{rawCreateTime},
+			NOW()
+		)
+	 </insert>
+	 
+	 <update id="updatePatientUuid">
+	 	UPDATE cloud_sync_match_db.e_diagnosis_info
+	 	<set>
+	 		<if test="uuidFinal != null">
+	 			patientUuid=#{uuidFinal,jdbcType=VARCHAR}
+	 		</if>
+	 	</set>
+	 	WHERE patientUuid IN
+		(
+			<foreach collection="uuidRelationships" item="uuidRelationship" index="index" separator=",">
+				#{uuidRelationship.uuid,jdbcType=VARCHAR}
+			</foreach>
+		)
+	 </update>
+	 
+	 <delete id="delete" parameterType="java.lang.String">
+	 	DELETE FROM cloud_sync_match_db.e_diagnosis_info WHERE diagnosisId=#{diagnosisId,jdbcType=VARCHAR}
+	 </delete>
+</mapper>

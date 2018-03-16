@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followupRecords.FollowupConvQuestionTreatmentDetailDao">
+
+	<select id="getTreatmentTypeDetails" parameterType="java.lang.Long" resultType="com.esuizhen.cloudservice.followup.bean.TreatmentDetailReq">
+		SELECT 
+			d.mainQuestionItemId,
+			d.treatmentTypeId,
+			d.startTime treatmentTime,
+			d.treatmentDesc,
+			d.treatmentNum,
+			m.treatmentTypeName,
+			d.continualTimeDesc,
+			d.startTime,
+			d.endTime,
+			m.sortNum
+		FROM followup_db.followup_conv_question_treatment_detail d
+		INNER JOIN followup_db.followup_conv_main_question_item f ON f.followupConvQuestionId=#{followupConvQuestionId}
+					AND f.questionType=5 AND f.mainQuestionItemId=d.mainQuestionItemId
+		INNER JOIN  ehr_db.meta_e_treatment m ON m.treatmentTypeId=d.treatmentTypeId
+		ORDER BY m.sortNum,m.createTime ASC
+	</select>
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.followup.bean.TreatmentDetailReq">
+		INSERT INTO followup_db.followup_conv_question_treatment_detail (
+			<!-- convQuestionTreatmentDetailId, -->
+			mainQuestionItemId,
+			followupConvQuestionId,
+			treatmentTypeId,
+			treatmentDesc,
+			treatmentNum,
+			continualTimeDesc,
+			startTime,
+			endTime,
+			createTime
+		)VALUES(
+			<!-- convQuestionTreatmentDetailId, -->
+			#{mainQuestionItemId},
+			#{followupConvQuestionId},
+			#{treatmentTypeId},
+			#{treatmentDesc},
+			#{treatmentNum},
+			#{continualTimeDesc},
+			IFNULL(#{startTime},#{treatmentTime}),
+			#{endTime},
+			NOW()
+		)
+	</insert>
+	<delete id="deleteByMQIId" parameterType="java.lang.Long">
+		DELETE FROM followup_db.followup_conv_question_treatment_detail
+		WHERE mainQuestionItemId=#{mainQuestionItemId}
+	</delete>
+</mapper>

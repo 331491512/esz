@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.cloud.QuestionnaireResultStemDao">
+	<resultMap type="com.esuizhen.cloudservice.sync.model.QuestionnaireResultStem" id="QuestionnaireResultStemResultMap">
+		<id column="questionnaireResultStemId" property="questionnaireResultStemId"/>
+		<result column="questionnaireResultId" property="questionnaireResultId"/>
+		<result column="questionnaireStemId" property="questionnaireStemId"/>
+		<result column="questionnaireId" property="questionnaireId"/>
+		<result column="mandatoryFlag" property="mandatoryFlag"/>
+		<result column="sectionId" property="sectionId"/>
+		<result column="sectionTitle" property="sectionTitle"/>
+		<result column="stemIndex" property="stemIndex"/>
+		<result column="stemCode" property="stemCode"/>
+		<result column="content" property="content"/>
+		<result column="questionType" property="questionType"/>
+		<result column="answerFlag" property="answerFlag"/>
+		<result column="createTime" property="createTime"/>
+		<result column="updateTime" property="updateTime"/>
+	</resultMap>
+	<resultMap type="com.esuizhen.cloudservice.sync.model.QuestionnaireResultStem" id="QuestionnaireResultOptionsResultMap" extends="QuestionnaireResultStemResultMap">
+  		<collection property="questionOptions" column="questionnaireResultStemId" select="com.esuizhen.cloudservice.sync.dao.cloud.QuestionnaireResultOptionsDetailDao.queryResultOptionsDetailByResultStemId"/>
+  	</resultMap>
+    
+    <select id="queryQuestionnaireResultStemByResultId" resultMap="QuestionnaireResultOptionsResultMap">
+		SELECT 
+        	questionnaireResultStemId,
+        	questionnaireResultId,
+        	questionnaireStemId,
+        	questionnaireId,
+        	mandatoryFlag,
+        	sectionId,
+        	sectionTitle,
+        	stemIndex,
+        	stemCode,
+        	content,
+        	questionType,
+        	answerFlag,
+        	createTime,
+        	updateTime
+		FROM followup_db.questionnaire_result_stem 
+	    WHERE 
+	        questionnaireResultId = #{questionnaireResultId} 
+	</select>
+</mapper>
+

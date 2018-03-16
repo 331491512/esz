@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.result.TCrfResultAdverseReactionInfoDao">
+
+	<resultMap id="crfResultAdverseReactionInfoMap" type="com.esuizhen.cloudservice.research.model.result.TCrfResultMainInfo" >
+		<result property="crfResultId" column="crfResultId" />
+		<result property="crfObserveId" column="crfObserveId" />
+		<result property="subjectElementId" column="subjectElementId" />
+		<result property="projectId" column="projectId" />
+		<result property="patientId" column="patientId" />
+		<result property="creatorId" column="creatorId" />
+		<result property="happenTime" column="happenTime"/>
+		<result property="crfCourseItemTime" column="crfCourseItemTime" />
+		
+		<collection property="crfResult" javaType="ArrayList" ofType="com.esuizhen.cloudservice.research.model.result.TCrfResultAdverseReactionInfo">
+			<result property="crfAdverseReactionResultId" column="crfAdverseReactionResultId" />
+			<result property="crfResultId" column="crfResultId" />
+			<result property="adverseReactionId" column="adverseReactionId" />
+			<result property="adverseReactionName" column="adverseReactionName" />
+			<result property="level" column="level" />
+			<result property="takeSteps" column="takeSteps" />
+			<result property="researchRelationship" column="researchRelationship" />
+			<result property="theOutcome" column="theOutcome" />
+			<result property="beginTime" column="beginTime" />
+			<result property="endTime" column="endTime" />
+		</collection>
+	</resultMap>
+	
+	<insert id="insertCrfResultAdverseReaction" parameterType="com.esuizhen.cloudservice.research.model.result.TCrfResultAdverseReactionInfo">
+		
+        INSERT INTO crf_result_adverse_reaction (
+        	crfAdverseReactionResultId ,
+        	crfResultId ,
+        	adverseReactionId ,
+        	adverseReactionName ,
+        	level ,
+        	takeSteps ,
+        	researchRelationship ,
+        	theOutcome ,
+        	beginTime ,
+        	endTime ,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{crfAdverseReactionResultId} ,
+        	#{crfResultId} ,
+        	#{adverseReactionId} ,
+        	#{adverseReactionName} ,
+        	#{level} ,
+        	#{takeSteps} ,
+        	#{researchRelationship} ,
+        	#{theOutcome} ,
+        	#{beginTime} ,
+        	#{endTime} ,
+        	NOW() ,
+        	NOW()
+        )
+	</insert>
+    
+    <insert id="insertCrfResultAdverseReactionList" parameterType="java.util.List">
+        INSERT INTO crf_result_adverse_reaction 
+        (
+        	crfAdverseReactionResultId ,
+        	crfResultId ,
+        	adverseReactionId ,
+        	adverseReactionName ,
+        	level ,
+        	takeSteps ,
+        	researchRelationship ,
+        	theOutcome ,
+        	beginTime ,
+        	endTime ,
+        	`index`,
+        	createTime ,
+        	updateTime 
+        ) VALUES 
+        <foreach collection="list" index="index" item="item" separator=",">
+        (
+        	#{item.crfAdverseReactionResultId} ,
+        	#{item.crfResultId} ,
+        	#{item.adverseReactionId} ,
+        	#{item.adverseReactionName} ,
+        	#{item.level} ,
+        	#{item.takeSteps} ,
+        	#{item.researchRelationship} ,
+        	#{item.theOutcome} ,
+        	#{item.beginTime} ,
+        	#{item.endTime} ,
+        	#{item.index} ,
+        	NOW() ,
+        	NOW()
+        )
+        </foreach>
+	</insert>
+	
+	<update id="updateCrfResultAdverseReaction" parameterType="com.esuizhen.cloudservice.research.model.result.TCrfResultAdverseReactionInfo">
+        UPDATE crf_result_adverse_reaction 
+        <set>
+	        <if test="crfResultId != null">
+                crfResultId = #{crfResultId} ,
+            </if>
+	        <if test="adverseReactionId != null">
+                adverseReactionId = #{adverseReactionId} ,
+            </if>
+	        <if test="adverseReactionName != null">
+                adverseReactionName = #{adverseReactionName} ,
+            </if>
+	        <if test="level != null">
+                level = #{level} ,
+            </if>
+	        <if test="takeSteps != null">
+                takeSteps = #{takeSteps} ,
+            </if>
+	        <if test="researchRelationship != null">
+                researchRelationship = #{researchRelationship} ,
+            </if>
+	        <if test="theOutcome != null">
+                theOutcome = #{theOutcome} ,
+            </if>
+	        <if test="beginTime != null">
+                beginTime = #{beginTime} ,
+            </if>
+	        <if test="endTime != null">
+                endTime = #{endTime} ,
+            </if>
+	        <if test="updateTime != null">
+                updateTime = NOW() ,
+            </if>
+        </set>
+        WHERE 
+	        crfAdverseReactionResultId = #{crfAdverseReactionResultId} 
+	</update>
+
+    <delete id="deleteCrfResultAdverseReaction">
+        DELETE FROM crf_result_adverse_reaction WHERE crfAdverseReactionResultId = #{crfAdverseReactionResultId} 
+    </delete>
+    
+    <delete id="deleteCrfResultAdverseReactionByCrfResultId">
+        DELETE FROM crf_result_adverse_reaction WHERE crfResultId = #{crfResultId} 
+    </delete>
+    
+    <select id="queryCrfResultAdverseReactionById" resultType="com.esuizhen.cloudservice.research.model.result.TCrfResultAdverseReactionInfo">
+		SELECT 
+        	crfAdverseReactionResultId,
+        	crfResultId,
+        	adverseReactionId,
+        	adverseReactionName,
+        	level,
+        	takeSteps,
+        	researchRelationship,
+        	theOutcome,
+        	beginTime,
+        	endTime,
+        	createTime,
+        	updateTime
+		FROM crf_result_adverse_reaction 
+	    WHERE 
+	        crfAdverseReactionResultId = #{crfAdverseReactionResultId}
+	</select>
+	
+	<select id="queryCrfResultAdverseReactionByCrfObserveIdAndPatientId" resultMap="crfResultAdverseReactionInfoMap">
+		SELECT 
+			t1.crfResultId,
+	    	t1.crfObserveId,
+	    	t1.subjectElementId,
+	    	t1.projectId,
+	    	t1.patientId,
+	    	t1.creatorId,
+        	t2.crfAdverseReactionResultId,
+        	t2.adverseReactionId,
+        	t2.adverseReactionName,
+        	t2.level,
+        	t2.takeSteps,
+        	t2.researchRelationship,
+        	t2.theOutcome,
+        	t2.beginTime,
+        	t2.endTime
+		FROM crf_result_main t1 , crf_result_adverse_reaction t2
+	    WHERE t1.crfResultId=t2.crfResultId
+		AND t1.crfObserveId=#{crfObserveId}
+		AND t1.patientId=#{patientId}
+		ORDER BY t2.`index` ASC
+	</select>
+	
+	<select id="queryCrfResultAdverseReactionRecords" resultType="com.esuizhen.cloudservice.research.model.result.TCrfResultAdverseReactionInfo">
+		SELECT
+			<include refid="base_column_list"/>
+		FROM pro_db.crf_result_adverse_reaction t1
+			INNER JOIN pro_db.crf_result_main t2 ON t1.crfResultId  = t2.crfResultId
+		WHERE t2.projectId = #{projectId} AND t2.patientId = #{patientId}
+		ORDER BY t1.beginTime DESC
+	</select>
+	
+	<sql id="base_column_list">
+		t1.crfAdverseReactionResultId,
+		t1.crfResultId,
+		t1.adverseReactionId,
+		t1.adverseReactionName,
+		t1.`level`,
+		t1.takeSteps,
+		t1.researchRelationship,
+		t1.theOutcome,
+		t1.beginTime,
+		t1.endTime,
+		t1.createTime,
+		t1.updateTime
+	</sql>
+	
+	<delete id="deleteByProjectId">
+		DELETE
+			i6.*
+		FROM pro_db.crf_result_main i1,
+			pro_db.crf_observation_subject_element i2,
+			pro_db.crf_course_detail i3,
+			pro_db.crf_course i4,
+			pro_db.r_crftemplate_project i5,
+			pro_db.crf_result_adverse_reaction i6
+		WHERE i1.crfObserveId = i2.crfObserveId
+			AND i2.crfCourseItemId = i3.crfCourseItemId
+			AND i3.crfCourseId = i4.crfCourseId
+			AND i4.crfTemplateId = i5.crfTemplateId
+			AND i5.projectId = #{projectId}
+	</delete>
+</mapper>
+

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.user.dao.VarPatientDoctorMedicalDao">
+	
+	<!-- 创建医患关系病历关系 -->
+	<insert id="createVarPatientDoctorMedical">
+		INSERT INTO ehr_db.var_patient_doctor_medical(patientId,doctorId,medicalRecordCount,createTime)
+		VALUES
+		(#{patientId},#{doctorId},
+		(select count(emrId) from ehr_db.e_medical_record where patientId = #{patientId} and (visibleFlag =1 or (visibleFlag in (2,3) and creatorId=#{doctorId})))
+		,NOW()
+		)
+		ON DUPLICATE KEY UPDATE
+		medicalRecordCount = VALUEs(medicalRecordCount),
+		updateTime = NOW()
+	</insert>
+	
+	<!-- 更新医患关系病历关系 -->
+	<update id="modifyVarPatientDoctorMedical">
+		update ehr_db.var_patient_doctor_medical
+		<set>
+			updateTime=now(),
+			latestMedicalRecordUploadTime =now(),
+			medicalRecordCount=medicalRecordCount+#{addCount}
+		</set>
+		where patientId = #{patientId}
+		<if test="visibleFlag==2||visibleFlag==3">
+			AND doctorId = #{creatorId}
+		</if>
+	</update>
+	
+	<update id="updateInfoToCloudPatientInfo">
+		UPDATE ehr_db.var_patient_doctor_medical t1 JOIN
+		(
+		SELECT id FROM ehr_db.var_patient_doctor_medical
+		WHERE
+			patientId = #{tobPatientId}
+		AND NOT EXISTS (
+			SELECT
+				0
+			FROM
+				ehr_db.var_patient_doctor_medical t1
+			WHERE
+				patientId =  #{cloudPatientId}
+			AND doctorId = t1.doctorId
+		)
+		)t2 ON t1.id = t2.id
+		<set>
+			patientId = #{cloudPatientId}
+		</set>
+	</update>
+	
+	<!-- 删除医患关系中间表 -->
+	<delete id="deleteVarPatientDoctorMedical">
+		delete from ehr_db.var_patient_doctor_medical where patientId =#{patientId} and doctorId=#{doctorId} 
+	</delete>
+	
+	<delete id="deleteByPatientId">
+		DELETE FROM ehr_db.var_patient_doctor_medical
+		WHERE patientId=#{patientId}
+	</delete>
+</mapper>
+

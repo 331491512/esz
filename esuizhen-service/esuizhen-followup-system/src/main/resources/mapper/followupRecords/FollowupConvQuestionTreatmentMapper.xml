@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followupRecords.FollowupConvQuestionTreatmentDao">
+
+	<select id="getTreatmentTypes" parameterType="java.lang.Long" resultType="com.esuizhen.cloudservice.followup.bean.TreatmentTypeReq">
+		SELECT
+			 (SELECT n.mainQuestionItemId FROM followup_db.followup_conv_question_treatment n
+				INNER JOIN  followup_db.followup_conv_main_question_item m ON m.questionType=1 AND m.followupConvQuestionId=#{followupConvQuestionId} AND n.mainQuestionItemId=m.mainQuestionItemId
+				where n.treatmentTypeId=t.treatmentTypeId LIMIT 1) mainQuestionItemId,
+			t.treatmentTypeId,
+			t.treatmentTypeName,
+			(SELECT CASE WHEN n.mainQuestionItemId  IS NULL THEN 0 ELSE 1 END FROM followup_db.followup_conv_question_treatment n
+				INNER JOIN  followup_db.followup_conv_main_question_item m ON m.questionType=1 AND m.followupConvQuestionId=#{followupConvQuestionId} AND n.mainQuestionItemId=m.mainQuestionItemId
+				where n.treatmentTypeId=t.treatmentTypeId LIMIT 1) choseFlag,
+			t.sortNum
+		FROM ehr_db.meta_e_treatment t
+		WHERE t.sortNum!=-1 ORDER BY t.sortNum ASC
+	</select>
+	
+	<select id="judgeTreatmentTypes" parameterType="com.esuizhen.cloudservice.followup.bean.TreatmentTypeReq" resultType="java.lang.Integer">
+		SELECT 1 FROM followup_db.followup_conv_main_question_item m
+		INNER JOIN followup_db.followup_conv_question_treatment f ON f.mainQuestionItemId=m.mainQuestionItemId AND f.treatmentTypeId=#{treatmentTypeId}
+		WHERE m.questionType=1 AND m.followupConvQuestionId=#{followupConvQuestionId}
+	</select>
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.followup.bean.TreatmentTypeReq">
+		INSERT INTO followup_db.followup_conv_question_treatment (
+			<!-- convQuestionTreatmentId, -->
+			mainQuestionItemId,
+			followupConvQuestionId,
+			treatmentTypeId,
+			createTime
+		) VALUES (
+			<!-- convQuestionTreatmentId, -->
+			#{mainQuestionItemId},
+			#{followupConvQuestionId},
+			#{treatmentTypeId},
+			NOW()
+		)
+	</insert>
+	<delete id="deleteByMQIId" parameterType="java.lang.Long">
+		DELETE FROM followup_db.followup_conv_question_treatment
+		WHERE mainQuestionItemId=#{mainQuestionItemId}
+	</delete>
+</mapper>

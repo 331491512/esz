@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_incre_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.match.MatchOutHospitalNoteDao" >
+	<sql id="base_column_list">
+		outhospitalId, inhospitalId, inhospitalNo, emrId, patientuuId, patientNo, 
+			hospitalId, inhospitalDate, outhospitalDate, inhospitalDays, symptomSummary, 
+			inhospitalDiagnosis, treatmentSummary, outhospitalDiagnosis, outhospitalDoctorAdvice, 
+			summaryContent,rawContent,createTime, updateTime,
+			mainID,inhospitalTimes,outhospitalSummary,
+			contentType,rawCreateTime,syncTime
+	</sql>
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.sync.bean.TOutHospitalNoteInfo">
+		INSERT INTO cloud_sync_match_db.ei_outhospital_note (
+			<include refid="base_column_list"/>
+		)
+		VALUES(
+		#{outhospitalId}, #{inhospitalId}, #{inhospitalNo}, #{emrId},
+		#{patientUuid},
+		#{patientNo}, #{hospitalId}, #{inhospitalDate},
+		#{outhospitalDate},
+		#{inhospitalDays}, #{symptomSummary},#{inhospitalDiagnosis},
+		#{treatmentSummary}, #{outhospitalDiagnosis}, #{outhospitalDoctorAdvice},
+		#{summaryContent},#{rawContent},#{createTime}, #{updateTime},<!-- ,1 -->
+		<!-- start by fanpanwei -->
+		#{mainID},#{inhospitalTimes},#{outhospitalSummary},
+		#{contentType},#{rawCreateTime},now()
+		<!-- end by fanpanwei -->
+		)
+	</insert>
+	
+	<select id="findByPatientUuid" resultType="com.esuizhen.cloudservice.sync.bean.TOutHospitalNoteInfo" parameterType="java.lang.String">
+		SELECT <include refid="base_column_list"></include> FROM cloud_sync_match_db.ei_outhospital_note t1
+		WHERE t1.patientuuId=#{patientUuid,jdbcType=VARCHAR}
+	</select>
+	
+	<update id="updatePatientUuid">
+	 	UPDATE cloud_sync_match_db.ei_outhospital_note
+	 	<set>
+	 		<if test="uuidFinal != null">
+	 			patientuuId=#{uuidFinal,jdbcType=VARCHAR}
+	 		</if>
+	 	</set>
+	 	WHERE patientuuId IN
+		(
+			<foreach collection="uuidRelationships" item="uuidRelationship" index="index" separator=",">
+				#{uuidRelationship.uuid,jdbcType=VARCHAR}
+			</foreach>
+		)
+	 </update>
+	 
+	 <delete id="delete" parameterType="java.lang.String">
+	 	DELETE FROM cloud_sync_match_db.ei_outhospital_note WHERE outhospitalId=#{outhospitalId}
+	 </delete>
+	
+</mapper>

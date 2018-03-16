@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.esuizhen.cloudservice.followup.dao.followupresult.FollowupWxResultDao">
+    
+    <!-- 微信随访结果统计查询 -->
+    <select id="queryFollowupResultStatis" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupResultReq" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultStatisInfo">
+    	SELECT
+			DATE_FORMAT(wxreq.sendTime, '%Y-%m-%d') sendTime,
+			count(1) sendCount,
+			template.contentTemplateId,
+			template.content,
+			(
+				SELECT
+					count(1) noFeedbackCount
+				FROM
+					followup_wx_req r1
+				WHERE DATE_FORMAT(r1.sendTime, '%Y%m%d')=DATE_FORMAT(wxreq.sendTime, '%Y%m%d') and r1.templateId=wxreq.templateId and r1.replyState=0
+				GROUP BY
+					DATE_FORMAT(r1.sendTime, '%Y%m%d'),r1.templateId
+			)noFeedbackCount
+		FROM
+			followup_wx_req wxreq
+		LEFT JOIN followup_content_template template ON wxreq.templateId = template.contentTemplateId
+		LEFT JOIN r_followup_task_assign assign on assign.followupAssignId=wxreq.followupAssignId and assign.followupTaskId=wxreq.followupTaskId
+		<if test="sql != null and sql != ''">
+			join 
+			(
+			${sql}
+			) s on s.doctorId = assign.operator
+		</if>
+		<where>
+			wxreq.mergeFlag!=2
+			<if test="templateId!=null">
+				and wxreq.templateId=#{templateId}
+			</if>
+			<if test="startSendTime!=null">
+				and DATE_FORMAT(wxreq.sendTime, '%Y-%m-%d') &gt;=#{startSendTime}
+			</if>
+			<if test="endSendTime!=null">
+				and DATE_FORMAT(wxreq.sendTime, '%Y-%m-%d') &lt;=#{endSendTime}
+			</if>
+			<!-- 
+			<if test="operator !=null">
+				and assign.operator =#{operator}
+			</if>
+			 -->
+		</where>
+		GROUP BY
+			DATE_FORMAT(wxreq.sendTime, '%Y-%m-%d'),wxreq.templateId
+		order by wxreq.sendTime desc
+    </select>
+    
+    <!-- 微信随访结果反馈查询 -->
+    <select id="queryFollowupResultDetail" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupResultDetailQueryReq" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultDetailInfo">
+    	SELECT
+			wxreq.reqId,
+			wxreq.trueName,
+			wxreq.sendTime,
+			wxreq.replyTime,
+		  	metaResult.followupResultValueName replyContent 
+		FROM
+			followup_wx_req wxreq
+			LEFT JOIN meta_followup_result_value metaResult ON metaResult.followupResultValueId = wxreq.replyContent
+			LEFT JOIN r_followup_task_assign assign on assign.followupAssignId=wxreq.followupAssignId and assign.followupTaskId=wxreq.followupTaskId
+			<if test="sql != null and sql != ''">
+				join 
+				(
+				${sql}
+				) s on s.doctorId = assign.operator
+			</if>
+		<where>
+			wxreq.mergeFlag!=2
+			<if test="templateId!=null">
+				and wxreq.templateId=#{templateId}
+			</if>
+			<if test="sendTime !=null">
+				AND DATE_FORMAT(wxreq.sendTime, '%Y-%m-%d') = DATE_FORMAT(#{sendTime}, '%Y-%m-%d')
+			</if>
+			<if test="startSendTime !=null">
+				and DATE_FORMAT(wxreq.sendTime, '%Y-%m-%d') &gt;=#{startSendTime}
+			</if>
+			<if test="endSendTime !=null">
+				and DATE_FORMAT(wxreq.sendTime, '%Y-%m-%d') &lt;=#{endSendTime}
+			</if>
+			<!-- 
+			<if test="operator !=null">
+				and assign.operator =#{operator}
+			</if>
+			 -->
+		</where>
+		order by wxreq.sendTime desc
+    </select>
+    
+    <!-- 微信随访结果统计 -->
+    <select id="statisFollowupResult" resultType="com.esuizhen.cloudservice.followup.model.followupresult.TFollowupResultValueInfo" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupResultStatisReq">
+    	SELECT
+			metaResult.*, count(1) count
+		FROM
+			followup_wx_req wxreq
+		LEFT JOIN followup_result_buff r ON wxreq.followupResultBuffId = r.followupResultBuffId
+		LEFT JOIN meta_followup_result_value metaResult ON metaResult.followupResultValueId = r.followupResultValue
+		LEFT JOIN r_followup_task_assign assign on assign.followupAssignId=wxreq.followupAssignId and assign.followupTaskId=wxreq.followupTaskId
+		<where>
+			wxreq.mergeFlag!=2
+			<if test="templateId !=null">
+				and wxreq.templateId=#{templateId}
+			</if>
+			<if test="sendTime !=null">
+				AND DATE_FORMAT(wxreq.sendTime, '%Y-%m-%d') = DATE_FORMAT(#{sendTime}, '%Y-%m-%d')  
+			</if>
+			<if test="startSendTime !=null">
+				and DATE_FORMAT(wxreq.sendTime, '%Y-%m-%d') &gt;=#{startSendTime}
+			</if>
+			<if test="endSendTime !=null">
+				and DATE_FORMAT(wxreq.sendTime, '%Y-%m-%d') &lt;=#{endSendTime}
+			</if>
+			<if test="replyState !=null">
+				and wxreq.replyState=#{replyState}
+			</if>
+			<if test="operator !=null">
+				and assign.operator =#{operator}
+			</if>
+		</where>
+		GROUP BY r.followupResultValue
+    </select>
+    
+    <!-- 微信随访结果总数统计 -->
+    <select id="statisFollowupResultTotal" resultType="Long" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupResultStatisReq">
+    	SELECT
+			count(1) count
+		FROM
+			followup_wx_req wxreq
+		LEFT JOIN followup_result_buff r ON wxreq.followupResultBuffId = r.followupResultBuffId
+		LEFT JOIN r_followup_task_assign assign on assign.followupAssignId=wxreq.followupAssignId and assign.followupTaskId=wxreq.followupTaskId
+		<where>
+			wxreq.mergeFlag!=2
+			<if test="templateId !=null">
+				and wxreq.templateId=#{templateId}
+			</if>
+			<if test="startSendTime !=null">
+				and DATE_FORMAT(wxreq.sendTime, '%Y-%m-%d') &gt;=#{startSendTime}
+			</if>
+			<if test="endSendTime !=null">
+				and DATE_FORMAT(wxreq.sendTime, '%Y-%m-%d') &lt;=#{endSendTime}
+			</if>
+			<if test="operator !=null">
+				and assign.operator =#{operator}
+			</if>
+		</where>
+    </select>
+    
+    <!-- 微信下发新增 -->
+	<insert id="insertFollowupWxReq"  parameterType="com.esuizhen.cloudservice.followup.model.followupdo.TFollowupWxReqInfo" keyProperty="reqId" useGeneratedKeys="true">
+        INSERT INTO followup_wx_req (
+			templateId,
+			followupTaskId,
+			followupAssignId,
+			hospitalId,
+			patientId,
+			openId,
+			messageId,
+			sendTime,
+			trueName,
+			state,
+			resultProcessState,
+			followupResultBuffId,
+			followupResultId,
+			createTime,
+			updateTime
+        ) VALUES (
+        	#{templateId},
+			#{followupTaskId},
+			#{followupAssignId},
+			#{hospitalId},
+			#{patientId},
+			#{openId},
+			#{messageId},
+			#{sendTime},
+			#{trueName},
+			#{state},
+			#{resultProcessState},
+			#{followupResultBuffId},
+			#{followupResultId},
+        	now() ,
+        	now()
+        )
+	</insert>
+    
+    <!-- 更新微信结果 -->
+	<update id="updateFollowupWxReq" parameterType="com.esuizhen.cloudservice.followup.model.followupdo.TFollowupWxReqInfo">
+        UPDATE followup_wx_req 
+        <set>
+	        <if test="followupResultId != null">
+                followupResultId = #{followupResultId} ,
+            </if>
+	        <if test="followupResultBuffId != null">
+                followupResultBuffId = #{followupResultBuffId} ,
+            </if>
+	        <if test="replyState != null">
+                replyState = #{replyState} ,
+            </if>
+            <if test="replyContent != null">
+                replyContent = #{replyContent} ,
+            </if>
+            <if test="replyTime != null">
+                replyTime = #{replyTime} ,
+            </if>
+	        <if test="resultProcessState != null">
+                resultProcessState = #{resultProcessState},
+            </if>
+            <if test="state != null">
+                state = #{state}
+            </if>
+        </set>
+        WHERE 
+	        reqId = #{reqId} 
+	</update>
+	
+	<select id="queryFollowupWxReqByMessageId" parameterType="String" resultType="com.esuizhen.cloudservice.followup.model.followupdo.TFollowupWxReqInfo">
+		SELECT
+			*
+		FROM
+			followup_wx_req wx
+		<where>
+			wx.messageId = #{messageId}
+		</where>
+	</select>
+    
+    <select id="queryFollowupWxReply" parameterType="java.util.Map" resultType="com.esuizhen.cloudservice.followup.model.followupdo.TFollowupWxReqInfo">
+		SELECT
+			*
+		FROM
+			followup_wx_req wx
+		<where>
+			wx.mergeFlag!=2
+			<if test="followupResultId != null">
+                and wx.followupResultId = #{followupResultId}
+            </if>
+	        <if test="followupResultBuffId != null">
+                and wx.followupResultBuffId = #{followupResultBuffId}
+            </if>
+             <if test="followupTaskId != null">
+                and wx.followupTaskId = #{followupTaskId}
+            </if>
+             <if test="followupAssignId != null">
+                and wx.followupAssignId = #{followupAssignId}
+            </if>
+			<if test="patientId !=null">
+				and wx.patientId =#{patientId}
+			</if>
+			<if test="templateId !=null">
+				and wx.templateId =#{templateId}
+			</if>
+			<if test="state !=null">
+				and wx.state =#{state}
+			</if>
+		</where>
+		order by wx.sendTime desc
+	</select>
+	
+	<select id="getFollowupWxReqCount" parameterType="com.esuizhen.cloudservice.followup.bean.FollowupMsgSendReq" resultType="Integer">
+		SELECT
+			count(1)
+		FROM
+			followup_wx_req wx
+		<where>
+			wx.mergeFlag!=2
+			<if test="followupTaskId != null">
+                and wx.followupTaskId = #{followupTaskId}
+            </if>
+	        <if test="followupAssignId != null">
+                and wx.followupAssignId = #{followupAssignId}
+            </if>
+			<if test="templateId !=null">
+				and wx.templateId =#{templateId}
+			</if>
+		</where>
+	</select>
+</mapper>

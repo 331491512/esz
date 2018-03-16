@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.MetaRDiseaseTypeIcd10Dao">
+	<select id="findByDiseaseCode" resultType="com.westangel.common.bean.ehr.MetaRDiseaseTypeIcd10">
+		SELECT
+			<include refid="base_column_list" />
+		FROM ehr_db.meta_r_disease_type_icd_10 t1
+		WHERE (LEFT(t1.diseaseCode, #{length})=#{diseaseCode} OR t1.diseaseCode=#{diseaseCode})
+			AND t1.hospitalId=#{hospitalId,jdbcType=BIGINT}
+	</select>
+	
+	<select id="findByDiseaseContent" resultType="com.westangel.common.bean.ehr.MetaRDiseaseTypeIcd10">
+		SELECT
+			<include refid="base_column_list"></include>
+		FROM ehr_db.meta_r_disease_type_icd_10 t1
+			INNER JOIN ehr_db.meta_c_disease_type t2 ON t1.diseaseTypeId=t2.diseaseTypeId
+			INNER JOIN ehr_db.meta_r_disease_type_keyword t3 ON t1.diseaseTypeId=t3.diseaseTypeId
+		WHERE LOCATE(t3.keyword, #{diseaseContent})
+			AND NOT LOCATE(
+				(CASE WHEN t3.excludeKeyword IS NULL || t3.excludeKeyword='' THEN '$XXXXX$' 
+				ELSE t3.excludeKeyword END)
+				, #{diseaseContent})
+			AND t1.hospitalId=#{hospitalId}
+	</select>
+	
+	<sql id="base_column_list">
+		t1.id, t1.hospitalId, t1.diseaseTypeId, t1.diseaseCode, t1.diseaseTypeName
+	</sql>
+	
+</mapper>

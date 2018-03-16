@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.esuizhen.cloudservice.business.dao.business.PatientDao">
+	<select id="findHospitalProfile" resultType="com.westangel.common.bean.user.HospitalPatientBriefInfo">
+		SELECT
+			t1.id,
+			t1.hospitalId,
+			t1.patientId,
+			t1.patientNo
+		FROM user_db.r_hospital_patient t1
+			INNER JOIN user_db.u_patient t2 ON t2.patientId = t1.patientId
+		WHERE t1.hospitalId = #{hospitalId} AND t2.userId = #{patientUserId}
+	</select>
+	
+	<select id="findByUserId" resultType="com.westangel.common.bean.Patient">
+		SELECT
+			t1.userId,
+			t1.patientId,
+			t1.trueName,
+			t1.sex,
+			t1.infoState
+		FROM user_db.u_patient t1
+		WHERE t1.userId = #{userId}
+	</select>
+	
+	<insert id="inserHospitalPatientBriefInfo">
+		INSERT INTO user_db.r_hospital_patient(
+			patientId,
+			hospitalId,
+			patientNo,
+			syncFlag,
+			sourceFlag,
+			createTime
+		)VALUES(
+			#{patientId},
+			#{hospitalId},
+			#{patientNo},
+			#{syncFlag},
+			#{sourceFlag},
+			NOW()
+		)
+	</insert>
+	
+	<update id="updatePatientNo">
+		UPDATE user_db.r_hospital_patient
+		<set>
+			patientNo = #{patientNo}
+		</set>
+		WHERE hospitalId = #{hospitalId} AND patientId = #{patientId}
+	</update>
+	
+	
+	<!-- 患者卡片 -->
+	<select id="queryPatientInfoCard" resultType="java.util.LinkedHashMap">
+		SELECT 
+		CASE tp1.sex WHEN 1 THEN '男' WHEN 2 THEN '女' ELSE '性别未知' END sex,
+		CASE WHEN tp1.birthDate IS NOT NULL THEN TIMESTAMPDIFF(YEAR, tp1.birthDate, now()) ELSE '年龄未知' END age,
+		(
+		SELECT 
+		CASE WHEN t1.diagnosis IS NOT NULL THEN 
+		CASE WHEN t2.disagnosisPeriodizationName IS NOT NULL THEN CONCAT(t1.diagnosis,' ',t2.disagnosisPeriodizationName) ELSE t1.diagnosis END
+		ELSE '无'
+		END diagnosis
+		FROM ehr_db.e_diagnosis_info t1
+		LEFT JOIN ehr_db.meta_e_diagnosis_periodization t2 ON t1.disagnosisPeriodizationId = t2.disagnosisPeriodizationId
+		WHERE t1.patientId = tp1.patientId AND diagnosisTypeId =1 ORDER BY t1.visitTime DESC LIMIT 1
+		) diagnosis,
+		(
+		SELECT 
+		CASE WHEN t1.pathologyDiagnosis IS NOT NULL THEN t1.pathologyDiagnosis  ELSE '无' END pathologyDiagnosis
+		FROM ehr_db.e_diagnosis_info t1
+		WHERE t1.patientId =tp1.patientId AND diagnosisTypeId =9 ORDER BY t1.visitTime DESC LIMIT 1
+		) pathologyDiagnosis,
+		(
+		SELECT 
+		CASE WHEN t2.followupResultValueName IS NOT NULL THEN
+		CASE WHEN t1.followupTime IS NOT NULL THEN CONCAT(t2.followupResultValueName,' (',DATE(t1.followupTime) ,')')
+		ELSE t2.followupResultValueName END
+		ELSE '无' END
+		FROM followup_db.followup_result t1
+		LEFT JOIN followup_db.meta_followup_result_value t2 ON t1.followupResultValue = t2.followupResultValueId
+		WHERE t1.patientId = tp1.patientId
+		ORDER BY followupTime DESC LIMIT 1
+		) followupResultValue
+		FROM user_db.u_patient tp1
+		WHERE 1
+		<if test="userId!=null">
+			AND userId = #{userId}
+		</if>
+		<if test="patientId!=null">
+			AND patientId = #{patientId}
+		</if>
+	</select>
+
+	<select id="findByPatientId" resultType="java.lang.Integer">
+		SELECT t1.icdDiseaseTypeId
+		FROM user_db.u_patient t1
+		WHERE t1.patientId = #{patientId}
+	</select>
+
+
+	<!-- 获取患者用户标签 -->
+	<select id="getPatientTags" resultType="com.westangel.common.bean.sys.TagInfo">
+		SELECT t2.tagId FROM user_db.u_patient t1
+		JOIN operation_db.r_patient_tag t2 ON t1.patientId = t2.patientId
+		JOIN com_sys_db.sys_tag t3 ON  t3.tagId=t2.tagId
+		JOIN com_sys_db.sys_tag_type t4 ON  t3.tagTypeId=t4.tagTypeId AND t4.isPublish = 1
+		WHERE t1.patientId = #{patientId}
+		UNION
+		SELECT t2.tagId FROM user_db.u_patient t1
+		JOIN com_sys_db.r_knowledge_tag_disease_type t2 ON t1.sourceDiseaseTypeId=t2.diseaseTypeId WHERE t1.patientId = #{patientId}
+	</select>
+
+	<select id="queryPatientIsOutHospital" resultType="java.util.LinkedHashMap">
+		SELECT
+			t.outhospitalDate,t.infoState
+		FROM
+			ehr_db.ei_inhospital_note t
+		WHERE
+			t.inhospitalId IN
+		<foreach collection="inhospitalIds" item="inhospitalId" separator="," open="(" close=")">
+			#{inhospitalId}
+		</foreach>
+			ORDER BY t.inhospitalDate DESC limit 0,1
+	</select>
+	<select id="getHospitalByPatientUserId" resultType="java.util.HashMap">
+		SELECT h.hospitalId,h.userId hospitalUserId,p.patientId FROM
+			user_db.u_patient p
+		INNER JOIN user_db.r_hospital_patient r ON p.patientId=r.patientId
+		INNER JOIN user_db.u_hospital h ON h.hospitalId=r.hospitalId
+		WHERE p.userId=#{userId} LIMIT 1
+	</select>
+</mapper>

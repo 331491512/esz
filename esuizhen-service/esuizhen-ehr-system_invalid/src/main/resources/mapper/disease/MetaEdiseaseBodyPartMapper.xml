@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.disease.MetaEdiseaseBodyPartDao">
+
+	<insert id="insertMetaEdiseaseBodyPart" useGeneratedKeys="true" parameterType="com.esuizhen.cloudservice.ehr.model.disease.MetaEdiseaseBodyPart">
+		<selectKey resultType="long" keyProperty="id" order="AFTER" >
+			SELECTLAST_INSERT_ID() as id
+		</selectKey>
+        INSERT INTO meta_e_disease_body_part (
+        	deseaseBodyPartId ,
+        	deseaseBodyPartName 
+        ) VALUES (
+        	#{deseaseBodyPartId} ,
+        	#{deseaseBodyPartName} 
+        )
+	</insert>
+    
+	<update id="updateMetaEdiseaseBodyPart" parameterType="com.esuizhen.cloudservice.ehr.model.disease.MetaEdiseaseBodyPart">
+        UPDATE meta_e_disease_body_part 
+        <set>
+	        <if test="deseaseBodyPartName != null">
+                deseaseBodyPartName = #{deseaseBodyPartName} ,
+            </if>
+        </set>
+        WHERE 
+	        deseaseBodyPartId = #{deseaseBodyPartId} 
+	</update>
+
+    <delete id="deleteMetaEdiseaseBodyPart">
+        DELETE FROM meta_e_disease_body_part WHERE
+        deseaseBodyPartId = #{id} 
+    </delete>
+    
+    <select id="queryMetaEdiseaseBodyPartById" resultType="com.esuizhen.cloudservice.ehr.model.disease.MetaEdiseaseBodyPart">
+		SELECT 
+        	deseaseBodyPartId,
+        	deseaseBodyPartName
+		FROM meta_e_disease_body_part 
+	    WHERE 
+	        deseaseBodyPartId = #{id} 
+	</select>
+	
+	<select id="selectMetaEdiseaseBodyPartTypeList" resultType="com.esuizhen.cloudservice.ehr.model.disease.MetaEdiseaseBodyPart">
+		SELECT
+        	t3.diseaseTypeId , 
+			t3.diseaseTypeName , 
+			t4.deseaseBodyPartId , 
+			t4.deseaseBodyPartName ,
+			t3.createTime
+		FROM meta_c_disease_type t3 , meta_e_disease_body_part t4
+		WHERE t3.diseaseBodyPartId=t4.deseaseBodyPartId
+		<if test="createTime!=null">
+			AND t3.createTime>#{createTime}
+		</if>
+		<if test="diseaseTypeId!=null">
+			AND t3.diseaseTypeId=#{diseaseTypeId}
+		</if>
+	</select>
+	
+	<select id="selectMetaEdiseaseBodyPartList" resultType="com.esuizhen.cloudservice.ehr.model.disease.MetaEdiseaseBodyPart">
+		SELECT
+			t4.deseaseBodyPartId , 
+			t4.deseaseBodyPartName 
+		FROM meta_e_disease_body_part t4 ORDER BY t4.sortIndex
+	</select>
+	
+	<select id="selectDiseaseBodyPartByDiseaseTypeId" resultType="java.lang.Integer">
+		SELECT 
+			diseaseBodyPartId
+		FROM meta_c_disease_type
+		WHERE
+			diseaseTypeId=#{diseaseTypeId}
+	</select>
+</mapper>
+

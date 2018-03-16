@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.business.dao.user.LISReportDao">
+	<!-- 报告详情查询 -->
+	<select id="queryNotSendReportLis" resultType="java.util.LinkedHashMap">
+		SELECT
+		statisBatchId,doctorUserId,
+		CASE WHEN promptCount=0
+		THEN CONCAT("截止今天",statisTime,"，您有",patientCount,"位患者的检查检验报告单已出结果") 
+		ELSE
+		CONCAT("截止今天",statisTime,"，您有",patientCount,"位患者的检查检验报告单已出结果，有",promptCount,"位患者的检查检验报告有异常") 
+		END content,
+		CONCAT(#{linkUrl},"?statisBatchId=",statisBatchId) linkUrl
+		FROM lis_realtime_db.s_exam_detection_report_statis
+		WHERE sendFlag=0
+	</select>
+	<!-- 更新统计结果发送状态 -->
+	<update id="updateExamDetectionReportStatisSendState">
+		UPDATE 
+		lis_realtime_db.s_exam_detection_report_statis
+		<set>
+			sendFlag=1,sendTime=NOW()
+		</set> 
+		<where>
+			<if test="statisBatchId!=null">
+				AND statisBatchId=#{statisBatchId}
+			</if>
+			<if test="statisBatchIds!=null">
+				<foreach collection="statisBatchIds" item="item" open="statisBatchId IN (" close=")" separator=",">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</update>
+	
+	<!-- 获取统计患者列表 -->
+	<select id="queryDoctorReportPatientList" resultType="java.util.LinkedHashMap">
+	<![CDATA[
+		SELECT t2.trueName,
+		IF(t1.promptFlag=-1,1,0) exceptionFlag,
+		IFNULL(t2.userPictureUrl,IF(t2.sex=2,#{wonmanUrl},#{manUrl})) pictureUrl,
+		t1.reportName,
+		examCount examReportNum,
+		detectionCount detectionReportNum,
+		CASE 
+		WHEN examCount=1 AND detectionCount=0 OR examCount=0 AND detectionCount=1
+		THEN CONCAT(#{linkUrl},"?patientId=",t1.patientId,"&reportId=",t1.reportId,"&reportType=",IF(examCount=1,1,2))
+		ELSE CONCAT(#{linkUrl},"?patientId=",t1.patientId,"&reportType=0")
+		END linkUrl
+		FROM lis_realtime_db.s_exam_detection_report_statis_detail t1
+		JOIN user_db.u_patient t2 ON t1.patientId = t2.patientId
+		JOIN user_db.u_user t3 ON t2.userId = t3.userId
+		WHERE t1.statisBatchId=#{statisBatchId}
+		ORDER BY t1.promptFlag,t1.reportTime
+	]]>  
+	</select>
+</mapper>

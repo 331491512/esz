@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.base.dao.organization.OrganizationDoctorDao">
+	<select id="queryOrganzationDoctorInfo" resultType="com.esuizhen.base.model.OrganizationDoctorInfo">
+		SELECT t.*,IFNULL(t1.hospitalId,t2.hospitalId) hospitalId,IFNULL(t1.doctorLevel,-1) doctorLevel,t2.deptId FROM
+		(
+			SELECT IF(deployLocation=1,1,0) isLocal,n.doctorId FROM followup_db.conf_global,
+			(
+				SELECT doctorId FROM user_db.u_doctor WHERE 1 
+				<if test="userId!=null"><!-- 如果用户Id不为空查询医生Id -->
+					AND userId=#{userId}
+				</if>
+				<if test="doctorId!=null"><!-- 如果医生Id不为空查询医生Id -->
+					AND doctorId=#{doctorId}
+				</if>
+			)n
+		) t
+		LEFT JOIN user_db.r_doctor t1 ON t1.doctorId=t.doctorId AND t1.state=1
+		LEFT JOIN user_db.r_hospital_doctor t2 ON t.doctorId=t2.doctorId
+	</select>
+	
+	<select id="queryCountDeptIdByParentId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		select d.deptId from user_db.u_department d where d.parentId in
+		<foreach collection="parentIds" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	<!-- add by zhuguo 根据用户id或医生id查询其角色 -->
+	<select id="queryDoctorRoleById" resultType="com.esuizhen.base.model.OrganizationDoctorInfo">
+		SELECT
+			d.userRole
+		FROM
+			user_db.u_user a
+		JOIN user_db.u_doctor b ON a.userId = b.userId
+		JOIN user_db.r_user_role c ON a.userId = c.userId
+		JOIN user_db.meta_role d ON c.userRole = d.userRole
+		WHERE
+			1
+		<!-- 如果用户Id不为空查询用户Id -->
+		<if test="userId!=null">
+			AND b.userId = #{userId}
+		</if>
+		<!-- 如果医生Id不为空查询医生Id -->
+		<if test="doctorId!=null">
+			AND b.doctorId = #{doctorId}
+		</if>
+		LIMIT 1
+	</select>
+	
+	<!-- 查询系统部署位置 add by zhuguo -->
+	<select id="queryDeployLocation" resultType="com.esuizhen.base.model.OrganizationDoctorInfo">
+		SELECT
+			deployLocation
+		FROM
+			followup_db.conf_global
+	</select>
+</mapper>
+

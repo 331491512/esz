@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.research.dao.crf.TCrfExamDetailDao">
+
+	<insert id="insertCrfObservationExamItemDetailOptions" parameterType="com.esuizhen.cloudservice.research.model.crf.TCrfExamsDetail">
+        INSERT INTO crf_observation_exam_item_detail_options 
+        (
+        	crfObserveItemId ,
+        	crfObserveId ,
+        	subjectElementId ,
+        	examTypeId ,
+        	examItemId ,
+        	flag,
+        	examItemName,
+        	`index`,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{crfObserveItemId} ,
+        	#{crfObserveId} ,
+        	#{subjectElementId} ,
+        	#{examTypeId} ,
+        	#{examItemId} ,
+        	#{flag},
+        	#{examItemName} ,
+        	#{index},
+        	NOW() ,
+        	NOW() 
+        )
+	</insert>
+    
+    <insert id="insertCrfObservationExamItemDetailOptionsList" parameterType="java.util.List">
+        INSERT INTO crf_observation_exam_item_detail_options 
+        (
+        	crfObserveItemId ,
+        	crfObserveId ,
+        	subjectElementId ,
+        	examTypeId ,
+        	examItemId ,
+        	flag,
+        	examItemName,
+        	`index`,
+        	createTime ,
+        	updateTime 
+        ) VALUES 
+        <foreach collection="list" index="index" item="item" separator=",">
+        (
+        	#{item.crfObserveItemId} ,
+        	#{item.crfObserveId} ,
+        	#{item.subjectElementId} ,
+        	#{item.examTypeId} ,
+        	#{item.examItemId} ,
+        	#{item.flag},
+        	#{item.examItemName},
+        	#{item.index},
+        	NOW() ,
+        	NOW() 
+        )
+        </foreach>
+	</insert>
+	
+	<update id="updateCrfObservationExamItemDetailOptions" parameterType="com.esuizhen.cloudservice.research.model.crf.TCrfExamsDetail">
+        UPDATE crf_observation_exam_item_detail_options 
+        <set>
+	        <if test="crfObserveId != null">
+                crfObserveId = #{crfObserveId} ,
+            </if>
+	        <if test="subjectElementId != null">
+                subjectElementId = #{subjectElementId} ,
+            </if>
+	        <if test="examTypeId != null">
+                examTypeId = #{examTypeId} ,
+            </if>
+	        <if test="examItemId != null">
+                examItemId = #{examItemId} ,
+            </if>
+            <if test="examItemName!=null">
+            	examItemName=#{examItemName}
+            </if>
+            <if test="flag!=null">
+            	flag=#{flag}
+            </if>
+	        <if test="1==1">
+                updateTime = #{updateTime} ,
+            </if>
+        </set>
+        WHERE 
+	        crfObserveItemId = #{crfObserveItemId} 
+	</update>
+
+    <delete id="deleteCrfObservationExamItemDetailOptions">
+        DELETE FROM crf_observation_exam_item_detail_options WHERE crfObserveItemId = #{crfObserveItemId} 
+    </delete>
+    
+    <delete id="deleteCrfObservationExamItemDetailOptionsByCrfObserveId">
+        DELETE FROM crf_observation_exam_item_detail_options WHERE crfObserveId = #{crfObserveId} 
+    </delete>
+    
+    <select id="queryCrfObservationExamItemDetailOptionsById" resultType="com.esuizhen.cloudservice.research.model.crf.TCrfExamsDetail">
+		SELECT 
+        	crfObserveItemId,
+        	crfObserveId,
+        	subjectElementId,
+        	examItemName,
+        	examTypeId,
+        	examItemId,
+        	flag,
+        	createTime,
+        	updateTime
+		FROM crf_observation_exam_item_detail_options 
+	    WHERE 
+	        crfObserveItemId = #{crfObserveItemId} 
+	</select>
+	
+	<resultMap id="TCrfExamsDetailMap" type="com.esuizhen.cloudservice.research.model.crf.TCrfExamsDetail" >
+    	<result property="crfObserveItemId" column="crfObserveItemId"/>
+    	<result property="crfObserveId" column="crfObserveId"/>
+    	<result property="subjectElementId" column="subjectElementId"/>
+    	<result property="examTypeId" column="examTypeId"/>
+    	<result property="examTypeName" column="examTypeName"/>
+    	<result property="examItemId" column="examItemId"/>
+    	<result property="flag" column="flag"/>
+    	<result property="createTime" column="createTime"/>
+    	<result property="updateTime" column="updateTime"/>
+  		<collection property="examItemList" ofType="com.esuizhen.cloudservice.research.model.crf.TCrfExamsItemInfo">
+    		<result property="examItemId" column="examItemId"/>
+    		<result property="examItemCode" column="examItemCode"/>
+    		<result property="examItemName" column="examItemName"/>
+    	</collection>
+	</resultMap>
+	
+	<select id="queryCrfObservationExamItemDetailOptionsByCrfObserveId" resultMap="TCrfExamsDetailMap">
+		SELECT 
+        	t1.crfObserveItemId,
+        	t1.crfObserveId,
+        	t1.subjectElementId,
+        	t1.examTypeId,
+        	(SELECT examTypeName FROM ehr_db.meta_e_exam_type WHERE examTypeId=t1.examTypeId LIMIT 1) examTypeName ,
+        	t1.examItemId,
+        	t1.examItemName,
+        	t1.createTime,
+        	t1.updateTime,
+        	t1.flag,
+        	t2.examItemCode, 
+        	t2.examItemName 
+		FROM crf_observation_exam_item_detail_options t1 LEFT JOIN ehr_db.meta_e_exam_item t2 ON t1.examItemId=t2.examItemId
+	    WHERE t1.crfObserveId = #{crfObserveId} 
+	</select>
+</mapper>
+

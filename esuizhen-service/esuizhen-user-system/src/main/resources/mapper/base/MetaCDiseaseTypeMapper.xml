@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.MetaCDiseaseTypeDao">
+	<select id="findByDiseaseTypeId" resultType="com.westangel.common.bean.ehr.MetaCDiseaseType">
+		SELECT
+			<include refid="base_column_list" />
+		FROM ehr_db.meta_c_disease_type t1
+		WHERE t1.diseaseTypeId=#{diseaseTypeId}
+	</select>
+	
+	<sql id="base_column_list">
+		t1.diseaseTypeId, t1.diseaseTypeName, t1.hospitalId, t1.createTime, t1.sortIndex, t1.diseaseBodyPartId
+	</sql>
+	
+	<select id="queryPatientDiseaseByDoctorId" resultType="com.esuizhen.cloudservice.user.bean.TDiseaseInfo">
+		SELECT
+			t2.diseaseTypeId,t2.diseaseTypeName,count(0) pnum
+		FROM
+			user_db.r_doctor_patient t,
+			user_db.u_patient t1,
+			ehr_db.meta_c_disease_type t2
+		WHERE
+			t.doctorId = #{doctorId}
+		AND t.patientId = t1.patientId
+		AND t1.sourceDiseaseTypeId NOT IN (999,9999)
+		AND t1.sourceDiseaseTypeId = t2.diseaseTypeId
+		GROUP BY t2.diseaseTypeId
+		ORDER BY pnum DESC
+	</select>
+</mapper>

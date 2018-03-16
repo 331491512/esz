@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.PatientSpecialDiseaseRegisterDao">
+	<resultMap id="baseResultMap" type="com.westangel.common.bean.Patient">
+		<id column="patientId" property="patientId" jdbcType="BIGINT" />
+		<result column="userId" property="userId" jdbcType="BIGINT" />
+		<result column="trueName" property="trueName" jdbcType="VARCHAR" />
+		<result column="syncFlag" property="syncFlag" jdbcType="INTEGER" />
+		<result column="uuid" property="uuid" jdbcType="VARCHAR" />
+		<result column="preTrueName" property="preTrueName" jdbcType="VARCHAR" />
+		<result column="nickName" property="nickName" jdbcType="VARCHAR" />
+		<result column="mobile" property="mobile" jdbcType="VARCHAR" />
+		<result column="patientRelation" property="patientRelation" jdbcType="INTEGER" />
+		<result column="sex" property="sex" jdbcType="INTEGER" />
+		<result column="birthDate" property="birthDate" jdbcType="TIMESTAMP" />
+		<result column="userPictureUrl" property="userPictureUrl" jdbcType="VARCHAR" />
+		<result column="familyName" property="familyName" jdbcType="VARCHAR" />
+		<result column="familyPhone" property="familyPhone" jdbcType="VARCHAR" />
+		<result column="liveStatus" property="liveStatus" jdbcType="INTEGER" />
+		<result column="deathDate" property="deathDate" jdbcType="TIMESTAMP" />
+		<result column="causeOfDeath" property="causeOfDeath" jdbcType="VARCHAR" />
+		<result column="bloodType" property="bloodType" jdbcType="VARCHAR" />
+		<result column="bloodTypeRH" property="bloodTypeRH" jdbcType="INTEGER" />
+		<result column="bodyHeight" property="bodyHeight" jdbcType="INTEGER" />
+		<result column="disabilityStatus" property="disabilityStatus" jdbcType="VARCHAR" />
+		<result column="geneticDiseaseHistory" property="geneticDiseaseHistory" jdbcType="VARCHAR" />
+		<result column="drugAllergyHistory" property="drugAllergyHistory" jdbcType="VARCHAR" />
+		<result column="medicalPayType" property="medicalPayType" jdbcType="INTEGER" />
+		<result column="sourceDiagnosis" property="sourceDiagnosis" jdbcType="VARCHAR" />
+		<result column="sourceDiseaseCode" property="sourceDiseaseCode" jdbcType="VARCHAR" />
+		<result column="sourcePathologyDiagnosis" property="sourcePathologyDiagnosis" jdbcType="VARCHAR" />
+		<result column="sourcePathologyDiseaseCode" property="sourcePathologyDiseaseCode" jdbcType="VARCHAR" />
+		<result column="attendingDoctor" property="attendingDoctor" jdbcType="INTEGER" />
+		<result column="confirmedDate" property="confirmedDate" jdbcType="TIMESTAMP" />
+		<result column="hasVisibleMedicalRecord" property="hasVisibleMedicalRecord" jdbcType="INTEGER" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+    <insert id="insertSpecialDisease" parameterType="com.esuizhen.cloudservice.user.bean.AutiCancerPatientInfo">
+    	<selectKey resultType="java.lang.Long" keyProperty="specialDiseaseRegisterId" order="AFTER">
+			SELECT LAST_INSERT_ID() as specialDiseaseRegisterId
+		</selectKey>
+    	INSERT INTO user_db.u_patient_special_disease_register(
+    		patientId,
+    		userId,
+			uuid,
+			syncFlag,auditState,hasVisibleMedicalRecord,
+			liveStatus,followupFlag,createTime,updateTime,patientType,outPatientFlag,mobile,
+			patientNo,trueName,sex,birthDate,
+			medicalCareAreaId,
+			medicalCarePlace,
+			medicareCardNo,medicalPayType,familyPhone,famZipcode,stafferType
+		)VALUES(
+			#{patientId},#{userId},(SELECT u.uuid FROM user_db.u_user u WHERE u.userId=#{userId}),
+			0,0,0,1,0,NOW(),NOW(),2,1,#{mobile},
+			#{patientNo},#{patientName},#{sex},#{birthDate},#{medicalCareAreaId},#{medicalCarePlace},#{medicalCareCardNo},
+			#{medicalCareType},#{familyTel},#{famZipcode},#{stafferType}
+		)
+    </insert>
+    
+    <update id="updateSpecialDisease" parameterType="com.esuizhen.cloudservice.user.bean.AutiCancerPatientInfo">
+    	UPDATE user_db.u_patient_special_disease_register p SET
+			p.patientNo=#{patientNo},
+			p.trueName=#{patientName},
+			p.sex=#{sex},
+			p.mobile=#{mobile},
+			p.birthDate=#{birthDate},
+			p.medicalCareAreaId=#{medicalCareAreaId},
+			p.medicalCarePlace=#{medicalCarePlace},
+			p.medicareCardNo=#{medicalCareCardNo},
+			p.medicalPayType=#{medicalCareType},
+			p.familyPhone=#{familyTel},
+			p.famZipcode=#{famZipcode},
+			p.stafferType=#{stafferType}
+		where p.patientId = #{patientId,jdbcType=BIGINT} AND p.specialDiseaseRegisterId=#{specialDiseaseRegisterId}
+    </update>
+</mapper>

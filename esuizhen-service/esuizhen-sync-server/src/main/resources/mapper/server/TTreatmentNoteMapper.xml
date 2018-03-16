@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.server.sync.dao.server.TTreatmentNoteDao" >
+
+  <insert id="insertSelective" parameterType="com.esuizhen.server.sync.bean.server.TreatmentNoteRes" >
+    insert into ehr_db.eci_treatment_note
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="treatmentId != null" >
+        treatmentId,
+      </if>
+      <if test="emrId != null" >
+        emrId,
+      </if>
+      <if test="patientId != null" >
+        patientId,
+      </if>
+      <if test="patientNo != null" >
+        patientNo,
+      </if>
+      <if test="patientUuid != null" >
+        patientUuid,
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId,
+      </if>
+      <if test="treatmentTypeId != null" >
+        treatmentTypeId,
+      </if>
+      <if test="opCode != null" >
+        opCode,
+      </if>
+      <if test="treatmentName != null" >
+        treatmentName,
+      </if>
+      <if test="treatmentWay != null" >
+        treatmentWay,
+      </if>
+      <if test="treatmentDosage != null" >
+        treatmentDosage,
+      </if>
+      <if test="dosageUnit != null" >
+        dosageUnit,
+      </if>
+      <if test="treatmentCourse != null" >
+        treatmentCourse,
+      </if>
+      <if test="treatmentProcessFlag != null" >
+        treatmentProcessFlag,
+      </if>
+      <if test="treatmentEffect != null" >
+        treatmentEffect,
+      </if>
+      <if test="operationDoctor != null" >
+        operationDoctor,
+      </if>
+      <if test="treatmentBeginTime != null" >
+        treatmentBeginTime,
+      </if>
+      <if test="treatmentEndTime != null" >
+        treatmentEndTime,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+      <if test="updateTime != null" >
+        updateTime,
+      </if>
+      <if test="inhospitalId != null" >
+        inhospitalId,
+      </if>
+      <if test="treatmentCode != null" >
+        treatmentCode,
+      </if>
+      <if test="scanPart != null" >
+        scanPart,
+      </if>
+      <if test="radiationValue != null" >
+        radiationValue,
+      </if>
+      <if test="radiationUnit != null" >
+        radiationUnit,
+      </if>
+      <if test="catalogState != null" >
+        catalogState,
+      </if>
+      <if test="medicine != null" >
+        medicine,
+      </if>
+      <if test="sourceFlag != null" >
+        sourceFlag,
+      </if>
+      <if test="operationDoctorUuid != null" >
+        operationDoctorUuid,
+      </if>
+      <if test="syncflag != null" >
+        syncflag,
+      </if>
+      <if test="rawCreateTime != null" >
+        rawCreateTime,
+      </if>
+      <if test="treatmentDesc != null" >
+        treatmentDesc,
+      </if>
+      <if test="mergeFlag != null" >
+        mergeFlag,
+      </if>
+      <if test="mergeTime != null" >
+        mergeTime,
+      </if>
+      <if test="mergeFromUuid != null" >
+        mergeFromUuid,
+      </if>
+      <if test="mergeTarget != null" >
+        mergeTarget,
+      </if>
+      <if test="mergeTargetUuid != null" >
+        mergeTargetUuid,
+      </if>
+      <if test="tempId != null" >
+        tempId,
+      </if>
+      <if test="rawTreatmentType != null" >
+        rawTreatmentType,
+      </if>
+      <if test="totalCourse != null" >
+        totalCourse,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="treatmentId != null" >
+        #{treatmentId,jdbcType=VARCHAR},
+      </if>
+      <if test="emrId != null" >
+        #{emrId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="patientUuid != null" >
+        #{patientUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="treatmentTypeId != null" >
+        #{treatmentTypeId,jdbcType=INTEGER},
+      </if>
+      <if test="opCode != null" >
+        #{opCode,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentName != null" >
+        #{treatmentName,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentWay != null" >
+        #{treatmentWay,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentDosage != null" >
+        #{treatmentDosage,jdbcType=REAL},
+      </if>
+      <if test="dosageUnit != null" >
+        #{dosageUnit,jdbcType=CHAR},
+      </if>
+      <if test="treatmentCourse != null" >
+        #{treatmentCourse,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentProcessFlag != null" >
+        #{treatmentProcessFlag,jdbcType=INTEGER},
+      </if>
+      <if test="treatmentEffect != null" >
+        #{treatmentEffect,jdbcType=VARCHAR},
+      </if>
+      <if test="operationDoctor != null" >
+        #{operationDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="treatmentBeginTime != null" >
+        #{treatmentBeginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="treatmentEndTime != null" >
+        #{treatmentEndTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="inhospitalId != null" >
+        #{inhospitalId,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentCode != null" >
+        #{treatmentCode,jdbcType=VARCHAR},
+      </if>
+      <if test="scanPart != null" >
+        #{scanPart,jdbcType=VARCHAR},
+      </if>
+      <if test="radiationValue != null" >
+        #{radiationValue,jdbcType=VARCHAR},
+      </if>
+      <if test="radiationUnit != null" >
+        #{radiationUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="catalogState != null" >
+        #{catalogState,jdbcType=INTEGER},
+      </if>
+      <if test="medicine != null" >
+        #{medicine,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceFlag != null" >
+        #{sourceFlag,jdbcType=INTEGER},
+      </if>
+      <if test="operationDoctorUuid != null" >
+        #{operationDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="syncflag != null" >
+        #{syncflag,jdbcType=INTEGER},
+      </if>
+      <if test="rawCreateTime != null" >
+        #{rawCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="treatmentDesc != null" >
+        #{treatmentDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeFlag != null" >
+        #{mergeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mergeTime != null" >
+        #{mergeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFromUuid != null" >
+        #{mergeFromUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeTarget != null" >
+        #{mergeTarget,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTargetUuid != null" >
+        #{mergeTargetUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="tempId != null" >
+        #{tempId,jdbcType=INTEGER},
+      </if>
+      <if test="rawTreatmentType != null" >
+        #{rawTreatmentType,jdbcType=VARCHAR},
+      </if>
+      <if test="totalCourse != null" >
+        #{totalCourse,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.esuizhen.server.sync.bean.server.TreatmentNoteRes" >
+    update ehr_db.eci_treatment_note
+    <set >
+      <if test="emrId != null" >
+        emrId = #{emrId,jdbcType=VARCHAR},
+      </if>
+      <if test="patientId != null" >
+        patientId = #{patientId,jdbcType=BIGINT},
+      </if>
+      <if test="patientNo != null" >
+        patientNo = #{patientNo,jdbcType=VARCHAR},
+      </if>
+      <if test="patientUuid != null" >
+        patientUuid = #{patientUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalId != null" >
+        hospitalId = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="treatmentTypeId != null" >
+        treatmentTypeId = #{treatmentTypeId,jdbcType=INTEGER},
+      </if>
+      <if test="opCode != null" >
+        opCode = #{opCode,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentName != null" >
+        treatmentName = #{treatmentName,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentWay != null" >
+        treatmentWay = #{treatmentWay,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentDosage != null" >
+        treatmentDosage = #{treatmentDosage,jdbcType=REAL},
+      </if>
+      <if test="dosageUnit != null" >
+        dosageUnit = #{dosageUnit,jdbcType=CHAR},
+      </if>
+      <if test="treatmentCourse != null" >
+        treatmentCourse = #{treatmentCourse,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentProcessFlag != null" >
+        treatmentProcessFlag = #{treatmentProcessFlag,jdbcType=INTEGER},
+      </if>
+      <if test="treatmentEffect != null" >
+        treatmentEffect = #{treatmentEffect,jdbcType=VARCHAR},
+      </if>
+      <if test="operationDoctor != null" >
+        operationDoctor = #{operationDoctor,jdbcType=INTEGER},
+      </if>
+      <if test="treatmentBeginTime != null" >
+        treatmentBeginTime = #{treatmentBeginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="treatmentEndTime != null" >
+        treatmentEndTime = #{treatmentEndTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="inhospitalId != null" >
+        inhospitalId = #{inhospitalId,jdbcType=VARCHAR},
+      </if>
+      <if test="treatmentCode != null" >
+        treatmentCode = #{treatmentCode,jdbcType=VARCHAR},
+      </if>
+      <if test="scanPart != null" >
+        scanPart = #{scanPart,jdbcType=VARCHAR},
+      </if>
+      <if test="radiationValue != null" >
+        radiationValue = #{radiationValue,jdbcType=VARCHAR},
+      </if>
+      <if test="radiationUnit != null" >
+        radiationUnit = #{radiationUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="catalogState != null" >
+        catalogState = #{catalogState,jdbcType=INTEGER},
+      </if>
+      <if test="medicine != null" >
+        medicine = #{medicine,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceFlag != null" >
+        sourceFlag = #{sourceFlag,jdbcType=INTEGER},
+      </if>
+      <if test="operationDoctorUuid != null" >
+        operationDoctorUuid = #{operationDoctorUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="syncflag != null" >
+        syncflag = #{syncflag,jdbcType=INTEGER},
+      </if>
+      <if test="rawCreateTime != null" >
+        rawCreateTime = #{rawCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="treatmentDesc != null" >
+        treatmentDesc = #{treatmentDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeFlag != null" >
+        mergeFlag = #{mergeFlag,jdbcType=INTEGER},
+      </if>
+      <if test="mergeTime != null" >
+        mergeTime = #{mergeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="mergeFromUuid != null" >
+        mergeFromUuid = #{mergeFromUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="mergeTarget != null" >
+        mergeTarget = #{mergeTarget,jdbcType=BIGINT},
+      </if>
+      <if test="mergeTargetUuid != null" >
+        mergeTargetUuid = #{mergeTargetUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="tempId != null" >
+        tempId = #{tempId,jdbcType=INTEGER},
+      </if>
+      <if test="rawTreatmentType != null" >
+        rawTreatmentType = #{rawTreatmentType,jdbcType=VARCHAR},
+      </if>
+      <if test="totalCourse != null" >
+        totalCourse = #{totalCourse,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where treatmentId = #{treatmentId,jdbcType=VARCHAR}
+  </update>
+</mapper>

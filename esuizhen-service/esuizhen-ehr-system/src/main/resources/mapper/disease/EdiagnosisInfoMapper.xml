@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.disease.EdiagnosisInfoDao">
+	<delete id="deleteDiagnosisByEmrId">
+		DELETE FROM 
+			e_diagnosis_info
+		WHERE 
+			emrId=#{emrId}
+	</delete>
+	<insert id="insertDiagnosis" parameterType="java.util.List">
+		INSERT INTO e_diagnosis_info
+		(
+			diagnosisId,
+			emrId,
+			patientId,
+			patientNo,
+			diagnosisTypeId,
+			diagnosis,
+			diseaseTypeId,
+			diseaseBodyPartId,
+			diseaseCode,
+			pathologyDiagnosis,
+			pathologyDiagnosisCode,
+			isSourceDiagnosis,
+			remark,
+			visitTime,
+			createTime,
+			updateTime
+		)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+		(
+			#{item.diagnosisId},
+			#{item.emrId},
+			#{item.patientId},
+			#{item.patientNo},
+			#{item.diagnosisTypeId},
+			#{item.diagnosis},
+			#{item.diseaseTypeId},
+			#{item.diseaseBodyPartId},
+			#{item.diseaseCode},
+			#{item.pathologyDiagnosis},
+			#{item.pathologyDiagnosisCode},
+			#{item.isSourceDiagnosis},
+			#{item.remark},
+			NOW(),
+			NOW(),
+			NOW()		
+		)
+		</foreach>
+	</insert>
+</mapper>

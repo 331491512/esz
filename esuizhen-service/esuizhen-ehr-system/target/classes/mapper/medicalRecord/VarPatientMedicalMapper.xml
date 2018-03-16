@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.esuizhen.cloudservice.ehr.dao.medicalRecord.TVarPatientMedicalDao">
+
+	<insert id="insertVarPatientMedical" useGeneratedKeys="true" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.TVarPatientMedical">
+		<selectKey resultType="long" keyProperty="id" order="AFTER" >
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+        INSERT INTO var_patient_medical (
+        	patientId ,
+        	latestClinicDate ,
+        	latestOutHospitalDate ,
+        	latestMedicalRecordUploadTime ,
+        	createTime ,
+        	updateTime 
+        ) VALUES (
+        	#{patientId} ,
+        	#{latestClinicDate} ,
+        	#{latestOutHospitalDate} ,
+        	#{latestMedicalRecordUploadTime} ,
+        	NOW() ,
+        	NOW() 
+        )
+	</insert>
+    
+	<update id="updateVarPatientMedical" parameterType="com.esuizhen.cloudservice.ehr.model.medicalRecord.TVarPatientMedical">
+        UPDATE var_patient_medical 
+        <set>
+	        <if test="patientId != null">
+                patientId = #{patientId} ,
+            </if>
+	        <if test="latestClinicDate != null">
+                latestClinicDate = #{latestClinicDate} ,
+            </if>
+	        <if test="latestOutHospitalDate != null">
+                latestOutHospitalDate = #{latestOutHospitalDate} ,
+            </if>
+	        <if test="latestMedicalRecordUploadTime != null">
+                latestMedicalRecordUploadTime = #{latestMedicalRecordUploadTime} ,
+            </if>
+	        <if test="createTime != null">
+                createTime = #{createTime} ,
+            </if>
+	        <if test="updateTime != null">
+                updateTime = #{updateTime} ,
+            </if>
+        </set>
+        WHERE 
+	        id = #{id} 
+	</update>
+
+    <delete id="deleteVarPatientMedical">
+        DELETE FROM var_patient_medical WHERE
+        id = #{id} 
+    </delete>
+    
+    <select id="queryVarPatientMedicalById" resultType="com.esuizhen.cloudservice.ehr.model.medicalRecord.TVarPatientMedical">
+		SELECT 
+        	id,
+        	patientId,
+        	latestClinicDate,
+        	latestOutHospitalDate,
+        	latestMedicalRecordUploadTime,
+        	createTime,
+        	updateTime
+		FROM var_patient_medical 
+	    WHERE 
+	        id = #{id} 
+	</select>
+	
+	<select id="queryVarPatientMedicalByPatientId" resultType="com.esuizhen.cloudservice.ehr.model.medicalRecord.TVarPatientMedical">
+		SELECT 
+        	id,
+        	patientId,
+        	latestClinicDate,
+        	latestOutHospitalDate,
+        	latestMedicalRecordUploadTime,
+        	createTime,
+        	updateTime
+		FROM var_patient_medical 
+	    WHERE 
+	        patientId = #{patientId} 
+	    LIMIT 1
+	</select>
+</mapper>
+

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.esuizhen.cloudservice.user.dao.SubdeptDoctorDao">
+	<resultMap id="BaseResultMap"
+		type="com.esuizhen.cloudservice.user.model.SubdeptDoctor">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="doctorId" property="doctorId" jdbcType="BIGINT" />
+		<result column="deptId" property="deptId" jdbcType="INTEGER" />
+		<result column="subDeptId" property="subDeptId" jdbcType="INTEGER" />
+		<result column="positionTitle" property="positionTitle"
+			jdbcType="INTEGER" />
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<resultMap id="BaseSubDeptProfileResultMap" type="com.westangel.common.bean.SubDeptProfile">
+		<id column="subDeptId" property="subDeptId" jdbcType="BIGINT" />
+		<result column="subDeptName" property="subDeptName" jdbcType="VARCHAR" />
+		<result column="level" property="level" jdbcType="INTEGER" />
+		<result column="tel" property="tel" jdbcType="VARCHAR" />
+		<result column="introduction" property="introduction" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<select id="findSubDeptListByDeptId" resultMap="BaseSubDeptProfileResultMap"
+		parameterType="java.lang.Long">
+		SELECT t1.deptId subDeptId, t1.deptName subDeptName, t1.level, t1.tel, t1.introduction FROM
+		u_u_department t1 WHERE t1.parentId = #{deptId,jdbcType=BIGINT}
+	</select>
+
+	<select id="selectSubDeptDoctor" resultMap="BaseResultMap">
+		SELECT
+			t1.id,
+			t1.doctorId,
+			t2.parentId deptId,
+			t1.deptId subDeptId,
+			t1.positionTitle,
+			t1.createTime
+		FROM
+			r_hospital_doctor t1
+		JOIN u_department t2 ON t1.deptId = t2.deptId
+		WHERE
+			t1.doctorId = #{doctorId,jdbcType=BIGINT}
+	</select>
+
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.user.model.SubdeptDoctor">
+		<selectKey resultType="long" keyProperty="id" order="AFTER">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+		insert into r_subdept_doctor
+		(doctorId,deptId,subDeptId,positionTitle,createTime)
+		values(
+		#{doctorId,jdbcType=BIGINT},
+		#{deptId,jdbcType=INTEGER},
+		#{subDeptId,jdbcType=INTEGER},
+		#{positionTitle,jdbcType=VARCHAR},
+		NOW())
+	</insert>
+	<update id="update" parameterType="map">
+		update r_subdept_doctor
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="record.deptId != null">
+				deptId=#{record.deptId,jdbcType=INTEGER},
+			</if>
+			<if test="record.subDeptId != null">
+				subDeptId=#{record.subDeptId,jdbcType=INTEGER},
+			</if>
+			<if test="record.positionTitle != null">
+				positionTitle=#{record.positionTitle,jdbcType=INTEGER},
+			</if>
+			<if test="record.doctorId != null">
+				doctorId=#{record.doctorId,jdbcType=INTEGER}
+			</if>
+		</trim>
+		where id=#{record.id,jdbcType=BIGINT}
+	</update>
+
+	<delete id="deleteById" parameterType="java.lang.Long">
+		delete from r_subdept_doctor where id=#{id,jdbcType=BIGINT}
+	</delete>
+</mapper>

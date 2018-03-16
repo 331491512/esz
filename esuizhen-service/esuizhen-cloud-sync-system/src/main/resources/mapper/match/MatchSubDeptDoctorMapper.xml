@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- cloud_sync_match_db -->
+<mapper namespace="com.esuizhen.cloudservice.sync.dao.match.MatchSubDeptDoctorDao" >
+	<resultMap type="com.esuizhen.cloudservice.sync.model.SubDeptDoctor" id="baseResultMap">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="deptId" property="deptId" jdbcType="BIGINT"/>
+		<result column="deptUuid" property="deptUuid" jdbcType="VARCHAR"/>
+		<result column="subDeptId" property="subDeptId" jdbcType="BIGINT"/>
+		<result column="subDeptUuid" property="subDeptUuid" jdbcType="VARCHAR"/>
+		<result column="doctorId" property="doctorId" jdbcType="BIGINT"/>
+		<result column="doctorUuid" property="doctorUuid" jdbcType="VARCHAR"/>
+		<result column="positionTitle" property="positionTitle" jdbcType="INTEGER"/>
+		<result column="createTime" property="createTime" jdbcType="TIMESTAMP"/>
+	</resultMap>
+	
+	<sql id="base_column_list">
+		t1.id, t1.deptId, t1.deptUuid, t1.subDeptId, t1.subDeptUuid, t1.doctorId, t1.doctorUuid, t1.positionTitle, t1.createTime
+	</sql>
+	
+	<select id="findByDoctorFinalUuid" resultMap="baseResultMap" parameterType="java.lang.String">
+		SELECT <include refid="base_column_list"></include>
+			FROM cloud_sync_match_db.r_subdept_doctor t1
+			WHERE t1.doctorUuid=#{doctorFinalUuid, jdbcType=VARCHAR}
+	</select>
+	
+	<select id="findByDeptUuidAndSubdeptUuidAndDoctorUuid" resultMap="baseResultMap">
+		SELECT <include refid="base_column_list"></include>
+			FROM cloud_sync_match_db.r_subdept_doctor t1
+			WHERE 1=1
+			<if test="deptUuid != null">
+				AND t1.deptUuid=#{deptUuid, jdbcType=VARCHAR}
+			</if>
+			<if test="subDeptUuid != null">
+				AND t1.subDeptUuid=#{subDeptUuid, jdbcType=VARCHAR}
+			</if>
+			<if test="doctorUuid != null">
+				AND t1.doctorUuid=#{doctorUuid, jdbcType=VARCHAR}
+			</if>
+	</select>
+	
+	<insert id="insert" parameterType="com.esuizhen.cloudservice.sync.model.SubDeptDoctor">
+		INSERT INTO cloud_sync_match_db.r_subdept_doctor(deptUuid, subdeptUuid, doctorUuid, positionTitle, createTime)
+		VALUES(#{deptUuid,jdbcType=VARCHAR},
+			#{subDeptUuid,jdbcType=VARCHAR},
+			#{doctorUuid,jdbcType=VARCHAR},
+			#{positionTitle,jdbcType=INTEGER},
+			#{createTime,jdbcType=TIMESTAMP})
+	</insert>
+	 
+	<update id="updateDoctorUuid">
+		UPDATE cloud_sync_match_db.r_subdept_doctor
+		<set>
+			<if test="finalUuid != null">
+				doctorUuid=#{finalUuid,jdbcType=VARCHAR}
+			</if>
+		</set>
+		WHERE doctorUuid IN
+		(
+			<foreach collection="uuidRelationships" item="uuidRelationship" index="index" separator=",">
+				#{uuidRelationship.uuid,jdbcType=VARCHAR}
+			</foreach>
+		)
+	</update>
+	 
+	 <delete id="delete">
+	 	DELETE FROM cloud_sync_match_db.r_hospital_doctor WHERE id=#{id,jdbcType=BIGINT}
+	 </delete>
+</mapper>
